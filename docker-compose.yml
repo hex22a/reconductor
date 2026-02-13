@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: reconductor
+      POSTGRES_DB: reconductor
+      POSTGRES_PASSWORD: reconductor
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend
+    depends_on:
+      - db
+    envirnment:
+      DATABASE_URL: postgres://reconductor:reconductor@db:5432/reconductor
+    ports:
+      - 4000:4000
+
+  dashboard:
+    build: ./dashboard
+    depends_on:
+      - backend
+    ports:
+      - 3000:80
+
+
