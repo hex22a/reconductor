@@ -9,12 +9,13 @@ RUN bun install
 
 COPY . .
 RUN bun build --compile --outfile=server ./src/server.ts
+RUN bun build --compile --outfile=migration ./migration.ts
 
 # Server
 FROM debian:bookworm-slim
 WORKDIR /app
 
-COPY --from=build /app/server ./server
+COPY --from=build /app/server /app/migration .
 
 EXPOSE 4000
 
