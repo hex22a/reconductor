@@ -12,8 +12,10 @@ services:
     build: ./backend
     depends_on:
       - db
-    envirnment:
+    environment:
+      DASHBOARD_URL: http://localhost:3000
       DATABASE_URL: postgres://reconductor:reconductor@db:5432/reconductor
+      NODE_ENV: production
     ports:
       - 4000:4000
 

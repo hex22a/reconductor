@@ -1,7 +1,9 @@
+import { DASHBOARD_URL } from "./constants";
+
 const PORT = 4000;
 
 const HEADERS = {
-    "Access-Control-Allow-Origin": "http://localhost:5173",
+    "Access-Control-Allow-Origin": DASHBOARD_URL,
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
 };
@@ -13,4 +15,5 @@ const server = Bun.serve({
     }
 })
 
+console.log(process.env.NODE_ENV)
 console.log(`Server is running on ${server.url}`)
