@@ -4,5 +4,3 @@ README.md
 
 .env
 .env.*
-!.env.example
-!.env.test.example
