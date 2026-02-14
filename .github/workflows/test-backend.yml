@@ -17,4 +17,7 @@ jobs:
       - name: Run ESLint
         run: bun lint
         working-directory: ./backend
+      - name: Run Tests
+        run: bun test
+        working-directory: ./backend
 
