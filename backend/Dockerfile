@@ -16,6 +16,7 @@ FROM debian:bookworm-slim
 WORKDIR /app
 
 COPY --from=build /app/server /app/migration .
+COPY migrations ./migrations
 
 EXPOSE 4000
 
