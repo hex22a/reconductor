@@ -2,3 +2,7 @@ node_modules
 README.md
 .gitignore
 
+.env
+.env.*
+!.env.example
+!.env.test.example
