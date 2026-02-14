@@ -1,0 +1,20 @@
+name: Test Backend
+on:
+  push:
+  pull_request:
+
+jobs:
+  Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.9
+      - name: Install Dependencies
+        run: bun install
+        working-directory: ./backend
+      - name: Run ESLint
+        run: bun lint
+        working-directory: ./backend
+
