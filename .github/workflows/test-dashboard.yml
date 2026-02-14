@@ -10,6 +10,7 @@ jobs:
       - uses: actions/checkout@v6
       - name: Install pnpm
         uses: pnpm/action-setup@v4
+        working-directory: ./dashboard
       - name: Install Dependencies
         run: pnpm install
         working-directory: ./dashboard
