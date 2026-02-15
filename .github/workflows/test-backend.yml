@@ -20,4 +20,7 @@ jobs:
       - name: Run unit tests
         run: bun test:unit
         working-directory: ./backend
+      - name: Run platform tests
+        run: ./platform.sh
+        working-directory: ./backend
 
