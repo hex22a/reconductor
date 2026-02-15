@@ -14,7 +14,7 @@ export function createUserFixture(username: string, passwordHash: string): [User
             id: Bun.randomUUIDv7(),
             username,
             password_hash: passwordHash,
-            passwird_version: 1,
+            password_version: 1,
             created_at: date,
             updated_at: date,
             last_login_at: date,

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "bun --watch src/server.ts",
     "start": "bun run src/server.ts",
-    "lint": "bun eslint migration.ts tests/**/*.ts src/**/*.ts",
+    "lint": "bun eslint db/**/*.ts tests/**/*.ts src/**/*.ts",
     "test:unit": "bun test src",
     "test:platform": "bun --env-file=.env.test run test:platform:all",
     "test:platform:up": "podman compose -f ../docker-compose.test.yml up -d",

@@ -2,7 +2,7 @@ export type UserEntity = {
     id: string,
     username: string,
     password_hash: string,
-    passwird_version: number,
+    password_version: number,
     created_at: Date,
     updated_at: Date,
     last_login_at: Date,

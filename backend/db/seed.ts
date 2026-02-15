@@ -1,4 +1,4 @@
-import { sql, type SQL } from '@/src/persistence/db';
+import type { SQL } from '@/src/persistence/db';
 import { createUserFixture, expectedExistingUserPasswordHash, expectedExistingUserUsername } from '@/tests/fixtures/users';
 
 async function seedUsers(sql: SQL): Promise<void> {
