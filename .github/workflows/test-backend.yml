@@ -24,6 +24,6 @@ jobs:
       - name: Run platform tests
         run: ./platform_tests.sh
         working-directory: ./backend
-        with:
+        env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
