@@ -1,8 +1,8 @@
-import { sql, type TransactionSQL } from 'bun';
+import { sql, type TransactionSQL } from '@/src/persistence/db';
 import { readdir } from 'node:fs/promises';
+import path from 'node:path';
+import { waitDb } from './helpers';
 
-const MAX_RETRIES = 30;
-const SLEEP_TIMEOUT = 1000;
 const MIGRATIONS_DIR = './migrations/';
 const MIGRATION_ADVISORY_LOCK_ID = 1337;
 const MIGRATION_TABLE = 'recon.schema_migrations';
@@ -18,21 +18,6 @@ async function acquireAdvisoryLock(trx: TransactionSQL): Promise<void> {
 
 async function releaseLock(trx: TransactionSQL): Promise<void> {
     return trx`SELECT pg_advisory_unlock(${MIGRATION_ADVISORY_LOCK_ID})`;
-}
-
-async function waitDb() {
-    for (let i = 0; i < MAX_RETRIES; i++) {
-        try {
-            console.info(`Connecting to DB. Try: ${i}`)
-            await sql`SELECT 1`;
-            console.info('Connected to DB');
-            return;
-        } catch {
-            console.info('DB not ready. Retrying...');
-            await new Promise(r => setTimeout(r, SLEEP_TIMEOUT));
-        }
-    }
-    throw new Error('DB is unavailable');
 }
 
 async function readAplliedMigrations(trx: TransactionSQL): Promise<Array<Migration>> {
@@ -55,7 +40,7 @@ function filterMigrations(files: Array<string>, appliedMigrations: Array<Migrati
 async function applyMigration(trx: TransactionSQL, filename: string): Promise<void> {
     console.info(`Applying ${filename}`);
     await trx.savepoint(async (sp) => {
-        await sp.file(`${MIGRATIONS_DIR}/${filename}`);
+        await sp.file(path.resolve(MIGRATIONS_DIR, filename));
         console.log('migration applied')
 
         await sp`INSERT INTO ${sql(MIGRATION_TABLE)} (version) VALUES (${filename})`;
@@ -64,7 +49,7 @@ async function applyMigration(trx: TransactionSQL, filename: string): Promise<vo
 
 
 async function execMigration() {
-    await waitDb();
+    await waitDb(sql);
     await sql.begin(async (trx) => {
         await acquireAdvisoryLock(trx);
         try {
