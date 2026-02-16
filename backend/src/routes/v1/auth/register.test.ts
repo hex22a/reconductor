@@ -1,18 +1,26 @@
 import { describe, test, expect, mock } from 'bun:test';
-import register from './register.ts';
+import createRegisterRoutes from './register.ts';
 import { API_REGISTER_ENDPOINT_V1 } from '../../../constants.ts';
+import container from '@/src/container.ts';
+import { asFunction } from 'awilix';
 
-mock.module('../../../controllers/auth/register.ts', () => ({}))
-
-describe('register', () => {
+describe('register', async () => {
     test('/api/v1/register', async () => {
         // Arrange
-        const mockRegister = await import('../../../controllers/auth/register.ts');
+        const mockRegisterController = {
+            post: mock(),
+        };
+        const mockCreateRegisterController = mock().mockReturnValue(mockRegisterController);
+        container.register({
+            registerController: asFunction(mockCreateRegisterController),
+        })
         const expectedMethod = 'POST';
         const expectedUrl = API_REGISTER_ENDPOINT_V1;
-        const expectedRoute = { [expectedUrl]: { [expectedMethod]: mockRegister.post } };
+        const expectedRoute = {
+            [expectedUrl]: { [expectedMethod]: mockRegisterController.post }
+        };
         // Act
-        const actualRoute = register;
+        const actualRoute = createRegisterRoutes();
         // Assert
         expect(actualRoute).toEqual(expectedRoute);
     });

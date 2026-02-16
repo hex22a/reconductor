@@ -1,3 +1,5 @@
-import register from "./register";
+import createRegisterRoutes from "./register";
 
-export default { ...register };
+const registerRoutes = createRegisterRoutes();
+
+export default { ...registerRoutes };

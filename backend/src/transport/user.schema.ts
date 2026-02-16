@@ -13,4 +13,3 @@ export const registerSchema = z.object({
         .max(MAX_PASSWORD_LENGTH, { error: Z_PASSWORD_LENGTH_ERROR_MESSAGE })
 });
 
-export type RegisterUserDto = z.infer<typeof registerSchema>;

@@ -24,6 +24,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "awilix": "^13.0.0",
     "zod": "^4.3.6"
   }
 }
