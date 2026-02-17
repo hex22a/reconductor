@@ -22,3 +22,5 @@ export const Z_PASSWORD_LENGTH_ERROR_MESSAGE = `password must be at least ${MIN_
 
 export const UNEXPECTED_END_OF_JSON_ERROR_MESSAGE = 'Unexpected end of JSON input';
 export const UNEXPECTED_ERROR_MESSAGE = 'Unexpected error';
+
+export const USER_SESSION_PREFIX = 'user_session:';
