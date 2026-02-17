@@ -19,9 +19,11 @@ describe('register', async () => {
         const expectedRoute = {
             [expectedUrl]: { [expectedMethod]: mockRegisterController.post }
         };
+        const mockWithErrorHandling = mock((fn) => fn);
         // Act
-        const actualRoute = createRegisterRoutes();
+        const actualRoute = createRegisterRoutes(mockWithErrorHandling);
         // Assert
+        expect(mockWithErrorHandling).toHaveBeenCalledWith(mockRegisterController.post);
         expect(actualRoute).toEqual(expectedRoute);
     });
 });

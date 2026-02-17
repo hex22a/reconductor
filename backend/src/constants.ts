@@ -14,6 +14,7 @@ export const MIN_USERNAME_LENGTH = 4;
 export const MAX_USERNAME_LENGTH = 32;
 export const MIN_PASSWORD_LENGTH = 6;
 export const MAX_PASSWORD_LENGTH = 74;
+export const Z_REGISTER_SCHEMA_ERROR_MESSAGE = 'wrong data';
 export const Z_USERNAME_STRING_ERROR_MESSAGE = 'username must be a string';
 export const Z_PASSWORD_STRING_ERROR_MESSAGE = 'password must be a string';
 export const Z_USERNAME_LENGTH_ERROR_MESSAGE = `username must be at least ${MIN_USERNAME_LENGTH} characters and no longer than ${MAX_USERNAME_LENGTH} characters`;

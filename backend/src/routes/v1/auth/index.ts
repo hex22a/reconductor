@@ -1,5 +1,6 @@
+import { withErrorHandling } from "@/src/decorators/controller";
 import createRegisterRoutes from "./register";
 
-const registerRoutes = createRegisterRoutes();
+const registerRoutes = createRegisterRoutes(withErrorHandling);
 
 export default { ...registerRoutes };
