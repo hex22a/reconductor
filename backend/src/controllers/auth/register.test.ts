@@ -1,12 +1,10 @@
 import type { BunRequest } from 'bun';
-import { constants } from 'node:http2';
 import { describe, test, expect, mock } from 'bun:test';
-import { HEADERS, UNEXPECTED_END_OF_JSON_ERROR_MESSAGE, UNEXPECTED_ERROR_MESSAGE, Z_REGISTER_SCHEMA_ERROR_MESSAGE } from '../../constants';
+import { HEADERS } from '../../constants';
 import { createRegisterController, type RegisterController } from './register';
 import type { UserDto } from '@/src/transport/user.dto';
 import { createUserFixture } from '@/tests/fixtures/users';
 import { afterEach } from 'node:test';
-import type { ErrorResponse } from '@/src/transport/error.dto';
 
 describe('register', () => {
     const mockHash = mock();
