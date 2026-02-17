@@ -11,7 +11,7 @@ const container = createContainer({
 container.register({
     registerController: asFunction(createRegisterController),
     userRepository: asFunction(createUserRepository),
-    hash: asValue(Bun.password.hash),
+    hashFn: asValue(Bun.password.hash),
     sql: asValue(sql),
 });
 

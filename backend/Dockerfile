@@ -1,13 +1,16 @@
 # Build
 FROM oven/bun:1.3.9 as build
 
+WORKDIR /shared
+COPY ./shared .
+
 WORKDIR /app
-COPY package.json bun.lock ./
+COPY backend/package.json backend/bun.lock ./
 
 ENV NODE_ENV=production
 RUN bun install
 
-COPY . .
+COPY backend .
 RUN bun build --compile --outfile=server ./src/server.ts
 RUN bun build --compile --outfile=migration ./db/migration.ts
 
@@ -16,7 +19,7 @@ FROM debian:bookworm-slim
 WORKDIR /app
 
 COPY --from=build /app/server /app/migration .
-COPY migrations ./migrations
+COPY backend/migrations ./migrations
 
 EXPOSE 4000
 

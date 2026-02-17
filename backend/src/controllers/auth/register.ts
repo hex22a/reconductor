@@ -11,13 +11,13 @@ export type RegisterController = {
 
 export function createRegisterController(
     userRepository: UserRepository,
-    hash: (str: string) => Promise<string>,
+    hashFn: (str: string) => Promise<string>,
 ): RegisterController {
     return {
         async post(req: BunRequest): Promise<Response> {
             const reqJson = await req.json();
             const { username, password }: RegisterUserDto = registerSchema.parse(reqJson);
-            const password_hash = await hash(password);
+            const password_hash = await hashFn(password);
             const userEntity: UserEntity = await userRepository.addUser({ username, password_hash });
             const userResponse: UserDto = {
                 id: userEntity.id,
