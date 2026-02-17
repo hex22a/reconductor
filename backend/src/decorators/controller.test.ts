@@ -7,7 +7,7 @@ import { constants } from 'node:http2';
 import { ZodError } from "zod";
 import type { $ZodIssue } from "zod/v4/core";
 import { ZodIssueCode } from "zod/v3";
-import { SYNTAX_ERROR_CODE, UNEXPECTED_ERROR_CODE, VALIDATION_ERROR_CODE } from "$/constants";
+import { DATABASE_ERROR_CODE, SYNTAX_ERROR_CODE, UNEXPECTED_ERROR_CODE, VALIDATION_ERROR_CODE } from "$/constants";
 
 describe('controller decorators', () => {
     describe('withErrorHandling', () => {
@@ -129,6 +129,34 @@ describe('controller decorators', () => {
 
             const expectedRequest = {} satisfies Partial<BunRequest>;
             mockController.mockRejectedValue(new ZodError(expectedZodIssues))
+            const decoreatedController = withErrorHandling(mockController);
+
+            // Act
+            const actualResponse: Response = await decoreatedController(expectedRequest as unknown as BunRequest);
+            // Assert
+            expect(mockController).toHaveBeenCalledWith(expectedRequest);
+            expect(await actualResponse.json()).toEqual(expectedResponseJson);
+            expect(actualResponse.headers.toJSON()).toEqual(expectedResponse.headers.toJSON());
+            expect(actualResponse.status).toEqual(expectedResponse.status);
+        });
+
+        test('returns 500 for database errors', async () => {
+            // Arrange
+            const expectedErrorMessage = 'database error';
+            const expectedErrorCode = '23505';
+            const expectedResponseJson: ErrorResponse = {
+                code: DATABASE_ERROR_CODE,
+                error: expectedErrorMessage,
+            };
+            const expectedResponseInit: ResponseInit = {
+                headers: HEADERS,
+                status: constants.HTTP_STATUS_BAD_REQUEST,
+            };
+
+            const expectedResponse: Response = Response.json(expectedResponseJson, expectedResponseInit);
+
+            const expectedRequest = {} satisfies Partial<BunRequest>;
+            mockController.mockRejectedValue(new Bun.SQL.PostgresError(expectedErrorMessage, { code: expectedErrorCode }))
             const decoreatedController = withErrorHandling(mockController);
 
             // Act
