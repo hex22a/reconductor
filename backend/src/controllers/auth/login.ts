@@ -4,6 +4,7 @@ import type { SessionRepository } from "@/src/persistence/session.kv";
 import type { UserRepository } from "@/src/persistence/user.db";
 import { registerSchema } from "@/src/transport/user.schema";
 import type { BunRequest } from "bun";
+import { constants } from 'node:http2';
 
 export type LoginController = {
     post: (req: BunRequest) => Promise<Response>;
@@ -20,7 +21,13 @@ export function createLoginController(
             const requestJson = await req.json();
             const { username, password } = registerSchema.parse(requestJson);
             const user: UserEntity = await userRepository.getUserByUsername(username);
-            verifyHash(password, user.password_hash);
+            const passwordsMatch = await verifyHash(password, user.password_hash);
+            if (!passwordsMatch) {
+                return Response.json(
+                    { ok: false },
+                    { headers: HEADERS, status: constants.HTTP_STATUS_UNAUTHORIZED },
+                )
+            }
             const token = getRandomToken();
             sessionRepository.createUserSession({ token, userId: user.id });
             req.cookies.set(USER_SESSION_COOKIE_NAME, token, {
