@@ -24,3 +24,4 @@ export const UNEXPECTED_END_OF_JSON_ERROR_MESSAGE = 'Unexpected end of JSON inpu
 export const UNEXPECTED_ERROR_MESSAGE = 'Unexpected error';
 
 export const USER_SESSION_PREFIX = 'user_session:';
+export const USER_SESSION_EXPIRATION_MILLS = 15 * 60 * 1000;
