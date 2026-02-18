@@ -25,3 +25,6 @@ export const UNEXPECTED_ERROR_MESSAGE = 'Unexpected error';
 
 export const USER_SESSION_PREFIX = 'user_session:';
 export const USER_SESSION_EXPIRATION_MILLS = 15 * 60 * 1000;
+
+export const USER_SESSION_COOKIE_NAME = 'recon_user_session';
+export const USER_SESSION_COOKIE_MAX_AGE = 15 * 60;

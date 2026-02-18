@@ -1,22 +1,25 @@
 import type { BunRequest } from 'bun';
-import { describe, test, expect, mock } from 'bun:test';
+import { describe, test, expect, mock, afterEach } from 'bun:test';
 import { HEADERS } from '../../constants';
 import { createRegisterController, type RegisterController } from './register';
 import type { UserDto } from '@/src/transport/user.dto';
 import { createUserFixture } from '@/tests/fixtures/users';
-import { afterEach } from 'node:test';
+import type { UserRepository } from '@/src/persistence/user.db';
 
 describe('register', () => {
     const mockHash = mock();
     const mockAddUser = mock();
-    const mockUserRepository = {
+    const mockGetUserByUsername = mock();
+    const mockUserRepository: UserRepository = {
         addUser: mockAddUser,
+        getUserByUsername: mockGetUserByUsername,
     };
 
     afterEach(() => {
         mockHash.mockReset();
         mockAddUser.mockReset();
-    })
+        mockGetUserByUsername.mockReset();
+    });
 
     test('createRegisterController', () => {
         // Arrange
