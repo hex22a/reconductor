@@ -23,8 +23,10 @@ export const Z_PASSWORD_LENGTH_ERROR_MESSAGE = `password must be at least ${MIN_
 export const UNEXPECTED_END_OF_JSON_ERROR_MESSAGE = 'Unexpected end of JSON input';
 export const UNEXPECTED_ERROR_MESSAGE = 'Unexpected error';
 
-export const USER_SESSION_PREFIX = 'user_session:';
-export const USER_SESSION_EXPIRATION_MILLS = 15 * 60 * 1000;
-
 export const USER_SESSION_COOKIE_NAME = 'recon_user_session';
 export const USER_SESSION_COOKIE_MAX_AGE = 15 * 60;
+
+export const USER_SESSION_PREFIX = 'user_session:';
+export const USER_SESSION_EXPIRATION_MILLS = USER_SESSION_COOKIE_MAX_AGE * 1000;
+
+export const TOKEN_RANDOM_BYTES_ARRAY_LENGTH = 32;
