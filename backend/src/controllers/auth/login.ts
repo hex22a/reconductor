@@ -14,7 +14,7 @@ export function createLoginController(
     userRepository: UserRepository,
     sessionRepository: SessionRepository,
     verifyHash: (password: string, hash: string) => Promise<boolean>,
-    getRandomToken: () => string,
+    generateRandomToken: () => string,
 ): LoginController {
     return {
         async post(req: BunRequest): Promise<Response> {
@@ -28,8 +28,8 @@ export function createLoginController(
                     { headers: HEADERS, status: constants.HTTP_STATUS_UNAUTHORIZED },
                 )
             }
-            const token = getRandomToken();
-            sessionRepository.createUserSession({ token, userId: user.id });
+            const token = generateRandomToken();
+            await sessionRepository.createUserSession({ token, userId: user.id });
             req.cookies.set(USER_SESSION_COOKIE_NAME, token, {
                 maxAge: USER_SESSION_COOKIE_MAX_AGE,
                 httpOnly: true,
