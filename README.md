@@ -43,4 +43,4 @@ For testing (just database and postgres):
 podman compose -f docker-compose.test.yml --env-file ./backend/.env.test up
 ```
 
-Refer to [./backend/README.md] for more details
+Refer to [./backend/README.md](./backend/README.md) for more details
