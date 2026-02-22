@@ -16,3 +16,9 @@ CREATE TABLE recon.users (
     is_active BOOLEAN NOT NULL DEFAULT true
 );
 
+CREATE TABLE recon.projects (
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    owner_id UUID NOT NULL REFERENCES recon.users (id),
+    name TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT now()
+);
