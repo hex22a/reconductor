@@ -1,4 +1,4 @@
-import { HEADERS, USER_SESSION_COOKIE_MAX_AGE, USER_SESSION_COOKIE_NAME } from "@/src/constants";
+import { HEADERS, USER_SESSION_TTL_SECONDS, USER_SESSION_COOKIE_NAME } from "@/src/constants";
 import type { UserEntity } from "@/src/domain/user.entity";
 import type { SessionRepository } from "@/src/persistence/session.kv";
 import type { UserRepository } from "@/src/persistence/user.db";
@@ -29,9 +29,9 @@ export function createLoginController(
                 )
             }
             const token = generateRandomToken();
-            await sessionRepository.createUserSession({ token, userId: user.id });
+            await sessionRepository.createUserSession({ token, userId: user.id, username: user.username });
             req.cookies.set(USER_SESSION_COOKIE_NAME, token, {
-                maxAge: USER_SESSION_COOKIE_MAX_AGE,
+                maxAge: USER_SESSION_TTL_SECONDS,
                 httpOnly: true,
                 secure: true,
                 path: '/',

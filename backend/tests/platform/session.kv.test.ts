@@ -1,8 +1,9 @@
 import { SessionNotFoundError } from '@/src/domain/errors/SessionNotFoundError';
-import type { UserSession, UserSessionInsert } from '@/src/domain/session.entity';
+import type { UserSession } from '@/src/domain/session.entity';
 import { kv } from '@/src/persistence/kv';
 import { createSessionRepository, type SessionRepository } from '@/src/persistence/session.kv';
 import { afterEach, describe, expect, it, test } from 'bun:test';
+import { createUserSessionFixture } from '../fixtures/sessions';
 
 describe('session', () => {
     afterEach(async () => {
@@ -23,15 +24,10 @@ describe('session', () => {
 
     it('stores the sessions under user_session:{token} key', async () => {
         // Arrange
+        const expectedUsername = 'user';
         const expectedUserId = '019c6c94-0fb1-7241-922f-b3eb297a5a2f';
         const expectedToken = 'random_value';
-        const expectedUserSession: UserSession = {
-            userId: expectedUserId,
-        };
-        const expectedUserSessionInsert: UserSessionInsert = {
-            token: expectedToken,
-            userId: expectedUserId,
-        };
+        const [expectedUserSessionInsert, expectedUserSession] = createUserSessionFixture(expectedToken, expectedUserId, expectedUsername);
         const sessionRepository = createSessionRepository(kv);
         // Act
         const actualUserSession: UserSession = await sessionRepository.createUserSession(expectedUserSessionInsert);
@@ -52,17 +48,12 @@ describe('session', () => {
         }
     });
 
-    it('gets userId from session storage', async () => {
+    it('gets userSession from session storage', async () => {
         // Arrange
+        const expectedUsername = 'user';
         const expectedToken = 'some_token';
         const expectedUserId = '019c6c94-0fb1-7241-922f-b3eb297a5a2f';
-        const expectedUserSession: UserSession = {
-            userId: expectedUserId,
-        };
-        const expectedUserSessionInsert: UserSessionInsert = {
-            token: expectedToken,
-            userId: expectedUserId,
-        };
+        const [expectedUserSessionInsert, expectedUserSession] = createUserSessionFixture(expectedToken, expectedUserId, expectedUsername);
         const sessionRepository = createSessionRepository(kv);
         await sessionRepository.createUserSession(expectedUserSessionInsert);
         // Act

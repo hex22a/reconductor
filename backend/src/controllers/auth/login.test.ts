@@ -3,7 +3,7 @@ import { afterEach, describe, expect, mock, test } from 'bun:test';
 import { createLoginController, type LoginController } from './login';
 import type { SessionRepository } from '@/src/persistence/session.kv';
 import type { BunRequest, CookieInit, CookieMap } from 'bun';
-import { HEADERS, USER_SESSION_COOKIE_MAX_AGE, USER_SESSION_COOKIE_NAME } from '@/src/constants';
+import { HEADERS, USER_SESSION_TTL_SECONDS, USER_SESSION_COOKIE_NAME } from '@/src/constants';
 import { createUserFixture } from '@/tests/fixtures/users';
 import type { UserSessionInsert } from '@/src/domain/session.entity';
 import { constants } from 'node:http2';
@@ -67,13 +67,14 @@ describe('login', () => {
                 cookies: (mockCookies as unknown as CookieMap),
             } satisfies Partial<BunRequest>;
             const expectedCookieInit: CookieInit = {
-                maxAge: USER_SESSION_COOKIE_MAX_AGE,
+                maxAge: USER_SESSION_TTL_SECONDS,
                 httpOnly: true,
                 secure: true,
                 path: '/',
             };
             const expectedUserSessionInsert: UserSessionInsert = {
                 token: expectedToken,
+                username: expectedUsername,
                 userId: expectedUserEntity.id,
             };
             mockVerifyHash.mockResolvedValue(true);
