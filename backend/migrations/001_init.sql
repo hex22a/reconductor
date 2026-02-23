@@ -22,3 +22,13 @@ CREATE TABLE recon.projects (
     name TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT now()
 );
+
+CREATE TYPE scan_status as ENUM ('scheduled', 'in progress', 'done');
+
+CREATE TABLE recon.scans (
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    project_id UUID NOT NULL REFERENCES recon.projects (id),
+    created_at TIMESTAMP NOT NULL DEFAULT now(),
+    target INET NOT NULL,
+    status scan_status NOT NULL DEFAULT 'scheduled'
+);

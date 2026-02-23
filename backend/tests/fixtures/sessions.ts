@@ -4,16 +4,16 @@ export function createUserSessionFixture(
     token: string,
     userId: string,
     username: string,
-): [UserSessionInsert, UserSession] {
+): [UserSession, UserSessionInsert] {
     return [
+        {
+            userId,
+            username,
+        },
         {
             token,
             userId,
             username,
         },
-        {
-            userId,
-            username,
-        }
     ];
 }

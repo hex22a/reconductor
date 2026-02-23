@@ -29,7 +29,7 @@ describe('user.db', () => {
                     // Arrange
                     const expectedUsername = 'not_root';
                     const expectedPassowrdHash = 'another_hash';
-                    const [expectedUserInsert, expectedAddedUser] = createUserFixture(expectedUsername, expectedPassowrdHash);
+                    const [expectedAddedUser, expectedUserInsert] = createUserFixture(expectedUsername, expectedPassowrdHash);
                     const userRepository: UserRepository = createUserRepository(trx);
                     // Act
                     const actualAddedUser: UserEntity = await userRepository.addUser(expectedUserInsert);
@@ -51,7 +51,7 @@ describe('user.db', () => {
                 await withTrx(async (trx) => {
                     // Arrange
                     const expectedErrorCode = '23505';
-                    const [expectedUserInsert] = createUserFixture(expectedExistingUserUsername, expectedExistingUserPasswordHash);
+                    const [, expectedUserInsert] = createUserFixture(expectedExistingUserUsername, expectedExistingUserPasswordHash);
                     const userRepository: UserRepository = createUserRepository(trx);
                     // Act
                     try {
@@ -71,7 +71,7 @@ describe('user.db', () => {
             await catchRollback(async () => {
                 await withTrx(async (trx) => {
                     // Arrange
-                    const [, expectedUser] = createUserFixture(expectedExistingUserUsername, expectedExistingUserPasswordHash);
+                    const [expectedUser] = createUserFixture(expectedExistingUserUsername, expectedExistingUserPasswordHash);
                     const userRepository: UserRepository = createUserRepository(trx);
                     // Act
                     const actualUser: UserEntity = await userRepository.getUserByUsername(expectedExistingUserUsername);

@@ -10,3 +10,4 @@ export type UserEntity = {
 };
 
 export type UserInsert = Pick<UserEntity, 'username' | 'password_hash'>;
+export type UserInsertSeed = Pick<UserEntity, 'id' | 'username' | 'password_hash'>;

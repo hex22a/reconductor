@@ -35,7 +35,7 @@ describe('register', () => {
         const expectedUsername = 'username';
         const expectedPassword = 'password';
         const expectedPasswordHash = 'password_hash';
-        const [expectedUserInsert, expectedAddedUser] = createUserFixture(expectedUsername, expectedPasswordHash);
+        const [expectedAddedUser, expectedUserInsert] = createUserFixture(expectedUsername, expectedPasswordHash);
         const expectedResponseJson: UserDto = {
             id: expectedAddedUser.id,
             username: expectedUsername,

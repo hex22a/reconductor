@@ -27,7 +27,7 @@ describe('session', () => {
         const expectedUsername = 'user';
         const expectedUserId = '019c6c94-0fb1-7241-922f-b3eb297a5a2f';
         const expectedToken = 'random_value';
-        const [expectedUserSessionInsert, expectedUserSession] = createUserSessionFixture(expectedToken, expectedUserId, expectedUsername);
+        const [expectedUserSession, expectedUserSessionInsert] = createUserSessionFixture(expectedToken, expectedUserId, expectedUsername);
         const sessionRepository = createSessionRepository(kv);
         // Act
         const actualUserSession: UserSession = await sessionRepository.createUserSession(expectedUserSessionInsert);
@@ -53,7 +53,7 @@ describe('session', () => {
         const expectedUsername = 'user';
         const expectedToken = 'some_token';
         const expectedUserId = '019c6c94-0fb1-7241-922f-b3eb297a5a2f';
-        const [expectedUserSessionInsert, expectedUserSession] = createUserSessionFixture(expectedToken, expectedUserId, expectedUsername);
+        const [expectedUserSession, expectedUserSessionInsert] = createUserSessionFixture(expectedToken, expectedUserId, expectedUsername);
         const sessionRepository = createSessionRepository(kv);
         await sessionRepository.createUserSession(expectedUserSessionInsert);
         // Act

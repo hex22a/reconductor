@@ -6,3 +6,4 @@ export type ProjectEntity = {
 };
 
 export type ProjectInsert = Pick<ProjectEntity, 'name' | 'owner_id'>;
+export type ProjectInsertSeed = Pick<ProjectEntity, 'id' | 'name' | 'owner_id'>;
