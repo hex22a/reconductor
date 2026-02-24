@@ -2,12 +2,16 @@ import { ScanNotFoundError } from "../domain/errors/ScanNotFoundError";
 import type { ScanEntity, ScanInsert } from "../domain/scan.entity";
 import type { SQL } from "./db";
 
+export type ScanRepositoryDeps = {
+    sql: SQL,
+};
+
 export type ScanRepository = {
     createScan: (scan: ScanInsert) => Promise<ScanEntity>;
     getScan: (id: string) => Promise<ScanEntity>;
 };
 
-export function createScanRepository(sql: SQL): ScanRepository {
+export function createScanRepository({ sql }: ScanRepositoryDeps): ScanRepository {
     return {
         async createScan(scan: ScanInsert): Promise<ScanEntity> {
             const queryResult = await sql`

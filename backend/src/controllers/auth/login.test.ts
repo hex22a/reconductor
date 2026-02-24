@@ -1,6 +1,6 @@
 import type { UserRepository } from '@/src/persistence/user.db';
 import { afterEach, describe, expect, mock, test } from 'bun:test';
-import { createLoginController, type LoginController } from './login';
+import { createLoginController, type LoginController, type LoginControllerDeps } from './login';
 import type { SessionRepository } from '@/src/persistence/session.kv';
 import type { BunRequest, CookieInit, CookieMap } from 'bun';
 import { HEADERS, USER_SESSION_TTL_SECONDS, USER_SESSION_COOKIE_NAME } from '@/src/constants';
@@ -28,6 +28,13 @@ describe('login', () => {
         set: mockSetCookies,
     } satisfies Partial<CookieMap>;
 
+    const expectedLoginControllerDeps: LoginControllerDeps = {
+        userRepository: mockUserRepository,
+        sessionRepository: mockSessionRepository,
+        verifyHash: mockVerifyHash,
+        generateRandomToken: mockGetRandomToken,
+    };
+
     afterEach(() => {
         mockSetCookies.mockReset();
         mockVerifyHash.mockReset();
@@ -41,12 +48,7 @@ describe('login', () => {
     test('createLoginController', () => {
         // Arrange
         // Act
-        const actualLoginController: LoginController = createLoginController(
-            mockUserRepository,
-            mockSessionRepository,
-            mockVerifyHash,
-            mockGetRandomToken,
-        );
+        const actualLoginController: LoginController = createLoginController(expectedLoginControllerDeps);
         // Assert
         expect(actualLoginController.post).toBeFunction();
     });
@@ -81,12 +83,7 @@ describe('login', () => {
             mockGetUserByUsername.mockResolvedValue(expectedUserEntity);
             mockGetRandomToken.mockReturnValue(expectedToken);
 
-            const loginController: LoginController = createLoginController(
-                mockUserRepository,
-                mockSessionRepository,
-                mockVerifyHash,
-                mockGetRandomToken,
-            );
+            const loginController: LoginController = createLoginController(expectedLoginControllerDeps);
             // Act
             const actualResponse: Response = await loginController.post(expectedRequest as unknown as BunRequest);
             // Assert
@@ -120,12 +117,7 @@ describe('login', () => {
             mockVerifyHash.mockResolvedValue(false);
             mockGetUserByUsername.mockResolvedValue(expectedUserEntity);
 
-            const loginController: LoginController = createLoginController(
-                mockUserRepository,
-                mockSessionRepository,
-                mockVerifyHash,
-                mockGetRandomToken,
-            );
+            const loginController: LoginController = createLoginController(expectedLoginControllerDeps);
             // Act
             const actualResponse: Response = await loginController.post(expectedRequest as unknown as BunRequest);
             // Assert

@@ -2,12 +2,16 @@ import { UserNotFoundError } from "../domain/errors/UserNotFoundError";
 import type { UserEntity, UserInsert } from "../domain/user.entity";
 import type { SQL } from "./db";
 
+export type UserRepositortDeps = {
+    sql: SQL,
+};
+
 export type UserRepository = {
     addUser: (userInsert: UserInsert) => Promise<UserEntity>;
     getUserByUsername: (username: string) => Promise<UserEntity>;
 };
 
-export function createUserRepository(sql: SQL): UserRepository {
+export function createUserRepository({ sql }: UserRepositortDeps): UserRepository {
     return {
         async addUser(userInsert: UserInsert): Promise<UserEntity> {
             const queryResults = await sql`

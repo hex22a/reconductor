@@ -2,12 +2,16 @@ import { ProjectNotFoundError } from "../domain/errors/ProjectNotFoundError";
 import type { ProjectEntity, ProjectInsert } from "../domain/project.entity";
 import type { SQL } from "./db";
 
+export type ProjectRepositoryDeps = {
+    sql: SQL,
+};
+
 export type ProjectRepository = {
     createProject: (project: ProjectInsert) => Promise<ProjectEntity>;
     getProject: (projectId: string) => Promise<ProjectEntity>;
 };
 
-export function createProjectRepository(sql: SQL): ProjectRepository {
+export function createProjectRepository({ sql }: ProjectRepositoryDeps): ProjectRepository {
     return {
         async createProject(project: ProjectInsert): Promise<ProjectEntity> {
             const queryResults = await sql`

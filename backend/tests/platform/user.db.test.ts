@@ -15,7 +15,7 @@ describe('user.db', () => {
                     getUserByUsername: expect.any(Function),
                 };
                 // Act
-                const actualUserRepository: UserRepository = createUserRepository(trx);
+                const actualUserRepository: UserRepository = createUserRepository({ sql: trx });
                 // Assert
                 expect(actualUserRepository).toEqual(expectedUserRepository);
             });
@@ -30,7 +30,7 @@ describe('user.db', () => {
                     const expectedUsername = 'not_root';
                     const expectedPassowrdHash = 'another_hash';
                     const [expectedAddedUser, expectedUserInsert] = createUserFixture(expectedUsername, expectedPassowrdHash);
-                    const userRepository: UserRepository = createUserRepository(trx);
+                    const userRepository: UserRepository = createUserRepository({ sql: trx });
                     // Act
                     const actualAddedUser: UserEntity = await userRepository.addUser(expectedUserInsert);
                     // Assert
@@ -52,7 +52,7 @@ describe('user.db', () => {
                     // Arrange
                     const expectedErrorCode = '23505';
                     const [, expectedUserInsert] = createUserFixture(expectedExistingUserUsername, expectedExistingUserPasswordHash);
-                    const userRepository: UserRepository = createUserRepository(trx);
+                    const userRepository: UserRepository = createUserRepository({ sql: trx });
                     // Act
                     try {
                         await userRepository.addUser(expectedUserInsert);
@@ -72,7 +72,7 @@ describe('user.db', () => {
                 await withTrx(async (trx) => {
                     // Arrange
                     const [expectedUser] = createUserFixture(expectedExistingUserUsername, expectedExistingUserPasswordHash);
-                    const userRepository: UserRepository = createUserRepository(trx);
+                    const userRepository: UserRepository = createUserRepository({ sql: trx });
                     // Act
                     const actualUser: UserEntity = await userRepository.getUserByUsername(expectedExistingUserUsername);
                     // Assert
@@ -93,7 +93,7 @@ describe('user.db', () => {
                 await withTrx(async (trx) => {
                     // Arrange
                     const expectedUsername = 'not_root';
-                    const userRepository: UserRepository = createUserRepository(trx);
+                    const userRepository: UserRepository = createUserRepository({ sql: trx });
                     // Act
                     try {
                         await userRepository.getUserByUsername(expectedUsername);

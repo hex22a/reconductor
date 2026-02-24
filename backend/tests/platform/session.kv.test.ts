@@ -17,7 +17,7 @@ describe('session', () => {
             getUserSession: expect.any(Function),
         };
         // Act
-        const actualSessionRepository = createSessionRepository(kv);
+        const actualSessionRepository = createSessionRepository({ kv });
         // Assert
         expect(actualSessionRepository).toEqual(expectedSessionRepository);
     });
@@ -28,7 +28,7 @@ describe('session', () => {
         const expectedUserId = '019c6c94-0fb1-7241-922f-b3eb297a5a2f';
         const expectedToken = 'random_value';
         const [expectedUserSession, expectedUserSessionInsert] = createUserSessionFixture(expectedToken, expectedUserId, expectedUsername);
-        const sessionRepository = createSessionRepository(kv);
+        const sessionRepository = createSessionRepository({ kv });
         // Act
         const actualUserSession: UserSession = await sessionRepository.createUserSession(expectedUserSessionInsert);
         // Assert
@@ -38,7 +38,7 @@ describe('session', () => {
     it('throws SessionNotFoundError if session is not found', async () => {
         // Arrange
         const expectedToken = 'does_not_exist';
-        const sessionRepository = createSessionRepository(kv);
+        const sessionRepository = createSessionRepository({ kv });
         // Act
         try {
             await sessionRepository.getUserSession(expectedToken);
@@ -54,7 +54,7 @@ describe('session', () => {
         const expectedToken = 'some_token';
         const expectedUserId = '019c6c94-0fb1-7241-922f-b3eb297a5a2f';
         const [expectedUserSession, expectedUserSessionInsert] = createUserSessionFixture(expectedToken, expectedUserId, expectedUsername);
-        const sessionRepository = createSessionRepository(kv);
+        const sessionRepository = createSessionRepository({ kv });
         await sessionRepository.createUserSession(expectedUserSessionInsert);
         // Act
         const actualUserSession: UserSession = await sessionRepository.getUserSession(expectedToken);

@@ -1,7 +1,7 @@
 import type { BunRequest } from 'bun';
 import { describe, test, expect, mock, afterEach } from 'bun:test';
 import { HEADERS } from '../../constants';
-import { createRegisterController, type RegisterController } from './register';
+import { createRegisterController, type RegisterController, type RegisterControllerDeps } from './register';
 import type { UserDto } from '@/src/transport/user.dto';
 import { createUserFixture } from '@/tests/fixtures/users';
 import type { UserRepository } from '@/src/persistence/user.db';
@@ -14,6 +14,10 @@ describe('register', () => {
         addUser: mockAddUser,
         getUserByUsername: mockGetUserByUsername,
     };
+    const expectedRegisterControllerDeps: RegisterControllerDeps = {
+        userRepository: mockUserRepository,
+        hashFn: mockHash,
+    };
 
     afterEach(() => {
         mockHash.mockReset();
@@ -24,7 +28,7 @@ describe('register', () => {
     test('createRegisterController', () => {
         // Arrange
         // Act
-        const actualRegisterController: RegisterController = createRegisterController(mockUserRepository, mockHash);
+        const actualRegisterController: RegisterController = createRegisterController(expectedRegisterControllerDeps);
         // Assert
         expect(actualRegisterController.post).toBeFunction();
 
@@ -51,7 +55,7 @@ describe('register', () => {
         mockHash.mockResolvedValue(expectedPasswordHash);
         mockAddUser.mockResolvedValue(expectedAddedUser);
 
-        const registerController: RegisterController = createRegisterController(mockUserRepository, mockHash);
+        const registerController: RegisterController = createRegisterController(expectedRegisterControllerDeps);
 
         // Act
         const actualResponse: Response = await registerController.post(expectedRequest as unknown as BunRequest);

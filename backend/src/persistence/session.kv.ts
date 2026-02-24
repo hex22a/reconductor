@@ -3,12 +3,16 @@ import { SessionNotFoundError } from "../domain/errors/SessionNotFoundError";
 import type { UserSession, UserSessionInsert } from "../domain/session.entity";
 import type { KvClinent } from "./kv";
 
+export type SessionRepositoryDeps = {
+    kv: KvClinent,
+};
+
 export type SessionRepository = {
     createUserSession: (userSession: UserSessionInsert) => Promise<UserSession>;
     getUserSession: (token: string) => Promise<UserSession>;
 };
 
-export function createSessionRepository(kv: KvClinent): SessionRepository {
+export function createSessionRepository({ kv }: SessionRepositoryDeps): SessionRepository {
     return {
         async createUserSession(userSession: UserSessionInsert): Promise<UserSession> {
             const { token, userId, username } = userSession;

@@ -16,7 +16,7 @@ describe('scan.db', () => {
                     getScan: expect.any(Function),
                 }
                 // Act
-                const actualScanRepository: ScanRepository = createScanRepository(trx);
+                const actualScanRepository: ScanRepository = createScanRepository({ sql: trx });
                 // Assert
                 expect(actualScanRepository).toEqual(expectedScanRepository);
             });
@@ -32,7 +32,7 @@ describe('scan.db', () => {
                     // Arrange
                     const expectedTarget = '192.168.0.0/16';
                     const [, expectedScanInsert] = createScanFixture(expectedExistingProjectId, expectedTarget);
-                    const scanRepository: ScanRepository = createScanRepository(trx);
+                    const scanRepository: ScanRepository = createScanRepository({ sql: trx });
                     // Act
                     const actualScan: ScanEntity = await scanRepository.createScan(expectedScanInsert);
                     // Assert
@@ -53,7 +53,7 @@ describe('scan.db', () => {
                     const expectedTarget = '192.168.0.0/16';
                     const expectedWrongProjectId = '5ffe9624-5f76-4534-b804-a569613822d0';
                     const [, expectedScanInsert] = createScanFixture(expectedWrongProjectId, expectedTarget);
-                    const scanRepository: ScanRepository = createScanRepository(trx);
+                    const scanRepository: ScanRepository = createScanRepository({ sql: trx });
                     // Act
                     try {
                         await scanRepository.createScan(expectedScanInsert);
@@ -73,7 +73,7 @@ describe('scan.db', () => {
                     const expectedErrorCode = '22P02';
                     const expectedTarget = '192.168.0.';
                     const [, expectedScanInsert] = createScanFixture(expectedExistingProjectId, expectedTarget);
-                    const scanRepository: ScanRepository = createScanRepository(trx);
+                    const scanRepository: ScanRepository = createScanRepository({ sql: trx });
                     // Act
                     try {
                         await scanRepository.createScan(expectedScanInsert);
@@ -93,7 +93,7 @@ describe('scan.db', () => {
                 await withTrx(async (trx) => {
                     // Arrange
                     const expectedStatus = 'scheduled';
-                    const scanRepository: ScanRepository = createScanRepository(trx);
+                    const scanRepository: ScanRepository = createScanRepository({ sql: trx });
                     // Act
                     const actualScan: ScanEntity = await scanRepository.getScan(expectedExistingScanId);
                     // Assert
@@ -111,7 +111,7 @@ describe('scan.db', () => {
                 await withTrx(async (trx) => {
                     // Arrange
                     const expectedScanId = '019c8a70-1fb0-7d53-aef0-5e163f62fb24';
-                    const scanRepository: ScanRepository = createScanRepository(trx);
+                    const scanRepository: ScanRepository = createScanRepository({ sql: trx });
                     // Act
                     try {
                         await scanRepository.getScan(expectedScanId);

@@ -6,16 +6,23 @@ import { registerSchema } from "@/src/transport/user.schema";
 import type { BunRequest } from "bun";
 import { constants } from 'node:http2';
 
-export type LoginController = {
-    post: (req: BunRequest) => Promise<Response>;
-};
-
-export function createLoginController(
+export type LoginControllerDeps = {
     userRepository: UserRepository,
     sessionRepository: SessionRepository,
     verifyHash: (password: string, hash: string) => Promise<boolean>,
     generateRandomToken: () => string,
-): LoginController {
+};
+
+export type LoginController = {
+    post: (req: BunRequest) => Promise<Response>;
+};
+
+export function createLoginController({
+    userRepository,
+    sessionRepository,
+    verifyHash,
+    generateRandomToken,
+}: LoginControllerDeps): LoginController {
     return {
         async post(req: BunRequest): Promise<Response> {
             const requestJson = await req.json();

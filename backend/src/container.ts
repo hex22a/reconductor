@@ -12,7 +12,7 @@ import { createSchema, createYoga } from 'graphql-yoga';
 import { getGraphQlServerInstance } from './servers/graphql';
 
 const container = createContainer({
-    injectionMode: InjectionMode.CLASSIC,
+    injectionMode: InjectionMode.PROXY,
     strict: true,
 });
 

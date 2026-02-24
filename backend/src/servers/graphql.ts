@@ -25,11 +25,17 @@ export type GraphQlServerFactory<
 
 export type GraphQlServerInstance = YogaServerInstance<GraphQlServerContext, GraphQlUserContext>;
 
-export function getGraphQlServerInstance(
+export type GraphQlServerFactoryDeps = {
     createGraphQlServer: GraphQlServerFactory<GraphQlServerContext, GraphQlUserContext>,
     createGraphQlSchema: GraphQlSchemaFactory,
     projectResolver: ProjectResolver,
-) {
+};
+
+export function getGraphQlServerInstance({
+    createGraphQlServer,
+    createGraphQlSchema,
+    projectResolver,
+}: GraphQlServerFactoryDeps) {
     return createGraphQlServer({
         schema: createGraphQlSchema({
             typeDefs,
