@@ -7,7 +7,7 @@ export type ProjectRepository = {
     getProject: (projectId: string) => Promise<ProjectEntity>;
 };
 
-export function createProjectsRepository(sql: SQL): ProjectRepository {
+export function createProjectRepository(sql: SQL): ProjectRepository {
     return {
         async createProject(project: ProjectInsert): Promise<ProjectEntity> {
             const queryResults = await sql`

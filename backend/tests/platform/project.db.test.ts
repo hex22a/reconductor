@@ -1,6 +1,6 @@
 import { describe, expect, it, test } from 'bun:test';
 import { catchRollback, withTrx } from '../decorators';
-import { createProjectsRepository, type ProjectRepository } from '@/src/persistence/project.db';
+import { createProjectRepository, type ProjectRepository } from '@/src/persistence/project.db';
 import { createProjectFixture } from '../fixtures/projects';
 import type { ProjectEntity } from '@/src/domain/project.entity';
 import { ProjectNotFoundError } from '@/src/domain/errors/ProjectNotFoundError';
@@ -16,7 +16,7 @@ describe('project.db', () => {
                     getProject: expect.any(Function),
                 };
                 // Act
-                const actualUserRepository: ProjectRepository = createProjectsRepository(trx);
+                const actualUserRepository: ProjectRepository = createProjectRepository(trx);
                 // Assert
                 expect(actualUserRepository).toEqual(expectedProjectRepository);
             });
@@ -30,7 +30,7 @@ describe('project.db', () => {
                     // Arrange
                     const expectedProjectName = 'test';
                     const [, expecteProjectInsert] = createProjectFixture(expectedProjectName, expectedExistingUserId);
-                    const actualProjectRepository: ProjectRepository = createProjectsRepository(trx);
+                    const actualProjectRepository: ProjectRepository = createProjectRepository(trx);
                     // Act
                     const actualCreatedProject: ProjectEntity = await actualProjectRepository.createProject(expecteProjectInsert);
                     // Assert
@@ -50,7 +50,7 @@ describe('project.db', () => {
                     const expectedProjectName = 'test';
                     const expectedWrongOwnerId = '5ffe9624-5f76-4534-b804-a569613822d0';
                     const [, expecteProjectInsert] = createProjectFixture(expectedProjectName, expectedWrongOwnerId);
-                    const projectRepository: ProjectRepository = createProjectsRepository(trx);
+                    const projectRepository: ProjectRepository = createProjectRepository(trx);
                     // Act
                     try {
                         await projectRepository.createProject(expecteProjectInsert);
@@ -71,7 +71,7 @@ describe('project.db', () => {
                     // Arrange
                     const expectedProjectName = 'test';
                     const [, expectedProjectInsert] = createProjectFixture(expectedProjectName, expectedExistingUserId);
-                    const projectRepository: ProjectRepository = createProjectsRepository(trx);
+                    const projectRepository: ProjectRepository = createProjectRepository(trx);
                     const expectedProject: ProjectEntity = await projectRepository.createProject(expectedProjectInsert);
                     // Act
                     const actualProject: ProjectEntity = await projectRepository.getProject(expectedProject.id);
@@ -89,7 +89,7 @@ describe('project.db', () => {
                 await withTrx(async (trx) => {
                     // Arrange
                     const expectedProjectName = '57455bc2-af34-4116-a98f-7dce209eba35';
-                    const projectRepository: ProjectRepository = createProjectsRepository(trx);
+                    const projectRepository: ProjectRepository = createProjectRepository(trx);
                     // Act
                     try {
                         await projectRepository.getProject(expectedProjectName);

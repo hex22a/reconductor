@@ -10,6 +10,7 @@ export const HEADERS = {
 
 export const API_REGISTER_ENDPOINT_V1 = '/api/v1/register';
 export const API_LOGIN_ENDPOINT_V1 = '/api/v1/login';
+export const GRAPHQL_ENDPOINT = '/graphql';
 
 export const MIN_USERNAME_LENGTH = 4;
 export const MAX_USERNAME_LENGTH = 32;

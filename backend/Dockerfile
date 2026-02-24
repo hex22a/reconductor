@@ -16,6 +16,10 @@ RUN bun build --compile --outfile=migration ./db/migration.ts
 
 # Server
 FROM debian:bookworm-slim
+
+WORKDIR /shared
+COPY ./shared/schema.graphql .
+
 WORKDIR /app
 
 COPY --from=build /app/server /app/migration .

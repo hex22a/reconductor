@@ -4,6 +4,12 @@ type Project {
   created_at: String!
 }
 
+type Scan {
+  id: ID!
+  target: String!
+  created_at: String!
+}
+
 type Query {
   projects: [Project!]!
   project(id: ID!): Project
