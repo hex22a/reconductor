@@ -13,7 +13,7 @@ describe('login', async () => {
         const mockCreateLoginController = mock().mockReturnValue(mockLoginController);
         container.register({
             loginController: asFunction(mockCreateLoginController),
-        })
+        });
         const expectedMethod = 'POST';
         const expectedRoute = {
             [API_LOGIN_ENDPOINT_V1]: { [expectedMethod]: mockLoginController.post }

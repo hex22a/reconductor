@@ -6,7 +6,7 @@ const SLEEP_TIMEOUT = 1000;
 export async function waitDb(sql: SQL) {
     for (let i = 0; i < MAX_RETRIES; i++) {
         try {
-            console.info(`Connecting to DB. Try: ${i}`)
+            console.info(`Connecting to DB. Try: ${i}`);
             await sql`SELECT 1`;
             console.info('Connected to DB');
             return;

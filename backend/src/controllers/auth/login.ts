@@ -33,7 +33,7 @@ export function createLoginController({
                 return Response.json(
                     { ok: false },
                     { headers: HEADERS, status: constants.HTTP_STATUS_UNAUTHORIZED },
-                )
+                );
             }
             const token = generateRandomToken();
             await sessionRepository.createUserSession({ token, userId: user.id, username: user.username });

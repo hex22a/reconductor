@@ -56,7 +56,7 @@ describe('project.db', () => {
                         await projectRepository.createProject(expecteProjectInsert);
                     } catch (actualError) {
                         // Assert
-                        expect(actualError).toBeInstanceOf(Bun.SQL.PostgresError)
+                        expect(actualError).toBeInstanceOf(Bun.SQL.PostgresError);
                         expect((actualError as Bun.SQL.PostgresError).errno).toEqual(expectedErrorCode);
                     }
                 });

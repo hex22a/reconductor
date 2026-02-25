@@ -58,7 +58,7 @@ describe('user.db', () => {
                         await userRepository.addUser(expectedUserInsert);
                     } catch (actualError) {
                         // Assert
-                        expect(actualError).toBeInstanceOf(Bun.SQL.PostgresError)
+                        expect(actualError).toBeInstanceOf(Bun.SQL.PostgresError);
                         expect((actualError as Bun.SQL.PostgresError).errno).toEqual(expectedErrorCode);
                     }
                 });

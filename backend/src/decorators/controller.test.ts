@@ -15,7 +15,7 @@ describe('controller decorators', () => {
 
         afterEach(() => {
             mockController.mockReset();
-        })
+        });
 
         test('no errors', async () => {
             // Arrange
@@ -79,7 +79,7 @@ describe('controller decorators', () => {
             const expectedResponse: Response = Response.json(expectedResponseJson, expectedResponseInit);
 
             const expectedRequest = {} satisfies Partial<BunRequest>;
-            mockController.mockRejectedValue(new SyntaxError(UNEXPECTED_END_OF_JSON_ERROR_MESSAGE))
+            mockController.mockRejectedValue(new SyntaxError(UNEXPECTED_END_OF_JSON_ERROR_MESSAGE));
             const decoreatedController = withErrorHandling(mockController);
 
             // Act
@@ -128,7 +128,7 @@ describe('controller decorators', () => {
             const expectedResponse: Response = Response.json(expectedResponseJson, expectedResponseInit);
 
             const expectedRequest = {} satisfies Partial<BunRequest>;
-            mockController.mockRejectedValue(new ZodError(expectedZodIssues))
+            mockController.mockRejectedValue(new ZodError(expectedZodIssues));
             const decoreatedController = withErrorHandling(mockController);
 
             // Act
@@ -156,7 +156,7 @@ describe('controller decorators', () => {
             const expectedResponse: Response = Response.json(expectedResponseJson, expectedResponseInit);
 
             const expectedRequest = {} satisfies Partial<BunRequest>;
-            mockController.mockRejectedValue(new Bun.SQL.PostgresError(expectedErrorMessage, { code: expectedErrorCode }))
+            mockController.mockRejectedValue(new Bun.SQL.PostgresError(expectedErrorMessage, { code: expectedErrorCode }));
             const decoreatedController = withErrorHandling(mockController);
 
             // Act
@@ -168,5 +168,5 @@ describe('controller decorators', () => {
             expect(actualResponse.status).toEqual(expectedResponse.status);
         });
 
-    })
+    });
 });

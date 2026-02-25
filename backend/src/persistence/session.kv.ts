@@ -29,5 +29,5 @@ export function createSessionRepository({ kv }: SessionRepositoryDeps): SessionR
             }
             return { userId: userSession.userId, username: userSession.username };
         }
-    }
+    };
 }

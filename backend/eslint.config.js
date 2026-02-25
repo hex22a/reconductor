@@ -17,5 +17,9 @@ export default [
         sourceType: 'module',
       },
     },
+    rules: {
+      semi: 'error',
+      'no-var': 'error',
+    },
   },
 ];

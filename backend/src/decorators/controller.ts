@@ -32,14 +32,14 @@ export function withErrorHandling(
                 return Response.json(
                     { code: DATABASE_ERROR_CODE, error: error.message },
                     { headers: HEADERS, status: constants.HTTP_STATUS_BAD_REQUEST },
-                )
+                );
             }
             return Response.json(
                 { code: UNEXPECTED_ERROR_CODE, error: UNEXPECTED_ERROR_MESSAGE },
                 { headers: HEADERS, status: constants.HTTP_STATUS_INTERNAL_SERVER_ERROR },
             );
         }
-    }
+    };
 }
 
 export type WithErrorHandlingDecorator = typeof withErrorHandling;

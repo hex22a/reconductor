@@ -34,17 +34,17 @@ async function scanMigrationsDirectory(): Promise<Array<string>> {
 
 function filterMigrations(files: Array<string>, appliedMigrations: Array<Migration>): Array<string> {
     const mappedAppliedMigrations: Array<string> = appliedMigrations.map(am => am.version);
-    return files.filter(file => mappedAppliedMigrations.indexOf(file) === -1)
+    return files.filter(file => mappedAppliedMigrations.indexOf(file) === -1);
 }
 
 async function applyMigration(trx: TransactionSQL, filename: string): Promise<void> {
     console.info(`Applying ${filename}`);
     await trx.savepoint(async (sp) => {
         await sp.file(path.resolve(MIGRATIONS_DIR, filename));
-        console.log('migration applied')
+        console.log('migration applied');
 
         await sp`INSERT INTO ${sql(MIGRATION_TABLE)} (version) VALUES (${filename})`;
-    })
+    });
 }
 
 
@@ -62,7 +62,7 @@ async function execMigration() {
         } finally {
             await releaseLock(trx);
         }
-    })
+    });
 }
 
 execMigration();

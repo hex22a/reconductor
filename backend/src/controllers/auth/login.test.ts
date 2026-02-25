@@ -48,7 +48,9 @@ describe('login', () => {
     test('createLoginController', () => {
         // Arrange
         // Act
-        const actualLoginController: LoginController = createLoginController(expectedLoginControllerDeps);
+        const actualLoginController: LoginController = createLoginController(
+            expectedLoginControllerDeps,
+        );
         // Assert
         expect(actualLoginController.post).toBeFunction();
     });
@@ -61,12 +63,17 @@ describe('login', () => {
             const expectedUsername = 'username';
             const expectedPassword = 'password';
             const expectedHashedPassword = 'hashed_password';
-            const [expectedUserEntity] = createUserFixture(expectedUsername, expectedHashedPassword);
-            const expectedResponse: Response = Response.json(expectedResponseJson, { headers: HEADERS });
+            const [expectedUserEntity] = createUserFixture(
+                expectedUsername,
+                expectedHashedPassword,
+            );
+            const expectedResponse: Response = Response.json(expectedResponseJson, {
+                headers: HEADERS,
+            });
             const expectedRequestJson = { username: expectedUsername, password: expectedPassword };
             const expectedRequest = {
                 json: mock().mockResolvedValue(expectedRequestJson),
-                cookies: (mockCookies as unknown as CookieMap),
+                cookies: mockCookies as unknown as CookieMap,
             } satisfies Partial<BunRequest>;
             const expectedCookieInit: CookieInit = {
                 maxAge: USER_SESSION_TTL_SECONDS,
@@ -83,16 +90,24 @@ describe('login', () => {
             mockGetUserByUsername.mockResolvedValue(expectedUserEntity);
             mockGetRandomToken.mockReturnValue(expectedToken);
 
-            const loginController: LoginController = createLoginController(expectedLoginControllerDeps);
+            const loginController: LoginController = createLoginController(
+                expectedLoginControllerDeps,
+            );
             // Act
-            const actualResponse: Response = await loginController.post(expectedRequest as unknown as BunRequest);
+            const actualResponse: Response = await loginController.post(
+                expectedRequest as unknown as BunRequest,
+            );
             // Assert
             expect(expectedRequest.json).toHaveBeenCalled();
             expect(mockVerifyHash).toHaveBeenCalledWith(expectedPassword, expectedHashedPassword);
             expect(mockGetUserByUsername).toHaveBeenCalledWith(expectedUsername);
             expect(mockGetRandomToken).toHaveBeenCalled();
             expect(mockCreateUserSession).toHaveBeenCalledWith(expectedUserSessionInsert);
-            expect(mockSetCookies).toHaveBeenCalledWith(USER_SESSION_COOKIE_NAME, expectedToken, expectedCookieInit);
+            expect(mockSetCookies).toHaveBeenCalledWith(
+                USER_SESSION_COOKIE_NAME,
+                expectedToken,
+                expectedCookieInit,
+            );
             expect(await actualResponse.json()).toEqual(expectedResponseJson);
             expect(actualResponse.headers.toJSON()).toEqual(expectedResponse.headers.toJSON());
             expect(actualResponse.status).toEqual(expectedResponse.status);
@@ -104,22 +119,29 @@ describe('login', () => {
             const expectedUsername = 'username';
             const expectedPassword = 'password';
             const expectedHashedPassword = 'hashed_password';
-            const [, expectedUserEntity] = createUserFixture(expectedUsername, expectedHashedPassword);
-            const expectedResponse: Response = Response.json(
-                expectedResponseJson,
-                { headers: HEADERS, status: constants.HTTP_STATUS_UNAUTHORIZED },
+            const [, expectedUserEntity] = createUserFixture(
+                expectedUsername,
+                expectedHashedPassword,
             );
+            const expectedResponse: Response = Response.json(expectedResponseJson, {
+                headers: HEADERS,
+                status: constants.HTTP_STATUS_UNAUTHORIZED,
+            });
             const expectedRequestJson = { username: expectedUsername, password: expectedPassword };
             const expectedRequest = {
                 json: mock().mockResolvedValue(expectedRequestJson),
-                cookies: (mockCookies as unknown as CookieMap),
+                cookies: mockCookies as unknown as CookieMap,
             } satisfies Partial<BunRequest>;
             mockVerifyHash.mockResolvedValue(false);
             mockGetUserByUsername.mockResolvedValue(expectedUserEntity);
 
-            const loginController: LoginController = createLoginController(expectedLoginControllerDeps);
+            const loginController: LoginController = createLoginController(
+                expectedLoginControllerDeps,
+            );
             // Act
-            const actualResponse: Response = await loginController.post(expectedRequest as unknown as BunRequest);
+            const actualResponse: Response = await loginController.post(
+                expectedRequest as unknown as BunRequest,
+            );
             // Assert
             expect(expectedRequest.json).toHaveBeenCalled();
             expect(mockVerifyHash).toHaveBeenCalledWith(expectedPassword, expectedHashedPassword);

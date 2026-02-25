@@ -15,5 +15,5 @@ export function createProjectFixture(
         { id, name, owner_id: ownerId, created_at: date },
         { name, owner_id: ownerId },
         { id, name, owner_id: ownerId },
-    ]
+    ];
 }

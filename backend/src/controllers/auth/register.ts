@@ -31,6 +31,6 @@ export function createRegisterController({
             };
             return Response.json(userResponse, { headers: HEADERS });
         }
-    }
+    };
 }
 

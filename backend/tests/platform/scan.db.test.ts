@@ -14,7 +14,7 @@ describe('scan.db', () => {
                 const expectedScanRepository: ScanRepository = {
                     createScan: expect.any(Function),
                     getScan: expect.any(Function),
-                }
+                };
                 // Act
                 const actualScanRepository: ScanRepository = createScanRepository({ sql: trx });
                 // Assert

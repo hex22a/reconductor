@@ -40,5 +40,5 @@ export function createScanRepository({ sql }: ScanRepositoryDeps): ScanRepositor
             }
             return scan;
         }
-    }
+    };
 }

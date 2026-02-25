@@ -13,7 +13,7 @@ describe('register', async () => {
         const mockCreateRegisterController = mock().mockReturnValue(mockRegisterController);
         container.register({
             registerController: asFunction(mockCreateRegisterController),
-        })
+        });
         const expectedMethod = 'POST';
         const expectedUrl = API_REGISTER_ENDPOINT_V1;
         const expectedRoute = {

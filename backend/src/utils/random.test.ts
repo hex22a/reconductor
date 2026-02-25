@@ -10,7 +10,7 @@ describe('random', () => {
 
     afterEach(() => {
         mockGetRandomValues.mockReset();
-    })
+    });
 
     test('createGenerateRandomToken', () => {
         // Arrange
@@ -32,5 +32,5 @@ describe('random', () => {
         // Assert
         expect(actualRandomToken).toEqual(expectedRandomToken);
         expect(mockGetRandomValues).toHaveBeenCalledWith(expectedBuffer);
-    })
+    });
 });

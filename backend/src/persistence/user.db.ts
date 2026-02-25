@@ -43,5 +43,5 @@ export function createUserRepository({ sql }: UserRepositortDeps): UserRepositor
             }
             return user;
         }
-    }
+    };
 }
