@@ -1,1 +1,1 @@
-export class SessionNotFoundError extends Error { };
+export class SessionNotFoundError extends Error {}

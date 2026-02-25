@@ -27,7 +27,7 @@ describe('project', () => {
             Query: {
                 project: expect.any(Function),
                 projects: expect.any(Function),
-            }
+            },
         };
         // Act
         const actualProjectResolver: ProjectResolver = createProjectResolver(mockProjectRepository);

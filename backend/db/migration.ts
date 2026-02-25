@@ -8,8 +8,8 @@ const MIGRATION_ADVISORY_LOCK_ID = 1337;
 const MIGRATION_TABLE = 'recon.schema_migrations';
 
 type Migration = {
-    version: string,
-    applied_at: Date,
+    version: string;
+    applied_at: Date;
 };
 
 async function acquireAdvisoryLock(trx: TransactionSQL): Promise<void> {
@@ -32,9 +32,12 @@ async function scanMigrationsDirectory(): Promise<Array<string>> {
     return (await readdir(MIGRATIONS_DIR)).sort();
 }
 
-function filterMigrations(files: Array<string>, appliedMigrations: Array<Migration>): Array<string> {
-    const mappedAppliedMigrations: Array<string> = appliedMigrations.map(am => am.version);
-    return files.filter(file => mappedAppliedMigrations.indexOf(file) === -1);
+function filterMigrations(
+    files: Array<string>,
+    appliedMigrations: Array<Migration>,
+): Array<string> {
+    const mappedAppliedMigrations: Array<string> = appliedMigrations.map((am) => am.version);
+    return files.filter((file) => mappedAppliedMigrations.indexOf(file) === -1);
 }
 
 async function applyMigration(trx: TransactionSQL, filename: string): Promise<void> {
@@ -46,7 +49,6 @@ async function applyMigration(trx: TransactionSQL, filename: string): Promise<vo
         await sp`INSERT INTO ${sql(MIGRATION_TABLE)} (version) VALUES (${filename})`;
     });
 }
-
 
 async function execMigration() {
     await waitDb(sql);

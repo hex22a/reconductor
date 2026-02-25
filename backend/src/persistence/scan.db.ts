@@ -1,9 +1,9 @@
-import { ScanNotFoundError } from "../domain/errors/ScanNotFoundError";
-import type { ScanEntity, ScanInsert } from "../domain/scan.entity";
-import type { SQL } from "./db";
+import { ScanNotFoundError } from '../domain/errors/ScanNotFoundError';
+import type { ScanEntity, ScanInsert } from '../domain/scan.entity';
+import type { SQL } from './db';
 
 export type ScanRepositoryDeps = {
-    sql: SQL,
+    sql: SQL;
 };
 
 export type ScanRepository = {
@@ -39,6 +39,6 @@ export function createScanRepository({ sql }: ScanRepositoryDeps): ScanRepositor
                 throw new ScanNotFoundError();
             }
             return scan;
-        }
+        },
     };
 }

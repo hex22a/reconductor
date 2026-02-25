@@ -2,7 +2,11 @@ import { describe, expect, it, test } from 'bun:test';
 import { catchRollback, withTrx } from '../decorators';
 import { createUserRepository, type UserRepository } from '@/src/persistence/user.db';
 import type { UserEntity } from '@/src/domain/user.entity';
-import { createUserFixture, expectedExistingUserPasswordHash, expectedExistingUserUsername } from '../fixtures/users';
+import {
+    createUserFixture,
+    expectedExistingUserPasswordHash,
+    expectedExistingUserUsername,
+} from '../fixtures/users';
 import { UserNotFoundError } from '@/src/domain/errors/UserNotFoundError';
 
 describe('user.db', () => {
@@ -29,10 +33,14 @@ describe('user.db', () => {
                     // Arrange
                     const expectedUsername = 'not_root';
                     const expectedPassowrdHash = 'another_hash';
-                    const [expectedAddedUser, expectedUserInsert] = createUserFixture(expectedUsername, expectedPassowrdHash);
+                    const [expectedAddedUser, expectedUserInsert] = createUserFixture(
+                        expectedUsername,
+                        expectedPassowrdHash,
+                    );
                     const userRepository: UserRepository = createUserRepository({ sql: trx });
                     // Act
-                    const actualAddedUser: UserEntity = await userRepository.addUser(expectedUserInsert);
+                    const actualAddedUser: UserEntity =
+                        await userRepository.addUser(expectedUserInsert);
                     // Assert
                     expect(actualAddedUser.id).toBeString();
                     expect(actualAddedUser.created_at).toBeDate();
@@ -40,7 +48,9 @@ describe('user.db', () => {
                     expect(actualAddedUser.last_login_at).toBeDate();
                     expect(actualAddedUser.username).toEqual(expectedAddedUser.username);
                     expect(actualAddedUser.password_hash).toEqual(expectedAddedUser.password_hash);
-                    expect(actualAddedUser.password_version).toEqual(expectedAddedUser.password_version);
+                    expect(actualAddedUser.password_version).toEqual(
+                        expectedAddedUser.password_version,
+                    );
                     expect(actualAddedUser.is_active).toEqual(expectedAddedUser.is_active);
                 });
             });
@@ -51,7 +61,10 @@ describe('user.db', () => {
                 await withTrx(async (trx) => {
                     // Arrange
                     const expectedErrorCode = '23505';
-                    const [, expectedUserInsert] = createUserFixture(expectedExistingUserUsername, expectedExistingUserPasswordHash);
+                    const [, expectedUserInsert] = createUserFixture(
+                        expectedExistingUserUsername,
+                        expectedExistingUserPasswordHash,
+                    );
                     const userRepository: UserRepository = createUserRepository({ sql: trx });
                     // Act
                     try {
@@ -59,7 +72,9 @@ describe('user.db', () => {
                     } catch (actualError) {
                         // Assert
                         expect(actualError).toBeInstanceOf(Bun.SQL.PostgresError);
-                        expect((actualError as Bun.SQL.PostgresError).errno).toEqual(expectedErrorCode);
+                        expect((actualError as Bun.SQL.PostgresError).errno).toEqual(
+                            expectedErrorCode,
+                        );
                     }
                 });
             });
@@ -71,10 +86,15 @@ describe('user.db', () => {
             await catchRollback(async () => {
                 await withTrx(async (trx) => {
                     // Arrange
-                    const [expectedUser] = createUserFixture(expectedExistingUserUsername, expectedExistingUserPasswordHash);
+                    const [expectedUser] = createUserFixture(
+                        expectedExistingUserUsername,
+                        expectedExistingUserPasswordHash,
+                    );
                     const userRepository: UserRepository = createUserRepository({ sql: trx });
                     // Act
-                    const actualUser: UserEntity = await userRepository.getUserByUsername(expectedExistingUserUsername);
+                    const actualUser: UserEntity = await userRepository.getUserByUsername(
+                        expectedExistingUserUsername,
+                    );
                     // Assert
                     expect(actualUser.id).toBeString();
                     expect(actualUser.created_at).toBeDate();

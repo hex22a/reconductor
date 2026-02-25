@@ -31,10 +31,14 @@ describe('scan.db', () => {
                 await withTrx(async (trx) => {
                     // Arrange
                     const expectedTarget = '192.168.0.0/16';
-                    const [, expectedScanInsert] = createScanFixture(expectedExistingProjectId, expectedTarget);
+                    const [, expectedScanInsert] = createScanFixture(
+                        expectedExistingProjectId,
+                        expectedTarget,
+                    );
                     const scanRepository: ScanRepository = createScanRepository({ sql: trx });
                     // Act
-                    const actualScan: ScanEntity = await scanRepository.createScan(expectedScanInsert);
+                    const actualScan: ScanEntity =
+                        await scanRepository.createScan(expectedScanInsert);
                     // Assert
                     expect(actualScan.id).toBeString();
                     expect(actualScan.created_at).toBeDate();
@@ -52,7 +56,10 @@ describe('scan.db', () => {
                     const expectedErrorCode = '23503';
                     const expectedTarget = '192.168.0.0/16';
                     const expectedWrongProjectId = '5ffe9624-5f76-4534-b804-a569613822d0';
-                    const [, expectedScanInsert] = createScanFixture(expectedWrongProjectId, expectedTarget);
+                    const [, expectedScanInsert] = createScanFixture(
+                        expectedWrongProjectId,
+                        expectedTarget,
+                    );
                     const scanRepository: ScanRepository = createScanRepository({ sql: trx });
                     // Act
                     try {
@@ -60,7 +67,9 @@ describe('scan.db', () => {
                     } catch (actualError) {
                         // Assert
                         expect(actualError).toBeInstanceOf(Bun.SQL.PostgresError);
-                        expect((actualError as Bun.SQL.PostgresError).errno).toEqual(expectedErrorCode);
+                        expect((actualError as Bun.SQL.PostgresError).errno).toEqual(
+                            expectedErrorCode,
+                        );
                     }
                 });
             });
@@ -72,7 +81,10 @@ describe('scan.db', () => {
                     // Arrange
                     const expectedErrorCode = '22P02';
                     const expectedTarget = '192.168.0.';
-                    const [, expectedScanInsert] = createScanFixture(expectedExistingProjectId, expectedTarget);
+                    const [, expectedScanInsert] = createScanFixture(
+                        expectedExistingProjectId,
+                        expectedTarget,
+                    );
                     const scanRepository: ScanRepository = createScanRepository({ sql: trx });
                     // Act
                     try {
@@ -80,7 +92,9 @@ describe('scan.db', () => {
                     } catch (actualError) {
                         // Assert
                         expect(actualError).toBeInstanceOf(Bun.SQL.PostgresError);
-                        expect((actualError as Bun.SQL.PostgresError).errno).toEqual(expectedErrorCode);
+                        expect((actualError as Bun.SQL.PostgresError).errno).toEqual(
+                            expectedErrorCode,
+                        );
                     }
                 });
             });
@@ -95,7 +109,8 @@ describe('scan.db', () => {
                     const expectedStatus = 'scheduled';
                     const scanRepository: ScanRepository = createScanRepository({ sql: trx });
                     // Act
-                    const actualScan: ScanEntity = await scanRepository.getScan(expectedExistingScanId);
+                    const actualScan: ScanEntity =
+                        await scanRepository.getScan(expectedExistingScanId);
                     // Assert
                     expect(actualScan.id).toEqual(expectedExistingScanId);
                     expect(actualScan.created_at).toBeDate();

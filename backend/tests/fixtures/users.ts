@@ -1,5 +1,5 @@
-import type { UserInsert, UserEntity, UserInsertSeed } from "@/src/domain/user.entity";
-import { randomUUIDv7 } from "bun";
+import type { UserInsert, UserEntity, UserInsertSeed } from '@/src/domain/user.entity';
+import { randomUUIDv7 } from 'bun';
 
 export const expectedExistingUserId = '6026c64e-5c35-402d-b6a5-f9b1306104df';
 export const expectedExistingUserUsername = 'root';
@@ -25,12 +25,12 @@ export function createUserFixture(
         },
         {
             username,
-            password_hash: passwordHash
+            password_hash: passwordHash,
         },
         {
             id,
             username,
-            password_hash: passwordHash
+            password_hash: passwordHash,
         },
     ];
-};
+}

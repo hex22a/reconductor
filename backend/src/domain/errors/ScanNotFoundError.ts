@@ -1,1 +1,1 @@
-export class ScanNotFoundError extends Error { };
+export class ScanNotFoundError extends Error {}

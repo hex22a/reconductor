@@ -1,9 +1,9 @@
-import { UserNotFoundError } from "../domain/errors/UserNotFoundError";
-import type { UserEntity, UserInsert } from "../domain/user.entity";
-import type { SQL } from "./db";
+import { UserNotFoundError } from '../domain/errors/UserNotFoundError';
+import type { UserEntity, UserInsert } from '../domain/user.entity';
+import type { SQL } from './db';
 
 export type UserRepositortDeps = {
-    sql: SQL,
+    sql: SQL;
 };
 
 export type UserRepository = {
@@ -42,6 +42,6 @@ export function createUserRepository({ sql }: UserRepositortDeps): UserRepositor
                 throw new UserNotFoundError();
             }
             return user;
-        }
+        },
     };
 }

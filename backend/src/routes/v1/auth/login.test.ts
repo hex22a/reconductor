@@ -16,7 +16,7 @@ describe('login', async () => {
         });
         const expectedMethod = 'POST';
         const expectedRoute = {
-            [API_LOGIN_ENDPOINT_V1]: { [expectedMethod]: mockLoginController.post }
+            [API_LOGIN_ENDPOINT_V1]: { [expectedMethod]: mockLoginController.post },
         };
         const mockWithErrorHandling = mock((fn) => fn);
         // Act

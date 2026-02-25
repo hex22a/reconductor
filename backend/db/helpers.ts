@@ -1,4 +1,4 @@
-import type { SQL } from "bun";
+import type { SQL } from 'bun';
 
 const MAX_RETRIES = 30;
 const SLEEP_TIMEOUT = 1000;
@@ -12,7 +12,7 @@ export async function waitDb(sql: SQL) {
             return;
         } catch {
             console.info('DB not ready. Retrying...');
-            await new Promise(r => setTimeout(r, SLEEP_TIMEOUT));
+            await new Promise((r) => setTimeout(r, SLEEP_TIMEOUT));
         }
     }
     throw new Error('DB is unavailable');

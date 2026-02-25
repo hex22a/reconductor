@@ -1,4 +1,4 @@
-import type { UserSession, UserSessionInsert } from "@/src/domain/session.entity";
+import type { UserSession, UserSessionInsert } from '@/src/domain/session.entity';
 
 export function createUserSessionFixture(
     token: string,

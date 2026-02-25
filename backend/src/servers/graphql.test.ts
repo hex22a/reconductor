@@ -1,7 +1,11 @@
 import { describe, expect, mock, test } from 'bun:test';
 import type { ProjectResolver } from '../resolvers/project';
 import type { GraphQLSchemaWithContext } from 'graphql-yoga';
-import { getGraphQlServerInstance, type GraphQlServerFactoryDeps, type GraphQlServerInstance } from './graphql';
+import {
+    getGraphQlServerInstance,
+    type GraphQlServerFactoryDeps,
+    type GraphQlServerInstance,
+} from './graphql';
 
 describe('graphql', () => {
     test('getGraphQlServerInstance', async () => {
@@ -14,7 +18,7 @@ describe('graphql', () => {
             Query: {
                 project: mock(),
                 projects: mock(),
-            }
+            },
         };
         const expectedSchemaDefinition = {
             typeDefs: expectedTypeDefs,
@@ -32,7 +36,9 @@ describe('graphql', () => {
             projectResolver: mockProjectResolver,
         };
         // Act
-        const actualGraphQlServerInstance: GraphQlServerInstance = getGraphQlServerInstance(expectedGraphQlServerFactoryDeps);
+        const actualGraphQlServerInstance: GraphQlServerInstance = getGraphQlServerInstance(
+            expectedGraphQlServerFactoryDeps,
+        );
         // Assert
         expect(actualGraphQlServerInstance).toEqual(expectedGraphQlServerInstance);
         expect(mockCreateGraphQlServer).toHaveBeenLastCalledWith(expectedServerOptions);

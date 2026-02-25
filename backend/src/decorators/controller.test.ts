@@ -1,13 +1,24 @@
-import type { BunRequest } from "bun";
-import { afterEach, describe, expect, mock, test } from "bun:test";
-import { HEADERS, UNEXPECTED_END_OF_JSON_ERROR_MESSAGE, UNEXPECTED_ERROR_MESSAGE, Z_PASSWORD_STRING_ERROR_MESSAGE, Z_USERNAME_STRING_ERROR_MESSAGE } from "../constants";
-import { withErrorHandling } from "./controller";
-import type { ErrorResponse } from "../transport/error.dto";
+import type { BunRequest } from 'bun';
+import { afterEach, describe, expect, mock, test } from 'bun:test';
+import {
+    HEADERS,
+    UNEXPECTED_END_OF_JSON_ERROR_MESSAGE,
+    UNEXPECTED_ERROR_MESSAGE,
+    Z_PASSWORD_STRING_ERROR_MESSAGE,
+    Z_USERNAME_STRING_ERROR_MESSAGE,
+} from '../constants';
+import { withErrorHandling } from './controller';
+import type { ErrorResponse } from '../transport/error.dto';
 import { constants } from 'node:http2';
-import { ZodError } from "zod";
-import type { $ZodIssue } from "zod/v4/core";
-import { ZodIssueCode } from "zod/v3";
-import { DATABASE_ERROR_CODE, SYNTAX_ERROR_CODE, UNEXPECTED_ERROR_CODE, VALIDATION_ERROR_CODE } from "$/constants";
+import { ZodError } from 'zod';
+import type { $ZodIssue } from 'zod/v4/core';
+import { ZodIssueCode } from 'zod/v3';
+import {
+    DATABASE_ERROR_CODE,
+    SYNTAX_ERROR_CODE,
+    UNEXPECTED_ERROR_CODE,
+    VALIDATION_ERROR_CODE,
+} from '$/constants';
 
 describe('controller decorators', () => {
     describe('withErrorHandling', () => {
@@ -23,14 +34,19 @@ describe('controller decorators', () => {
             const expectedResponseInit: ResponseInit = {
                 headers: HEADERS,
             };
-            const expectedResponse: Response = Response.json(expectedResponseJson, expectedResponseInit);
+            const expectedResponse: Response = Response.json(
+                expectedResponseJson,
+                expectedResponseInit,
+            );
 
             const expectedRequest = {} satisfies Partial<BunRequest>;
             mockController.mockResolvedValue(expectedResponse);
             const decoreatedController = withErrorHandling(mockController);
 
             // Act
-            const actualResponse: Response = await decoreatedController(expectedRequest as unknown as BunRequest);
+            const actualResponse: Response = await decoreatedController(
+                expectedRequest as unknown as BunRequest,
+            );
 
             // Assert
             expect(mockController).toHaveBeenCalledWith(expectedRequest);
@@ -49,7 +65,10 @@ describe('controller decorators', () => {
                 headers: HEADERS,
                 status: constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
             };
-            const expectedResponse: Response = Response.json(expectedResponseJson, expectedResponseInit);
+            const expectedResponse: Response = Response.json(
+                expectedResponseJson,
+                expectedResponseInit,
+            );
 
             const expectedRequest = {} satisfies Partial<BunRequest>;
 
@@ -57,7 +76,9 @@ describe('controller decorators', () => {
             const decoreatedController = withErrorHandling(mockController);
 
             // Act
-            const actualResponse: Response = await decoreatedController(expectedRequest as unknown as BunRequest);
+            const actualResponse: Response = await decoreatedController(
+                expectedRequest as unknown as BunRequest,
+            );
 
             // Assert
             expect(mockController).toHaveBeenCalledWith(expectedRequest);
@@ -74,16 +95,21 @@ describe('controller decorators', () => {
             };
             const expectedResponseInit: ResponseInit = {
                 headers: HEADERS,
-                status: constants.HTTP_STATUS_BAD_REQUEST
+                status: constants.HTTP_STATUS_BAD_REQUEST,
             };
-            const expectedResponse: Response = Response.json(expectedResponseJson, expectedResponseInit);
+            const expectedResponse: Response = Response.json(
+                expectedResponseJson,
+                expectedResponseInit,
+            );
 
             const expectedRequest = {} satisfies Partial<BunRequest>;
             mockController.mockRejectedValue(new SyntaxError(UNEXPECTED_END_OF_JSON_ERROR_MESSAGE));
             const decoreatedController = withErrorHandling(mockController);
 
             // Act
-            const actualResponse: Response = await decoreatedController(expectedRequest as unknown as BunRequest);
+            const actualResponse: Response = await decoreatedController(
+                expectedRequest as unknown as BunRequest,
+            );
 
             // Assert
             expect(mockController).toHaveBeenCalledWith(expectedRequest);
@@ -108,7 +134,7 @@ describe('controller decorators', () => {
                     path: [expectedSecondIssuePath],
                     message: Z_PASSWORD_STRING_ERROR_MESSAGE,
                     expected: 'string',
-                }
+                },
             ];
             const expectedResponseJson: ErrorResponse = {
                 code: VALIDATION_ERROR_CODE,
@@ -125,14 +151,19 @@ describe('controller decorators', () => {
                 status: constants.HTTP_STATUS_UNPROCESSABLE_ENTITY,
             };
 
-            const expectedResponse: Response = Response.json(expectedResponseJson, expectedResponseInit);
+            const expectedResponse: Response = Response.json(
+                expectedResponseJson,
+                expectedResponseInit,
+            );
 
             const expectedRequest = {} satisfies Partial<BunRequest>;
             mockController.mockRejectedValue(new ZodError(expectedZodIssues));
             const decoreatedController = withErrorHandling(mockController);
 
             // Act
-            const actualResponse: Response = await decoreatedController(expectedRequest as unknown as BunRequest);
+            const actualResponse: Response = await decoreatedController(
+                expectedRequest as unknown as BunRequest,
+            );
             // Assert
             expect(mockController).toHaveBeenCalledWith(expectedRequest);
             expect(await actualResponse.json()).toEqual(expectedResponseJson);
@@ -153,20 +184,26 @@ describe('controller decorators', () => {
                 status: constants.HTTP_STATUS_BAD_REQUEST,
             };
 
-            const expectedResponse: Response = Response.json(expectedResponseJson, expectedResponseInit);
+            const expectedResponse: Response = Response.json(
+                expectedResponseJson,
+                expectedResponseInit,
+            );
 
             const expectedRequest = {} satisfies Partial<BunRequest>;
-            mockController.mockRejectedValue(new Bun.SQL.PostgresError(expectedErrorMessage, { code: expectedErrorCode }));
+            mockController.mockRejectedValue(
+                new Bun.SQL.PostgresError(expectedErrorMessage, { code: expectedErrorCode }),
+            );
             const decoreatedController = withErrorHandling(mockController);
 
             // Act
-            const actualResponse: Response = await decoreatedController(expectedRequest as unknown as BunRequest);
+            const actualResponse: Response = await decoreatedController(
+                expectedRequest as unknown as BunRequest,
+            );
             // Assert
             expect(mockController).toHaveBeenCalledWith(expectedRequest);
             expect(await actualResponse.json()).toEqual(expectedResponseJson);
             expect(actualResponse.headers.toJSON()).toEqual(expectedResponse.headers.toJSON());
             expect(actualResponse.status).toEqual(expectedResponse.status);
         });
-
     });
 });

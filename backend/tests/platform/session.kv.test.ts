@@ -27,10 +27,15 @@ describe('session', () => {
         const expectedUsername = 'user';
         const expectedUserId = '019c6c94-0fb1-7241-922f-b3eb297a5a2f';
         const expectedToken = 'random_value';
-        const [expectedUserSession, expectedUserSessionInsert] = createUserSessionFixture(expectedToken, expectedUserId, expectedUsername);
+        const [expectedUserSession, expectedUserSessionInsert] = createUserSessionFixture(
+            expectedToken,
+            expectedUserId,
+            expectedUsername,
+        );
         const sessionRepository = createSessionRepository({ kv });
         // Act
-        const actualUserSession: UserSession = await sessionRepository.createUserSession(expectedUserSessionInsert);
+        const actualUserSession: UserSession =
+            await sessionRepository.createUserSession(expectedUserSessionInsert);
         // Assert
         expect(actualUserSession).toEqual(expectedUserSession);
     });
@@ -53,11 +58,16 @@ describe('session', () => {
         const expectedUsername = 'user';
         const expectedToken = 'some_token';
         const expectedUserId = '019c6c94-0fb1-7241-922f-b3eb297a5a2f';
-        const [expectedUserSession, expectedUserSessionInsert] = createUserSessionFixture(expectedToken, expectedUserId, expectedUsername);
+        const [expectedUserSession, expectedUserSessionInsert] = createUserSessionFixture(
+            expectedToken,
+            expectedUserId,
+            expectedUsername,
+        );
         const sessionRepository = createSessionRepository({ kv });
         await sessionRepository.createUserSession(expectedUserSessionInsert);
         // Act
-        const actualUserSession: UserSession = await sessionRepository.getUserSession(expectedToken);
+        const actualUserSession: UserSession =
+            await sessionRepository.getUserSession(expectedToken);
         // Assert
         expect(actualUserSession).toEqual(expectedUserSession);
     });

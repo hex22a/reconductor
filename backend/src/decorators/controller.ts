@@ -1,11 +1,16 @@
-import type { BunRequest } from "bun";
-import { z, ZodError } from "zod";
-import { HEADERS, UNEXPECTED_ERROR_MESSAGE } from "../constants";
+import type { BunRequest } from 'bun';
+import { z, ZodError } from 'zod';
+import { HEADERS, UNEXPECTED_ERROR_MESSAGE } from '../constants';
 import { constants } from 'node:http2';
-import { DATABASE_ERROR_CODE, SYNTAX_ERROR_CODE, UNEXPECTED_ERROR_CODE, VALIDATION_ERROR_CODE } from "$/constants";
+import {
+    DATABASE_ERROR_CODE,
+    SYNTAX_ERROR_CODE,
+    UNEXPECTED_ERROR_CODE,
+    VALIDATION_ERROR_CODE,
+} from '$/constants';
 
 export function withErrorHandling(
-    controller: (req: BunRequest) => Promise<Response>
+    controller: (req: BunRequest) => Promise<Response>,
 ): (res: BunRequest) => Promise<Response> {
     return async function (req: BunRequest): Promise<Response> {
         try {
@@ -14,13 +19,16 @@ export function withErrorHandling(
         } catch (error) {
             if (error instanceof ZodError) {
                 const errorRespnse = z.flattenError(error);
-                return Response.json({
-                    code: VALIDATION_ERROR_CODE,
-                    error: errorRespnse,
-                }, {
-                    headers: HEADERS,
-                    status: constants.HTTP_STATUS_UNPROCESSABLE_ENTITY,
-                });
+                return Response.json(
+                    {
+                        code: VALIDATION_ERROR_CODE,
+                        error: errorRespnse,
+                    },
+                    {
+                        headers: HEADERS,
+                        status: constants.HTTP_STATUS_UNPROCESSABLE_ENTITY,
+                    },
+                );
             }
             if (error instanceof SyntaxError) {
                 return Response.json(

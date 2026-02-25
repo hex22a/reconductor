@@ -1,10 +1,10 @@
-import { USER_SESSION_PREFIX, USER_SESSION_TTL_SECONDS } from "../constants";
-import { SessionNotFoundError } from "../domain/errors/SessionNotFoundError";
-import type { UserSession, UserSessionInsert } from "../domain/session.entity";
-import type { KvClinent } from "./kv";
+import { USER_SESSION_PREFIX, USER_SESSION_TTL_SECONDS } from '../constants';
+import { SessionNotFoundError } from '../domain/errors/SessionNotFoundError';
+import type { UserSession, UserSessionInsert } from '../domain/session.entity';
+import type { KvClinent } from './kv';
 
 export type SessionRepositoryDeps = {
-    kv: KvClinent,
+    kv: KvClinent;
 };
 
 export type SessionRepository = {
@@ -28,6 +28,6 @@ export function createSessionRepository({ kv }: SessionRepositoryDeps): SessionR
                 throw new SessionNotFoundError();
             }
             return { userId: userSession.userId, username: userSession.username };
-        }
+        },
     };
 }

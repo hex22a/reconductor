@@ -1,5 +1,5 @@
-import type { ScanEntity, ScanInsert, ScanInsertSeed } from "@/src/domain/scan.entity";
-import { randomUUIDv7 } from "bun";
+import type { ScanEntity, ScanInsert, ScanInsertSeed } from '@/src/domain/scan.entity';
+import { randomUUIDv7 } from 'bun';
 
 export const expectedExistingScanId = '019c8a62-739f-73f1-99a8-e94a34bc31f3';
 export const expectedScanTarget = '192.168.1.0/24';

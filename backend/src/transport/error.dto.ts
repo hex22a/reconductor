@@ -12,6 +12,6 @@ type ErrorCode =
     | typeof SYNTAX_ERROR_CODE;
 
 export type ErrorResponse = {
-    code: ErrorCode,
-    error: string | object,
-}
+    code: ErrorCode;
+    error: string | object;
+};

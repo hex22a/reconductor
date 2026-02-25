@@ -1,7 +1,11 @@
 import type { BunRequest } from 'bun';
 import { describe, test, expect, mock, afterEach } from 'bun:test';
 import { HEADERS } from '../../constants';
-import { createRegisterController, type RegisterController, type RegisterControllerDeps } from './register';
+import {
+    createRegisterController,
+    type RegisterController,
+    type RegisterControllerDeps,
+} from './register';
 import type { UserDto } from '@/src/transport/user.dto';
 import { createUserFixture } from '@/tests/fixtures/users';
 import type { UserRepository } from '@/src/persistence/user.db';
@@ -28,10 +32,11 @@ describe('register', () => {
     test('createRegisterController', () => {
         // Arrange
         // Act
-        const actualRegisterController: RegisterController = createRegisterController(expectedRegisterControllerDeps);
+        const actualRegisterController: RegisterController = createRegisterController(
+            expectedRegisterControllerDeps,
+        );
         // Assert
         expect(actualRegisterController.post).toBeFunction();
-
     });
 
     test('register controller', async () => {
@@ -39,13 +44,18 @@ describe('register', () => {
         const expectedUsername = 'username';
         const expectedPassword = 'password';
         const expectedPasswordHash = 'password_hash';
-        const [expectedAddedUser, expectedUserInsert] = createUserFixture(expectedUsername, expectedPasswordHash);
+        const [expectedAddedUser, expectedUserInsert] = createUserFixture(
+            expectedUsername,
+            expectedPasswordHash,
+        );
         const expectedResponseJson: UserDto = {
             id: expectedAddedUser.id,
             username: expectedUsername,
             isActive: true,
         };
-        const expectedResponse: Response = Response.json(expectedResponseJson, { headers: HEADERS });
+        const expectedResponse: Response = Response.json(expectedResponseJson, {
+            headers: HEADERS,
+        });
         const expectedRequestJson = { username: expectedUsername, password: expectedPassword };
 
         const expectedRequest = {
@@ -55,10 +65,14 @@ describe('register', () => {
         mockHash.mockResolvedValue(expectedPasswordHash);
         mockAddUser.mockResolvedValue(expectedAddedUser);
 
-        const registerController: RegisterController = createRegisterController(expectedRegisterControllerDeps);
+        const registerController: RegisterController = createRegisterController(
+            expectedRegisterControllerDeps,
+        );
 
         // Act
-        const actualResponse: Response = await registerController.post(expectedRequest as unknown as BunRequest);
+        const actualResponse: Response = await registerController.post(
+            expectedRequest as unknown as BunRequest,
+        );
 
         // Assert
         expect(expectedRequest.json).toHaveBeenCalled();

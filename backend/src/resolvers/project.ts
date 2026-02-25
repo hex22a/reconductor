@@ -1,18 +1,15 @@
-import type { ProjectRepository } from "../persistence/project.db";
-import type { ProjectDto } from "../transport/project.dto";
+import type { ProjectRepository } from '../persistence/project.db';
+import type { ProjectDto } from '../transport/project.dto';
 
 type ProjectResolverArgs = {
-    id: string
+    id: string;
 };
 
 export type ProjectResolver = {
     Query: {
-        project: (
-            parent: unknown,
-            args: ProjectResolverArgs,
-        ) => Promise<ProjectDto>;
+        project: (parent: unknown, args: ProjectResolverArgs) => Promise<ProjectDto>;
         projects: () => Promise<void>;
-    }
+    };
 };
 
 export function createProjectResolver(projectRepository: ProjectRepository): ProjectResolver {
@@ -28,7 +25,7 @@ export function createProjectResolver(projectRepository: ProjectRepository): Pro
             },
             async projects() {
                 throw new Error('not implemented');
-            }
-        }
+            },
+        },
     };
-};
+}

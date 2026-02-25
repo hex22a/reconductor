@@ -1,16 +1,16 @@
-import { HEADERS, USER_SESSION_TTL_SECONDS, USER_SESSION_COOKIE_NAME } from "@/src/constants";
-import type { UserEntity } from "@/src/domain/user.entity";
-import type { SessionRepository } from "@/src/persistence/session.kv";
-import type { UserRepository } from "@/src/persistence/user.db";
-import { registerSchema } from "@/src/transport/user.schema";
-import type { BunRequest } from "bun";
+import { HEADERS, USER_SESSION_TTL_SECONDS, USER_SESSION_COOKIE_NAME } from '@/src/constants';
+import type { UserEntity } from '@/src/domain/user.entity';
+import type { SessionRepository } from '@/src/persistence/session.kv';
+import type { UserRepository } from '@/src/persistence/user.db';
+import { registerSchema } from '@/src/transport/user.schema';
+import type { BunRequest } from 'bun';
 import { constants } from 'node:http2';
 
 export type LoginControllerDeps = {
-    userRepository: UserRepository,
-    sessionRepository: SessionRepository,
-    verifyHash: (password: string, hash: string) => Promise<boolean>,
-    generateRandomToken: () => string,
+    userRepository: UserRepository;
+    sessionRepository: SessionRepository;
+    verifyHash: (password: string, hash: string) => Promise<boolean>;
+    generateRandomToken: () => string;
 };
 
 export type LoginController = {
@@ -36,7 +36,11 @@ export function createLoginController({
                 );
             }
             const token = generateRandomToken();
-            await sessionRepository.createUserSession({ token, userId: user.id, username: user.username });
+            await sessionRepository.createUserSession({
+                token,
+                userId: user.id,
+                username: user.username,
+            });
             req.cookies.set(USER_SESSION_COOKIE_NAME, token, {
                 maxAge: USER_SESSION_TTL_SECONDS,
                 httpOnly: true,

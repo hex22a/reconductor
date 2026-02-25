@@ -17,7 +17,7 @@ describe('register', async () => {
         const expectedMethod = 'POST';
         const expectedUrl = API_REGISTER_ENDPOINT_V1;
         const expectedRoute = {
-            [expectedUrl]: { [expectedMethod]: mockRegisterController.post }
+            [expectedUrl]: { [expectedMethod]: mockRegisterController.post },
         };
         const mockWithErrorHandling = mock((fn) => fn);
         // Act

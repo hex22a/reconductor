@@ -1,1 +1,1 @@
-export class ProjectNotFoundError extends Error { };
+export class ProjectNotFoundError extends Error {}

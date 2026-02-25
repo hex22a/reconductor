@@ -1,9 +1,9 @@
-import { ProjectNotFoundError } from "../domain/errors/ProjectNotFoundError";
-import type { ProjectEntity, ProjectInsert } from "../domain/project.entity";
-import type { SQL } from "./db";
+import { ProjectNotFoundError } from '../domain/errors/ProjectNotFoundError';
+import type { ProjectEntity, ProjectInsert } from '../domain/project.entity';
+import type { SQL } from './db';
 
 export type ProjectRepositoryDeps = {
-    sql: SQL,
+    sql: SQL;
 };
 
 export type ProjectRepository = {
@@ -40,4 +40,4 @@ export function createProjectRepository({ sql }: ProjectRepositoryDeps): Project
             return project;
         },
     };
-};
+}

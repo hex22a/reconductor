@@ -17,7 +17,7 @@ describe('graphql', () => {
         const expectedRoutes = {
             [GRAPHQL_ENDPOINT]: {
                 POST: mockGraphQlServer.fetch,
-            }
+            },
         };
         // Act
         const actualRoutes = createGraphQlRoutes();
