@@ -7,9 +7,9 @@ import { kv } from './persistence/kv';
 import { createLoginController } from './controllers/auth/login';
 import { createGenerateRandomToken } from './utils/random';
 import { createProjectRepository } from './persistence/project.db';
-import { createProjectResolver } from './resolvers/project';
+import { createProjectResolver } from './graphql/resolvers/project';
 import { createSchema, createYoga } from 'graphql-yoga';
-import { getGraphQlServerInstance } from './servers/graphql';
+import { getGraphQlServerInstance } from './graphql/server';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,

@@ -1,6 +1,6 @@
 import { GRAPHQL_ENDPOINT } from '../constants';
 import container from '../container';
-import type { GraphQlServerInstance } from '../servers/graphql';
+import type { GraphQlServerInstance } from '@/src/graphql/server';
 
 export function createGraphQlRoutes() {
     const graphQlServer: GraphQlServerInstance = container.resolve('graphQlServer');

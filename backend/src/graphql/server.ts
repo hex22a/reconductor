@@ -1,4 +1,4 @@
-import type { ProjectResolver } from '../resolvers/project';
+import type { ProjectResolver } from './resolvers/project';
 import type { GraphQLSchemaWithContext, YogaServerInstance } from 'graphql-yoga';
 
 const typeDefs = await Bun.file('../shared/schema.graphql').text();

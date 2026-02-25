@@ -1,11 +1,11 @@
 import { describe, expect, mock, test } from 'bun:test';
-import type { ProjectResolver } from '../resolvers/project';
+import type { ProjectResolver } from './resolvers/project';
 import type { GraphQLSchemaWithContext } from 'graphql-yoga';
 import {
     getGraphQlServerInstance,
     type GraphQlServerFactoryDeps,
     type GraphQlServerInstance,
-} from './graphql';
+} from './server';
 
 describe('graphql', () => {
     test('getGraphQlServerInstance', async () => {
