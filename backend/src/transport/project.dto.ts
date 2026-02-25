@@ -1,5 +1,5 @@
 export type ProjectDto = {
     id: string;
     name: string;
-    createdAt: Date;
+    created_at: Date;
 };

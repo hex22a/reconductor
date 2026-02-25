@@ -20,7 +20,7 @@ export function createProjectResolver(projectRepository: ProjectRepository): Pro
                 return {
                     id: project.id,
                     name: project.name,
-                    createdAt: project.created_at,
+                    created_at: project.created_at,
                 };
             },
             async projects() {

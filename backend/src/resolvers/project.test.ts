@@ -3,12 +3,9 @@ import { createProjectResolver, type ProjectResolver } from './project';
 import type { ProjectRepository } from '../persistence/project.db';
 import type { ProjectDto } from '../transport/project.dto';
 import { createProjectFixture } from '@/tests/fixtures/projects';
-import type { GraphQLResolveInfo } from 'graphql';
 
 describe('project', () => {
     const expectedParent = null;
-    const expectedContext = null;
-    const expectedInfo = {} satisfies Partial<GraphQLResolveInfo>;
     const mockCreateProject = mock();
     const mockGetProject = mock();
     const mockProjectRepository: ProjectRepository = {
@@ -43,7 +40,7 @@ describe('project', () => {
         const expectedProject: ProjectDto = {
             id: expectedProjectId,
             name: expectedProjectName,
-            createdAt: expect.any(Date),
+            created_at: expect.any(Date),
         };
         const [expectedProjectEntity] = createProjectFixture(
             expectedProjectName,
@@ -57,8 +54,6 @@ describe('project', () => {
         const actualProject: ProjectDto = await projectResolver.Query.project(
             expectedParent,
             expectedArgs,
-            expectedContext,
-            expectedInfo as unknown as GraphQLResolveInfo,
         );
         // Assert
         expect(actualProject).toEqual(expectedProject);
