@@ -5,6 +5,10 @@ type ProjectResolverArgs = {
     id: string;
 };
 
+export type ProjectResolverFactoryDeps = {
+    projectRepository: ProjectRepository;
+};
+
 export type ProjectResolver = {
     Query: {
         project: (parent: unknown, args: ProjectResolverArgs) => Promise<ProjectDto>;
@@ -12,7 +16,9 @@ export type ProjectResolver = {
     };
 };
 
-export function createProjectResolver(projectRepository: ProjectRepository): ProjectResolver {
+export function createProjectResolver({
+    projectRepository,
+}: ProjectResolverFacrotyDeps): ProjectResolver {
     return {
         Query: {
             async project(_, args) {

@@ -32,3 +32,6 @@ export const USER_SESSION_TTL_SECONDS = 15 * 60;
 export const USER_SESSION_PREFIX = 'user_session';
 
 export const TOKEN_RANDOM_BYTES_ARRAY_LENGTH = 32;
+
+export const GRAPHQL_UNAUTHORIZED_ERROR_MESSAGE = 'Unauthorized';
+export const GRAPHQL_ERROR_EXTENSION_CODE = 'FORBIDDEN';

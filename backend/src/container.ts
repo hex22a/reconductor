@@ -10,6 +10,7 @@ import { createProjectRepository } from './persistence/project.db';
 import { createProjectResolver } from './graphql/resolvers/project';
 import { createSchema, createYoga } from 'graphql-yoga';
 import { getGraphQlServerInstance } from './graphql/server';
+import { createGraphQlContext } from './graphql/context';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -21,7 +22,7 @@ container.register({
     loginController: asFunction(createLoginController),
     projectResolver: asFunction(createProjectResolver).singleton(),
     userRepository: asFunction(createUserRepository),
-    sessionRepository: asFunction(createSessionRepository),
+    sessionRepository: asFunction(createSessionRepository).singleton(),
     projectRepository: asFunction(createProjectRepository).singleton(),
     generateRandomToken: asFunction(createGenerateRandomToken),
     cryptoProvider: asValue(crypto),
@@ -31,6 +32,7 @@ container.register({
     kv: asValue(kv),
     createGraphQlServer: asValue(createYoga),
     createGraphQlSchema: asValue(createSchema),
+    graphQlContextResolver: asFunction(createGraphQlContext).singleton(),
     graphQlServer: asFunction(getGraphQlServerInstance).singleton(),
 });
 

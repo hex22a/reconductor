@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, mock, test } from 'bun:test';
-import { createProjectResolver, type ProjectResolver } from './project';
+import {
+    createProjectResolver,
+    type ProjectResolver,
+    type ProjectResolverFactoryDeps,
+} from './project';
 import type { ProjectRepository } from '../persistence/project.db';
 import type { ProjectDto } from '../transport/project.dto';
 import { createProjectFixture } from '@/tests/fixtures/projects';
@@ -11,6 +15,9 @@ describe('project', () => {
     const mockProjectRepository: ProjectRepository = {
         createProject: mockCreateProject,
         getProject: mockGetProject,
+    };
+    const expectedProjectResolverFactoryDeps: ProjectResolverFactoryDeps = {
+        projectRepository: mockProjectRepository,
     };
 
     afterEach(() => {
@@ -27,7 +34,9 @@ describe('project', () => {
             },
         };
         // Act
-        const actualProjectResolver: ProjectResolver = createProjectResolver(mockProjectRepository);
+        const actualProjectResolver: ProjectResolver = createProjectResolver(
+            expectedProjectResolverFactoryDeps,
+        );
         // Assert
         expect(actualProjectResolver).toEqual(expectedProjectResolver);
     });
@@ -49,7 +58,9 @@ describe('project', () => {
         );
         const expectedArgs = { id: expectedProjectId };
         mockGetProject.mockResolvedValue(expectedProjectEntity);
-        const projectResolver: ProjectResolver = createProjectResolver(mockProjectRepository);
+        const projectResolver: ProjectResolver = createProjectResolver(
+            expectedProjectResolverFactoryDeps,
+        );
         // Act
         const actualProject: ProjectDto = await projectResolver.Query.project(
             expectedParent,

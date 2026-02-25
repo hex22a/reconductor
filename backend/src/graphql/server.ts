@@ -1,5 +1,7 @@
+import type { BunRequest } from 'bun';
 import type { ProjectResolver } from './resolvers/project';
 import type { GraphQLSchemaWithContext, YogaServerInstance } from 'graphql-yoga';
+import type { GraphQlContext } from '../transport/graphql.context';
 
 const typeDefs = await Bun.file('../shared/schema.graphql').text();
 
@@ -8,8 +10,12 @@ export type GraphQlUserContext = {
 };
 
 export type GraphQlServerContext = {
-    request: Request;
+    request: BunRequest;
 };
+
+export type GraphQlContextResolver = (
+    serverContext: GraphQlServerContext,
+) => Promise<GraphQlContext>;
 
 export type GraphQlSchemaFactory = (options: {
     typeDefs: string;
@@ -21,6 +27,7 @@ export type GraphQlServerFactory<
     TUserCtx extends Record<string, unknown>,
 > = (options: {
     schema: GraphQLSchemaWithContext<never>;
+    context: GraphQlContextResolver;
 }) => YogaServerInstance<TServerCtx, TUserCtx>;
 
 export type GraphQlServerInstance = YogaServerInstance<GraphQlServerContext, GraphQlUserContext>;
@@ -28,12 +35,14 @@ export type GraphQlServerInstance = YogaServerInstance<GraphQlServerContext, Gra
 export type GraphQlServerFactoryDeps = {
     createGraphQlServer: GraphQlServerFactory<GraphQlServerContext, GraphQlUserContext>;
     createGraphQlSchema: GraphQlSchemaFactory;
+    graphQlContextResolver: GraphQlContextResolver;
     projectResolver: ProjectResolver;
 };
 
 export function getGraphQlServerInstance({
     createGraphQlServer,
     createGraphQlSchema,
+    graphQlContextResolver,
     projectResolver,
 }: GraphQlServerFactoryDeps) {
     return createGraphQlServer({
@@ -41,5 +50,6 @@ export function getGraphQlServerInstance({
             typeDefs,
             resolvers: projectResolver,
         }),
+        context: graphQlContextResolver,
     });
 }

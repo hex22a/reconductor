@@ -14,6 +14,7 @@ describe('graphql', () => {
         const expectedTypeDefs = await Bun.file('../shared/schema.graphql').text();
         const mockCreateGraphQlServer = mock();
         const mockCreateGraphQlSchema = mock();
+        const mockGraphQlContextResolver = mock();
         const mockProjectResolver: ProjectResolver = {
             Query: {
                 project: mock(),
@@ -27,12 +28,14 @@ describe('graphql', () => {
         const expectedSchema = {} satisfies Partial<GraphQLSchemaWithContext<never>>;
         const expectedServerOptions = {
             schema: expectedSchema,
+            context: mockGraphQlContextResolver,
         };
         mockCreateGraphQlSchema.mockReturnValue(expectedSchema);
         mockCreateGraphQlServer.mockReturnValue(expectedGraphQlServerInstance);
         const expectedGraphQlServerFactoryDeps: GraphQlServerFactoryDeps = {
             createGraphQlServer: mockCreateGraphQlServer,
             createGraphQlSchema: mockCreateGraphQlSchema,
+            graphQlContextResolver: mockGraphQlContextResolver,
             projectResolver: mockProjectResolver,
         };
         // Act
