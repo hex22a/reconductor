@@ -20,6 +20,9 @@ describe('graphql', () => {
                 project: mock(),
                 projects: mock(),
             },
+            Mutation: {
+                createProject: mock(),
+            },
         };
         const expectedSchemaDefinition = {
             typeDefs: expectedTypeDefs,
