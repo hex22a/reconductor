@@ -35,3 +35,5 @@ export const TOKEN_RANDOM_BYTES_ARRAY_LENGTH = 32;
 
 export const GRAPHQL_UNAUTHORIZED_ERROR_MESSAGE = 'Unauthorized';
 export const GRAPHQL_ERROR_EXTENSION_CODE = 'FORBIDDEN';
+
+export const UNAUTHORIZED_ERROR_MESSAGE = 'Unauthorized';

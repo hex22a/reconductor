@@ -41,10 +41,10 @@ describe('controller decorators', () => {
 
             const expectedRequest = {} satisfies Partial<BunRequest>;
             mockController.mockResolvedValue(expectedResponse);
-            const decoreatedController = withErrorHandling(mockController);
+            const decoratedController = withErrorHandling(mockController);
 
             // Act
-            const actualResponse: Response = await decoreatedController(
+            const actualResponse: Response = await decoratedController(
                 expectedRequest as unknown as BunRequest,
             );
 
@@ -73,10 +73,10 @@ describe('controller decorators', () => {
             const expectedRequest = {} satisfies Partial<BunRequest>;
 
             mockController.mockRejectedValue(Symbol('UNEXPECTED'));
-            const decoreatedController = withErrorHandling(mockController);
+            const decoratedController = withErrorHandling(mockController);
 
             // Act
-            const actualResponse: Response = await decoreatedController(
+            const actualResponse: Response = await decoratedController(
                 expectedRequest as unknown as BunRequest,
             );
 
@@ -104,10 +104,10 @@ describe('controller decorators', () => {
 
             const expectedRequest = {} satisfies Partial<BunRequest>;
             mockController.mockRejectedValue(new SyntaxError(UNEXPECTED_END_OF_JSON_ERROR_MESSAGE));
-            const decoreatedController = withErrorHandling(mockController);
+            const decoratedController = withErrorHandling(mockController);
 
             // Act
-            const actualResponse: Response = await decoreatedController(
+            const actualResponse: Response = await decoratedController(
                 expectedRequest as unknown as BunRequest,
             );
 
@@ -158,10 +158,10 @@ describe('controller decorators', () => {
 
             const expectedRequest = {} satisfies Partial<BunRequest>;
             mockController.mockRejectedValue(new ZodError(expectedZodIssues));
-            const decoreatedController = withErrorHandling(mockController);
+            const decoratedController = withErrorHandling(mockController);
 
             // Act
-            const actualResponse: Response = await decoreatedController(
+            const actualResponse: Response = await decoratedController(
                 expectedRequest as unknown as BunRequest,
             );
             // Assert
@@ -193,10 +193,10 @@ describe('controller decorators', () => {
             mockController.mockRejectedValue(
                 new Bun.SQL.PostgresError(expectedErrorMessage, { code: expectedErrorCode }),
             );
-            const decoreatedController = withErrorHandling(mockController);
+            const decoratedController = withErrorHandling(mockController);
 
             // Act
-            const actualResponse: Response = await decoreatedController(
+            const actualResponse: Response = await decoratedController(
                 expectedRequest as unknown as BunRequest,
             );
             // Assert

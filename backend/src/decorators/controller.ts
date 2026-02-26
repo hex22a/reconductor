@@ -42,6 +42,7 @@ export function withErrorHandling(
                     { headers: HEADERS, status: constants.HTTP_STATUS_BAD_REQUEST },
                 );
             }
+            console.error(error);
             return Response.json(
                 { code: UNEXPECTED_ERROR_CODE, error: UNEXPECTED_ERROR_MESSAGE },
                 { headers: HEADERS, status: constants.HTTP_STATUS_INTERNAL_SERVER_ERROR },

@@ -11,6 +11,7 @@ import { createProjectResolver } from './graphql/resolvers/project';
 import { createSchema, createYoga } from 'graphql-yoga';
 import { getGraphQlServerInstance } from './graphql/server';
 import { createGraphQlContext } from './graphql/context';
+import { createAuthDecorators } from './decorators/auth';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -34,6 +35,7 @@ container.register({
     createGraphQlSchema: asValue(createSchema),
     graphQlContextResolver: asFunction(createGraphQlContext).singleton(),
     graphQlServer: asFunction(getGraphQlServerInstance).singleton(),
+    authDecorators: asFunction(createAuthDecorators).singleton(),
 });
 
 export default container;
