@@ -1,13 +1,13 @@
 import type { BunRequest } from 'bun';
 import { afterEach, describe, expect, mock, test } from 'bun:test';
 import {
-    HEADERS,
+    CORS_HEADERS,
     UNEXPECTED_END_OF_JSON_ERROR_MESSAGE,
     UNEXPECTED_ERROR_MESSAGE,
     Z_PASSWORD_STRING_ERROR_MESSAGE,
     Z_USERNAME_STRING_ERROR_MESSAGE,
 } from '../constants';
-import { withErrorHandling } from './controller';
+import { withCors, withErrorHandling, type RequestHandler } from './controller';
 import type { ErrorResponse } from '../transport/error.dto';
 import { constants } from 'node:http2';
 import { ZodError } from 'zod';
@@ -21,23 +21,16 @@ import {
 } from '$/constants';
 
 describe('controller decorators', () => {
+    const mockController = mock();
+
+    afterEach(() => {
+        mockController.mockReset();
+    });
     describe('withErrorHandling', () => {
-        const mockController = mock();
-
-        afterEach(() => {
-            mockController.mockReset();
-        });
-
         test('no errors', async () => {
             // Arrange
             const expectedResponseJson = { respose: 'some valid response' };
-            const expectedResponseInit: ResponseInit = {
-                headers: HEADERS,
-            };
-            const expectedResponse: Response = Response.json(
-                expectedResponseJson,
-                expectedResponseInit,
-            );
+            const expectedResponse: Response = Response.json(expectedResponseJson);
 
             const expectedRequest = {} satisfies Partial<BunRequest>;
             mockController.mockResolvedValue(expectedResponse);
@@ -62,7 +55,6 @@ describe('controller decorators', () => {
                 error: UNEXPECTED_ERROR_MESSAGE,
             };
             const expectedResponseInit: ResponseInit = {
-                headers: HEADERS,
                 status: constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
             };
             const expectedResponse: Response = Response.json(
@@ -94,7 +86,6 @@ describe('controller decorators', () => {
                 error: UNEXPECTED_END_OF_JSON_ERROR_MESSAGE,
             };
             const expectedResponseInit: ResponseInit = {
-                headers: HEADERS,
                 status: constants.HTTP_STATUS_BAD_REQUEST,
             };
             const expectedResponse: Response = Response.json(
@@ -147,7 +138,6 @@ describe('controller decorators', () => {
                 },
             };
             const expectedResponseInit: ResponseInit = {
-                headers: HEADERS,
                 status: constants.HTTP_STATUS_UNPROCESSABLE_ENTITY,
             };
 
@@ -180,7 +170,6 @@ describe('controller decorators', () => {
                 error: expectedErrorMessage,
             };
             const expectedResponseInit: ResponseInit = {
-                headers: HEADERS,
                 status: constants.HTTP_STATUS_BAD_REQUEST,
             };
 
@@ -205,5 +194,37 @@ describe('controller decorators', () => {
             expect(actualResponse.headers.toJSON()).toEqual(expectedResponse.headers.toJSON());
             expect(actualResponse.status).toEqual(expectedResponse.status);
         });
+    });
+
+    test('withCors', async () => {
+        // Arrange
+        const expectedResponseJson = { respose: 'some valid response' };
+        const expectedCustomHeaders = {
+            'x-recon-custom-header': 'custom',
+        };
+        const expectedHeadersJson = {
+            'content-type': 'application/json;charset=utf-8',
+            ...expectedCustomHeaders,
+            ...CORS_HEADERS,
+        };
+        const expectedResponseInit: ResponseInit = {
+            headers: expectedCustomHeaders,
+        };
+        const expectedResponse: Response = Response.json(
+            expectedResponseJson,
+            expectedResponseInit,
+        );
+        const expectedRequest = {} satisfies Partial<BunRequest>;
+        mockController.mockResolvedValue(expectedResponse);
+        const decoratedController: RequestHandler = withCors(mockController);
+        // Act
+        const actualResponse: Response = await decoratedController(
+            expectedRequest as unknown as BunRequest,
+        );
+        // Assert
+        expect(mockController).toHaveBeenCalledWith(expectedRequest);
+        expect(await actualResponse.json()).toEqual(expectedResponseJson);
+        expect(actualResponse.headers.toJSON()).toEqual(expectedHeadersJson);
+        expect(actualResponse.status).toEqual(expectedResponse.status);
     });
 });

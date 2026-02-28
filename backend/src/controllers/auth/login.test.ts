@@ -3,7 +3,7 @@ import { afterEach, describe, expect, mock, test } from 'bun:test';
 import { createLoginController, type LoginController, type LoginControllerDeps } from './login';
 import type { SessionRepository } from '@/src/persistence/session.kv';
 import type { BunRequest, CookieInit, CookieMap } from 'bun';
-import { HEADERS, USER_SESSION_TTL_SECONDS, USER_SESSION_COOKIE_NAME } from '@/src/constants';
+import { USER_SESSION_TTL_SECONDS, USER_SESSION_COOKIE_NAME } from '@/src/constants';
 import { createUserFixture } from '@/tests/fixtures/users';
 import type { UserSessionInsert } from '@/src/domain/session.entity';
 import { constants } from 'node:http2';
@@ -67,9 +67,7 @@ describe('login', () => {
                 expectedUsername,
                 expectedHashedPassword,
             );
-            const expectedResponse: Response = Response.json(expectedResponseJson, {
-                headers: HEADERS,
-            });
+            const expectedResponse: Response = Response.json(expectedResponseJson);
             const expectedRequestJson = { username: expectedUsername, password: expectedPassword };
             const expectedRequest = {
                 json: mock().mockResolvedValue(expectedRequestJson),
@@ -124,7 +122,6 @@ describe('login', () => {
                 expectedHashedPassword,
             );
             const expectedResponse: Response = Response.json(expectedResponseJson, {
-                headers: HEADERS,
                 status: constants.HTTP_STATUS_UNAUTHORIZED,
             });
             const expectedRequestJson = { username: expectedUsername, password: expectedPassword };

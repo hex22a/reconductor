@@ -1,9 +1,8 @@
-import type { BunRequest, MaybePromise } from 'bun';
+import type { BunRequest } from 'bun';
 import { constants } from 'node:http2';
 import type { SessionRepository } from '../persistence/session.kv';
-import { HEADERS, UNAUTHORIZED_ERROR_MESSAGE, USER_SESSION_COOKIE_NAME } from '../constants';
-
-type RequestHandler = (req: BunRequest) => MaybePromise<Response>;
+import { CORS_HEADERS, UNAUTHORIZED_ERROR_MESSAGE, USER_SESSION_COOKIE_NAME } from '../constants';
+import type { RequestHandler } from './controller';
 
 export type AuthDecorators = {
     withAuth: (handler: RequestHandler) => RequestHandler;
@@ -23,7 +22,7 @@ export function createAuthDecorators({
                 if (!token) {
                     return Response.json(
                         { error: UNAUTHORIZED_ERROR_MESSAGE },
-                        { headers: HEADERS, status: constants.HTTP_STATUS_UNAUTHORIZED },
+                        { headers: CORS_HEADERS, status: constants.HTTP_STATUS_UNAUTHORIZED },
                     );
                 }
                 try {
@@ -32,7 +31,7 @@ export function createAuthDecorators({
                 } catch {
                     return Response.json(
                         { error: UNAUTHORIZED_ERROR_MESSAGE },
-                        { headers: HEADERS, status: constants.HTTP_STATUS_UNAUTHORIZED },
+                        { headers: CORS_HEADERS, status: constants.HTTP_STATUS_UNAUTHORIZED },
                     );
                 }
             };

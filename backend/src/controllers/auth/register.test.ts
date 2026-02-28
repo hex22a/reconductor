@@ -1,6 +1,5 @@
 import type { BunRequest } from 'bun';
 import { describe, test, expect, mock, afterEach } from 'bun:test';
-import { HEADERS } from '../../constants';
 import {
     createRegisterController,
     type RegisterController,
@@ -53,9 +52,7 @@ describe('register', () => {
             username: expectedUsername,
             isActive: true,
         };
-        const expectedResponse: Response = Response.json(expectedResponseJson, {
-            headers: HEADERS,
-        });
+        const expectedResponse: Response = Response.json(expectedResponseJson);
         const expectedRequestJson = { username: expectedUsername, password: expectedPassword };
 
         const expectedRequest = {

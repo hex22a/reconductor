@@ -4,10 +4,15 @@ export const DASHBOARD_URL: string =
     (process.env.NODE_ENV === 'production' ? process.env.DASHBOARD_URL : DEFAULT_DASHBOARD_URL) ||
     DEFAULT_DASHBOARD_URL;
 
-export const HEADERS = {
-    'Access-Control-Allow-Origin': DASHBOARD_URL,
-    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+export const ACCESS_CONTROL_ALLOW_ORIGIN_HEADER = 'access-control-allow-origin';
+export const ACCESS_CONTROL_ALLOW_METHODS_HEADER = 'access-control-allow-methods';
+export const ACCESS_CONTROL_ALLOW_HEADERS_HEADER = 'access-control-allow-headers';
+export const CORS_ALLOWED_METHODS = 'GET,POST,OPTIONS';
+export const CORS_ALLOWED_HEADERS = 'Content-Type';
+export const CORS_HEADERS = {
+    [ACCESS_CONTROL_ALLOW_ORIGIN_HEADER]: DASHBOARD_URL,
+    [ACCESS_CONTROL_ALLOW_METHODS_HEADER]: CORS_ALLOWED_METHODS,
+    [ACCESS_CONTROL_ALLOW_HEADERS_HEADER]: CORS_ALLOWED_HEADERS,
 };
 
 export const API_REGISTER_ENDPOINT_V1 = '/api/v1/register';

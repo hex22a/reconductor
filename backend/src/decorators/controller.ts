@@ -1,6 +1,14 @@
-import type { BunRequest } from 'bun';
+import type { BunRequest, MaybePromise } from 'bun';
 import { z, ZodError } from 'zod';
-import { HEADERS, UNEXPECTED_ERROR_MESSAGE } from '../constants';
+import {
+    ACCESS_CONTROL_ALLOW_HEADERS_HEADER,
+    ACCESS_CONTROL_ALLOW_METHODS_HEADER,
+    ACCESS_CONTROL_ALLOW_ORIGIN_HEADER,
+    CORS_ALLOWED_HEADERS,
+    CORS_ALLOWED_METHODS,
+    DASHBOARD_URL,
+    UNEXPECTED_ERROR_MESSAGE,
+} from '../constants';
 import { constants } from 'node:http2';
 import {
     DATABASE_ERROR_CODE,
@@ -9,9 +17,9 @@ import {
     VALIDATION_ERROR_CODE,
 } from '$/constants';
 
-export function withErrorHandling(
-    controller: (req: BunRequest) => Promise<Response>,
-): (res: BunRequest) => Promise<Response> {
+export type RequestHandler = (req: BunRequest) => MaybePromise<Response>;
+
+export function withErrorHandling(controller: RequestHandler): RequestHandler {
     return async function (req: BunRequest): Promise<Response> {
         try {
             const response: Response = await controller(req);
@@ -25,7 +33,6 @@ export function withErrorHandling(
                         error: errorRespnse,
                     },
                     {
-                        headers: HEADERS,
                         status: constants.HTTP_STATUS_UNPROCESSABLE_ENTITY,
                     },
                 );
@@ -33,22 +40,34 @@ export function withErrorHandling(
             if (error instanceof SyntaxError) {
                 return Response.json(
                     { code: SYNTAX_ERROR_CODE, error: error.message },
-                    { headers: HEADERS, status: constants.HTTP_STATUS_BAD_REQUEST },
+                    { status: constants.HTTP_STATUS_BAD_REQUEST },
                 );
             }
             if (error instanceof Bun.SQL.PostgresError) {
                 return Response.json(
                     { code: DATABASE_ERROR_CODE, error: error.message },
-                    { headers: HEADERS, status: constants.HTTP_STATUS_BAD_REQUEST },
+                    { status: constants.HTTP_STATUS_BAD_REQUEST },
                 );
             }
             console.error(error);
             return Response.json(
                 { code: UNEXPECTED_ERROR_CODE, error: UNEXPECTED_ERROR_MESSAGE },
-                { headers: HEADERS, status: constants.HTTP_STATUS_INTERNAL_SERVER_ERROR },
+                { status: constants.HTTP_STATUS_INTERNAL_SERVER_ERROR },
             );
         }
     };
 }
 
 export type WithErrorHandlingDecorator = typeof withErrorHandling;
+
+export function withCors(controller: RequestHandler): RequestHandler {
+    return async function (req: BunRequest): Promise<Response> {
+        const response: Response = await controller(req);
+        response.headers.append(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, DASHBOARD_URL);
+        response.headers.append(ACCESS_CONTROL_ALLOW_METHODS_HEADER, CORS_ALLOWED_METHODS);
+        response.headers.append(ACCESS_CONTROL_ALLOW_HEADERS_HEADER, CORS_ALLOWED_HEADERS);
+        return response;
+    };
+}
+
+export type WithCorsDecorator = typeof withCors;

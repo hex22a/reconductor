@@ -1,5 +1,4 @@
 import type { BunRequest } from 'bun';
-import { HEADERS } from '../../constants';
 import type { UserRepository } from '@/src/persistence/user.db';
 import type { RegisterUserDto, UserDto } from '@/src/transport/user.dto';
 import { registerSchema } from '@/src/transport/user.schema';
@@ -32,7 +31,7 @@ export function createRegisterController({
                 username,
                 isActive: userEntity.is_active,
             };
-            return Response.json(userResponse, { headers: HEADERS });
+            return Response.json(userResponse);
         },
     };
 }

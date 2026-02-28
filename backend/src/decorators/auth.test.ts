@@ -3,7 +3,7 @@ import { constants } from 'node:http2';
 import type { BunRequest, CookieMap } from 'bun';
 import type { SessionRepository } from '../persistence/session.kv';
 import { createAuthDecorators, type AuthDecorators, type AuthDecoratorsFactoryDeps } from './auth';
-import { HEADERS, UNAUTHORIZED_ERROR_MESSAGE, USER_SESSION_COOKIE_NAME } from '../constants';
+import { CORS_HEADERS, UNAUTHORIZED_ERROR_MESSAGE, USER_SESSION_COOKIE_NAME } from '../constants';
 import type { UserSession } from '../domain/session.entity';
 import { SessionNotFoundError } from '../domain/errors/SessionNotFoundError';
 
@@ -55,7 +55,7 @@ describe('auth', () => {
             };
             const expectedResponseJson = { respose: 'some valid response' };
             const expectedResponseInit: ResponseInit = {
-                headers: HEADERS,
+                headers: CORS_HEADERS,
             };
             const expectedResponse: Response = Response.json(
                 expectedResponseJson,
@@ -84,7 +84,7 @@ describe('auth', () => {
             // Arrange
             const expectedResponseJson = { error: UNAUTHORIZED_ERROR_MESSAGE };
             const expectedResponseInit: ResponseInit = {
-                headers: HEADERS,
+                headers: CORS_HEADERS,
                 status: constants.HTTP_STATUS_UNAUTHORIZED,
             };
             const expectedResponse: Response = Response.json(
@@ -111,7 +111,7 @@ describe('auth', () => {
             const expectedToken = 'token';
             const expectedResponseJson = { error: UNAUTHORIZED_ERROR_MESSAGE };
             const expectedResponseInit: ResponseInit = {
-                headers: HEADERS,
+                headers: CORS_HEADERS,
                 status: constants.HTTP_STATUS_UNAUTHORIZED,
             };
             const expectedResponse: Response = Response.json(

@@ -1,4 +1,4 @@
-import { HEADERS, USER_SESSION_TTL_SECONDS, USER_SESSION_COOKIE_NAME } from '@/src/constants';
+import { USER_SESSION_TTL_SECONDS, USER_SESSION_COOKIE_NAME } from '@/src/constants';
 import type { UserEntity } from '@/src/domain/user.entity';
 import type { SessionRepository } from '@/src/persistence/session.kv';
 import type { UserRepository } from '@/src/persistence/user.db';
@@ -30,10 +30,7 @@ export function createLoginController({
             const user: UserEntity = await userRepository.getUserByUsername(username);
             const passwordsMatch = await verifyHash(password, user.password_hash);
             if (!passwordsMatch) {
-                return Response.json(
-                    { ok: false },
-                    { headers: HEADERS, status: constants.HTTP_STATUS_UNAUTHORIZED },
-                );
+                return Response.json({ ok: false }, { status: constants.HTTP_STATUS_UNAUTHORIZED });
             }
             const token = generateRandomToken();
             await sessionRepository.createUserSession({
@@ -47,7 +44,7 @@ export function createLoginController({
                 secure: true,
                 path: '/',
             });
-            return Response.json({ ok: true }, { headers: HEADERS });
+            return Response.json({ ok: true });
         },
     };
 }

@@ -12,6 +12,8 @@ import { createSchema, createYoga } from 'graphql-yoga';
 import { getGraphQlServerInstance } from './graphql/server';
 import { createGraphQlContext } from './graphql/context';
 import { createAuthDecorators } from './decorators/auth';
+import { withCors, withErrorHandling } from './decorators/controller';
+import { preflight } from './controllers/preflight';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -19,6 +21,7 @@ const container = createContainer({
 });
 
 container.register({
+    preflightController: asValue(preflight),
     registerController: asFunction(createRegisterController),
     loginController: asFunction(createLoginController),
     projectResolver: asFunction(createProjectResolver).singleton(),
@@ -36,6 +39,8 @@ container.register({
     graphQlContextResolver: asFunction(createGraphQlContext).singleton(),
     graphQlServer: asFunction(getGraphQlServerInstance).singleton(),
     authDecorators: asFunction(createAuthDecorators).singleton(),
+    withErrorHandling: asValue(withErrorHandling),
+    withCors: asValue(withCors),
 });
 
 export default container;
