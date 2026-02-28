@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:18
+    image: postgres:18-alpine
     environment:
       POSTGRES_USER: reconductor
       POSTGRES_DB: reconductor_test

@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:18
+    image: postgres:18-alpine
     environment:
       POSTGRES_USER: reconductor
       POSTGRES_DB: reconductor
@@ -33,7 +33,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      DASHBOARD_URL: http://localhost:5173
+      DASHBOARD_URL: ${DASHBOARD_URL}
       DATABASE_URL: postgres://reconductor:reconductor@db:5432/reconductor
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
       NODE_ENV: production
@@ -41,5 +41,11 @@ services:
       - 4000:4000
     command: sh -c "./migration && ./server"
 
+  dashboard:
+    build: ./dashboard
+    depends_on:
+      - backend
+    ports:
+      - 3000:80
 
 
