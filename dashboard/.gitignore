@@ -23,7 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 
-.env
+.env*
+!.env.example
+!.env.test.example
 
 # React Router
 /.react-router/
