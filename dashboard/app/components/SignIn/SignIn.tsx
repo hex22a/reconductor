@@ -1,8 +1,28 @@
-import { Form } from 'react-router';
+import type React from 'react';
+import { API_LOGIN_URL } from '~/constants';
 
 export function SignIn() {
+  async function handleSubmit(e: React.SubmitEvent) {
+    e.preventDefault();
+    const target = e.currentTarget as HTMLFormElement;
+    const formData = new FormData(target);
+    const username = formData.get('username');
+    const password = formData.get('password');
+    const res = await fetch(API_LOGIN_URL, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    });
+    console.log(res);
+  }
   return (
-    <Form className="w-150 flex flex-col gap-3 border border-white rounded-xl p-3">
+    <form
+      onSubmit={handleSubmit}
+      className="w-150 flex flex-col gap-3 border border-white rounded-xl p-3"
+    >
       <h1 className="font-special">Sign in</h1>
       <label htmlFor="username">Username:</label>
       <input className="border-b border-white p-2" id="username" name="username" type="text" />
@@ -14,6 +34,6 @@ export function SignIn() {
       >
         Sign in
       </button>
-    </Form>
+    </form>
   );
 }

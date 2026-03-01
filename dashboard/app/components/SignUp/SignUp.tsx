@@ -1,4 +1,5 @@
 import type React from 'react';
+import { API_REGISTER_URL } from '~/constants';
 
 export function SignUp() {
   async function handleSubmit(e: React.SubmitEvent) {
@@ -7,7 +8,7 @@ export function SignUp() {
     const formData = new FormData(target);
     const username = formData.get('username');
     const password = formData.get('password');
-    const res = await fetch('http://localhost:4000/api/v1/register', {
+    const res = await fetch(API_REGISTER_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

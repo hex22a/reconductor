@@ -1,9 +1,11 @@
 import type { BunRequest, MaybePromise } from 'bun';
 import { z, ZodError } from 'zod';
 import {
+    ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER,
     ACCESS_CONTROL_ALLOW_HEADERS_HEADER,
     ACCESS_CONTROL_ALLOW_METHODS_HEADER,
     ACCESS_CONTROL_ALLOW_ORIGIN_HEADER,
+    CORS_ALLOW_CREDENTIALS,
     CORS_ALLOWED_HEADERS,
     CORS_ALLOWED_METHODS,
     DASHBOARD_URL,
@@ -66,6 +68,7 @@ export function withCors(controller: RequestHandler): RequestHandler {
         response.headers.append(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, DASHBOARD_URL);
         response.headers.append(ACCESS_CONTROL_ALLOW_METHODS_HEADER, CORS_ALLOWED_METHODS);
         response.headers.append(ACCESS_CONTROL_ALLOW_HEADERS_HEADER, CORS_ALLOWED_HEADERS);
+        response.headers.append(ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER, CORS_ALLOW_CREDENTIALS);
         return response;
     };
 }

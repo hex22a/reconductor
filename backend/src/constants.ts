@@ -7,12 +7,15 @@ export const DASHBOARD_URL: string =
 export const ACCESS_CONTROL_ALLOW_ORIGIN_HEADER = 'access-control-allow-origin';
 export const ACCESS_CONTROL_ALLOW_METHODS_HEADER = 'access-control-allow-methods';
 export const ACCESS_CONTROL_ALLOW_HEADERS_HEADER = 'access-control-allow-headers';
+export const ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER = 'access-control-allow-credentials';
 export const CORS_ALLOWED_METHODS = 'GET,POST,OPTIONS';
 export const CORS_ALLOWED_HEADERS = 'Content-Type';
+export const CORS_ALLOW_CREDENTIALS = 'true';
 export const CORS_HEADERS = {
     [ACCESS_CONTROL_ALLOW_ORIGIN_HEADER]: DASHBOARD_URL,
     [ACCESS_CONTROL_ALLOW_METHODS_HEADER]: CORS_ALLOWED_METHODS,
     [ACCESS_CONTROL_ALLOW_HEADERS_HEADER]: CORS_ALLOWED_HEADERS,
+    [ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER]: CORS_ALLOW_CREDENTIALS,
 };
 
 export const API_REGISTER_ENDPOINT_V1 = '/api/v1/register';
