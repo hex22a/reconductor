@@ -9,6 +9,7 @@ import {
     CORS_ALLOWED_HEADERS,
     CORS_ALLOWED_METHODS,
     DASHBOARD_URL,
+    DATABASE_ERROR_MESSAGE,
     UNEXPECTED_ERROR_MESSAGE,
 } from '../constants';
 import { constants } from 'node:http2';
@@ -46,9 +47,10 @@ export function withErrorHandling(controller: RequestHandler): RequestHandler {
                 );
             }
             if (error instanceof Bun.SQL.PostgresError) {
+                console.error(error.message);
                 return Response.json(
-                    { code: DATABASE_ERROR_CODE, error: error.message },
-                    { status: constants.HTTP_STATUS_BAD_REQUEST },
+                    { code: DATABASE_ERROR_CODE, error: DATABASE_ERROR_MESSAGE },
+                    { status: constants.HTTP_STATUS_INTERNAL_SERVER_ERROR },
                 );
             }
             console.error(error);

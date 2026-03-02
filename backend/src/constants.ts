@@ -34,6 +34,7 @@ export const Z_PASSWORD_LENGTH_ERROR_MESSAGE = `password must be at least ${MIN_
 
 export const UNEXPECTED_END_OF_JSON_ERROR_MESSAGE = 'Unexpected end of JSON input';
 export const UNEXPECTED_ERROR_MESSAGE = 'Unexpected error';
+export const DATABASE_ERROR_MESSAGE = 'Something went wrong';
 
 export const USER_SESSION_COOKIE_NAME = 'recon_user_session';
 export const USER_SESSION_TTL_SECONDS = 15 * 60;

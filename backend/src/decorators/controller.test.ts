@@ -2,6 +2,7 @@ import type { BunRequest } from 'bun';
 import { afterEach, describe, expect, mock, test } from 'bun:test';
 import {
     CORS_HEADERS,
+    DATABASE_ERROR_MESSAGE,
     UNEXPECTED_END_OF_JSON_ERROR_MESSAGE,
     UNEXPECTED_ERROR_MESSAGE,
     Z_PASSWORD_STRING_ERROR_MESSAGE,
@@ -167,10 +168,10 @@ describe('controller decorators', () => {
             const expectedErrorCode = '23505';
             const expectedResponseJson: ErrorResponse = {
                 code: DATABASE_ERROR_CODE,
-                error: expectedErrorMessage,
+                error: DATABASE_ERROR_MESSAGE,
             };
             const expectedResponseInit: ResponseInit = {
-                status: constants.HTTP_STATUS_BAD_REQUEST,
+                status: constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
             };
 
             const expectedResponse: Response = Response.json(
