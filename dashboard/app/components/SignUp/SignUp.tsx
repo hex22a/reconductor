@@ -1,21 +1,48 @@
 import type React from 'react';
+import { useState } from 'react';
 import { API_REGISTER_URL } from '~/constants';
+import { FormError } from '../FormError/FormError';
 
 export function SignUp() {
+  const [networkError, setNetworkError] = useState<string | null>(null);
+  const [usernameError, setUsernameError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  function dismissNetworkError() {
+    setNetworkError(null);
+  }
+  function dismissUsernameError() {
+    setUsernameError(null);
+  }
+  function dismissPasswordError() {
+    setPasswordError(null);
+  }
   async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
     const target = e.currentTarget as HTMLFormElement;
     const formData = new FormData(target);
     const username = formData.get('username');
     const password = formData.get('password');
-    const res = await fetch(API_REGISTER_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, password }),
-    });
-    console.log(res);
+    try {
+      const res = await fetch(API_REGISTER_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+      const result = await res.json();
+      console.log(result);
+      if (result.error && result.error.fieldErrors) {
+        if (result.error.fieldErrors.username) {
+          setUsernameError(result.error.fileldErrors.username);
+        }
+        if (result.error.fieldErrors.password) {
+          setPasswordError(result.error.fieldErrors.password);
+        }
+      }
+    } catch {
+      setNetworkError('Network error');
+    }
   }
 
   return (
@@ -26,14 +53,17 @@ export function SignUp() {
       <h1 className="font-special">Signup</h1>
       <label htmlFor="username">Username:</label>
       <input className="border-b border-white p-2" id="username" name="username" type="text" />
+      {usernameError && <FormError error={usernameError} onClose={dismissUsernameError} />}
       <label htmlFor="password">Password</label>
       <input className="border-b border-white p-2" id="password" name="password" type="password" />
+      {passwordError && <FormError error={passwordError} onClose={dismissPasswordError} />}
       <button
         className="border border-white rounded-lg p-2 cursor-pointer hover:bg-white hover:text-black"
         type="submit"
       >
         Register
       </button>
+      {networkError && <FormError error={networkError} onClose={dismissNetworkError} />}
     </form>
   );
 }
