@@ -31,16 +31,15 @@ export function SignUp() {
         body: JSON.stringify({ username, password }),
       });
       const result = await res.json();
-      console.log(result);
       if (result.error && result.error.fieldErrors) {
         if (result.error.fieldErrors.username) {
-          setUsernameError(result.error.fileldErrors.username);
+          setUsernameError(result.error.fieldErrors.username[0]);
         }
         if (result.error.fieldErrors.password) {
-          setPasswordError(result.error.fieldErrors.password);
+          setPasswordError(result.error.fieldErrors.password[0]);
         }
       }
-    } catch {
+    } catch (err) {
       setNetworkError('Network error');
     }
   }

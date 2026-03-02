@@ -1,5 +1,7 @@
 services:
   db:
+    profiles:
+      - backend
     image: postgres:18-alpine
     environment:
       POSTGRES_USER: reconductor
@@ -13,6 +15,8 @@ services:
       timeout: 5s
       retries: 5
   redis:
+    profiles:
+      - backend
     image: redis:8.6.0-alpine
     command: redis-server --requirepass ${REDIS_PASSWORD}
     ports:
@@ -24,6 +28,8 @@ services:
       retries: 5
 
   backend:
+    profiles:
+      - backend
     build:
       context: .
       dockerfile: ./backend/Dockerfile
@@ -42,6 +48,8 @@ services:
     command: sh -c "./migration && ./server"
 
   dashboard:
+    profiles:
+      - frontend
     build: ./dashboard
     depends_on:
       - backend

@@ -1,22 +1,52 @@
 import type React from 'react';
+import { useState } from 'react';
 import { API_LOGIN_URL } from '~/constants';
+import { FormError } from '../FormError/FormError';
+import { useNavigate } from 'react-router';
 
 export function SignIn() {
+  const navigate = useNavigate();
+  const [networkError, setNetworkError] = useState<string | null>(null);
+  const [usernameError, setUsernameError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  function dismissNetworkError() {
+    setNetworkError(null);
+  }
+  function dismissUsernameError() {
+    setUsernameError(null);
+  }
+  function dismissPasswordError() {
+    setPasswordError(null);
+  }
   async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
     const target = e.currentTarget as HTMLFormElement;
     const formData = new FormData(target);
     const username = formData.get('username');
     const password = formData.get('password');
-    const res = await fetch(API_LOGIN_URL, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, password }),
-    });
-    console.log(res);
+    try {
+      const res = await fetch(API_LOGIN_URL, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+      const result = await res.json();
+      if (result.error && result.error.fieldErrors) {
+        if (result.error.fieldErrors.username) {
+          setUsernameError(result.error.fieldErrors.username[0]);
+        }
+        if (result.error.fieldErrors.password) {
+          setPasswordError(result.error.fieldErrors.password[0]);
+        }
+      } else {
+        navigate('/projects');
+      }
+    } catch (err) {
+      setNetworkError('Network error');
+    }
   }
   return (
     <form
@@ -26,14 +56,17 @@ export function SignIn() {
       <h1 className="font-special">Sign in</h1>
       <label htmlFor="username">Username:</label>
       <input className="border-b border-white p-2" id="username" name="username" type="text" />
+      {usernameError && <FormError error={usernameError} onClose={dismissUsernameError} />}
       <label htmlFor="password">Password</label>
       <input className="border-b border-white p-2" id="password" name="password" type="password" />
+      {passwordError && <FormError error={passwordError} onClose={dismissPasswordError} />}
       <button
         className="border border-white rounded-lg p-2 cursor-pointer hover:bg-white hover:text-black"
         type="submit"
       >
         Sign in
       </button>
+      {networkError && <FormError error={networkError} onClose={dismissNetworkError} />}
     </form>
   );
 }
