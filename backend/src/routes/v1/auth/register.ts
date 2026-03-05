@@ -1,11 +1,8 @@
 import type { RegisterController } from '@/src/controllers/auth/register';
 import { API_REGISTER_ENDPOINT_V1 } from '../../../constants';
 import container from '@/src/container';
-import type {
-    RequestHandler,
-    WithCorsDecorator,
-    WithErrorHandlingDecorator,
-} from '@/src/decorators/controller';
+import type { WithCorsDecorator, WithErrorHandlingDecorator } from '@/src/decorators/controller';
+import type { RequestHandler } from '@/src/controllers/types';
 
 export default function createRegisterRoutes() {
     const registerController: RegisterController = container.resolve('registerController');

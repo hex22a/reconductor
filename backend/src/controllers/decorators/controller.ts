@@ -1,4 +1,4 @@
-import type { BunRequest, MaybePromise } from 'bun';
+import type { BunRequest } from 'bun';
 import { z, ZodError } from 'zod';
 import {
     ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER,
@@ -11,7 +11,7 @@ import {
     DASHBOARD_URL,
     DATABASE_ERROR_MESSAGE,
     UNEXPECTED_ERROR_MESSAGE,
-} from '../constants';
+} from '@/src/constants';
 import { constants } from 'node:http2';
 import {
     DATABASE_ERROR_CODE,
@@ -19,8 +19,7 @@ import {
     UNEXPECTED_ERROR_CODE,
     VALIDATION_ERROR_CODE,
 } from '$/constants';
-
-export type RequestHandler = (req: BunRequest) => MaybePromise<Response>;
+import type { RequestHandler } from '@/src/controllers/types';
 
 export function withErrorHandling(controller: RequestHandler): RequestHandler {
     return async function (req: BunRequest): Promise<Response> {

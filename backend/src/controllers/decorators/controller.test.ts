@@ -7,9 +7,9 @@ import {
     UNEXPECTED_ERROR_MESSAGE,
     Z_PASSWORD_STRING_ERROR_MESSAGE,
     Z_USERNAME_STRING_ERROR_MESSAGE,
-} from '../constants';
-import { withCors, withErrorHandling, type RequestHandler } from './controller';
-import type { ErrorResponse } from '../transport/error.dto';
+} from '@/src/constants';
+import { withCors, withErrorHandling } from './controller';
+import type { ErrorResponse } from '@/src/transport/error.dto';
 import { constants } from 'node:http2';
 import { ZodError } from 'zod';
 import type { $ZodIssue } from 'zod/v4/core';
@@ -20,6 +20,7 @@ import {
     UNEXPECTED_ERROR_CODE,
     VALIDATION_ERROR_CODE,
 } from '$/constants';
+import type { RequestHandler } from '@/src/controllers/types';
 
 describe('controller decorators', () => {
     const mockController = mock();
