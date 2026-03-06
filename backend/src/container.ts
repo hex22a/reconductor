@@ -17,6 +17,7 @@ import { preflight } from './controllers/preflight';
 import { SessionStrategy } from './auth/strategies/SessionStrategy.ts';
 import { HandleCallStrategy } from './auth/strategies/HandleCallStrategy.ts';
 import { HandleWithContextStrategy } from './auth/strategies/HandleWithContextStrategy.ts';
+import { me } from './controllers/auth/me.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -30,6 +31,7 @@ container.register({
     preflightController: asValue(preflight),
     registerController: asFunction(createRegisterController),
     loginController: asFunction(createLoginController),
+    meController: asValue(me),
     projectResolver: asFunction(createProjectResolver).singleton(),
     userRepository: asFunction(createUserRepository),
     sessionRepository: asFunction(createSessionRepository).singleton(),

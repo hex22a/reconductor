@@ -3,7 +3,7 @@ import { createGraphQlRoutes } from './graphql';
 import { GRAPHQL_ENDPOINT } from '../constants';
 import container from '../container';
 import { asFunction, asValue } from 'awilix';
-import type { AuthDecorators } from '@/src/auth/decorators/auth';
+import type { AuthDecorators, AuthDecoratorsFactoryDeps } from '@/src/auth/decorators/auth';
 import { SessionStrategy } from '../auth/strategies/SessionStrategy';
 import type { HandleCallStrategy } from '../auth/strategies/HandleCallStrategy';
 

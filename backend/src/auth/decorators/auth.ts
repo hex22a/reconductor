@@ -9,15 +9,15 @@ export type AuthDecorators = {
     withAuth: (handler: RequestHandler) => RequestHandler;
 };
 
-export type AuthDecoratorsFactoryDeps = {
+export type AuthDecoratorsFactoryDeps<Context = void> = {
     authStrategy: IAuthStrategy;
-    handleStrategy: IHandleStrategy;
+    handleStrategy: IHandleStrategy<Context>;
 };
 
-export function createAuthDecorators({
+export function createAuthDecorators<Context = void>({
     authStrategy,
     handleStrategy,
-}: AuthDecoratorsFactoryDeps): AuthDecorators {
+}: AuthDecoratorsFactoryDeps<Context>): AuthDecorators {
     return {
         withAuth(handler: RequestHandler): RequestHandler {
             return async function (req: BunRequest): Promise<Response> {
