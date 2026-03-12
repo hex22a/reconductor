@@ -77,7 +77,7 @@ describe('session', () => {
         const expectedUsername = 'user';
         const expectedToken = 'some_token';
         const expectedUserId = '019c6c94-0fb1-7241-922f-b3eb297a5a2f';
-        const [expectedUserSession, expectedUserSessionInsert] = createUserSessionFixture(
+        const [, expectedUserSessionInsert] = createUserSessionFixture(
             expectedToken,
             expectedUserId,
             expectedUsername,
