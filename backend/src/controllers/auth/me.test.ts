@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import type { BunRequest } from 'bun';
 import { me } from './me';
 import type { RequestContext } from '../types';
-import { createUserSessionFixture } from '@/tests/fixtures/sessions';
+import type { UserSession } from '@/src/domain/session.entity';
 
 describe('me', () => {
     test('returns username from context', async () => {
@@ -11,11 +11,11 @@ describe('me', () => {
         const expectedUserId = '019cb419-2d24-727d-b66a-cf6390891464';
         const expectedUsername = 'username';
         const expectedResponseJson = { username: expectedUsername };
-        const [expectedUserSession] = createUserSessionFixture(
-            expectedToken,
-            expectedUserId,
-            expectedUsername,
-        );
+        const expectedUserSession: UserSession = {
+            token: expectedToken,
+            userId: expectedUserId,
+            username: expectedUsername,
+        };
         const expectedContext: RequestContext = {
             user: expectedUserSession,
         };

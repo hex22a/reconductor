@@ -5,8 +5,8 @@ import type { SessionRepository } from '@/src/persistence/session.kv';
 import type { BunRequest, CookieInit, CookieMap } from 'bun';
 import { USER_SESSION_TTL_SECONDS, USER_SESSION_COOKIE_NAME } from '@/src/constants';
 import { createUserFixture } from '@/tests/fixtures/users';
-import type { UserSessionInsert } from '@/src/domain/session.entity';
 import { constants } from 'node:http2';
+import type { UserSession } from '@/src/domain/session.entity';
 
 describe('login', () => {
     const mockSetCookies = mock();
@@ -14,6 +14,7 @@ describe('login', () => {
     const mockAddUser = mock();
     const mockGetUserByUsername = mock();
     const mockCreateUserSession = mock();
+    const mockDeleteUserSession = mock();
     const mockGetUserSession = mock();
     const mockGetRandomToken = mock();
     const mockUserRepository: UserRepository = {
@@ -23,6 +24,7 @@ describe('login', () => {
     const mockSessionRepository: SessionRepository = {
         createUserSession: mockCreateUserSession,
         getUserSession: mockGetUserSession,
+        deleteUserSession: mockDeleteUserSession,
     };
     const mockCookies = {
         set: mockSetCookies,
@@ -42,6 +44,7 @@ describe('login', () => {
         mockGetUserByUsername.mockReset();
         mockCreateUserSession.mockReset();
         mockGetUserSession.mockReset();
+        mockDeleteUserSession.mockReset();
         mockGetRandomToken.mockReset();
     });
 
@@ -79,7 +82,7 @@ describe('login', () => {
                 secure: true,
                 path: '/',
             };
-            const expectedUserSessionInsert: UserSessionInsert = {
+            const expectedUserSessionInsert: UserSession = {
                 token: expectedToken,
                 username: expectedUsername,
                 userId: expectedUserEntity.id,

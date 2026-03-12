@@ -2,7 +2,7 @@ import { describe, expect, it, mock } from 'bun:test';
 import { HandleWithContextStrategy } from './HandleWithContextStrategy';
 import type { BunRequest } from 'bun';
 import type { RequestContext } from '@/src/controllers/types';
-import { createUserSessionFixture } from '@/tests/fixtures/sessions';
+import type { UserSession } from '@/src/domain/session.entity';
 
 describe('HandleWithContextStrategy', () => {
     it('calls handler with context', async () => {
@@ -11,11 +11,11 @@ describe('HandleWithContextStrategy', () => {
         const expectedToken = 'token';
         const expectedUserId = '019cb419-2d24-727d-b66a-cf6390891464';
         const expectedUsername = 'username';
-        const [expectedUserSession] = createUserSessionFixture(
-            expectedToken,
-            expectedUserId,
-            expectedUsername,
-        );
+        const expectedUserSession: UserSession = {
+            token: expectedToken,
+            userId: expectedUserId,
+            username: expectedUsername,
+        };
         const expectedResponseJson = { respose: 'some valid response' };
         const expectedResponse: Response = Response.json(expectedResponseJson);
         const expectedRequest = {} satisfies Partial<BunRequest>;

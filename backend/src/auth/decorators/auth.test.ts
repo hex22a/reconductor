@@ -7,7 +7,6 @@ import type { UserSession } from '@/src/domain/session.entity';
 import type { IAuthStrategy } from '../strategies/IAuthStrategy';
 import type { IHandleStrategy } from '../strategies/IHandleStrategy';
 import type { RequestContext } from '@/src/controllers/types';
-import { createUserSessionFixture } from '@/tests/fixtures/sessions';
 import { UnauthorizedError } from '@/src/domain/errors/UnauthorizedError';
 
 describe('auth', () => {
@@ -16,7 +15,7 @@ describe('auth', () => {
             throw new Error('Method not implemented.');
         }
     }
-    class MockHandleStrategy implements IHandleStrategy {
+    class MockHandleStrategy implements IHandleStrategy<RequestContext> {
         handle(): MaybePromise<Response> {
             throw new Error('Method not implemented.');
         }
@@ -29,7 +28,7 @@ describe('auth', () => {
     mockHandleStrategy.handle = mockHandle;
     const mockController = mock();
     const expectedRequest = {} satisfies Partial<BunRequest>;
-    const expectedAuthDecoratorsDeps: AuthDecoratorsFactoryDeps = {
+    const expectedAuthDecoratorsDeps: AuthDecoratorsFactoryDeps<RequestContext> = {
         authStrategy: mockAuthStrategy,
         handleStrategy: mockHandleStrategy,
     };
@@ -42,7 +41,7 @@ describe('auth', () => {
 
     test('createAuthDecorators', () => {
         // Arrange
-        const expectedAuthDecorators: AuthDecorators = {
+        const expectedAuthDecorators: AuthDecorators<RequestContext> = {
             withAuth: expect.any(Function),
         };
         // Act
@@ -57,11 +56,11 @@ describe('auth', () => {
             const expectedUserId = '019c94f3-4826-7c85-a663-98055fe5cba4';
             const expectedUsername = 'username';
             const expectedToken = 'token';
-            const [expectedUserSession] = createUserSessionFixture(
-                expectedToken,
-                expectedUserId,
-                expectedUsername,
-            );
+            const expectedUserSession: UserSession = {
+                token: expectedToken,
+                userId: expectedUserId,
+                username: expectedUsername,
+            };
             const expectedContext: RequestContext = {
                 user: expectedUserSession,
             };
