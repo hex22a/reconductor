@@ -2,8 +2,10 @@ import type React from 'react';
 import { useState } from 'react';
 import { API_REGISTER_URL } from '~/constants';
 import { FormError } from '../FormError/FormError';
+import { useNavigate } from 'react-router';
 
 export function SignUp() {
+  const navigate = useNavigate();
   const [networkError, setNetworkError] = useState<string | null>(null);
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
@@ -37,6 +39,8 @@ export function SignUp() {
         }
         if (result.error.fieldErrors.password) {
           setPasswordError(result.error.fieldErrors.password[0]);
+        } else {
+          navigate('/signin');
         }
       }
     } catch (err) {
