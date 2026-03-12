@@ -11,25 +11,28 @@ describe('graphql', () => {
     test('createGraphQlRoutes', () => {
         // Arrange
         const mockDecoratedHandler = mock();
+        const mockAdaptedHandler = mock();
         const expectedSessionStrategy: SessionStrategy = {} as unknown as SessionStrategy;
         const expectedHandleCallStrategy: HandleCallStrategy = {} as unknown as HandleCallStrategy;
-        const expectedAuthDecoratorsDeps: AuthDecoratorsFactoryDeps = {
+        const expectedAuthDecoratorsDeps: AuthDecoratorsFactoryDeps<void> = {
             authStrategy: expectedSessionStrategy,
             handleStrategy: expectedHandleCallStrategy,
         };
         const mockGraphQlServer = {
             fetch: mock(),
         };
-        const mockAuthDecorators: AuthDecorators = {
+        const mockAuthDecorators: AuthDecorators<void> = {
             withAuth: mock().mockReturnValue(mockDecoratedHandler),
         };
         const mockGetGraphQlServerInstance = mock().mockReturnValue(mockGraphQlServer);
         const mockCreateAuthDecorators = mock().mockReturnValue(mockAuthDecorators);
+        const mockFetchToHandlerAdapter = mock().mockReturnValue(mockAdaptedHandler);
         container.register({
             sessionStrategy: asValue(expectedSessionStrategy),
             handleCallStrategy: asValue(expectedHandleCallStrategy),
             graphQlServer: asFunction(mockGetGraphQlServerInstance).singleton(),
             createAuthDecorators: asValue(mockCreateAuthDecorators),
+            fetchToHandlerAdapter: asValue(mockFetchToHandlerAdapter),
         });
         const expectedRoutes = {
             [GRAPHQL_ENDPOINT]: {
@@ -41,6 +44,7 @@ describe('graphql', () => {
         // Assert
         expect(actualRoutes).toEqual(expectedRoutes);
         expect(mockCreateAuthDecorators).toHaveBeenCalledWith(expectedAuthDecoratorsDeps);
-        expect(mockAuthDecorators.withAuth).toHaveBeenCalledWith(mockGraphQlServer.fetch);
+        expect(mockFetchToHandlerAdapter).toHaveBeenLastCalledWith(mockGraphQlServer.fetch);
+        expect(mockAuthDecorators.withAuth).toHaveBeenCalledWith(mockAdaptedHandler);
     });
 });

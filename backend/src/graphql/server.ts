@@ -53,3 +53,5 @@ export function getGraphQlServerInstance({
         context: graphQlContextResolver,
     });
 }
+
+export type GraphQlServerFetch = ReturnType<typeof getGraphQlServerInstance>['fetch'];

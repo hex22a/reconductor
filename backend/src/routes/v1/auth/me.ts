@@ -8,14 +8,14 @@ import type { RequestContext, RequestHandler } from '@/src/controllers/types';
 
 export function createMeRoutes() {
     const meController: RequestHandler<RequestContext> = container.resolve('meController');
-    const preflight: RequestHandler = container.resolve('preflightController');
+    const preflight: RequestHandler<void> = container.resolve('preflightController');
     const sessionStrategy: SessionStrategy = container.resolve('sessionStrategy');
     const handleWithContextStrategy: HandleWithContextStrategy = container.resolve(
         'handleWithContextStrategy',
     );
     const createAuthDecorators: AuthDecoratorsFactory = container.resolve('createAuthDecorators');
     const withCors: WithCorsDecorator = container.resolve('withCors');
-    const authDecorators: AuthDecorators = createAuthDecorators({
+    const authDecorators: AuthDecorators<RequestContext> = createAuthDecorators({
         authStrategy: sessionStrategy,
         handleStrategy: handleWithContextStrategy,
     });

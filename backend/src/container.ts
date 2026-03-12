@@ -18,6 +18,7 @@ import { SessionStrategy } from './auth/strategies/SessionStrategy.ts';
 import { HandleCallStrategy } from './auth/strategies/HandleCallStrategy.ts';
 import { HandleWithContextStrategy } from './auth/strategies/HandleWithContextStrategy.ts';
 import { me } from './controllers/auth/me.ts';
+import { toHandler } from './graphql/adapters/FetchToHandlerAdapter.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -49,6 +50,7 @@ container.register({
     graphQlServer: asFunction(getGraphQlServerInstance).singleton(),
     withErrorHandling: asValue(withErrorHandling),
     withCors: asValue(withCors),
+    fetchToHandlerAdapter: asValue(toHandler),
 });
 
 export default container;

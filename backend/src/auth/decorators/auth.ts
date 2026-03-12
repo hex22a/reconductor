@@ -5,21 +5,21 @@ import type { RequestContext, RequestHandler } from '@/src/controllers/types';
 import type { IAuthStrategy } from '../strategies/IAuthStrategy';
 import type { IHandleStrategy } from '../strategies/IHandleStrategy';
 
-export type AuthDecorators = {
-    withAuth: (handler: RequestHandler) => RequestHandler;
+export type AuthDecorators<Context extends RequestContext | void> = {
+    withAuth: (handler: RequestHandler<Context>) => RequestHandler<void>;
 };
 
-export type AuthDecoratorsFactoryDeps<Context = void> = {
+export type AuthDecoratorsFactoryDeps<Context extends RequestContext | void> = {
     authStrategy: IAuthStrategy;
     handleStrategy: IHandleStrategy<Context>;
 };
 
-export function createAuthDecorators<Context = void>({
+export function createAuthDecorators<Context extends RequestContext | void>({
     authStrategy,
     handleStrategy,
-}: AuthDecoratorsFactoryDeps<Context>): AuthDecorators {
+}: AuthDecoratorsFactoryDeps<Context>): AuthDecorators<Context> {
     return {
-        withAuth(handler: RequestHandler): RequestHandler {
+        withAuth(handler: RequestHandler<Context>): RequestHandler<void> {
             return async function (req: BunRequest): Promise<Response> {
                 try {
                     const userSession = await authStrategy.authenticate(req);
