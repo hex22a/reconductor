@@ -15,6 +15,7 @@ describe('session', () => {
         const expectedSessionRepository: SessionRepository = {
             createUserSession: expect.any(Function),
             getUserSession: expect.any(Function),
+            deleteUserSession: expect.any(Function),
         };
         // Act
         const actualSessionRepository = createSessionRepository({ kv });
@@ -70,5 +71,26 @@ describe('session', () => {
             await sessionRepository.getUserSession(expectedToken);
         // Assert
         expect(actualUserSession).toEqual(expectedUserSession);
+    });
+
+    it('deletes userSession from storage', async () => {
+        const expectedUsername = 'user';
+        const expectedToken = 'some_token';
+        const expectedUserId = '019c6c94-0fb1-7241-922f-b3eb297a5a2f';
+        const [expectedUserSession, expectedUserSessionInsert] = createUserSessionFixture(
+            expectedToken,
+            expectedUserId,
+            expectedUsername,
+        );
+        const sessionRepository = createSessionRepository({ kv });
+        await sessionRepository.createUserSession(expectedUserSessionInsert);
+        // Act
+        await sessionRepository.deleteUserSession(expectedToken);
+        // Assert
+        try {
+            await sessionRepository.getUserSession(expectedToken);
+        } catch (actualError) {
+            expect(actualError).toBeInstanceOf(SessionNotFoundError);
+        }
     });
 });

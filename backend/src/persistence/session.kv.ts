@@ -10,6 +10,7 @@ export type SessionRepositoryDeps = {
 export type SessionRepository = {
     createUserSession: (userSession: UserSessionInsert) => Promise<UserSession>;
     getUserSession: (token: string) => Promise<UserSession>;
+    deleteUserSession: (token: string) => Promise<void>;
 };
 
 export function createSessionRepository({ kv }: SessionRepositoryDeps): SessionRepository {
@@ -28,6 +29,10 @@ export function createSessionRepository({ kv }: SessionRepositoryDeps): SessionR
                 throw new SessionNotFoundError();
             }
             return { userId: userSession.userId, username: userSession.username };
+        },
+        async deleteUserSession(token: string): Promise<void> {
+            const key = `${USER_SESSION_PREFIX}:${token}`;
+            await kv.del(key);
         },
     };
 }
