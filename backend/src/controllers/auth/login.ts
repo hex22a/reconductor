@@ -5,6 +5,7 @@ import type { UserRepository } from '@/src/persistence/user.db';
 import { registerSchema } from '@/src/transport/user.schema';
 import type { BunRequest } from 'bun';
 import { constants } from 'node:http2';
+import type { RequestHandler } from '../types';
 
 export type LoginControllerDeps = {
     userRepository: UserRepository;
@@ -14,7 +15,7 @@ export type LoginControllerDeps = {
 };
 
 export type LoginController = {
-    post: (req: BunRequest) => Promise<Response>;
+    post: RequestHandler<void>;
 };
 
 export function createLoginController({

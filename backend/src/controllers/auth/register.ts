@@ -3,6 +3,7 @@ import type { UserRepository } from '@/src/persistence/user.db';
 import type { RegisterUserDto, UserDto } from '@/src/transport/user.dto';
 import { registerSchema } from '@/src/transport/user.schema';
 import type { UserEntity } from '@/src/domain/user.entity';
+import type { RequestHandler } from '../types';
 
 export type RegisterControllerDeps = {
     userRepository: UserRepository;
@@ -10,7 +11,7 @@ export type RegisterControllerDeps = {
 };
 
 export type RegisterController = {
-    post: (req: BunRequest) => Promise<Response>;
+    post: RequestHandler<void>;
 };
 
 export function createRegisterController({

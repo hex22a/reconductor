@@ -5,7 +5,6 @@ export type RequestContext = {
     user: UserSession;
 };
 
-export type RequestHandler<Context extends RequestContext | void> = (
-    req: BunRequest,
-    context?: Context,
-) => MaybePromise<Response>;
+export type RequestHandler<Context extends RequestContext | void> = Context extends void
+    ? (req: BunRequest) => MaybePromise<Response>
+    : (req: BunRequest, context: RequestContext) => MaybePromise<Response>;
