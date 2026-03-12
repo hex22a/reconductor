@@ -19,6 +19,7 @@ import { HandleCallStrategy } from './auth/strategies/HandleCallStrategy.ts';
 import { HandleWithContextStrategy } from './auth/strategies/HandleWithContextStrategy.ts';
 import { me } from './controllers/auth/me.ts';
 import { toHandler } from './graphql/adapters/FetchToHandlerAdapter.ts';
+import { createLogoutController } from './controllers/auth/logout.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -32,6 +33,7 @@ container.register({
     preflightController: asValue(preflight),
     registerController: asFunction(createRegisterController),
     loginController: asFunction(createLoginController),
+    logoutController: asFunction(createLogoutController),
     meController: asValue(me),
     projectResolver: asFunction(createProjectResolver).singleton(),
     userRepository: asFunction(createUserRepository),
