@@ -3,14 +3,20 @@ import { useState } from 'react';
 import { API_REGISTER_URL } from '~/constants';
 import { FormError } from '../FormError/FormError';
 import { useNavigate } from 'react-router';
+import {
+  VALIDATION_ERROR_CODE,
+  SYNTAX_ERROR_CODE,
+  DATABASE_ERROR_CODE,
+  UNEXPECTED_ERROR_CODE,
+} from '$/constants';
 
 export function SignUp() {
   const navigate = useNavigate();
-  const [networkError, setNetworkError] = useState<string | null>(null);
+  const [genericError, setGenericError] = useState<string | null>(null);
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  function dismissNetworkError() {
-    setNetworkError(null);
+  function dismissGenericError() {
+    setGenericError(null);
   }
   function dismissUsernameError() {
     setUsernameError(null);
@@ -33,18 +39,25 @@ export function SignUp() {
         body: JSON.stringify({ username, password }),
       });
       const result = await res.json();
-      if (result.error && result.error.fieldErrors) {
-        if (result.error.fieldErrors.username) {
-          setUsernameError(result.error.fieldErrors.username[0]);
-        }
-        if (result.error.fieldErrors.password) {
-          setPasswordError(result.error.fieldErrors.password[0]);
-        } else {
+      switch (result.code) {
+        case VALIDATION_ERROR_CODE:
+          if (result.error.fieldErrors.username) {
+            setUsernameError(result.error.fieldErrors.username[0]);
+          }
+          if (result.error.fieldErrors.password) {
+            setPasswordError(result.error.fieldErrors.password[0]);
+          }
+          break;
+        case DATABASE_ERROR_CODE:
+        case UNEXPECTED_ERROR_CODE:
+        case SYNTAX_ERROR_CODE:
+          setGenericError(result.error);
+          break;
+        default:
           navigate('/signin');
-        }
       }
     } catch (err) {
-      setNetworkError('Network error');
+      setGenericError('Network error');
     }
   }
 
@@ -66,7 +79,7 @@ export function SignUp() {
       >
         Register
       </button>
-      {networkError && <FormError error={networkError} onClose={dismissNetworkError} />}
+      {genericError && <FormError error={genericError} onClose={dismissGenericError} />}
     </form>
   );
 }

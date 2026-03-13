@@ -1,19 +1,25 @@
-import { useEffect, useState } from 'react';
-import { NavLink } from 'react-router';
-import { API_ME_URL } from '~/constants';
+import { NavLink, useNavigate } from 'react-router';
+import { useAuth } from '~/providers/AuthProvider';
 export function Header() {
-  const [username, setUsername] = useState<string | null>(null);
-  useEffect(() => {
-    fetch(API_ME_URL, { credentials: 'include' }).then((res) => {
-      res.json().then((responseJson) => {
-        setUsername(responseJson.username);
-      });
-    });
-  }, []);
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  async function handleLogout() {
+    await logout();
+    navigate('/');
+  }
+
   return (
     <header className="sticky top-0">
-      {username ? (
-        <div>{username}</div>
+      {user?.username ? (
+        <nav>
+          <span>$: {user?.username}</span>
+          <span>
+            <button type="button" onClick={handleLogout}>
+              (Logout)
+            </button>
+          </span>
+        </nav>
       ) : (
         <nav>
           <NavLink to="/signup">Sign up</NavLink>/<NavLink to="/signin">Sign in</NavLink>
