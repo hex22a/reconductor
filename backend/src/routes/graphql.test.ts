@@ -10,8 +10,10 @@ import type { HandleCallStrategy } from '../auth/strategies/HandleCallStrategy';
 describe('graphql', () => {
     test('createGraphQlRoutes', () => {
         // Arrange
-        const mockDecoratedHandler = mock();
+        const mockHandlerWithAuth = mock();
         const mockAdaptedHandler = mock();
+        const mockControllerWithCors = mock();
+        const mockPreflightController = mock();
         const expectedSessionStrategy: SessionStrategy = {} as unknown as SessionStrategy;
         const expectedHandleCallStrategy: HandleCallStrategy = {} as unknown as HandleCallStrategy;
         const expectedAuthDecoratorsDeps: AuthDecoratorsFactoryDeps<void> = {
@@ -22,21 +24,26 @@ describe('graphql', () => {
             fetch: mock(),
         };
         const mockAuthDecorators: AuthDecorators<void> = {
-            withAuth: mock().mockReturnValue(mockDecoratedHandler),
+            withAuth: mock().mockReturnValue(mockHandlerWithAuth),
         };
         const mockGetGraphQlServerInstance = mock().mockReturnValue(mockGraphQlServer);
         const mockCreateAuthDecorators = mock().mockReturnValue(mockAuthDecorators);
         const mockFetchToHandlerAdapter = mock().mockReturnValue(mockAdaptedHandler);
+        const mockWithCors = mock().mockReturnValue(mockControllerWithCors);
         container.register({
             sessionStrategy: asValue(expectedSessionStrategy),
             handleCallStrategy: asValue(expectedHandleCallStrategy),
             graphQlServer: asFunction(mockGetGraphQlServerInstance).singleton(),
             createAuthDecorators: asValue(mockCreateAuthDecorators),
             fetchToHandlerAdapter: asValue(mockFetchToHandlerAdapter),
+            preflightController: asValue(mockPreflightController),
+            withCors: asValue(mockWithCors),
         });
         const expectedRoutes = {
             [GRAPHQL_ENDPOINT]: {
-                POST: mockDecoratedHandler,
+                GET: mockControllerWithCors,
+                POST: mockControllerWithCors,
+                OPTIONS: mockControllerWithCors,
             },
         };
         // Act
@@ -46,5 +53,7 @@ describe('graphql', () => {
         expect(mockCreateAuthDecorators).toHaveBeenCalledWith(expectedAuthDecoratorsDeps);
         expect(mockFetchToHandlerAdapter).toHaveBeenLastCalledWith(mockGraphQlServer.fetch);
         expect(mockAuthDecorators.withAuth).toHaveBeenCalledWith(mockAdaptedHandler);
+        expect(mockWithCors).toHaveBeenNthCalledWith(1, mockHandlerWithAuth);
+        expect(mockWithCors).toHaveBeenNthCalledWith(2, mockPreflightController);
     });
 });

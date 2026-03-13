@@ -63,13 +63,13 @@ export function withErrorHandling(controller: RequestHandler): RequestHandler {
 
 export type WithErrorHandlingDecorator = typeof withErrorHandling;
 
-export function withCors(controller: RequestHandler): RequestHandler {
+export function withCors(controller: RequestHandler<void>): RequestHandler<void> {
     return async function (req: BunRequest): Promise<Response> {
         const response: Response = await controller(req);
-        response.headers.append(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, DASHBOARD_URL);
-        response.headers.append(ACCESS_CONTROL_ALLOW_METHODS_HEADER, CORS_ALLOWED_METHODS);
-        response.headers.append(ACCESS_CONTROL_ALLOW_HEADERS_HEADER, CORS_ALLOWED_HEADERS);
-        response.headers.append(ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER, CORS_ALLOW_CREDENTIALS);
+        response.headers.set(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, DASHBOARD_URL);
+        response.headers.set(ACCESS_CONTROL_ALLOW_METHODS_HEADER, CORS_ALLOWED_METHODS);
+        response.headers.set(ACCESS_CONTROL_ALLOW_HEADERS_HEADER, CORS_ALLOWED_HEADERS);
+        response.headers.set(ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER, CORS_ALLOW_CREDENTIALS);
         return response;
     };
 }
