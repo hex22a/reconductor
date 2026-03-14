@@ -14,6 +14,7 @@ describe('project.db', () => {
                 const expectedProjectRepository: ProjectRepository = {
                     createProject: expect.any(Function),
                     getProject: expect.any(Function),
+                    listProjects: expect.any(Function),
                 };
                 // Act
                 const actualUserRepository: ProjectRepository = createProjectRepository({
@@ -122,6 +123,24 @@ describe('project.db', () => {
                         // Assert
                         expect(actualError).toBeInstanceOf(ProjectNotFoundError);
                     }
+                });
+            });
+        });
+    });
+
+    describe('listProjects', () => {
+        it('returns list of all projects for current user', async () => {
+            await catchRollback(async () => {
+                await withTrx(async (trx) => {
+                    // Arrange
+                    const projectRepository: ProjectRepository = createProjectRepository({
+                        sql: trx,
+                    });
+                    // Act
+                    const actualProjects =
+                        await projectRepository.listProjects(expectedExistingUserId);
+                    // Assert
+                    expect(actualProjects).toHaveLength(1);
                 });
             });
         });

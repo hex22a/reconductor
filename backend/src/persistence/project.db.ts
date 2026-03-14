@@ -9,6 +9,7 @@ export type ProjectRepositoryDeps = {
 export type ProjectRepository = {
     createProject: (project: ProjectInsert) => Promise<ProjectEntity>;
     getProject: (projectId: string) => Promise<ProjectEntity>;
+    listProjects: (ownerId: string) => Promise<Array<ProjectEntity>>;
 };
 
 export function createProjectRepository({ sql }: ProjectRepositoryDeps): ProjectRepository {
@@ -38,6 +39,17 @@ export function createProjectRepository({ sql }: ProjectRepositoryDeps): Project
                 throw new ProjectNotFoundError();
             }
             return project;
+        },
+        async listProjects(ownerId: string): Promise<Array<ProjectEntity>> {
+            return sql<Array<ProjectEntity>>`
+                SELECT
+                    id,
+                    owner_id,
+                    name,
+                    created_at
+                FROM recon.projects
+                WHERE owner_id=${ownerId};
+            `;
         },
     };
 }
