@@ -20,7 +20,11 @@ export type ProjectResolverFactoryDeps = {
 export type ProjectResolver = {
     Query: {
         project: (parent: unknown, args: ProjectResolverArgs) => Promise<ProjectDto>;
-        projects: () => Promise<void>;
+        projects: (
+            parent: unknown,
+            args: unknown,
+            context: GraphQlContext,
+        ) => Promise<Array<ProjectDto>>;
     };
     Mutation: {
         createProject: (
@@ -44,8 +48,13 @@ export function createProjectResolver({
                     created_at: project.created_at,
                 };
             },
-            async projects() {
-                throw new Error('not implemented');
+            async projects(_, __, context) {
+                const projects = await projectRepository.listProjects(context.user.id);
+                return projects.map((projectEnity) => ({
+                    id: projectEnity.id,
+                    name: projectEnity.name,
+                    created_at: projectEnity.created_at,
+                }));
             },
         },
         Mutation: {

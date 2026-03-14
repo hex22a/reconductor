@@ -10,14 +10,17 @@ import type { ProjectRepository } from '@/src/persistence/project.db';
 import type { ProjectDto } from '@/src/transport/project.dto';
 import { createProjectFixture } from '@/tests/fixtures/projects';
 import type { GraphQlContext } from '@/src/transport/graphql.context';
+import type { ProjectEntity } from '@/src/domain/project.entity';
 
 describe('project', () => {
     const expectedParent = null;
     const mockCreateProject = mock();
     const mockGetProject = mock();
+    const mockListProjects = mock();
     const mockProjectRepository: ProjectRepository = {
         createProject: mockCreateProject,
         getProject: mockGetProject,
+        listProjects: mockListProjects,
     };
     const expectedProjectResolverFactoryDeps: ProjectResolverFactoryDeps = {
         projectRepository: mockProjectRepository,
@@ -35,6 +38,7 @@ describe('project', () => {
     afterEach(() => {
         mockCreateProject.mockReset();
         mockGetProject.mockReset();
+        mockListProjects.mockReset();
     });
 
     test('createProjectResolver', () => {
@@ -106,5 +110,34 @@ describe('project', () => {
         // Assert
         expect(actualProject).toEqual(expectedProject);
         expect(mockCreateProject).toHaveBeenCalledWith(expectedProjectInsert);
+    });
+
+    test('projects', async () => {
+        // Arrange
+        const expectedUserId = '019c9abc-a10c-76e3-8287-885036664a5c';
+        const expectedArgs = null;
+        const expectedContext: GraphQlContext = {
+            user: { id: expectedUserId },
+        };
+        const [expectedProjectEntity] = createProjectFixture(
+            expectedProjectName,
+            expectedUserId,
+            expectedProjectId,
+        );
+        const expectedProjectEntities: Array<ProjectEntity> = [expectedProjectEntity];
+        mockListProjects.mockResolvedValue(expectedProjectEntities);
+        const expectedProjects: Array<ProjectDto> = [expectedProject];
+        const projectResolver: ProjectResolver = createProjectResolver(
+            expectedProjectResolverFactoryDeps,
+        );
+        // Act
+        const actualProjects: Array<ProjectDto> = await projectResolver.Query.projects(
+            expectedParent,
+            expectedArgs,
+            expectedContext,
+        );
+        // Assert
+        expect(actualProjects).toEqual(expectedProjects);
+        expect(mockListProjects).toHaveBeenCalledWith(expectedUserId);
     });
 });
