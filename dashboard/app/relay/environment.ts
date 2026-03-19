@@ -1,7 +1,8 @@
 import { Environment, Network, RecordSource, Store } from 'relay-runtime';
+import type { RequestParameters, Variables } from 'relay-runtime';
 import { GRAPHQL_URL } from '~/constants';
 
-async function fetchGraphQL(params: any, variables: any) {
+async function fetchGraphQL(params: RequestParameters, variables: Variables) {
     const res = await fetch(GRAPHQL_URL, {
         method: 'POST',
         headers: {
