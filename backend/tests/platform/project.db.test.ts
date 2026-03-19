@@ -1,7 +1,7 @@
 import { describe, expect, it, test } from 'bun:test';
 import { catchRollback, withTrx } from '../decorators';
 import { createProjectRepository, type ProjectRepository } from '@/src/persistence/project.db';
-import { createProjectFixture } from '../fixtures/projects';
+import { createProjectFixture, expectedExistingProjectId } from '../fixtures/projects';
 import type { ProjectEntity } from '@/src/domain/project.entity';
 import { ProjectNotFoundError } from '@/src/domain/errors/ProjectNotFoundError';
 import { expectedExistingUserId } from '../fixtures/users';
@@ -58,7 +58,7 @@ describe('project.db', () => {
                     const expectedErrorCode = '23503';
                     const expectedProjectName = 'test';
                     const expectedWrongOwnerId = '5ffe9624-5f76-4534-b804-a569613822d0';
-                    const [, expecteProjectInsert] = createProjectFixture(
+                    const [, expectedProjectInsert] = createProjectFixture(
                         expectedProjectName,
                         expectedWrongOwnerId,
                     );
@@ -67,7 +67,7 @@ describe('project.db', () => {
                     });
                     // Act
                     try {
-                        await projectRepository.createProject(expecteProjectInsert);
+                        await projectRepository.createProject(expectedProjectInsert);
                     } catch (actualError) {
                         // Assert
                         expect(actualError).toBeInstanceOf(Bun.SQL.PostgresError);
@@ -141,6 +141,36 @@ describe('project.db', () => {
                         await projectRepository.listProjects(expectedExistingUserId);
                     // Assert
                     expect(actualProjects).toHaveLength(1);
+                });
+            });
+        });
+
+        it('returns list of all projects for current user after cursor', async () => {
+            await catchRollback(async () => {
+                await withTrx(async (trx) => {
+                    // Arrange
+                    const expectedProject1Name = 'test';
+                    const expectedProject2Name = 'test2';
+                    const [, expectedProject1Insert] = createProjectFixture(
+                        expectedProject1Name,
+                        expectedExistingUserId,
+                    );
+                    const [, expectedProject2Insert] = createProjectFixture(
+                        expectedProject2Name,
+                        expectedExistingUserId,
+                    );
+                    const projectRepository: ProjectRepository = createProjectRepository({
+                        sql: trx,
+                    });
+                    await projectRepository.createProject(expectedProject1Insert);
+                    await projectRepository.createProject(expectedProject2Insert);
+                    // Act
+                    const actualProjects = await projectRepository.listProjects(
+                        expectedExistingUserId,
+                        expectedExistingProjectId,
+                    );
+                    // Assert
+                    expect(actualProjects).toHaveLength(2);
                 });
             });
         });

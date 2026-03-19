@@ -1,3 +1,4 @@
+import { PROJECTS_PAGE_SIZE } from '../constants';
 import { ProjectNotFoundError } from '../domain/errors/ProjectNotFoundError';
 import type { ProjectEntity, ProjectInsert } from '../domain/project.entity';
 import type { SQL } from './db';
@@ -6,11 +7,12 @@ export type ProjectRepositoryDeps = {
     sql: SQL;
 };
 
-export type ProjectRepository = {
-    createProject: (project: ProjectInsert) => Promise<ProjectEntity>;
-    getProject: (projectId: string) => Promise<ProjectEntity>;
-    listProjects: (ownerId: string) => Promise<Array<ProjectEntity>>;
-};
+export interface ProjectRepository {
+    createProject(project: ProjectInsert): Promise<ProjectEntity>;
+    getProject(projectId: string): Promise<ProjectEntity>;
+    listProjects(ownerId: string): Promise<Array<ProjectEntity>>;
+    listProjects(ownerId: string, cursorId: string): Promise<Array<ProjectEntity>>;
+}
 
 export function createProjectRepository({ sql }: ProjectRepositoryDeps): ProjectRepository {
     return {
@@ -40,7 +42,22 @@ export function createProjectRepository({ sql }: ProjectRepositoryDeps): Project
             }
             return project;
         },
-        async listProjects(ownerId: string): Promise<Array<ProjectEntity>> {
+        async listProjects(ownerId: string, cursorId?: string): Promise<Array<ProjectEntity>> {
+            if (cursorId) {
+                console.log(cursorId);
+                return sql<Array<ProjectEntity>>`
+                    SELECT
+                        id,
+                        owner_id,
+                        name,
+                        created_at
+                    FROM recon.projects
+                    WHERE owner_id=${ownerId}
+                        AND id < ${cursorId}
+                    ORDER BY id DESC
+                    LIMIT ${PROJECTS_PAGE_SIZE};
+                `;
+            }
             return sql<Array<ProjectEntity>>`
                 SELECT
                     id,
@@ -48,7 +65,9 @@ export function createProjectRepository({ sql }: ProjectRepositoryDeps): Project
                     name,
                     created_at
                 FROM recon.projects
-                WHERE owner_id=${ownerId};
+                WHERE owner_id=${ownerId}
+                ORDER BY id DESC
+                LIMIT ${PROJECTS_PAGE_SIZE};
             `;
         },
     };

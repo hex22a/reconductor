@@ -23,6 +23,8 @@ CREATE TABLE recon.projects (
     created_at TIMESTAMP NOT NULL DEFAULT now()
 );
 
+CREATE INDEX idx_projects_id_desc ON recon.projects (id DESC);
+
 CREATE TYPE scan_status as ENUM ('scheduled', 'in progress', 'done');
 
 CREATE TABLE recon.scans (
