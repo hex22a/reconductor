@@ -1,7 +1,7 @@
 import { describe, expect, it, test } from 'bun:test';
 import { catchRollback, withTrx } from '../decorators';
 import { createProjectRepository, type ProjectRepository } from '@/src/persistence/project.db';
-import { createProjectFixture, expectedExistingProjectId } from '../fixtures/projects';
+import { createProjectFixture } from '../fixtures/projects';
 import type { ProjectEntity } from '@/src/domain/project.entity';
 import { ProjectNotFoundError } from '@/src/domain/errors/ProjectNotFoundError';
 import { expectedExistingUserId } from '../fixtures/users';
