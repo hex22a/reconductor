@@ -1,16 +1,20 @@
-import { useLazyLoadQuery } from 'react-relay';
+import { usePaginationFragment } from 'react-relay';
 import { CreateProjectForm } from '../CreateProjectForm/CreateProjectForm';
-import { query } from '~/routes/Projects/ProjectsQuery';
 import { ProjectItem } from '../ProjectItem/ProjectItem';
-import type { ProjectsQuery } from '~/__generated__/ProjectsQuery.graphql';
+import type { ProjectsListFragment$key } from '~/__generated__/ProjectsListFragment.graphql';
+import { fragment } from './Projects.fragment';
 
-export function Projects() {
-  const data = useLazyLoadQuery<ProjectsQuery>(query, {});
+type ProjectsProps = {
+  fragmentRef: ProjectsListFragment$key;
+};
+
+export function Projects({ fragmentRef }: ProjectsProps) {
+  const { data } = usePaginationFragment(fragment, fragmentRef);
   return (
     <>
       <h1 className="font-special">Projects</h1>
-      {data.projects.map((project) => (
-        <ProjectItem key={project.id} projectRef={project} />
+      {data.projects.edges.map((edge) => (
+        <ProjectItem key={edge.node.id} projectRef={edge.node} />
       ))}
       <CreateProjectForm />
     </>

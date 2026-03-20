@@ -1,6 +1,6 @@
 import type { GraphQlContext } from '@/src/transport/graphql.context';
 import type { ProjectRepository } from '@/src/persistence/project.db';
-import type { ProjectDto, ProjectsDto } from '@/src/transport/project.dto';
+import type { ProjectDto, ProjectsDto, ProjectEdge } from '@/src/transport/project.dto';
 import type { ProjectEntity } from '@/src/domain/project.entity';
 import { type CursorDecoder, type CursorEncoder } from '@/src/utils/cursor';
 
@@ -30,7 +30,7 @@ export type ProjectResolver = {
             parent: unknown,
             args: CreateProjectArgs,
             context: GraphQlContext,
-        ) => Promise<ProjectDto>;
+        ) => Promise<ProjectEdge>;
     };
 };
 
@@ -76,15 +76,18 @@ export function createProjectResolver({
                 _,
                 { input: { name } }: CreateProjectArgs,
                 context: GraphQlContext,
-            ): Promise<ProjectDto> {
+            ): Promise<ProjectEdge> {
                 const project: ProjectEntity = await projectRepository.createProject({
                     name,
                     owner_id: context.user.id,
                 });
                 return {
-                    id: project.id,
-                    name,
-                    created_at: project.created_at,
+                    node: {
+                        id: project.id,
+                        name,
+                        created_at: project.created_at,
+                    },
+                    cursor: encodeCursor(project.id),
                 };
             },
         },

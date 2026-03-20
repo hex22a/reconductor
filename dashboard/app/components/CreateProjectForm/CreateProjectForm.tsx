@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useMutation } from 'react-relay';
+import { ConnectionHandler, useMutation } from 'react-relay';
 import { CreateProjectMutation } from '~/graphql/mutations/CreateProjectMutation';
 
 export function CreateProjectForm() {
@@ -8,12 +8,12 @@ export function CreateProjectForm() {
     e.preventDefault();
     const target = e.currentTarget as HTMLFormElement;
     const formData = new FormData(target);
+    const connectionId = ConnectionHandler.getConnectionID('root', 'ProjectsList_projects');
     const name = formData.get('name');
     commit({
       variables: {
-        input: {
-          name,
-        },
+        input: { name },
+        connections: [connectionId],
       },
 
       onCompleted() {

@@ -91,6 +91,7 @@ describe('project', () => {
     test('createProject', async () => {
         // Arrange
         const expectedUserId = '019c9abc-a10c-76e3-8287-885036664a5c';
+        const expectedCursor = 'cursor';
         const expectedArgs: CreateProjectArgs = {
             input: {
                 name: expectedProjectName,
@@ -105,17 +106,19 @@ describe('project', () => {
             expectedProjectId,
         );
         mockCreateProject.mockResolvedValue(expectedProjectEntity);
+        mockEncodeCursor.mockReturnValue(expectedCursor);
         const projectResolver: ProjectResolver = createProjectResolver(
             expectedProjectResolverFactoryDeps,
         );
         // Act
-        const actualProject: ProjectDto = await projectResolver.Mutation.createProject(
+        const actualProject: ProjectEdge = await projectResolver.Mutation.createProject(
             expectedParent,
             expectedArgs,
             expectedContext,
         );
         // Assert
-        expect(actualProject).toEqual(expectedProject);
+        expect(actualProject.node).toEqual(expectedProject);
+        expect(actualProject.cursor).toEqual(expectedCursor);
         expect(mockCreateProject).toHaveBeenCalledWith(expectedProjectInsert);
     });
 

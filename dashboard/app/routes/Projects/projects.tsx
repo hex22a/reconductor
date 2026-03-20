@@ -1,10 +1,14 @@
 import { Projects } from '~/components/Projects/Projects';
-import type { Route } from '../+types/projects';
+import { useLazyLoadQuery } from 'react-relay';
+import { query } from './ProjectsQuery';
+import type { Route } from './+types/projects';
+import type { ProjectsQuery } from '~/__generated__/ProjectsQuery.graphql';
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: 'Signin' }, { name: 'description', content: 'Signin to Reconductor' }];
 }
 
 export default function ProjectsRoute() {
-  return <Projects />;
+  const data = useLazyLoadQuery<ProjectsQuery>(query, {});
+  return <Projects fragmentRef={data} />;
 }

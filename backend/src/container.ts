@@ -20,6 +20,7 @@ import { HandleWithContextStrategy } from './auth/strategies/HandleWithContextSt
 import { me } from './controllers/auth/me.ts';
 import { toHandler } from './graphql/adapters/FetchToHandlerAdapter.ts';
 import { createLogoutController } from './controllers/auth/logout.ts';
+import { decodeCursor, encodeCursor } from './utils/cursor.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -53,6 +54,8 @@ container.register({
     withErrorHandling: asValue(withErrorHandling),
     withCors: asValue(withCors),
     fetchToHandlerAdapter: asValue(toHandler),
+    encodeCursor: asValue(encodeCursor),
+    decodeCursor: asValue(decodeCursor),
 });
 
 export default container;

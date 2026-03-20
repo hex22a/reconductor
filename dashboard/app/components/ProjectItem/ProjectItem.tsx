@@ -1,5 +1,5 @@
 import { useFragment } from 'react-relay';
-import { fragment } from './ProjectItemFragment';
+import { fragment } from './ProjectItem.fragment';
 import type { ProjectItemFragment$key } from '~/__generated__/ProjectItemFragment.graphql';
 
 type ProjectItemProps = {
