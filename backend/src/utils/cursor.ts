@@ -5,3 +5,6 @@ export function encodeCursor(value: string) {
 export function decodeCursor(cursor: string) {
     return Buffer.from(cursor, 'base64').toString();
 }
+
+export type CursorEncoder = typeof encodeCursor;
+export type CursorDecoder = typeof decodeCursor;

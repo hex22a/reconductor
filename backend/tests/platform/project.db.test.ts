@@ -137,10 +137,11 @@ describe('project.db', () => {
                         sql: trx,
                     });
                     // Act
-                    const actualProjects =
+                    const { projects, hasNextPage } =
                         await projectRepository.listProjects(expectedExistingUserId);
                     // Assert
-                    expect(actualProjects).toHaveLength(1);
+                    expect(projects).toHaveLength(1);
+                    expect(hasNextPage).toBeFalse();
                 });
             });
         });
@@ -149,8 +150,13 @@ describe('project.db', () => {
             await catchRollback(async () => {
                 await withTrx(async (trx) => {
                     // Arrange
+                    const expectedAnchorProjectName = 'anchor';
                     const expectedProject1Name = 'test';
                     const expectedProject2Name = 'test2';
+                    const [, expectedAnchorProjectInsert] = createProjectFixture(
+                        expectedAnchorProjectName,
+                        expectedExistingUserId,
+                    );
                     const [, expectedProject1Insert] = createProjectFixture(
                         expectedProject1Name,
                         expectedExistingUserId,
@@ -164,13 +170,17 @@ describe('project.db', () => {
                     });
                     await projectRepository.createProject(expectedProject1Insert);
                     await projectRepository.createProject(expectedProject2Insert);
+                    const expectedAnchorProject = await projectRepository.createProject(
+                        expectedAnchorProjectInsert,
+                    );
                     // Act
-                    const actualProjects = await projectRepository.listProjects(
+                    const { projects, hasNextPage } = await projectRepository.listProjects(
                         expectedExistingUserId,
-                        expectedExistingProjectId,
+                        expectedAnchorProject.id,
                     );
                     // Assert
-                    expect(actualProjects).toHaveLength(2);
+                    expect(projects).toHaveLength(2);
+                    expect(hasNextPage).toBeFalse();
                 });
             });
         });

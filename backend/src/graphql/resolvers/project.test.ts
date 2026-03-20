@@ -7,16 +7,19 @@ import {
     type ProjectResolverFactoryDeps,
 } from './project';
 import type { ProjectRepository } from '@/src/persistence/project.db';
-import type { ProjectDto } from '@/src/transport/project.dto';
+import type { ProjectDto, ProjectEdge, ProjectsDto } from '@/src/transport/project.dto';
 import { createProjectFixture } from '@/tests/fixtures/projects';
 import type { GraphQlContext } from '@/src/transport/graphql.context';
 import type { ProjectEntity } from '@/src/domain/project.entity';
+import type { PageInfo } from '@/src/transport/pageInfo';
 
 describe('project', () => {
     const expectedParent = null;
     const mockCreateProject = mock();
     const mockGetProject = mock();
     const mockListProjects = mock();
+    const mockEncodeCursor = mock();
+    const mockDecodeCursor = mock();
     const mockProjectRepository: ProjectRepository = {
         createProject: mockCreateProject,
         getProject: mockGetProject,
@@ -24,6 +27,8 @@ describe('project', () => {
     };
     const expectedProjectResolverFactoryDeps: ProjectResolverFactoryDeps = {
         projectRepository: mockProjectRepository,
+        encodeCursor: mockEncodeCursor,
+        decodeCursor: mockDecodeCursor,
     };
 
     const expectedOwnerId = 'owner_id';
@@ -39,6 +44,8 @@ describe('project', () => {
         mockCreateProject.mockReset();
         mockGetProject.mockReset();
         mockListProjects.mockReset();
+        mockEncodeCursor.mockReset();
+        mockDecodeCursor.mockReset();
     });
 
     test('createProjectResolver', () => {
@@ -125,19 +132,37 @@ describe('project', () => {
             expectedProjectId,
         );
         const expectedProjectEntities: Array<ProjectEntity> = [expectedProjectEntity];
-        mockListProjects.mockResolvedValue(expectedProjectEntities);
-        const expectedProjects: Array<ProjectDto> = [expectedProject];
+        const expectedHasNextPage = true;
+        const expectedCursor = 'cursor';
+        const expectedPageInfo: PageInfo = {
+            hasNextPage: expectedHasNextPage,
+            hasPreviousPage: false,
+            startCursor: expectedCursor,
+            endCursor: expectedCursor,
+        };
+        mockListProjects.mockResolvedValue({
+            projects: expectedProjectEntities,
+            hasNextPage: expectedHasNextPage,
+        });
+        mockEncodeCursor.mockReturnValue(expectedCursor);
+        const expectedEdges: Array<ProjectEdge> = [
+            {
+                node: expectedProject,
+                cursor: expectedCursor,
+            },
+        ];
         const projectResolver: ProjectResolver = createProjectResolver(
             expectedProjectResolverFactoryDeps,
         );
         // Act
-        const actualProjects: Array<ProjectDto> = await projectResolver.Query.projects(
+        const actualProjects: ProjectsDto = await projectResolver.Query.projects(
             expectedParent,
             expectedArgs,
             expectedContext,
         );
         // Assert
-        expect(actualProjects).toEqual(expectedProjects);
+        expect(actualProjects.edges).toEqual(expectedEdges);
+        expect(actualProjects.pageInfo).toEqual(expectedPageInfo);
         expect(mockListProjects).toHaveBeenCalledWith(expectedUserId);
     });
 });

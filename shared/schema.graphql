@@ -10,8 +10,25 @@ type Scan {
   created_at: String!
 }
 
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type ProjectEdge {
+  cursor: String!
+  node: Project!
+}
+
+type ProjectConnection {
+  edges: [ProjectEdge!]!
+  pageInfo: PageInfo!
+}
+
 type Query {
-  projects: [Project!]!
+  projects(first: Int, after: String): ProjectConnection!
   project(id: ID!): Project
 }
 

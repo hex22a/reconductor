@@ -10,8 +10,13 @@ export type ProjectRepositoryDeps = {
 export interface ProjectRepository {
     createProject(project: ProjectInsert): Promise<ProjectEntity>;
     getProject(projectId: string): Promise<ProjectEntity>;
-    listProjects(ownerId: string): Promise<Array<ProjectEntity>>;
-    listProjects(ownerId: string, cursorId: string): Promise<Array<ProjectEntity>>;
+    listProjects(
+        ownerId: string,
+    ): Promise<{ projects: Array<ProjectEntity>; hasNextPage: boolean }>;
+    listProjects(
+        ownerId: string,
+        cursorId: string,
+    ): Promise<{ projects: Array<ProjectEntity>; hasNextPage: boolean }>;
 }
 
 export function createProjectRepository({ sql }: ProjectRepositoryDeps): ProjectRepository {
@@ -42,23 +47,12 @@ export function createProjectRepository({ sql }: ProjectRepositoryDeps): Project
             }
             return project;
         },
-        async listProjects(ownerId: string, cursorId?: string): Promise<Array<ProjectEntity>> {
-            if (cursorId) {
-                console.log(cursorId);
-                return sql<Array<ProjectEntity>>`
-                    SELECT
-                        id,
-                        owner_id,
-                        name,
-                        created_at
-                    FROM recon.projects
-                    WHERE owner_id=${ownerId}
-                        AND id < ${cursorId}
-                    ORDER BY id DESC
-                    LIMIT ${PROJECTS_PAGE_SIZE};
-                `;
-            }
-            return sql<Array<ProjectEntity>>`
+        async listProjects(
+            ownerId: string,
+            cursorId?: string,
+        ): Promise<{ projects: Array<ProjectEntity>; hasNextPage: boolean }> {
+            const limit = PROJECTS_PAGE_SIZE + 1;
+            const projects: Array<ProjectEntity> = await sql<Array<ProjectEntity>>`
                 SELECT
                     id,
                     owner_id,
@@ -66,9 +60,15 @@ export function createProjectRepository({ sql }: ProjectRepositoryDeps): Project
                     created_at
                 FROM recon.projects
                 WHERE owner_id=${ownerId}
+                ${cursorId ? sql`AND id < ${cursorId}` : sql``}
                 ORDER BY id DESC
-                LIMIT ${PROJECTS_PAGE_SIZE};
+                LIMIT ${limit};
             `;
+            const hasNextPage = projects.length === limit;
+            return {
+                projects: hasNextPage ? projects.slice(0, -1) : projects,
+                hasNextPage,
+            };
         },
     };
 }
