@@ -8,11 +8,12 @@ type ProjectItemProps = {
 
 export function ProjectItem({ projectRef }: ProjectItemProps) {
   const data = useFragment(fragment, projectRef);
+  const createdAt = new Date(parseInt(data.created_at));
 
   return (
-    <div>
+    <div className="my-3 flex gap-3">
+      <span>{createdAt.toUTCString()}</span>
       <span>{data.name}</span>
-      <span>{data.created_at}</span>
     </div>
   );
 }

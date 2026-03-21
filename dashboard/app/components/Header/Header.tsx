@@ -10,7 +10,7 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0">
+    <header className="sticky top-0 py-2">
       {user?.username ? (
         <nav>
           <span>$: {user?.username}</span>

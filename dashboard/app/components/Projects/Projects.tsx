@@ -11,12 +11,14 @@ type ProjectsProps = {
 export function Projects({ fragmentRef }: ProjectsProps) {
   const { data } = usePaginationFragment(fragment, fragmentRef);
   return (
-    <>
-      <h1 className="font-special">Projects</h1>
-      {data.projects.edges.map((edge) => (
-        <ProjectItem key={edge.node.id} projectRef={edge.node} />
-      ))}
+    <div className="w-3xl">
       <CreateProjectForm />
-    </>
+      <div className="my-2">
+        <h1 className="font-special">Projects</h1>
+        {data.projects.edges.map((edge) => (
+          <ProjectItem key={edge.node.id} projectRef={edge.node} />
+        ))}
+      </div>
+    </div>
   );
 }
