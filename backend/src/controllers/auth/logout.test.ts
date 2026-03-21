@@ -2,14 +2,16 @@ import { describe, test, it, mock, afterEach, expect } from 'bun:test';
 import type { SessionRepository } from '@/src/persistence/session.kv';
 import { createLogoutController, type LogoutControllerDeps } from './logout';
 import type { RequestContext, RequestHandler } from '../types';
-import type { BunRequest } from 'bun';
+import type { BunRequest, CookieMap } from 'bun';
 import type { UserSession } from '@/src/domain/session.entity';
 import { constants } from 'node:http2';
+import { USER_SESSION_COOKIE_NAME } from '@/src/constants';
 
 describe('logout controller', () => {
     const mockCreateUserSession = mock();
     const mockDeleteUserSession = mock();
     const mockGetUserSession = mock();
+    const mockDeleteCookies = mock();
     const mockSessionRepository: SessionRepository = {
         createUserSession: mockCreateUserSession,
         getUserSession: mockGetUserSession,
@@ -18,11 +20,15 @@ describe('logout controller', () => {
     const expectedLogoutControllerDeps: LogoutControllerDeps = {
         sessionRepository: mockSessionRepository,
     };
+    const mockCookies = {
+        delete: mockDeleteCookies,
+    } satisfies Partial<CookieMap>;
 
     afterEach(() => {
         mockCreateUserSession.mockReset();
         mockGetUserSession.mockReset();
         mockDeleteUserSession.mockReset();
+        mockDeleteCookies.mockReset();
     });
 
     test('createLogoutController', () => {
@@ -49,7 +55,9 @@ describe('logout controller', () => {
             const expectedContext: RequestContext = {
                 user: expectedUserSession,
             };
-            const expectedRequest = {} satisfies Partial<BunRequest>;
+            const expectedRequest = {
+                cookies: mockCookies as unknown as CookieMap,
+            } satisfies Partial<BunRequest>;
             const expectedResponse: Response = new Response(null, {
                 status: constants.HTTP_STATUS_NO_CONTENT,
             });
@@ -64,6 +72,7 @@ describe('logout controller', () => {
             // Assert
             expect(mockDeleteUserSession).toHaveBeenLastCalledWith(expectedToken);
             expect(actualResponse.status).toEqual(expectedResponse.status);
+            expect(mockDeleteCookies).toHaveBeenLastCalledWith(USER_SESSION_COOKIE_NAME);
         });
     });
 });
