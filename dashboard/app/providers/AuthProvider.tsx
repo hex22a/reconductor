@@ -5,6 +5,7 @@ type User = { username: string } | null;
 
 type AuthContextType = {
   user: User;
+  isLoading: boolean;
   login: (username: string) => void;
   logout: () => Promise<void>;
 };
@@ -13,6 +14,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetch(API_ME_URL, { credentials: 'include' })
@@ -20,7 +22,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .then((data) => {
         if (data) setUser(data);
       })
-      .catch(() => {});
+      .catch(() => {
+        setUser(null);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
   function login(username: string) {
@@ -35,7 +42,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }
 
-  return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

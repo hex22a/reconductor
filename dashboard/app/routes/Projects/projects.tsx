@@ -5,7 +5,7 @@ import type { Route } from './+types/projects';
 import type { ProjectsQuery } from '~/__generated__/ProjectsQuery.graphql';
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: 'Signin' }, { name: 'description', content: 'Signin to Reconductor' }];
+  return [{ title: 'Projects list' }, { name: 'description', content: 'Your projects' }];
 }
 
 export default function ProjectsRoute() {

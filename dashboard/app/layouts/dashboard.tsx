@@ -4,7 +4,10 @@ import { Header } from '~/components/Header/Header';
 import { useAuth } from '~/providers/AuthProvider';
 
 export default function DashboardLayout() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+  if (isLoading) {
+    return <div>Loading</div>;
+  }
   if (!user) {
     return <Navigate to="/signin" replace />;
   }

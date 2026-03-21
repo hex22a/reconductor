@@ -15,7 +15,7 @@ export function Header() {
         <nav>
           <span>$: {user?.username}</span>
           <span>
-            <button type="button" onClick={handleLogout}>
+            <button className="cursor-pointer" type="button" onClick={handleLogout}>
               (Logout)
             </button>
           </span>

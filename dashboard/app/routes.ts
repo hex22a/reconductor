@@ -6,5 +6,8 @@ export default [
         route('signin', 'routes/signin.tsx'),
         route('signup', 'routes/signup.tsx'),
     ]),
-    layout('./layouts/dashboard.tsx', [route('projects', 'routes/Projects/projects.tsx')]),
+    layout('./layouts/dashboard.tsx', [
+        route('projects', 'routes/Projects/projects.tsx'),
+        route('project/:id', 'routes/Project/project.tsx'),
+    ]),
 ] satisfies RouteConfig;
