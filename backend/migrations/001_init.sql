@@ -35,3 +35,32 @@ CREATE TABLE recon.scans (
     status scan_status NOT NULL DEFAULT 'scheduled',
     schedule TEXT DEFAULT NULL
 );
+
+CREATE INDEX idx_scans_id_desc ON recon.scans (id DESC);
+
+CREATE TABLE recon.scan_hosts (
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    scan_id UUID NOT NULL REFERENCES recon.scans(id),
+    ip VARCHAR(45) NOT NULL,
+    mac VARCHAR(17),
+    vendor TEXT,
+    hostname TEXT,
+    os_match TEXT,
+    os_accuracy INT,
+    created_at TIMESTAMP DEFAULT now()
+);
+
+CREATE INDEX idx_scan_hosts_id_desc ON recon.scan_hosts (id DESC);
+
+CREATE TABLE recon.scan_ports (
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    host_id UUID NOT NULL REFERENCES recon.scan_hosts(id),
+    port INT NOT NULL,
+    protocol VARCHAR(10),
+    state VARCHAR(20),
+    service TEXT,
+    product TEXT,
+    version TEXT
+);
+
+CREATE INDEX idx_scan_ports_id_desc ON recon.scan_ports (id DESC);

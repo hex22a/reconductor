@@ -1,4 +1,8 @@
+import { expectedExistingHostId, expectedHostIp } from '@/src/domain/host.entity';
+import { expectedExistingPortId, expectedPort } from '@/src/domain/port.entity';
 import type { SQL } from '@/src/persistence/db';
+import { createHostFixture } from '@/tests/fixtures/hosts';
+import { createPortFixture } from '@/tests/fixtures/ports';
 import {
     createProjectFixture,
     expectedExistingProjectId,
@@ -59,8 +63,38 @@ async function seedScans(sql: SQL): Promise<void> {
     `;
 }
 
+async function seedHosts(sql: SQL): Promise<void> {
+    const [, host] = createHostFixture(
+        expectedExistingScanId,
+        expectedHostIp,
+        expectedExistingHostId,
+    );
+    await sql`
+        INSERT into recon.scan_hosts
+            (id, scan_id, ip)
+        VALUES
+            (${host.id}, ${host.scan_id}, ${host.ip});
+    `;
+}
+
+async function seedPorts(sql: SQL): Promise<void> {
+    const [, port] = createPortFixture(
+        expectedExistingHostId,
+        expectedPort,
+        expectedExistingPortId,
+    );
+    await sql`
+        INSERT into recon.scan_ports
+            (id, host_id, port)
+        VALUES
+            (${port.id}, ${port.host_id}, ${port.port});
+    `;
+}
+
 export async function seedDb(sql: SQL): Promise<void> {
     await seedUsers(sql);
     await seedProjects(sql);
     await seedScans(sql);
+    await seedHosts(sql);
+    await seedPorts(sql);
 }
