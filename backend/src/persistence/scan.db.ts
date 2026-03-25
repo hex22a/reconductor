@@ -16,21 +16,22 @@ export function createScanRepository({ sql }: ScanRepositoryDeps): ScanRepositor
         async createScan(scan: ScanInsert): Promise<ScanEntity> {
             const queryResult = await sql`
                 INSERT INTO recon.scans
-                    (project_id, target)
+                    (project_id, target, schedule)
                 VALUES
-                    (${scan.project_id}, ${scan.target})
+                    (${scan.project_id}, ${scan.target}, ${scan.schedule})
                 RETURNING *;
             `;
             return queryResult[0];
         },
         async getScan(id: string): Promise<ScanEntity> {
             const [scan] = await sql<Array<ScanEntity>>`
-                SELECT 
+                SELECT
                     id,
                     project_id,
                     created_at,
                     target,
-                    status
+                    status,
+                    schedule
                 FROM recon.scans
                 WHERE id=${id}
                 LIMIT 1;

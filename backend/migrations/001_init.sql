@@ -32,5 +32,6 @@ CREATE TABLE recon.scans (
     project_id UUID NOT NULL REFERENCES recon.projects (id),
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     target INET NOT NULL,
-    status scan_status NOT NULL DEFAULT 'scheduled'
+    status scan_status NOT NULL DEFAULT 'scheduled',
+    schedule TEXT DEFAULT NULL
 );

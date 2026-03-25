@@ -23,7 +23,7 @@ async function seedUsers(sql: SQL): Promise<void> {
         expectedExistingUserId,
     );
     await sql`
-        INSERT INTO recon.users 
+        INSERT INTO recon.users
             (id, username, password_hash)
         VALUES
             (${rootUser.id}, ${rootUser.username}, ${rootUser.password_hash});
@@ -48,6 +48,7 @@ async function seedScans(sql: SQL): Promise<void> {
     const [, , scan] = createScanFixture(
         expectedExistingProjectId,
         expectedScanTarget,
+        undefined,
         expectedExistingScanId,
     );
     await sql`

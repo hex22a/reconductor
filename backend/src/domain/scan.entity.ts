@@ -6,7 +6,8 @@ export type ScanEntity = {
     created_at: Date;
     target: string;
     status: ScanStatus;
+    schedule: string | null;
 };
 
-export type ScanInsert = Pick<ScanEntity, 'project_id' | 'target'>;
-export type ScanInsertSeed = Pick<ScanEntity, 'id' | 'project_id' | 'target'>;
+export type ScanInsert = Pick<ScanEntity, 'project_id' | 'target' | 'schedule'>;
+export type ScanInsertSeed = Pick<ScanEntity, 'id' | 'project_id' | 'target' | 'schedule'>;

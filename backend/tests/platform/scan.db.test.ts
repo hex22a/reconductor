@@ -45,6 +45,33 @@ describe('scan.db', () => {
                     expect(actualScan.project_id).toEqual(expectedExistingProjectId);
                     expect(actualScan.target).toEqual(expectedTarget);
                     expect(actualScan.status).toEqual(expectedStatus);
+                    expect(actualScan.schedule).toEqual(null);
+                });
+            });
+        });
+
+        it('creates a scan in database with a schedule', async () => {
+            await catchRollback(async () => {
+                await withTrx(async (trx) => {
+                    // Arrange
+                    const expectedTarget = '192.168.0.0/16';
+                    const expectedSchedule = '* * 5 0 0';
+                    const [, expectedScanInsert] = createScanFixture(
+                        expectedExistingProjectId,
+                        expectedTarget,
+                        expectedSchedule,
+                    );
+                    const scanRepository: ScanRepository = createScanRepository({ sql: trx });
+                    // Act
+                    const actualScan: ScanEntity =
+                        await scanRepository.createScan(expectedScanInsert);
+                    // Assert
+                    expect(actualScan.id).toBeString();
+                    expect(actualScan.created_at).toBeDate();
+                    expect(actualScan.project_id).toEqual(expectedExistingProjectId);
+                    expect(actualScan.target).toEqual(expectedTarget);
+                    expect(actualScan.status).toEqual(expectedStatus);
+                    expect(actualScan.schedule).toEqual(expectedSchedule);
                 });
             });
         });

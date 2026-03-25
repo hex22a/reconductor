@@ -7,6 +7,7 @@ export const expectedScanTarget = '192.168.1.0/24';
 export function createScanFixture(
     projectId: string,
     target: string,
+    schedule?: string,
     scanId?: string,
 ): [ScanEntity, ScanInsert, ScanInsertSeed] {
     const id = scanId || randomUUIDv7();
@@ -18,15 +19,18 @@ export function createScanFixture(
             target,
             created_at: date,
             status: 'scheduled',
+            schedule: schedule ?? null,
         },
         {
             project_id: projectId,
             target,
+            schedule: schedule ?? null,
         },
         {
             id,
             project_id: projectId,
             target,
+            schedule: schedule ?? null,
         },
     ];
 }
