@@ -24,7 +24,9 @@ type ProjectConnection {
 type Scan {
   id: ID!
   target: String!
+  status: String!
   created_at: String!
+  schedule: String
 }
 
 type ScanEdge {
@@ -41,6 +43,11 @@ type Host {
   id: ID!
   created_at: String!
   ip: String
+  mac: String
+  hostname: String
+  vendor: String
+  os_match: String
+  os_accuracy: Int
 }
 
 type HostEdge {
@@ -57,6 +64,11 @@ type Port {
   id: ID!
   created_at: String!
   port: Int!
+  protocol: String
+  state: String
+  service: String
+  product: String
+  version: String
 }
 
 type PortEdge {
@@ -78,6 +90,11 @@ input CreateProjectInput {
   name: String!
 }
 
+input CreateScanInput {
+  target: String!
+}
+
 type Mutation {
   createProject(input: CreateProjectInput!): ProjectEdge!
+  createScan(input: CreateScanInput!): ScanEdge!
 }

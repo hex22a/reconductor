@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<aa0541ef4f547d3159f69fa0c3daee4c>>
+ * @generated SignedSource<<1afb0fe3bc1839ca22add8908dd9c9ba>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -174,12 +174,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "458f44edf20d05c8f8b9d7bedc4ce091",
+    "cacheID": "fab01ef927ed86e2c26a43824d449487",
     "id": null,
     "metadata": {},
     "name": "ProjectsPaginationQuery",
     "operationKind": "query",
-    "text": "query ProjectsPaginationQuery(\n  $after: String\n  $first: Int = 15\n) {\n  ...ProjectsListFragment_2HEEH6\n}\n\nfragment ProjectItemFragment on Project {\n  name\n  created_at\n}\n\nfragment ProjectsListFragment_2HEEH6 on Query {\n  projects(first: $first, after: $after) {\n    edges {\n      node {\n        id\n        ...ProjectItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n"
+    "text": "query ProjectsPaginationQuery(\n  $after: String\n  $first: Int = 15\n) {\n  ...ProjectsListFragment_2HEEH6\n}\n\nfragment ProjectItemFragment on Project {\n  id\n  name\n  created_at\n}\n\nfragment ProjectsListFragment_2HEEH6 on Query {\n  projects(first: $first, after: $after) {\n    edges {\n      node {\n        id\n        ...ProjectItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n"
   }
 };
 })();
