@@ -1,20 +1,14 @@
-type Project {
-  id: ID!
-  name: String!
-  created_at: String!
-}
-
-type Scan {
-  id: ID!
-  target: String!
-  created_at: String!
-}
-
 type PageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
   startCursor: String
   endCursor: String
+}
+
+type Project {
+  id: ID!
+  name: String!
+  created_at: String!
 }
 
 type ProjectEdge {
@@ -24,6 +18,54 @@ type ProjectEdge {
 
 type ProjectConnection {
   edges: [ProjectEdge!]!
+  pageInfo: PageInfo!
+}
+
+type Scan {
+  id: ID!
+  target: String!
+  created_at: String!
+}
+
+type ScanEdge {
+  cursor: String!
+  node: Scan!
+}
+
+type ScanConnection {
+  edges: [ScanEdge!]!
+  pageInfo: PageInfo!
+}
+
+type Host {
+  id: ID!
+  created_at: String!
+  ip: String
+}
+
+type HostEdge {
+  cursor: String!
+  node: Host!
+}
+
+type HostConnection {
+  edges: [HostEdge!]!
+  pageInfo: PageInfo!
+}
+
+type Port {
+  id: ID!
+  created_at: String!
+  port: Int!
+}
+
+type PortEdge {
+  cursor: String!
+  node: Port!
+}
+
+type PortConnection {
+  edges: [PortEdge!]!
   pageInfo: PageInfo!
 }
 

@@ -14,6 +14,7 @@ describe('scan.db', () => {
                 const expectedScanRepository: ScanRepository = {
                     createScan: expect.any(Function),
                     getScan: expect.any(Function),
+                    listScans: expect.any(Function),
                 };
                 // Act
                 const actualScanRepository: ScanRepository = createScanRepository({ sql: trx });
@@ -161,6 +162,59 @@ describe('scan.db', () => {
                         // Assert
                         expect(actualError).toBeInstanceOf(ScanNotFoundError);
                     }
+                });
+            });
+        });
+    });
+
+    describe('listScans', () => {
+        it('returns list of all scans for a given project', async () => {
+            await catchRollback(async () => {
+                await withTrx(async (trx) => {
+                    // Arrange
+                    const scanRepository: ScanRepository = createScanRepository({ sql: trx });
+                    // Act
+                    const { scans, hasNextPage } =
+                        await scanRepository.listScans(expectedExistingProjectId);
+                    // Assert
+                    expect(scans).toHaveLength(1);
+                    expect(hasNextPage).toBeFalse();
+                });
+            });
+        });
+
+        it('returns list of all scans for a given project after cursor', async () => {
+            await catchRollback(async () => {
+                await withTrx(async (trx) => {
+                    // Arrange
+                    const expectedAnchorScanTarget = '192.168.0.0/16';
+                    const expectedScan1Target = '192.167.0.0/16';
+                    const expectedScan2Target = '192.169.0.0/16';
+                    const [, expectedAnchorScanInsert] = createScanFixture(
+                        expectedExistingProjectId,
+                        expectedAnchorScanTarget,
+                    );
+                    const [, expectedScan1Insert] = createScanFixture(
+                        expectedExistingProjectId,
+                        expectedScan1Target,
+                    );
+                    const [, expectedScan2Insert] = createScanFixture(
+                        expectedExistingProjectId,
+                        expectedScan2Target,
+                    );
+                    const scanRepository: ScanRepository = createScanRepository({ sql: trx });
+                    await scanRepository.createScan(expectedScan1Insert);
+                    await scanRepository.createScan(expectedScan2Insert);
+                    const expectedAnchorProject =
+                        await scanRepository.createScan(expectedAnchorScanInsert);
+                    // Act
+                    const { scans, hasNextPage } = await scanRepository.listScans(
+                        expectedExistingProjectId,
+                        expectedAnchorProject.id,
+                    );
+                    // Assert
+                    expect(scans).toHaveLength(3);
+                    expect(hasNextPage).toBeFalse();
                 });
             });
         });

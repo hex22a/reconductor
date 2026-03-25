@@ -50,3 +50,4 @@ export const GRAPHQL_ERROR_EXTENSION_CODE = 'FORBIDDEN';
 export const UNAUTHORIZED_ERROR_MESSAGE = 'Unauthorized';
 
 export const PROJECTS_PAGE_SIZE = 15;
+export const SCANS_PAGE_SIZE = 25;
