@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<aafac6f54d0c2552fd2a033e9c51df44>>
+ * @generated SignedSource<<692d1abb36624000b7cf881f3aca1e05>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,7 +12,7 @@ import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type ProjectsQuery$variables = Record<PropertyKey, never>;
 export type ProjectsQuery$data = {
-  readonly " $fragmentSpreads": FragmentRefs<"ProjectsListFragment">;
+  readonly " $fragmentSpreads": FragmentRefs<"ProjectListFragment">;
 };
 export type ProjectsQuery = {
   response: ProjectsQuery$data;
@@ -37,7 +37,7 @@ return {
       {
         "args": null,
         "kind": "FragmentSpread",
-        "name": "ProjectsListFragment"
+        "name": "ProjectListFragment"
       }
     ],
     "type": "Query",
@@ -154,16 +154,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "fc541756ee58e9b9d5feb017c1f1be95",
+    "cacheID": "603441d37f0649f2aefb6a3502d2b2ab",
     "id": null,
     "metadata": {},
     "name": "ProjectsQuery",
     "operationKind": "query",
-    "text": "query ProjectsQuery {\n  ...ProjectsListFragment\n}\n\nfragment ProjectItemFragment on Project {\n  id\n  name\n  created_at\n}\n\nfragment ProjectsListFragment on Query {\n  projects(first: 15) {\n    edges {\n      node {\n        id\n        ...ProjectItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n"
+    "text": "query ProjectsQuery {\n  ...ProjectListFragment\n}\n\nfragment ProjectItemFragment on Project {\n  id\n  name\n  created_at\n}\n\nfragment ProjectListFragment on Query {\n  projects(first: 15) {\n    edges {\n      node {\n        id\n        ...ProjectItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "c0686c421c6b364bdb5a5d4b51a378ce";
+(node as any).hash = "fa1dc4acf4a4bc7a2cbc452d4b000a5e";
 
 export default node;

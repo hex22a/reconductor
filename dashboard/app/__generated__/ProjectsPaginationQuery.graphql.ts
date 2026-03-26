@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<1afb0fe3bc1839ca22add8908dd9c9ba>>
+ * @generated SignedSource<<ea1bee6ee4651f7a61574179ab04fb9c>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,7 +15,7 @@ export type ProjectsPaginationQuery$variables = {
   first?: number | null | undefined;
 };
 export type ProjectsPaginationQuery$data = {
-  readonly " $fragmentSpreads": FragmentRefs<"ProjectsListFragment">;
+  readonly " $fragmentSpreads": FragmentRefs<"ProjectListFragment">;
 };
 export type ProjectsPaginationQuery = {
   response: ProjectsPaginationQuery$data;
@@ -57,7 +57,7 @@ return {
       {
         "args": (v1/*: any*/),
         "kind": "FragmentSpread",
-        "name": "ProjectsListFragment"
+        "name": "ProjectListFragment"
       }
     ],
     "type": "Query",
@@ -174,16 +174,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "fab01ef927ed86e2c26a43824d449487",
+    "cacheID": "9a9595a7ada1da5b07857a68bf1ad369",
     "id": null,
     "metadata": {},
     "name": "ProjectsPaginationQuery",
     "operationKind": "query",
-    "text": "query ProjectsPaginationQuery(\n  $after: String\n  $first: Int = 15\n) {\n  ...ProjectsListFragment_2HEEH6\n}\n\nfragment ProjectItemFragment on Project {\n  id\n  name\n  created_at\n}\n\nfragment ProjectsListFragment_2HEEH6 on Query {\n  projects(first: $first, after: $after) {\n    edges {\n      node {\n        id\n        ...ProjectItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n"
+    "text": "query ProjectsPaginationQuery(\n  $after: String\n  $first: Int = 15\n) {\n  ...ProjectListFragment_2HEEH6\n}\n\nfragment ProjectItemFragment on Project {\n  id\n  name\n  created_at\n}\n\nfragment ProjectListFragment_2HEEH6 on Query {\n  projects(first: $first, after: $after) {\n    edges {\n      node {\n        id\n        ...ProjectItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "df25c557e1fd8f247c8b7fd84886e8a0";
+(node as any).hash = "fd4d68c40c25ad53788445910d551583";
 
 export default node;

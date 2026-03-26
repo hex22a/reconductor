@@ -1,4 +1,4 @@
-import { Projects } from '~/components/Projects/Projects';
+import { ProjectList } from '~/components/ProjectList/ProjectList';
 import { useLazyLoadQuery } from 'react-relay';
 import { query } from './ProjectsQuery';
 import type { Route } from './+types/projects';
@@ -10,5 +10,5 @@ export function meta({}: Route.MetaArgs) {
 
 export default function ProjectsRoute() {
   const data = useLazyLoadQuery<ProjectsQuery>(query, {});
-  return <Projects fragmentRef={data} />;
+  return <ProjectList fragmentRef={data} />;
 }

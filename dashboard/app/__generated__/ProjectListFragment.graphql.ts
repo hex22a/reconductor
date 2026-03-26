@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<026a510c91ae1435ddd645b6075fe2e4>>
+ * @generated SignedSource<<0c1483ec1709291082569f257b7adc68>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,7 +10,7 @@
 
 import { ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type ProjectsListFragment$data = {
+export type ProjectListFragment$data = {
   readonly projects: {
     readonly edges: ReadonlyArray<{
       readonly node: {
@@ -19,11 +19,11 @@ export type ProjectsListFragment$data = {
       };
     }>;
   };
-  readonly " $fragmentType": "ProjectsListFragment";
+  readonly " $fragmentType": "ProjectListFragment";
 };
-export type ProjectsListFragment$key = {
-  readonly " $data"?: ProjectsListFragment$data;
-  readonly " $fragmentSpreads": FragmentRefs<"ProjectsListFragment">;
+export type ProjectListFragment$key = {
+  readonly " $data"?: ProjectListFragment$data;
+  readonly " $fragmentSpreads": FragmentRefs<"ProjectListFragment">;
 };
 
 import ProjectsPaginationQuery_graphql from './ProjectsPaginationQuery.graphql';
@@ -68,7 +68,7 @@ return {
       "operation": ProjectsPaginationQuery_graphql
     }
   },
-  "name": "ProjectsListFragment",
+  "name": "ProjectListFragment",
   "selections": [
     {
       "alias": "projects",
@@ -160,6 +160,6 @@ return {
 };
 })();
 
-(node as any).hash = "df25c557e1fd8f247c8b7fd84886e8a0";
+(node as any).hash = "fd4d68c40c25ad53788445910d551583";
 
 export default node;
