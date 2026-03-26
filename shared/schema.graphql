@@ -84,6 +84,7 @@ type PortConnection {
 type Query {
   projects(first: Int, after: String): ProjectConnection!
   project(id: ID!): Project
+  scans(first: Int, after: String): ScanConnection!
 }
 
 input CreateProjectInput {
@@ -92,6 +93,8 @@ input CreateProjectInput {
 
 input CreateScanInput {
   target: String!
+  projectId: String!
+  schedule: String
 }
 
 type Mutation {

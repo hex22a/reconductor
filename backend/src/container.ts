@@ -21,6 +21,8 @@ import { me } from './controllers/auth/me.ts';
 import { toHandler } from './graphql/adapters/FetchToHandlerAdapter.ts';
 import { createLogoutController } from './controllers/auth/logout.ts';
 import { decodeCursor, encodeCursor } from './utils/cursor.ts';
+import { createScanRepository } from './persistence/scan.db.ts';
+import { createScanResolver } from './graphql/resolvers/scan.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -37,9 +39,11 @@ container.register({
     logoutController: asFunction(createLogoutController),
     meController: asValue(me),
     projectResolver: asFunction(createProjectResolver).singleton(),
+    scanResolver: asFunction(createScanResolver).singleton(),
     userRepository: asFunction(createUserRepository),
     sessionRepository: asFunction(createSessionRepository).singleton(),
     projectRepository: asFunction(createProjectRepository).singleton(),
+    scanRepository: asFunction(createScanRepository).singleton(),
     generateRandomToken: asFunction(createGenerateRandomToken),
     cryptoProvider: asValue(crypto),
     hashFn: asValue(Bun.password.hash),
