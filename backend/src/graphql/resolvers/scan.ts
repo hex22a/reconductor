@@ -1,7 +1,7 @@
 import type { ScanEntity } from '@/src/domain/scan.entity';
 import type { ScanRepository } from '@/src/persistence/scan.db';
 import type { GraphQlContext } from '@/src/transport/graphql.context';
-import type { ScanEdge, ScansDto } from '@/src/transport/scan.dto';
+import type { CreateScanPayload, ScansDto } from '@/src/transport/scan.dto';
 import type { CursorDecoder, CursorEncoder } from '@/src/utils/cursor';
 
 export type CreateScanArgs = {
@@ -31,7 +31,7 @@ export type ScanResolver = {
             parent: unknown,
             args: CreateScanArgs,
             context: GraphQlContext,
-        ) => Promise<ScanEdge>;
+        ) => Promise<CreateScanPayload>;
     };
 };
 
@@ -66,19 +66,22 @@ export function createScanResolver({
             async createScan(
                 _,
                 { input: { target, projectId, schedule } }: CreateScanArgs,
-            ): Promise<ScanEdge> {
+            ): Promise<CreateScanPayload> {
                 const scan: ScanEntity = await scanRepository.createScan({
                     target,
                     project_id: projectId,
                     schedule: schedule ?? null,
                 });
                 return {
-                    node: {
-                        id: scan.id,
-                        created_at: scan.created_at,
-                        target,
+                    edge: {
+                        node: {
+                            id: scan.id,
+                            created_at: scan.created_at,
+                            target,
+                        },
+                        cursor: encodeCursor(scan.id),
                     },
-                    cursor: encodeCursor(scan.id),
+                    errors: [],
                 };
             },
         },

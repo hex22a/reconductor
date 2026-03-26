@@ -1,3 +1,4 @@
+import type { ValidationError } from './error.dto';
 import type { PageInfo } from './pageInfo';
 
 export type ScanDto = {
@@ -15,4 +16,9 @@ export type ScanEdge = {
 export type ScansDto = {
     edges: ScanEdge[];
     pageInfo: PageInfo;
+};
+
+export type CreateScanPayload = {
+    edge: ScanEdge;
+    errors: ValidationError[];
 };

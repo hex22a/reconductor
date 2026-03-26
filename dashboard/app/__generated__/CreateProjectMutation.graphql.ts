@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d219975ec4c8f164ce8171a29cc21083>>
+ * @generated SignedSource<<9c7dffdeb757af850704101360915ef9>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -18,12 +18,18 @@ export type CreateProjectMutation$variables = {
 };
 export type CreateProjectMutation$data = {
   readonly createProject: {
-    readonly cursor: string;
-    readonly node: {
-      readonly created_at: string;
-      readonly id: string;
-      readonly name: string;
-    };
+    readonly edge: {
+      readonly cursor: string;
+      readonly node: {
+        readonly created_at: string;
+        readonly id: string;
+        readonly name: string;
+      };
+    } | null | undefined;
+    readonly errors: ReadonlyArray<{
+      readonly field: string;
+      readonly message: string;
+    }>;
   };
 };
 export type CreateProjectMutation = {
@@ -51,10 +57,10 @@ v2 = [
 ],
 v3 = {
   "alias": null,
-  "args": (v2/*: any*/),
+  "args": null,
   "concreteType": "ProjectEdge",
   "kind": "LinkedField",
-  "name": "createProject",
+  "name": "edge",
   "plural": false,
   "selections": [
     {
@@ -98,6 +104,31 @@ v3 = {
     }
   ],
   "storageKey": null
+},
+v4 = {
+  "alias": null,
+  "args": null,
+  "concreteType": "ValidationError",
+  "kind": "LinkedField",
+  "name": "errors",
+  "plural": true,
+  "selections": [
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "field",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "message",
+      "storageKey": null
+    }
+  ],
+  "storageKey": null
 };
 return {
   "fragment": {
@@ -109,7 +140,19 @@ return {
     "metadata": null,
     "name": "CreateProjectMutation",
     "selections": [
-      (v3/*: any*/)
+      {
+        "alias": null,
+        "args": (v2/*: any*/),
+        "concreteType": "CreateProjectPayload",
+        "kind": "LinkedField",
+        "name": "createProject",
+        "plural": false,
+        "selections": [
+          (v3/*: any*/),
+          (v4/*: any*/)
+        ],
+        "storageKey": null
+      }
     ],
     "type": "Mutation",
     "abstractKey": null
@@ -123,36 +166,48 @@ return {
     "kind": "Operation",
     "name": "CreateProjectMutation",
     "selections": [
-      (v3/*: any*/),
       {
         "alias": null,
         "args": (v2/*: any*/),
-        "filters": null,
-        "handle": "appendEdge",
-        "key": "",
-        "kind": "LinkedHandle",
+        "concreteType": "CreateProjectPayload",
+        "kind": "LinkedField",
         "name": "createProject",
-        "handleArgs": [
+        "plural": false,
+        "selections": [
+          (v3/*: any*/),
           {
-            "kind": "Variable",
-            "name": "connections",
-            "variableName": "connections"
-          }
-        ]
+            "alias": null,
+            "args": null,
+            "filters": null,
+            "handle": "appendEdge",
+            "key": "",
+            "kind": "LinkedHandle",
+            "name": "edge",
+            "handleArgs": [
+              {
+                "kind": "Variable",
+                "name": "connections",
+                "variableName": "connections"
+              }
+            ]
+          },
+          (v4/*: any*/)
+        ],
+        "storageKey": null
       }
     ]
   },
   "params": {
-    "cacheID": "a9b842daba63df8991e91e262eaee2ef",
+    "cacheID": "28c092f576f4c75c97e8d7f2ab148abf",
     "id": null,
     "metadata": {},
     "name": "CreateProjectMutation",
     "operationKind": "mutation",
-    "text": "mutation CreateProjectMutation(\n  $input: CreateProjectInput!\n) {\n  createProject(input: $input) {\n    cursor\n    node {\n      id\n      name\n      created_at\n    }\n  }\n}\n"
+    "text": "mutation CreateProjectMutation(\n  $input: CreateProjectInput!\n) {\n  createProject(input: $input) {\n    edge {\n      cursor\n      node {\n        id\n        name\n        created_at\n      }\n    }\n    errors {\n      field\n      message\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "05e38f1a094704ad4f2aa3059e0e7414";
+(node as any).hash = "e26c0d9a6bf243f2e169b8f15f444703";
 
 export default node;

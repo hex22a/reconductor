@@ -7,11 +7,17 @@ import {
     type ProjectResolverFactoryDeps,
 } from './project';
 import type { ProjectRepository } from '@/src/persistence/project.db';
-import type { ProjectDto, ProjectEdge, ProjectsDto } from '@/src/transport/project.dto';
+import type {
+    CreateProjectPayload,
+    ProjectDto,
+    ProjectEdge,
+    ProjectsDto,
+} from '@/src/transport/project.dto';
 import { createProjectFixture } from '@/tests/fixtures/projects';
 import type { GraphQlContext } from '@/src/transport/graphql.context';
 import type { ProjectEntity } from '@/src/domain/project.entity';
 import type { PageInfo } from '@/src/transport/pageInfo';
+import type { ValidationError } from '@/src/transport/error.dto';
 
 describe('project', () => {
     const expectedParent = null;
@@ -92,6 +98,7 @@ describe('project', () => {
         // Arrange
         const expectedUserId = '019c9abc-a10c-76e3-8287-885036664a5c';
         const expectedCursor = 'cursor';
+        const expectedValidationErrors: Array<ValidationError> = [];
         const expectedArgs: CreateProjectArgs = {
             input: {
                 name: expectedProjectName,
@@ -111,14 +118,16 @@ describe('project', () => {
             expectedProjectResolverFactoryDeps,
         );
         // Act
-        const actualProject: ProjectEdge = await projectResolver.Mutation.createProject(
-            expectedParent,
-            expectedArgs,
-            expectedContext,
-        );
+        const actualCreateProjectPayload: CreateProjectPayload =
+            await projectResolver.Mutation.createProject(
+                expectedParent,
+                expectedArgs,
+                expectedContext,
+            );
         // Assert
-        expect(actualProject.node).toEqual(expectedProject);
-        expect(actualProject.cursor).toEqual(expectedCursor);
+        expect(actualCreateProjectPayload.edge.node).toEqual(expectedProject);
+        expect(actualCreateProjectPayload.edge.cursor).toEqual(expectedCursor);
+        expect(actualCreateProjectPayload.errors).toEqual(expectedValidationErrors);
         expect(mockCreateProject).toHaveBeenCalledWith(expectedProjectInsert);
     });
 

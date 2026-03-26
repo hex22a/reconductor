@@ -1,8 +1,10 @@
 import { useRef } from 'react';
 import { ConnectionHandler, useMutation } from 'react-relay';
+import { useParams } from 'react-router';
 import { CreateScanMutation } from '~/graphql/mutations/CreateScanMutation';
 
 export function CreateScanForm() {
+  const { id: projectId } = useParams();
   const [commit, isInFlight] = useMutation(CreateScanMutation);
   const targetRef = useRef<HTMLInputElement>(null);
   const scheduleRef = useRef<HTMLInputElement>(null);
@@ -15,7 +17,7 @@ export function CreateScanForm() {
     const schedule = formData.get('schedule');
     commit({
       variables: {
-        input: { target, schedule },
+        input: { projectId, target, schedule },
         connections: [connectionId],
       },
 

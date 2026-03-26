@@ -1,3 +1,4 @@
+import type { ValidationError } from './error.dto';
 import type { PageInfo } from './pageInfo';
 
 export type ProjectDto = {
@@ -14,4 +15,9 @@ export type ProjectEdge = {
 export type ProjectsDto = {
     edges: ProjectEdge[];
     pageInfo: PageInfo;
+};
+
+export type CreateProjectPayload = {
+    edge: ProjectEdge;
+    errors: ValidationError[];
 };

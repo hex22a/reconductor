@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<f46c5a522e0449040619b58e2b9c5c17>>
+ * @generated SignedSource<<2e2f5fa63d387e54a73c88b2d75da2b0>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -20,14 +20,20 @@ export type CreateScanMutation$variables = {
 };
 export type CreateScanMutation$data = {
   readonly createScan: {
-    readonly cursor: string;
-    readonly node: {
-      readonly created_at: string;
-      readonly id: string;
-      readonly schedule: string | null | undefined;
-      readonly status: string;
-      readonly target: string;
-    };
+    readonly edge: {
+      readonly cursor: string;
+      readonly node: {
+        readonly created_at: string;
+        readonly id: string;
+        readonly schedule: string | null | undefined;
+        readonly status: string;
+        readonly target: string;
+      };
+    } | null | undefined;
+    readonly errors: ReadonlyArray<{
+      readonly field: string;
+      readonly message: string;
+    }>;
   };
 };
 export type CreateScanMutation = {
@@ -55,10 +61,10 @@ v2 = [
 ],
 v3 = {
   "alias": null,
-  "args": (v2/*: any*/),
+  "args": null,
   "concreteType": "ScanEdge",
   "kind": "LinkedField",
-  "name": "createScan",
+  "name": "edge",
   "plural": false,
   "selections": [
     {
@@ -116,6 +122,31 @@ v3 = {
     }
   ],
   "storageKey": null
+},
+v4 = {
+  "alias": null,
+  "args": null,
+  "concreteType": "ValidationError",
+  "kind": "LinkedField",
+  "name": "errors",
+  "plural": true,
+  "selections": [
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "field",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "message",
+      "storageKey": null
+    }
+  ],
+  "storageKey": null
 };
 return {
   "fragment": {
@@ -127,7 +158,19 @@ return {
     "metadata": null,
     "name": "CreateScanMutation",
     "selections": [
-      (v3/*: any*/)
+      {
+        "alias": null,
+        "args": (v2/*: any*/),
+        "concreteType": "CreateScanPayload",
+        "kind": "LinkedField",
+        "name": "createScan",
+        "plural": false,
+        "selections": [
+          (v3/*: any*/),
+          (v4/*: any*/)
+        ],
+        "storageKey": null
+      }
     ],
     "type": "Mutation",
     "abstractKey": null
@@ -141,36 +184,48 @@ return {
     "kind": "Operation",
     "name": "CreateScanMutation",
     "selections": [
-      (v3/*: any*/),
       {
         "alias": null,
         "args": (v2/*: any*/),
-        "filters": null,
-        "handle": "appendEdge",
-        "key": "",
-        "kind": "LinkedHandle",
+        "concreteType": "CreateScanPayload",
+        "kind": "LinkedField",
         "name": "createScan",
-        "handleArgs": [
+        "plural": false,
+        "selections": [
+          (v3/*: any*/),
           {
-            "kind": "Variable",
-            "name": "connections",
-            "variableName": "connections"
-          }
-        ]
+            "alias": null,
+            "args": null,
+            "filters": null,
+            "handle": "appendEdge",
+            "key": "",
+            "kind": "LinkedHandle",
+            "name": "edge",
+            "handleArgs": [
+              {
+                "kind": "Variable",
+                "name": "connections",
+                "variableName": "connections"
+              }
+            ]
+          },
+          (v4/*: any*/)
+        ],
+        "storageKey": null
       }
     ]
   },
   "params": {
-    "cacheID": "0217b18a59d6ba4017eb50b99fa78dee",
+    "cacheID": "ff21104c9ec83b1328c767784e62cf5c",
     "id": null,
     "metadata": {},
     "name": "CreateScanMutation",
     "operationKind": "mutation",
-    "text": "mutation CreateScanMutation(\n  $input: CreateScanInput!\n) {\n  createScan(input: $input) {\n    cursor\n    node {\n      id\n      target\n      schedule\n      created_at\n      status\n    }\n  }\n}\n"
+    "text": "mutation CreateScanMutation(\n  $input: CreateScanInput!\n) {\n  createScan(input: $input) {\n    edge {\n      cursor\n      node {\n        id\n        target\n        schedule\n        created_at\n        status\n      }\n    }\n    errors {\n      field\n      message\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "3545a33b77de5b2ba05bc7179c01d54f";
+(node as any).hash = "928ddcfb6df556c38ad70c9887c967ba";
 
 export default node;

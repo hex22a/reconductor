@@ -7,11 +7,12 @@ import {
     type ScanResolverFactoryDeps,
 } from './scan';
 import type { ScanRepository } from '@/src/persistence/scan.db';
-import type { ScanDto, ScanEdge, ScansDto } from '@/src/transport/scan.dto';
+import type { CreateScanPayload, ScanDto, ScanEdge, ScansDto } from '@/src/transport/scan.dto';
 import type { GraphQlContext } from '@/src/transport/graphql.context';
 import { createScanFixture } from '@/tests/fixtures/scans';
 import type { PageInfo } from '@/src/transport/pageInfo';
 import type { ScanEntity } from '@/src/domain/scan.entity';
+import type { ValidationError } from '@/src/transport/error.dto';
 
 describe('scan', () => {
     const expectedCursor = 'cursor';
@@ -120,6 +121,7 @@ describe('scan', () => {
         test('ad-hoc (no schedule)', async () => {
             // Arrange
             const expectedTarget = '192.168.50.0/16';
+            const expectedValidationErrors: Array<ValidationError> = [];
             const expectedScan: ScanDto = {
                 id: expectedScanId,
                 created_at: expect.any(Date),
@@ -144,14 +146,16 @@ describe('scan', () => {
             mockEncodeCursor.mockReturnValue(expectedCursor);
             const scanResolver: ScanResolver = createScanResolver(expectedScanResolverFactoryDeps);
             // Act
-            const actualScan: ScanEdge = await scanResolver.Mutation.createScan(
-                expectedParent,
-                expectedArgs,
-                expectedContext,
-            );
+            const actualCreateScanPayload: CreateScanPayload =
+                await scanResolver.Mutation.createScan(
+                    expectedParent,
+                    expectedArgs,
+                    expectedContext,
+                );
             // Assert
-            expect(actualScan.node).toEqual(expectedScan);
-            expect(actualScan.cursor).toEqual(expectedCursor);
+            expect(actualCreateScanPayload.edge.node).toEqual(expectedScan);
+            expect(actualCreateScanPayload.edge.cursor).toEqual(expectedCursor);
+            expect(actualCreateScanPayload.errors).toEqual(expectedValidationErrors);
             expect(mockCreateScan).toHaveBeenCalledWith(expectedScanInsert);
         });
     });

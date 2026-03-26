@@ -15,3 +15,8 @@ export type ErrorResponse = {
     code: ErrorCode;
     error: string | object;
 };
+
+export type ValidationError = {
+    field: string;
+    message: string;
+};

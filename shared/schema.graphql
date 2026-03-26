@@ -5,6 +5,11 @@ type PageInfo {
   endCursor: String
 }
 
+type ValidationError {
+  field: String!
+  message: String!
+}
+
 type Project {
   id: ID!
   name: String!
@@ -14,6 +19,11 @@ type Project {
 type ProjectEdge {
   cursor: String!
   node: Project!
+}
+
+type CreateProjectPayload {
+  edge: ProjectEdge
+  errors: [ValidationError!]!
 }
 
 type ProjectConnection {
@@ -32,6 +42,11 @@ type Scan {
 type ScanEdge {
   cursor: String!
   node: Scan!
+}
+
+type CreateScanPayload {
+  edge: ScanEdge
+  errors: [ValidationError!]!
 }
 
 type ScanConnection {
@@ -98,6 +113,6 @@ input CreateScanInput {
 }
 
 type Mutation {
-  createProject(input: CreateProjectInput!): ProjectEdge!
-  createScan(input: CreateScanInput!): ScanEdge!
+  createProject(input: CreateProjectInput!): CreateProjectPayload!
+  createScan(input: CreateScanInput!): CreateScanPayload!
 }
