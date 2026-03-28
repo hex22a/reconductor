@@ -16,10 +16,12 @@ import { SessionNotFoundError } from '../domain/errors/SessionNotFoundError';
 describe('context', () => {
     const mockCreateUserSession = mock();
     const mockGetUserSession = mock();
+    const mockDeleteUserSession = mock();
     const mockGetCookies = mock();
     const mockSessionRepository: SessionRepository = {
         createUserSession: mockCreateUserSession,
         getUserSession: mockGetUserSession,
+        deleteUserSession: mockDeleteUserSession,
     };
     const mockCookies = {
         get: mockGetCookies,
@@ -34,6 +36,8 @@ describe('context', () => {
     afterEach(() => {
         mockCreateUserSession.mockReset();
         mockGetUserSession.mockReset();
+        mockDeleteUserSession.mockReset();
+        mockGetCookies.mockReset();
     });
 
     test('createGraphQlContext', () => {
@@ -53,6 +57,7 @@ describe('context', () => {
             const expectedUserSession: UserSession = {
                 userId: expectedUserId,
                 username: expectedUsername,
+                token: expectedCookieToken,
             };
             const expectedContext: GraphQlContext = {
                 user: { id: expectedUserId },

@@ -33,6 +33,11 @@ export const Z_USERNAME_STRING_ERROR_MESSAGE = 'username must be a string';
 export const Z_PASSWORD_STRING_ERROR_MESSAGE = 'password must be a string';
 export const Z_USERNAME_LENGTH_ERROR_MESSAGE = `username must be at least ${MIN_USERNAME_LENGTH} characters and no longer than ${MAX_USERNAME_LENGTH} characters`;
 export const Z_PASSWORD_LENGTH_ERROR_MESSAGE = `password must be at least ${MIN_PASSWORD_LENGTH} characters and no longer than ${MAX_PASSWORD_LENGTH} characters`;
+export const Z_SCAN_TARGET_ERROR_MESSAGE =
+    'target must be either IPv4, IPv6, CIDR IPv4 or CIDR IPv6';
+export const Z_SCAN_PROJECT_ID_ERROR_MESSAGE = 'project id must be uuid v7';
+export const Z_SCAN_SHCEDULE_ERROR_MESSAGE = 'schedule must be a cron expression';
+export const Z_SCAN_SCHEMA_ERROR_MESSAGE = 'target and project id required';
 
 export const UNEXPECTED_END_OF_JSON_ERROR_MESSAGE = 'Unexpected end of JSON input';
 export const UNEXPECTED_ERROR_MESSAGE = 'Unexpected error';
