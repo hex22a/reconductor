@@ -7,12 +7,15 @@ import {
     type ScanResolverFactoryDeps,
 } from './scan';
 import type { ScanRepository } from '@/src/persistence/scan.db';
-import type { CreateScanPayload, ScanDto, ScanEdge, ScansDto } from '@/src/transport/scan.dto';
+import type { ScanDto } from '@/src/transport/scan.dto';
 import type { GraphQlContext } from '@/src/transport/graphql.context';
 import { createScanFixture } from '@/tests/fixtures/scans';
-import type { PageInfo } from '@/src/transport/pageInfo';
+import type { PageInfo } from '@/src/transport/pageInfo.dto';
 import type { ScanEntity } from '@/src/domain/scan.entity';
 import type { ValidationError } from '@/src/transport/error.dto';
+import type { Edge } from '@/src/transport/edge.dto';
+import type { Pagination } from '@/src/transport/pagination.dto';
+import type { CreateEntityPayload } from '@/src/transport/payload.dto';
 
 describe('scan', () => {
     const expectedCursor = 'cursor';
@@ -92,7 +95,7 @@ describe('scan', () => {
                 startCursor: expectedCursor,
                 endCursor: expectedCursor,
             };
-            const expectedEdges: Array<ScanEdge> = [
+            const expectedEdges: Array<Edge<ScanDto>> = [
                 {
                     node: expectedScan,
                     cursor: expectedCursor,
@@ -105,7 +108,7 @@ describe('scan', () => {
             mockEncodeCursor.mockReturnValue(expectedCursor);
             const scanResolver: ScanResolver = createScanResolver(expectedScanResolverFactoryDeps);
             // Act
-            const actualScans: ScansDto = await scanResolver.Query.scans(
+            const actualScans: Pagination<Edge<ScanDto>> = await scanResolver.Query.scans(
                 expectedParent,
                 expectedArgs,
                 expectedContext,
@@ -146,7 +149,7 @@ describe('scan', () => {
             mockEncodeCursor.mockReturnValue(expectedCursor);
             const scanResolver: ScanResolver = createScanResolver(expectedScanResolverFactoryDeps);
             // Act
-            const actualCreateScanPayload: CreateScanPayload =
+            const actualCreateScanPayload: CreateEntityPayload<Edge<ScanDto>> =
                 await scanResolver.Mutation.createScan(
                     expectedParent,
                     expectedArgs,

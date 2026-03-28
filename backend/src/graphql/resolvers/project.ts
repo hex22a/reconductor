@@ -1,8 +1,12 @@
 import type { GraphQlContext } from '@/src/transport/graphql.context';
 import type { ProjectRepository } from '@/src/persistence/project.db';
-import type { ProjectDto, ProjectsDto, CreateProjectPayload } from '@/src/transport/project.dto';
+import type { ProjectDto } from '@/src/transport/project.dto';
 import type { ProjectEntity } from '@/src/domain/project.entity';
 import { type CursorDecoder, type CursorEncoder } from '@/src/utils/cursor';
+import type { CreateEntityPayload } from '@/src/transport/payload.dto';
+import type { Edge } from '@/src/transport/edge.dto';
+import type { Pagination } from '@/src/transport/pagination.dto';
+import type { EntityResolver, MutationResolver, PaginatonResolver } from './types';
 
 export type ProjectResolverArgs = {
     id: string;
@@ -22,15 +26,11 @@ export type ProjectResolverFactoryDeps = {
 
 export type ProjectResolver = {
     Query: {
-        project: (parent: unknown, args: ProjectResolverArgs) => Promise<ProjectDto>;
-        projects: (parent: unknown, args: unknown, context: GraphQlContext) => Promise<ProjectsDto>;
+        project: EntityResolver<ProjectDto, ProjectResolverArgs>;
+        projects: PaginatonResolver<ProjectDto>;
     };
     Mutation: {
-        createProject: (
-            parent: unknown,
-            args: CreateProjectArgs,
-            context: GraphQlContext,
-        ) => Promise<CreateProjectPayload>;
+        createProject: MutationResolver<ProjectDto, CreateProjectArgs>;
     };
 };
 
@@ -48,7 +48,7 @@ export function createProjectResolver({
                     created_at: project.created_at,
                 };
             },
-            async projects(_, __, context) {
+            async projects(_, __, context): Promise<Pagination<Edge<ProjectDto>>> {
                 const { projects, hasNextPage } = await projectRepository.listProjects(
                     context.user.id,
                 );
@@ -76,7 +76,7 @@ export function createProjectResolver({
                 _,
                 { input: { name } }: CreateProjectArgs,
                 context: GraphQlContext,
-            ): Promise<CreateProjectPayload> {
+            ): Promise<CreateEntityPayload<Edge<ProjectDto>>> {
                 const project: ProjectEntity = await projectRepository.createProject({
                     name,
                     owner_id: context.user.id,

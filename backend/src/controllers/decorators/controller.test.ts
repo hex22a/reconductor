@@ -218,7 +218,7 @@ describe('controller decorators', () => {
         );
         const expectedRequest = {} satisfies Partial<BunRequest>;
         mockController.mockResolvedValue(expectedResponse);
-        const decoratedController: RequestHandler = withCors(mockController);
+        const decoratedController: RequestHandler<void> = withCors(mockController);
         // Act
         const actualResponse: Response = await decoratedController(
             expectedRequest as unknown as BunRequest,

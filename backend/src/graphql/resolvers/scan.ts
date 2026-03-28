@@ -1,8 +1,11 @@
 import type { ScanEntity } from '@/src/domain/scan.entity';
 import type { ScanRepository } from '@/src/persistence/scan.db';
-import type { GraphQlContext } from '@/src/transport/graphql.context';
-import type { CreateScanPayload, ScansDto } from '@/src/transport/scan.dto';
+import type { Edge } from '@/src/transport/edge.dto';
+import type { Pagination } from '@/src/transport/pagination.dto';
+import type { CreateEntityPayload } from '@/src/transport/payload.dto';
+import type { ScanDto } from '@/src/transport/scan.dto';
 import type { CursorDecoder, CursorEncoder } from '@/src/utils/cursor';
+import type { MutationResolver, PaginatonResolver } from './types';
 
 export type CreateScanArgs = {
     input: {
@@ -24,14 +27,10 @@ export type ScanResolverFactoryDeps = {
 
 export type ScanResolver = {
     Query: {
-        scans: (parent: unknown, args: ListScansArgs, context: GraphQlContext) => Promise<ScansDto>;
+        scans: PaginatonResolver<ScanDto, ListScansArgs>;
     };
     Mutation: {
-        createScan: (
-            parent: unknown,
-            args: CreateScanArgs,
-            context: GraphQlContext,
-        ) => Promise<CreateScanPayload>;
+        createScan: MutationResolver<ScanDto, CreateScanArgs>;
     };
 };
 
@@ -41,7 +40,7 @@ export function createScanResolver({
 }: ScanResolverFactoryDeps): ScanResolver {
     return {
         Query: {
-            async scans(_: unknown, args: ListScansArgs): Promise<ScansDto> {
+            async scans(_: unknown, args: ListScansArgs): Promise<Pagination<Edge<ScanDto>>> {
                 const { scans, hasNextPage } = await scanRepository.listScans(args.projectId);
                 const edges = scans.map((scanEntity) => ({
                     node: {
@@ -66,7 +65,7 @@ export function createScanResolver({
             async createScan(
                 _,
                 { input: { target, projectId, schedule } }: CreateScanArgs,
-            ): Promise<CreateScanPayload> {
+            ): Promise<CreateEntityPayload<Edge<ScanDto>>> {
                 const scan: ScanEntity = await scanRepository.createScan({
                     target,
                     project_id: projectId,

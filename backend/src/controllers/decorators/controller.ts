@@ -21,7 +21,7 @@ import {
 } from '$/constants';
 import type { RequestHandler } from '@/src/controllers/types';
 
-export function withErrorHandling(controller: RequestHandler): RequestHandler {
+export function withErrorHandling(controller: RequestHandler<void>): RequestHandler<void> {
     return async function (req: BunRequest): Promise<Response> {
         try {
             const response: Response = await controller(req);

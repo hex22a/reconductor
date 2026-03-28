@@ -7,17 +7,15 @@ import {
     type ProjectResolverFactoryDeps,
 } from './project';
 import type { ProjectRepository } from '@/src/persistence/project.db';
-import type {
-    CreateProjectPayload,
-    ProjectDto,
-    ProjectEdge,
-    ProjectsDto,
-} from '@/src/transport/project.dto';
+import type { ProjectDto } from '@/src/transport/project.dto';
 import { createProjectFixture } from '@/tests/fixtures/projects';
 import type { GraphQlContext } from '@/src/transport/graphql.context';
 import type { ProjectEntity } from '@/src/domain/project.entity';
-import type { PageInfo } from '@/src/transport/pageInfo';
+import type { PageInfo } from '@/src/transport/pageInfo.dto';
 import type { ValidationError } from '@/src/transport/error.dto';
+import type { CreateEntityPayload } from '@/src/transport/payload.dto';
+import type { Edge } from '@/src/transport/edge.dto';
+import type { Pagination } from '@/src/transport/pagination.dto';
 
 describe('project', () => {
     const expectedParent = null;
@@ -118,7 +116,7 @@ describe('project', () => {
             expectedProjectResolverFactoryDeps,
         );
         // Act
-        const actualCreateProjectPayload: CreateProjectPayload =
+        const actualCreateProjectPayload: CreateEntityPayload<Edge<ProjectDto>> =
             await projectResolver.Mutation.createProject(
                 expectedParent,
                 expectedArgs,
@@ -157,7 +155,7 @@ describe('project', () => {
             hasNextPage: expectedHasNextPage,
         });
         mockEncodeCursor.mockReturnValue(expectedCursor);
-        const expectedEdges: Array<ProjectEdge> = [
+        const expectedEdges: Array<Edge<ProjectDto>> = [
             {
                 node: expectedProject,
                 cursor: expectedCursor,
@@ -167,7 +165,7 @@ describe('project', () => {
             expectedProjectResolverFactoryDeps,
         );
         // Act
-        const actualProjects: ProjectsDto = await projectResolver.Query.projects(
+        const actualProjects: Pagination<Edge<ProjectDto>> = await projectResolver.Query.projects(
             expectedParent,
             expectedArgs,
             expectedContext,
