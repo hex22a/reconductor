@@ -1,5 +1,5 @@
 import type { GraphQlContext } from '@/src/transport/graphql.context';
-import type { MutationResolver } from '../resolvers/types';
+import type { MutationResolver } from '../types';
 import { ZodError } from 'zod';
 import type { CreateEntityPayload } from '@/src/transport/payload.dto';
 import type { Edge } from '@/src/transport/edge.dto';

@@ -1,23 +1,23 @@
 import { afterEach, describe, expect, mock, test } from 'bun:test';
-import {
-    createProjectResolver,
-    type CreateProjectArgs,
-    type ProjectResolver,
-    type ProjectResolverArgs,
-    type ProjectResolverFactoryDeps,
-} from './project';
 import type { ProjectRepository } from '@/src/persistence/project.db';
 import type { ProjectDto } from '@/src/transport/project.dto';
+import {
+    createProjectService,
+    type CreateProjectArgs,
+    type ProjectResolverArgs,
+    type ProjectService,
+    type ProjectServiceFactoryDeps,
+} from './project.service';
+import type { ValidationError } from '@/src/transport/error.dto';
 import { createProjectFixture } from '@/tests/fixtures/projects';
 import type { GraphQlContext } from '@/src/transport/graphql.context';
-import type { ProjectEntity } from '@/src/domain/project.entity';
-import type { PageInfo } from '@/src/transport/pageInfo.dto';
-import type { ValidationError } from '@/src/transport/error.dto';
 import type { CreateEntityPayload } from '@/src/transport/payload.dto';
 import type { Edge } from '@/src/transport/edge.dto';
+import type { ProjectEntity } from '@/src/domain/project.entity';
+import type { PageInfo } from '@/src/transport/pageInfo.dto';
 import type { Pagination } from '@/src/transport/pagination.dto';
 
-describe('project', () => {
+describe('project.service', () => {
     const expectedParent = null;
     const mockCreateProject = mock();
     const mockGetProject = mock();
@@ -29,7 +29,7 @@ describe('project', () => {
         getProject: mockGetProject,
         listProjects: mockListProjects,
     };
-    const expectedProjectResolverFactoryDeps: ProjectResolverFactoryDeps = {
+    const expectedProjectServiceFactoryDeps: ProjectServiceFactoryDeps = {
         projectRepository: mockProjectRepository,
         encodeCursor: mockEncodeCursor,
         decodeCursor: mockDecodeCursor,
@@ -52,23 +52,19 @@ describe('project', () => {
         mockDecodeCursor.mockReset();
     });
 
-    test('createProjectResolver', () => {
+    test('createProjectService', () => {
         // Arrange
-        const expectedProjectResolver: ProjectResolver = {
-            Query: {
-                project: expect.any(Function),
-                projects: expect.any(Function),
-            },
-            Mutation: {
-                createProject: expect.any(Function),
-            },
+        const expectedProjectService: ProjectService = {
+            getProject: expect.any(Function),
+            listProjects: expect.any(Function),
+            createProject: expect.any(Function),
         };
         // Act
-        const actualProjectResolver: ProjectResolver = createProjectResolver(
-            expectedProjectResolverFactoryDeps,
+        const actualProjectService: ProjectService = createProjectService(
+            expectedProjectServiceFactoryDeps,
         );
         // Assert
-        expect(actualProjectResolver).toEqual(expectedProjectResolver);
+        expect(actualProjectService).toEqual(expectedProjectService);
     });
 
     test('project', async () => {
@@ -80,11 +76,11 @@ describe('project', () => {
         );
         const expectedArgs: ProjectResolverArgs = { id: expectedProjectId };
         mockGetProject.mockResolvedValue(expectedProjectEntity);
-        const projectResolver: ProjectResolver = createProjectResolver(
-            expectedProjectResolverFactoryDeps,
+        const projectService: ProjectService = createProjectService(
+            expectedProjectServiceFactoryDeps,
         );
         // Act
-        const actualProject: ProjectDto = await projectResolver.Query.project(
+        const actualProject: ProjectDto = await projectService.getProject(
             expectedParent,
             expectedArgs,
         );
@@ -112,19 +108,15 @@ describe('project', () => {
         );
         mockCreateProject.mockResolvedValue(expectedProjectEntity);
         mockEncodeCursor.mockReturnValue(expectedCursor);
-        const projectResolver: ProjectResolver = createProjectResolver(
-            expectedProjectResolverFactoryDeps,
+        const projectService: ProjectService = createProjectService(
+            expectedProjectServiceFactoryDeps,
         );
         // Act
         const actualCreateProjectPayload: CreateEntityPayload<Edge<ProjectDto>> =
-            await projectResolver.Mutation.createProject(
-                expectedParent,
-                expectedArgs,
-                expectedContext,
-            );
+            await projectService.createProject(expectedParent, expectedArgs, expectedContext);
         // Assert
-        expect(actualCreateProjectPayload.edge.node).toEqual(expectedProject);
-        expect(actualCreateProjectPayload.edge.cursor).toEqual(expectedCursor);
+        expect(actualCreateProjectPayload.edge!.node).toEqual(expectedProject);
+        expect(actualCreateProjectPayload.edge!.cursor).toEqual(expectedCursor);
         expect(actualCreateProjectPayload.errors).toEqual(expectedValidationErrors);
         expect(mockCreateProject).toHaveBeenCalledWith(expectedProjectInsert);
     });
@@ -161,11 +153,11 @@ describe('project', () => {
                 cursor: expectedCursor,
             },
         ];
-        const projectResolver: ProjectResolver = createProjectResolver(
-            expectedProjectResolverFactoryDeps,
+        const projectService: ProjectService = createProjectService(
+            expectedProjectServiceFactoryDeps,
         );
         // Act
-        const actualProjects: Pagination<Edge<ProjectDto>> = await projectResolver.Query.projects(
+        const actualProjects: Pagination<Edge<ProjectDto>> = await projectService.listProjects(
             expectedParent,
             expectedArgs,
             expectedContext,

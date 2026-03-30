@@ -7,7 +7,7 @@ import { kv } from './persistence/kv';
 import { createLoginController } from './controllers/auth/login';
 import { createGenerateRandomToken } from './utils/random';
 import { createProjectRepository } from './persistence/project.db';
-import { createProjectResolver } from './graphql/resolvers/project';
+import { createProjectResolver } from './graphql/project/project.resovler';
 import { createSchema, createYoga } from 'graphql-yoga';
 import { getGraphQlServerInstance } from './graphql/server';
 import { createGraphQlContext } from './graphql/context';
@@ -22,7 +22,9 @@ import { toHandler } from './graphql/adapters/FetchToHandlerAdapter.ts';
 import { createLogoutController } from './controllers/auth/logout.ts';
 import { decodeCursor, encodeCursor } from './utils/cursor.ts';
 import { createScanRepository } from './persistence/scan.db.ts';
-import { createScanResolver } from './graphql/resolvers/scan.ts';
+import { createScanResolver } from './graphql/scan/scan.resolver';
+import { createProjectService } from './graphql/project/project.service.ts';
+import { createScanService } from './graphql/scan/scan.service.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -44,6 +46,8 @@ container.register({
     sessionRepository: asFunction(createSessionRepository).singleton(),
     projectRepository: asFunction(createProjectRepository).singleton(),
     scanRepository: asFunction(createScanRepository).singleton(),
+    projectService: asFunction(createProjectService).singleton(),
+    scanService: asFunction(createScanService).singleton(),
     generateRandomToken: asFunction(createGenerateRandomToken),
     cryptoProvider: asValue(crypto),
     hashFn: asValue(Bun.password.hash),
