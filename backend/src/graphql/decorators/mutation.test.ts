@@ -6,6 +6,10 @@ import type { CreateScanArgs } from '../resolvers/scan';
 import type { CreateEntityPayload } from '@/src/transport/payload.dto';
 import type { Edge } from '@/src/transport/edge.dto';
 import { withValidation } from './mutation';
+import { ZodIssueCode } from 'zod/v3';
+import type { $ZodIssue } from 'zod/v4/core';
+import { ZodError } from 'zod';
+import { Z_SCAN_PROJECT_ID_ERROR_MESSAGE, Z_SCAN_TARGET_ERROR_MESSAGE } from '@/src/constants';
 
 describe('mutation', () => {
     const expectedParent = null;
@@ -21,7 +25,7 @@ describe('mutation', () => {
     });
 
     describe('withFieldValidation', () => {
-        test('no error', async () => {
+        test('no errors', async () => {
             // Arrange
             const expectedTarget = '192.168.50.0/16';
             const expectedValidationErrors: Array<ValidationError> = [];
@@ -48,6 +52,59 @@ describe('mutation', () => {
                 errors: expectedValidationErrors,
             };
             mockMutation.mockResolvedValue(expectedResponse);
+            const decoratedMutation = withValidation(mockMutation);
+            // Act
+            const actualResponse = await decoratedMutation(
+                expectedParent,
+                expectedArgs,
+                expectedContext,
+            );
+            // Assert
+            expect(actualResponse).toEqual(expectedResponse);
+        });
+
+        test('mutation throws a zod validation error', async () => {
+            // Arrange
+            const expectedTarget = '192.168.50.0/16';
+            const expectedFirstIssuePath = 'target';
+            const expectedSecondIssuePath = 'projectId';
+            const expectedZodIssues: $ZodIssue[] = [
+                {
+                    code: ZodIssueCode.invalid_type,
+                    path: [expectedFirstIssuePath],
+                    message: Z_SCAN_TARGET_ERROR_MESSAGE,
+                    expected: 'string',
+                },
+                {
+                    code: ZodIssueCode.invalid_type,
+                    path: [expectedSecondIssuePath],
+                    message: Z_SCAN_PROJECT_ID_ERROR_MESSAGE,
+                    expected: 'string',
+                },
+            ];
+            const expectedValidationErrors: Array<ValidationError> = [
+                {
+                    field: expectedFirstIssuePath,
+                    message: Z_SCAN_TARGET_ERROR_MESSAGE,
+                },
+                {
+                    field: expectedSecondIssuePath,
+                    message: Z_SCAN_PROJECT_ID_ERROR_MESSAGE,
+                },
+            ];
+            const expectedArgs: CreateScanArgs = {
+                input: {
+                    target: expectedTarget,
+                    projectId: expectedProjectId,
+                },
+            };
+            const expectedContext: GraphQlContext = {
+                user: { id: expectedUserId },
+            };
+            const expectedResponse: CreateEntityPayload<Edge<ScanDto>> = {
+                errors: expectedValidationErrors,
+            };
+            mockMutation.mockRejectedValue(new ZodError(expectedZodIssues));
             const decoratedMutation = withValidation(mockMutation);
             // Act
             const actualResponse = await decoratedMutation(

@@ -1,6 +1,6 @@
 import type { ValidationError } from './error.dto';
 
 export type CreateEntityPayload<E> = {
-    edge: E;
+    edge?: E;
     errors: ValidationError[];
 };
