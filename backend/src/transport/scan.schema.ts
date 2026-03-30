@@ -15,7 +15,7 @@ export const scanSchema = z.object(
             error: Z_SCAN_TARGET_ERROR_MESSAGE,
         }),
         projectId: z.uuidv7({ error: Z_SCAN_PROJECT_ID_ERROR_MESSAGE }),
-        schedule: z.regex(cronRegex, { error: Z_SCAN_SHCEDULE_ERROR_MESSAGE }),
+        schedule: z.string().regex(cronRegex, { error: Z_SCAN_SHCEDULE_ERROR_MESSAGE }).optional(),
     },
     { error: Z_SCAN_SCHEMA_ERROR_MESSAGE },
 );

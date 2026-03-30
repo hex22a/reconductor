@@ -25,6 +25,7 @@ import { createScanRepository } from './persistence/scan.db.ts';
 import { createScanResolver } from './graphql/scan/scan.resolver';
 import { createProjectService } from './graphql/project/project.service.ts';
 import { createScanService } from './graphql/scan/scan.service.ts';
+import { withValidation } from './graphql/decorators/mutation.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -61,6 +62,7 @@ container.register({
     graphQlServer: asFunction(getGraphQlServerInstance).singleton(),
     withErrorHandling: asValue(withErrorHandling),
     withCors: asValue(withCors),
+    withValidation: asValue(withValidation),
     fetchToHandlerAdapter: asValue(toHandler),
     encodeCursor: asValue(encodeCursor),
     decodeCursor: asValue(decodeCursor),

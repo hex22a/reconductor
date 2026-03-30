@@ -1,18 +1,15 @@
 import type { ScanRepository } from '@/src/persistence/scan.db';
 import type { CursorDecoder, CursorEncoder } from '@/src/utils/cursor';
 import type { MutationResolver, PaginatonResolver } from '../types';
-import type { ScanDto } from '@/src/transport/scan.dto';
+import type { CreateScanDto, ScanDto } from '@/src/transport/scan.dto';
 import type { Pagination } from '@/src/transport/pagination.dto';
 import type { Edge } from '@/src/transport/edge.dto';
 import type { CreateEntityPayload } from '@/src/transport/payload.dto';
 import type { ScanEntity } from '@/src/domain/scan.entity';
+import { scanSchema } from '@/src/transport/scan.schema';
 
 export type CreateScanArgs = {
-    input: {
-        target: string;
-        projectId: string;
-        schedule?: string;
-    };
+    input: CreateScanDto;
 };
 
 export type ListScansArgs = {
@@ -42,6 +39,7 @@ export function createScanService({
                     id: scanEntity.id,
                     created_at: scanEntity.created_at,
                     target: scanEntity.target,
+                    status: scanEntity.status,
                 },
                 cursor: encodeCursor(scanEntity.id),
             }));
@@ -57,8 +55,9 @@ export function createScanService({
         },
         async createScan(
             _,
-            { input: { target, projectId, schedule } }: CreateScanArgs,
+            { input }: CreateScanArgs,
         ): Promise<CreateEntityPayload<Edge<ScanDto>>> {
+            const { target, projectId, schedule }: CreateScanDto = scanSchema.parse(input);
             const scan: ScanEntity = await scanRepository.createScan({
                 target,
                 project_id: projectId,
@@ -70,6 +69,7 @@ export function createScanService({
                         id: scan.id,
                         created_at: scan.created_at,
                         target,
+                        status: scan.status,
                     },
                     cursor: encodeCursor(scan.id),
                 },

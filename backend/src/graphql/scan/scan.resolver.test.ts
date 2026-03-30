@@ -9,27 +9,32 @@ import type { ScanService } from './scan.service';
 describe('scan.resolver', () => {
     const mockCreateScan = mock();
     const mockListScans = mock();
+    const mockWithValidation = mock();
     const mockScanService: ScanService = {
         createScan: mockCreateScan,
         listScans: mockListScans,
     };
     const expectedScanResolverFactoryDeps: ScanResolverFactoryDeps = {
         scanService: mockScanService,
+        withValidation: mockWithValidation,
     };
 
     afterEach(() => {
         mockCreateScan.mockReset();
         mockListScans.mockReset();
+        mockWithValidation.mockReset();
     });
 
     test('createScanResolver', () => {
         // Arrange
+        const mockDecoratedMutation = mock();
+        mockWithValidation.mockReturnValue(mockDecoratedMutation);
         const expectedScanResolver: ScanResolver = {
             Query: {
                 scans: mockListScans,
             },
             Mutation: {
-                createScan: mockCreateScan,
+                createScan: mockDecoratedMutation,
             },
         };
         // Act
@@ -38,5 +43,6 @@ describe('scan.resolver', () => {
         );
         // Assert
         expect(actualScanResolver).toEqual(expectedScanResolver);
+        expect(mockWithValidation).toHaveBeenCalledWith(mockCreateScan);
     });
 });

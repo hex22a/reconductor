@@ -29,3 +29,5 @@ export function withValidation<T, A>(mutation: MutationResolver<T, A>): Mutation
         }
     };
 }
+
+export type WithValidationDecorator = typeof withValidation;

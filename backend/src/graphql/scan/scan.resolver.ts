@@ -1,9 +1,11 @@
 import type { ScanDto } from '@/src/transport/scan.dto';
 import type { MutationResolver, PaginatonResolver } from '../types';
 import type { CreateScanArgs, ListScansArgs, ScanService } from './scan.service';
+import type { WithValidationDecorator } from '../decorators/mutation';
 
 export type ScanResolverFactoryDeps = {
     scanService: ScanService;
+    withValidation: WithValidationDecorator;
 };
 
 export type ScanResolver = {
@@ -15,13 +17,16 @@ export type ScanResolver = {
     };
 };
 
-export function createScanResolver({ scanService }: ScanResolverFactoryDeps): ScanResolver {
+export function createScanResolver({
+    scanService,
+    withValidation,
+}: ScanResolverFactoryDeps): ScanResolver {
     return {
         Query: {
             scans: scanService.listScans,
         },
         Mutation: {
-            createScan: scanService.createScan,
+            createScan: withValidation(scanService.createScan),
         },
     };
 }

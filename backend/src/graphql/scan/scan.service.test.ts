@@ -16,11 +16,13 @@ import type { Edge } from '@/src/transport/edge.dto';
 import type { Pagination } from '@/src/transport/pagination.dto';
 import type { ValidationError } from '@/src/transport/error.dto';
 import type { CreateEntityPayload } from '@/src/transport/payload.dto';
+import { ZodError } from 'zod';
 
 describe('scan.service', () => {
     const expectedCursor = 'cursor';
     const expectedProjectId = '019d29e9-eaed-7782-b537-fa2e7a73a3e4';
     const expectedUserId = '019c9abc-a10c-76e3-8287-885036664a5c';
+    const expectedStatus = 'scheduled';
 
     const expectedParent = null;
     const mockCreateScan = mock();
@@ -68,6 +70,7 @@ describe('scan.service', () => {
                 id: expectedScanId,
                 created_at: expect.any(Date),
                 target: expectedTarget,
+                status: expectedStatus,
             };
             const expectedArgs: ListScansArgs = {
                 projectId: expectedProjectId,
@@ -123,6 +126,7 @@ describe('scan.service', () => {
                 id: expectedScanId,
                 created_at: expect.any(Date),
                 target: expectedTarget,
+                status: expectedStatus,
             };
             const expectedArgs: CreateScanArgs = {
                 input: {
@@ -150,6 +154,28 @@ describe('scan.service', () => {
             expect(actualCreateScanPayload.edge!.cursor).toEqual(expectedCursor);
             expect(actualCreateScanPayload.errors).toEqual(expectedValidationErrors);
             expect(mockCreateScan).toHaveBeenCalledWith(expectedScanInsert);
+        });
+
+        test('throws ZodError if target is not valid', async () => {
+            // Arrange
+            const expectedTarget = 'invalid target';
+            const expectedArgs: CreateScanArgs = {
+                input: {
+                    target: expectedTarget,
+                    projectId: expectedProjectId,
+                },
+            };
+            const expectedContext: GraphQlContext = {
+                user: { id: expectedUserId },
+            };
+            const scanService: ScanService = createScanService(expectedScanServiceFactoryDeps);
+            // Act
+            try {
+                await scanService.createScan(expectedParent, expectedArgs, expectedContext);
+            } catch (actualError) {
+                // Assert
+                expect(actualError).toBeInstanceOf(ZodError);
+            }
         });
     });
 });
