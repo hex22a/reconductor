@@ -1,3 +1,7 @@
+interface Node {
+  id: ID!
+}
+
 type PageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
@@ -10,10 +14,11 @@ type ValidationError {
   message: String!
 }
 
-type Project {
+type Project implements Node {
   id: ID!
   name: String!
   created_at: String!
+  scans(first: Int, after: String): ScanConnection!
 }
 
 type ProjectEdge {
@@ -31,7 +36,7 @@ type ProjectConnection {
   pageInfo: PageInfo!
 }
 
-type Scan {
+type Scan implements Node {
   id: ID!
   target: String!
   status: String!
@@ -97,9 +102,9 @@ type PortConnection {
 }
 
 type Query {
+  node(id: ID!): Node
   projects(first: Int, after: String): ProjectConnection!
   project(id: ID!): Project
-  scans(first: Int, after: String): ScanConnection!
 }
 
 input CreateProjectInput {

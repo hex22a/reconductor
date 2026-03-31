@@ -9,7 +9,7 @@ export type ScanResolverFactoryDeps = {
 };
 
 export type ScanResolver = {
-    Query: {
+    Project: {
         scans: PaginatonResolver<ScanDto, ListScansArgs>;
     };
     Mutation: {
@@ -22,7 +22,7 @@ export function createScanResolver({
     withValidation,
 }: ScanResolverFactoryDeps): ScanResolver {
     return {
-        Query: {
+        Project: {
             scans: scanService.listScans,
         },
         Mutation: {

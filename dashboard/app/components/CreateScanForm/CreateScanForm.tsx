@@ -12,7 +12,7 @@ export function CreateScanForm() {
     e.preventDefault();
     const form = e.currentTarget as HTMLFormElement;
     const formData = new FormData(form);
-    const connectionId = ConnectionHandler.getConnectionID('root', 'ScanList_scans');
+    const connectionId = ConnectionHandler.getConnectionID(projectId!, 'ScanList_scans');
     const target = formData.get('target');
     const schedule = formData.get('schedule');
     commit({
@@ -50,7 +50,7 @@ export function CreateScanForm() {
           id="schedule"
           name="schedule"
           typeof="text"
-          placeholder="* * * 10 5"
+          placeholder="10 5 * * *"
           ref={scheduleRef}
         />
         <button

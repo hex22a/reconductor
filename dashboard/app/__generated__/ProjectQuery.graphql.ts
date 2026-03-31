@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<ec0bd0fe5a2609e7c3c42d3f0072a469>>
+ * @generated SignedSource<<fbe0f9f5675c30ac74dde2dbacc08820>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -37,7 +37,28 @@ v1 = [
     "name": "id",
     "variableName": "id"
   }
-];
+],
+v2 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "created_at",
+  "storageKey": null
+},
+v3 = [
+  {
+    "kind": "Literal",
+    "name": "first",
+    "value": 15
+  }
+],
+v4 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "id",
+  "storageKey": null
+};
 return {
   "fragment": {
     "argumentDefinitions": (v0/*: any*/),
@@ -86,32 +107,124 @@ return {
             "name": "name",
             "storageKey": null
           },
+          (v2/*: any*/),
           {
             "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "created_at",
-            "storageKey": null
+            "args": (v3/*: any*/),
+            "concreteType": "ScanConnection",
+            "kind": "LinkedField",
+            "name": "scans",
+            "plural": false,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "ScanEdge",
+                "kind": "LinkedField",
+                "name": "edges",
+                "plural": true,
+                "selections": [
+                  {
+                    "alias": null,
+                    "args": null,
+                    "concreteType": "Scan",
+                    "kind": "LinkedField",
+                    "name": "node",
+                    "plural": false,
+                    "selections": [
+                      (v4/*: any*/),
+                      (v2/*: any*/),
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "target",
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "status",
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "schedule",
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "__typename",
+                        "storageKey": null
+                      }
+                    ],
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "cursor",
+                    "storageKey": null
+                  }
+                ],
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "PageInfo",
+                "kind": "LinkedField",
+                "name": "pageInfo",
+                "plural": false,
+                "selections": [
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "endCursor",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "hasNextPage",
+                    "storageKey": null
+                  }
+                ],
+                "storageKey": null
+              }
+            ],
+            "storageKey": "scans(first:15)"
           },
           {
             "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "id",
-            "storageKey": null
-          }
+            "args": (v3/*: any*/),
+            "filters": null,
+            "handle": "connection",
+            "key": "ScanList_scans",
+            "kind": "LinkedHandle",
+            "name": "scans"
+          },
+          (v4/*: any*/)
         ],
         "storageKey": null
       }
     ]
   },
   "params": {
-    "cacheID": "31dc4a87691ea60f2ef4aadfadff39bc",
+    "cacheID": "31a0dc7eb871f840f84c63a81dc089f3",
     "id": null,
     "metadata": {},
     "name": "ProjectQuery",
     "operationKind": "query",
-    "text": "query ProjectQuery(\n  $id: ID!\n) {\n  project(id: $id) {\n    ...ProjectFragment\n    id\n  }\n}\n\nfragment ProjectFragment on Project {\n  name\n  created_at\n}\n"
+    "text": "query ProjectQuery(\n  $id: ID!\n) {\n  project(id: $id) {\n    ...ProjectFragment\n    id\n  }\n}\n\nfragment ProjectFragment on Project {\n  name\n  created_at\n  ...ScanListFragment\n}\n\nfragment ScanItemFragment on Scan {\n  created_at\n  target\n  status\n  schedule\n}\n\nfragment ScanListFragment on Project {\n  scans(first: 15) {\n    edges {\n      node {\n        id\n        ...ScanItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
   }
 };
 })();

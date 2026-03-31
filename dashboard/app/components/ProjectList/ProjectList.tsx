@@ -1,11 +1,11 @@
 import { usePaginationFragment } from 'react-relay';
 import { CreateProjectForm } from '../CreateProjectForm/CreateProjectForm';
 import { ProjectItem } from '../ProjectItem/ProjectItem';
-import type { ProjectsListFragment$key } from '~/__generated__/ProjectsListFragment.graphql';
+import type { ProjectListFragment$key } from '~/__generated__/ProjectListFragment.graphql';
 import { fragment } from './ProjectList.fragment';
 
 type ProjectsProps = {
-  fragmentRef: ProjectsListFragment$key;
+  fragmentRef: ProjectListFragment$key;
 };
 
 export function ProjectList({ fragmentRef }: ProjectsProps) {

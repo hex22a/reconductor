@@ -30,7 +30,7 @@ describe('scan.resolver', () => {
         const mockDecoratedMutation = mock();
         mockWithValidation.mockReturnValue(mockDecoratedMutation);
         const expectedScanResolver: ScanResolver = {
-            Query: {
+            Project: {
                 scans: mockListScans,
             },
             Mutation: {
