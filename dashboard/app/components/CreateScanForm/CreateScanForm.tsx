@@ -41,6 +41,7 @@ export function CreateScanForm() {
           id="target"
           name="target"
           typeof="text"
+          placeholder="192.168.50.0/16"
           ref={targetRef}
         />
         <label htmlFor="schedule">Schedule:</label>
@@ -49,6 +50,7 @@ export function CreateScanForm() {
           id="schedule"
           name="schedule"
           typeof="text"
+          placeholder="* * * 10 5"
           ref={scheduleRef}
         />
         <button
