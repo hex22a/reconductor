@@ -12,21 +12,21 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/bun": "latest",
-    "@typescript-eslint/eslint-plugin": "^8.55.0",
-    "@typescript-eslint/parser": "^8.55.0",
-    "eslint": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.58.0",
+    "@typescript-eslint/parser": "^8.58.0",
+    "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
-    "globals": "^17.3.0",
+    "globals": "^17.4.0",
     "prettier": "^3.8.1",
-    "typescript-eslint": "^8.55.0"
+    "typescript-eslint": "^8.58.0"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "awilix": "^13.0.0",
-    "graphql": "^16.12.0",
-    "graphql-yoga": "^5.18.0",
+    "awilix": "^13.0.3",
+    "graphql": "^16.13.2",
+    "graphql-yoga": "^5.19.0",
     "zod": "^4.3.6"
   }
 }
