@@ -17,6 +17,7 @@ import type { Pagination } from '@/src/transport/pagination.dto';
 import type { ValidationError } from '@/src/transport/error.dto';
 import type { CreateEntityPayload } from '@/src/transport/payload.dto';
 import { ZodError } from 'zod';
+import type { ProjectDto } from '@/src/transport/project.dto';
 
 describe('scan.service', () => {
     const expectedCursor = 'cursor';
@@ -24,7 +25,9 @@ describe('scan.service', () => {
     const expectedUserId = '019c9abc-a10c-76e3-8287-885036664a5c';
     const expectedStatus = 'scheduled';
 
-    const expectedParent = null;
+    const expectedParent: Partial<ProjectDto> = {
+        id: expectedProjectId,
+    };
     const mockCreateScan = mock();
     const mockGetScan = mock();
     const mockListScans = mock();
@@ -65,6 +68,7 @@ describe('scan.service', () => {
     describe('listScans', () => {
         test('valid projectId', async () => {
             // Arrange
+            const expectedFirst = 15;
             const expectedTarget = '192.168.50.0/16';
             const expectedScan: ScanDto = {
                 id: expectedScanId,
@@ -73,7 +77,8 @@ describe('scan.service', () => {
                 status: expectedStatus,
             };
             const expectedArgs: ListScansArgs = {
-                projectId: expectedProjectId,
+                first: expectedFirst,
+                after: expectedCursor,
             };
             const expectedContext: GraphQlContext = {
                 user: { id: expectedUserId },

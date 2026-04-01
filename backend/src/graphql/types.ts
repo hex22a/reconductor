@@ -5,8 +5,8 @@ import type { CreateEntityPayload } from '@/src/transport/payload.dto';
 
 export type EntityResolver<T, A> = (parent: unknown, args: A) => Promise<T>;
 
-export type PaginatonResolver<T, A = unknown> = (
-    parent: unknown,
+export type PaginatonResolver<T, P = unknown, A = unknown> = (
+    parent: P,
     args: A,
     context: GraphQlContext,
 ) => Promise<Pagination<Edge<T>>>;

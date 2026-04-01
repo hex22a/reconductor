@@ -7,13 +7,15 @@ import type { Edge } from '@/src/transport/edge.dto';
 import type { CreateEntityPayload } from '@/src/transport/payload.dto';
 import type { ScanEntity } from '@/src/domain/scan.entity';
 import { scanSchema } from '@/src/transport/scan.schema';
+import type { ProjectDto } from '@/src/transport/project.dto';
 
 export type CreateScanArgs = {
     input: CreateScanDto;
 };
 
 export type ListScansArgs = {
-    projectId: string;
+    first: number;
+    after: string;
 };
 
 export type ScanServiceFactoryDeps = {
@@ -23,7 +25,7 @@ export type ScanServiceFactoryDeps = {
 };
 
 export type ScanService = {
-    listScans: PaginatonResolver<ScanDto, ListScansArgs>;
+    listScans: PaginatonResolver<ScanDto, ProjectDto>;
     createScan: MutationResolver<ScanDto, CreateScanArgs>;
 };
 
@@ -32,8 +34,8 @@ export function createScanService({
     encodeCursor,
 }: ScanServiceFactoryDeps): ScanService {
     return {
-        async listScans(_: unknown, args: ListScansArgs): Promise<Pagination<Edge<ScanDto>>> {
-            const { scans, hasNextPage } = await scanRepository.listScans(args.projectId);
+        async listScans(parent: ProjectDto): Promise<Pagination<Edge<ScanDto>>> {
+            const { scans, hasNextPage } = await scanRepository.listScans(parent.id);
             const edges = scans.map((scanEntity) => ({
                 node: {
                     id: scanEntity.id,
