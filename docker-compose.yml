@@ -26,6 +26,16 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  rabbitmq:
+    profiles:
+      - backend
+    image: rabbitmq:4.2.5-management
+    environment:
+      RABBITMQ_DEFAULT_USER: reconductor
+      RABBITMQ_DEFAULT_PASS: reconductor
+    ports:
+      - "5672:5672"
+      - "15672:15672"
 
   backend:
     profiles:
