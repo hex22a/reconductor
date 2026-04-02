@@ -7,7 +7,7 @@ import {
     type ScanService,
     type ScanServiceFactoryDeps,
 } from './scan.service';
-import type { ScanDto } from '@/src/transport/scan.dto';
+import type { ScanDto, ScanMessageDto } from '@/src/transport/scan.dto';
 import type { GraphQlContext } from '@/src/transport/graphql.context';
 import { createScanFixture } from '@/tests/fixtures/scans';
 import type { ScanEntity } from '@/src/domain/scan.entity';
@@ -18,6 +18,7 @@ import type { ValidationError } from '@/src/transport/error.dto';
 import type { CreateEntityPayload } from '@/src/transport/payload.dto';
 import { ZodError } from 'zod';
 import type { ProjectDto } from '@/src/transport/project.dto';
+import type { QueueService } from '@/src/queue/queue.service';
 
 describe('scan.service', () => {
     const expectedCursor = 'cursor';
@@ -33,13 +34,20 @@ describe('scan.service', () => {
     const mockListScans = mock();
     const mockEncodeCursor = mock();
     const mockDecodeCursor = mock();
+    const mockPublish = mock();
+    const mockClose = mock();
     const mockScanRepository: ScanRepository = {
         getScan: mockGetScan,
         createScan: mockCreateScan,
         listScans: mockListScans,
     };
+    const mockQueueService: QueueService = {
+        publish: mockPublish,
+        close: mockClose,
+    };
     const expectedScanServiceFactoryDeps: ScanServiceFactoryDeps = {
         scanRepository: mockScanRepository,
+        queueService: mockQueueService,
         encodeCursor: mockEncodeCursor,
         decodeCursor: mockDecodeCursor,
     };
@@ -51,6 +59,8 @@ describe('scan.service', () => {
         mockCreateScan.mockReset();
         mockGetScan.mockReset();
         mockListScans.mockReset();
+        mockPublish.mockReset();
+        mockClose.mockReset();
     });
 
     test('createScanService', () => {
@@ -111,7 +121,7 @@ describe('scan.service', () => {
             const scanService: ScanService = createScanService(expectedScanServiceFactoryDeps);
             // Act
             const actualScans: Pagination<Edge<ScanDto>> = await scanService.listScans(
-                expectedParent,
+                expectedParent as unknown as ProjectDto,
                 expectedArgs,
                 expectedContext,
             );
@@ -132,6 +142,10 @@ describe('scan.service', () => {
                 created_at: expect.any(Date),
                 target: expectedTarget,
                 status: expectedStatus,
+            };
+            const expectedScanMessage: ScanMessageDto = {
+                id: expectedScanId,
+                target: expectedTarget,
             };
             const expectedArgs: CreateScanArgs = {
                 input: {
@@ -155,6 +169,7 @@ describe('scan.service', () => {
             const actualCreateScanPayload: CreateEntityPayload<Edge<ScanDto>> =
                 await scanService.createScan(expectedParent, expectedArgs, expectedContext);
             // Assert
+            expect(mockPublish).toHaveBeenLastCalledWith(expectedScanMessage);
             expect(actualCreateScanPayload.edge!.node).toEqual(expectedScan);
             expect(actualCreateScanPayload.edge!.cursor).toEqual(expectedCursor);
             expect(actualCreateScanPayload.errors).toEqual(expectedValidationErrors);

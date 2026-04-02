@@ -1,4 +1,5 @@
 import { RABBITMQ_URL, SCAN_QUEUE } from '../constants';
+import type { ScanMessageDto } from '../transport/scan.dto';
 import type { MqProvider } from './mq';
 
 export type QueueServiceFactoryDeps = {
@@ -6,7 +7,7 @@ export type QueueServiceFactoryDeps = {
 };
 
 export type QueueService = {
-    publish: (message: string) => Promise<void>;
+    publish: (message: ScanMessageDto) => Promise<void>;
     close: () => Promise<void>;
 };
 
@@ -14,9 +15,9 @@ export async function createQueueService({ mq }: QueueServiceFactoryDeps): Promi
     const connection = await mq.connect(RABBITMQ_URL);
     const channel = await connection.createChannel();
     return {
-        async publish(message: string) {
+        async publish(message: ScanMessageDto) {
             await channel.assertQueue(SCAN_QUEUE, { durable: true });
-            channel.sendToQueue(SCAN_QUEUE, Buffer.from(message));
+            channel.sendToQueue(SCAN_QUEUE, Buffer.from(JSON.stringify(message)));
         },
         async close() {
             await channel.close();

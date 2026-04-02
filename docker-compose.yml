@@ -30,12 +30,20 @@ services:
     profiles:
       - backend
     image: rabbitmq:4.2.5-management
+    userns_mode: keep-id
     environment:
       RABBITMQ_DEFAULT_USER: reconductor
       RABBITMQ_DEFAULT_PASS: reconductor
     ports:
       - "5672:5672"
       - "15672:15672"
+    tmpfs:
+      - /var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     profiles:
@@ -47,6 +55,8 @@ services:
       redis:
         condition: service_healthy
       db:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     environment:
       DASHBOARD_URL: ${DASHBOARD_URL}

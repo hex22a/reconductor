@@ -8,6 +8,7 @@ import type { CreateEntityPayload } from '@/src/transport/payload.dto';
 import type { ScanEntity } from '@/src/domain/scan.entity';
 import { scanSchema } from '@/src/transport/scan.schema';
 import type { ProjectDto } from '@/src/transport/project.dto';
+import type { QueueService } from '@/src/queue/queue.service';
 
 export type CreateScanArgs = {
     input: CreateScanDto;
@@ -20,6 +21,7 @@ export type ListScansArgs = {
 
 export type ScanServiceFactoryDeps = {
     scanRepository: ScanRepository;
+    queueService: QueueService;
     encodeCursor: CursorEncoder;
     decodeCursor: CursorDecoder;
 };
@@ -31,6 +33,7 @@ export type ScanService = {
 
 export function createScanService({
     scanRepository,
+    queueService,
     encodeCursor,
 }: ScanServiceFactoryDeps): ScanService {
     return {
@@ -64,6 +67,10 @@ export function createScanService({
                 target,
                 project_id: projectId,
                 schedule: schedule ?? null,
+            });
+            await queueService.publish({
+                id: scan.id,
+                target,
             });
             return {
                 edge: {

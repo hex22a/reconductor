@@ -7,6 +7,7 @@ import {
 import type { MqProvider } from './mq';
 import { RABBITMQ_URL, SCAN_QUEUE } from '../constants';
 import type { Channel } from 'amqplib';
+import type { ScanMessageDto } from '../transport/scan.dto';
 
 describe('queue.service', () => {
     const mockConnect = mock();
@@ -57,8 +58,13 @@ describe('queue.service', () => {
 
     test('publish', async () => {
         // Arrange
-        const expectedMessage = 'start scan';
-        const expectedMessageBuffer = Buffer.from(expectedMessage);
+        const expectedId = '019d4f1c-afb4-7fd5-8afe-361b489732f5';
+        const expectedTarget = '192.168.1.0/16';
+        const expectedMessage: ScanMessageDto = {
+            id: expectedId,
+            target: expectedTarget,
+        };
+        const expectedMessageBuffer = Buffer.from(JSON.stringify(expectedMessage));
         mockConnect.mockResolvedValue(mockConnection);
         mockCreateChannel.mockResolvedValue(mockChannel);
         const queueService: QueueService = await createQueueService(expectedQueueServiceDeps);

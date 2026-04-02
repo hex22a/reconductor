@@ -23,6 +23,7 @@ export function withValidation<T, A>(mutation: MutationResolver<T, A>): Mutation
                     errors,
                 };
             }
+            console.error(error);
             return {
                 errors: [],
             };

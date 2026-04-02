@@ -1,12 +1,12 @@
 const DEFAULT_DASHBOARD_URL = 'http://localhost:5173';
-const DEFAULT_RABBITMQ_URL = 'amqp://localhost';
+const DEFAULT_RABBITMQ_URL = 'amqp://reconductor:reconductor@rabbitmq:5672';
 
 export const DASHBOARD_URL: string =
     (process.env.NODE_ENV === 'production' ? process.env.DASHBOARD_URL : DEFAULT_DASHBOARD_URL) ||
     DEFAULT_DASHBOARD_URL;
 export const RABBITMQ_URL: string =
     (process.env.NODE_ENV === 'production' ? process.env.RABBITMQ_URL : DEFAULT_RABBITMQ_URL) ||
-    DEFAULT_DASHBOARD_URL;
+    DEFAULT_RABBITMQ_URL;
 
 export const SCAN_QUEUE = 'scans';
 

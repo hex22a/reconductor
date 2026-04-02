@@ -11,3 +11,5 @@ export type ScanDto = {
     status: string;
     schedule?: string;
 };
+
+export type ScanMessageDto = Pick<ScanDto, 'id' | 'target'>;

@@ -26,11 +26,15 @@ import { createScanResolver } from './graphql/scan/scan.resolver';
 import { createProjectService } from './graphql/project/project.service.ts';
 import { createScanService } from './graphql/scan/scan.service.ts';
 import { withValidation } from './graphql/decorators/mutation.ts';
+import { mq } from './queue/mq.ts';
+import { createQueueService } from './queue/queue.service.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
     strict: true,
 });
+
+const queueService = await createQueueService({ mq });
 
 container.register({
     sessionStrategy: asClass(SessionStrategy),
@@ -55,6 +59,8 @@ container.register({
     verifyHash: asValue(Bun.password.verify),
     sql: asValue(sql),
     kv: asValue(kv),
+    mq: asValue(mq),
+    queueService: asValue(queueService),
     createGraphQlServer: asValue(createYoga),
     createGraphQlSchema: asValue(createSchema),
     createAuthDecorators: asValue(createAuthDecorators),
