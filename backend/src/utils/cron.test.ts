@@ -14,7 +14,7 @@ describe('cron', () => {
     };
     CronExpressionParser.parse = mockParse;
     const expectedCronParserDeps: CronParserFactoryDeps = {
-        CronParser: CronExpressionParser,
+        CronParserProvider: CronExpressionParser,
     };
 
     afterEach(() => {

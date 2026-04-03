@@ -1,17 +1,17 @@
 import { CronExpressionParser } from 'cron-parser';
 
 export type CronParserFactoryDeps = {
-    CronParser: typeof CronExpressionParser;
+    CronParserProvider: typeof CronExpressionParser;
 };
 
 export type CronParser = {
     getNextRunDate: (cronSchedule: string) => Date;
 };
 
-export function createCronParser({ CronParser: Parser }: CronParserFactoryDeps): CronParser {
+export function createCronParser({ CronParserProvider }: CronParserFactoryDeps): CronParser {
     return {
         getNextRunDate(cronSchedule): Date {
-            return Parser.parse(cronSchedule).next().toDate();
+            return CronParserProvider.parse(cronSchedule).next().toDate();
         },
     };
 }
