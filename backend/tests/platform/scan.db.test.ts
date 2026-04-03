@@ -2,7 +2,12 @@ import { describe, expect, test, it } from 'bun:test';
 import { catchRollback, withTrx } from '../decorators';
 import { createScanRepository, type ScanRepository } from '@/src/persistence/scan.db';
 import type { ScanEntity } from '@/src/domain/scan.entity';
-import { createScanFixture, expectedExistingScanId, expectedScanTarget } from '../fixtures/scans';
+import {
+    createScanFixture,
+    expectedExistingScanId,
+    expectedNextRunAt,
+    expectedScanTarget,
+} from '../fixtures/scans';
 import { expectedExistingProjectId } from '../fixtures/projects';
 import { ScanNotFoundError } from '@/src/domain/errors/ScanNotFoundError';
 
@@ -35,6 +40,7 @@ describe('scan.db', () => {
                     const [, expectedScanInsert] = createScanFixture(
                         expectedExistingProjectId,
                         expectedTarget,
+                        expectedNextRunAt,
                     );
                     const scanRepository: ScanRepository = createScanRepository({ sql: trx });
                     // Act
@@ -60,6 +66,7 @@ describe('scan.db', () => {
                     const [, expectedScanInsert] = createScanFixture(
                         expectedExistingProjectId,
                         expectedTarget,
+                        expectedNextRunAt,
                         expectedSchedule,
                     );
                     const scanRepository: ScanRepository = createScanRepository({ sql: trx });
@@ -87,6 +94,7 @@ describe('scan.db', () => {
                     const [, expectedScanInsert] = createScanFixture(
                         expectedWrongProjectId,
                         expectedTarget,
+                        expectedNextRunAt,
                     );
                     const scanRepository: ScanRepository = createScanRepository({ sql: trx });
                     // Act
@@ -112,6 +120,7 @@ describe('scan.db', () => {
                     const [, expectedScanInsert] = createScanFixture(
                         expectedExistingProjectId,
                         expectedTarget,
+                        expectedNextRunAt,
                     );
                     const scanRepository: ScanRepository = createScanRepository({ sql: trx });
                     // Act
@@ -193,14 +202,17 @@ describe('scan.db', () => {
                     const [, expectedAnchorScanInsert] = createScanFixture(
                         expectedExistingProjectId,
                         expectedAnchorScanTarget,
+                        expectedNextRunAt,
                     );
                     const [, expectedScan1Insert] = createScanFixture(
                         expectedExistingProjectId,
                         expectedScan1Target,
+                        expectedNextRunAt,
                     );
                     const [, expectedScan2Insert] = createScanFixture(
                         expectedExistingProjectId,
                         expectedScan2Target,
+                        expectedNextRunAt,
                     );
                     const scanRepository: ScanRepository = createScanRepository({ sql: trx });
                     await scanRepository.createScan(expectedScan1Insert);

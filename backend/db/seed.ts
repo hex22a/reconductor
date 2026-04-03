@@ -11,6 +11,7 @@ import {
 import {
     createScanFixture,
     expectedExistingScanId,
+    expectedNextRunAt,
     expectedScanTarget,
 } from '@/tests/fixtures/scans';
 import {
@@ -52,14 +53,15 @@ async function seedScans(sql: SQL): Promise<void> {
     const [, , scan] = createScanFixture(
         expectedExistingProjectId,
         expectedScanTarget,
+        expectedNextRunAt,
         undefined,
         expectedExistingScanId,
     );
     await sql`
         INSERT INTO recon.scans
-            (id, project_id, target)
+            (id, project_id, target, next_run_at)
         VALUES
-            (${scan.id}, ${scan.project_id}, ${scan.target});
+            (${scan.id}, ${scan.project_id}, ${scan.target}, ${scan.next_run_at});
     `;
 }
 

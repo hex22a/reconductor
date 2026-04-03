@@ -33,7 +33,8 @@ CREATE TABLE recon.scans (
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     target INET NOT NULL,
     status scan_status NOT NULL DEFAULT 'scheduled',
-    schedule TEXT DEFAULT NULL
+    schedule TEXT DEFAULT NULL,
+    next_run_at TIMESTAMP NOT NULL
 );
 
 CREATE INDEX idx_scans_id_desc ON recon.scans (id DESC);

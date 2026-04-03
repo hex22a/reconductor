@@ -22,9 +22,9 @@ export function createScanRepository({ sql }: ScanRepositoryDeps): ScanRepositor
         async createScan(scan: ScanInsert): Promise<ScanEntity> {
             const queryResult = await sql`
                 INSERT INTO recon.scans
-                    (project_id, target, schedule)
+                    (project_id, target, schedule, next_run_at)
                 VALUES
-                    (${scan.project_id}, ${scan.target}, ${scan.schedule})
+                    (${scan.project_id}, ${scan.target}, ${scan.schedule}, ${scan.next_run_at})
                 RETURNING *;
             `;
             return queryResult[0];
