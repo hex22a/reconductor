@@ -28,6 +28,8 @@ import { createScanService } from './graphql/scan/scan.service.ts';
 import { withValidation } from './graphql/decorators/mutation.ts';
 import { mq } from './queue/mq.ts';
 import { createQueueService } from './queue/queue.service.ts';
+import CronExpressionParser from 'cron-parser';
+import { createCronParser } from './utils/cron.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -58,7 +60,9 @@ container.register({
     sql: asValue(sql),
     kv: asValue(kv),
     mq: asValue(mq),
+    CronParser: asValue(CronExpressionParser),
     queueService: asFunction(createQueueService).singleton(),
+    cronParser: asFunction(createCronParser).singleton(),
     createGraphQlServer: asValue(createYoga),
     createGraphQlSchema: asValue(createSchema),
     createAuthDecorators: asValue(createAuthDecorators),

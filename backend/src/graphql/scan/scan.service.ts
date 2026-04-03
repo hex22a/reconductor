@@ -9,6 +9,7 @@ import type { ScanEntity } from '@/src/domain/scan.entity';
 import { scanSchema } from '@/src/transport/scan.schema';
 import type { ProjectDto } from '@/src/transport/project.dto';
 import type { QueueService } from '@/src/queue/queue.service';
+import type { CronParser } from '@/src/utils/cron';
 
 export type CreateScanArgs = {
     input: CreateScanDto;
@@ -24,6 +25,7 @@ export type ScanServiceFactoryDeps = {
     queueService: QueueService;
     encodeCursor: CursorEncoder;
     decodeCursor: CursorDecoder;
+    cronParser: CronParser;
 };
 
 export type ScanService = {
@@ -35,6 +37,7 @@ export function createScanService({
     scanRepository,
     queueService,
     encodeCursor,
+    cronParser,
 }: ScanServiceFactoryDeps): ScanService {
     return {
         async listScans(parent: ProjectDto): Promise<Pagination<Edge<ScanDto>>> {
@@ -63,9 +66,14 @@ export function createScanService({
             { input }: CreateScanArgs,
         ): Promise<CreateEntityPayload<Edge<ScanDto>>> {
             const { target, projectId, schedule }: CreateScanDto = scanSchema.parse(input);
+            let nextRunAt: Date | null = null;
+            if (schedule) {
+                nextRunAt = cronParser.getNextRunDate(schedule);
+            }
             const scan: ScanEntity = await scanRepository.createScan({
                 target,
                 project_id: projectId,
+                next_run_at: nextRunAt ?? null,
                 schedule: schedule ?? null,
             });
             await queueService.publish({

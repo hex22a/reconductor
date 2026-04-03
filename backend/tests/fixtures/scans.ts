@@ -8,7 +8,7 @@ export const expectedNextRunAt = new Date(2030, 6, 15, 1, 30, 30, 10);
 export function createScanFixture(
     projectId: string,
     target: string,
-    nextRunAt: Date,
+    nextRunAt?: Date,
     schedule?: string,
     scanId?: string,
 ): [ScanEntity, ScanInsert, ScanInsertSeed] {
@@ -20,22 +20,22 @@ export function createScanFixture(
             project_id: projectId,
             target,
             created_at: date,
-            next_run_at: nextRunAt,
             status: 'scheduled',
             schedule: schedule ?? null,
+            next_run_at: nextRunAt ?? null,
         },
         {
             project_id: projectId,
             target,
-            next_run_at: nextRunAt,
             schedule: schedule ?? null,
+            next_run_at: nextRunAt ?? null,
         },
         {
             id,
             project_id: projectId,
             target,
-            next_run_at: nextRunAt,
             schedule: schedule ?? null,
+            next_run_at: nextRunAt ?? null,
         },
     ];
 }

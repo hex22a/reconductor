@@ -19,6 +19,7 @@ import type { CreateEntityPayload } from '@/src/transport/payload.dto';
 import { ZodError } from 'zod';
 import type { ProjectDto } from '@/src/transport/project.dto';
 import type { QueueService } from '@/src/queue/queue.service';
+import type { CronParser } from '@/src/utils/cron';
 
 describe('scan.service', () => {
     const expectedCursor = 'cursor';
@@ -36,20 +37,27 @@ describe('scan.service', () => {
     const mockDecodeCursor = mock();
     const mockPublish = mock();
     const mockClose = mock();
+    const mockEnsureConnected = mock();
+    const mockGetNextRunDate = mock();
     const mockScanRepository: ScanRepository = {
         getScan: mockGetScan,
         createScan: mockCreateScan,
         listScans: mockListScans,
     };
     const mockQueueService: QueueService = {
+        ensureConnected: mockEnsureConnected,
         publish: mockPublish,
         close: mockClose,
+    };
+    const mockCronParser: CronParser = {
+        getNextRunDate: mockGetNextRunDate,
     };
     const expectedScanServiceFactoryDeps: ScanServiceFactoryDeps = {
         scanRepository: mockScanRepository,
         queueService: mockQueueService,
         encodeCursor: mockEncodeCursor,
         decodeCursor: mockDecodeCursor,
+        cronParser: mockCronParser,
     };
     const expectedScanId = 'id';
 
@@ -61,6 +69,8 @@ describe('scan.service', () => {
         mockListScans.mockReset();
         mockPublish.mockReset();
         mockClose.mockReset();
+        mockEnsureConnected.mockReset();
+        mockGetNextRunDate.mockReset();
     });
 
     test('createScanService', () => {
@@ -96,6 +106,7 @@ describe('scan.service', () => {
             const [expectedScanEntity] = createScanFixture(
                 expectedProjectId,
                 expectedTarget,
+                undefined,
                 undefined,
                 expectedScanId,
             );
@@ -133,6 +144,54 @@ describe('scan.service', () => {
     });
 
     describe('createScan', () => {
+        test('with schedule', async () => {
+            // Arrange
+            const expectedTarget = '192.168.50.0/16';
+            const expectedSchedule = '10 5 * * *';
+            const expectedNextRunAt = new Date(2030, 6, 10, 1, 30, 30, 10);
+            const expectedValidationErrors: Array<ValidationError> = [];
+            const expectedScan: ScanDto = {
+                id: expectedScanId,
+                created_at: expect.any(Date),
+                target: expectedTarget,
+                status: expectedStatus,
+            };
+            const expectedScanMessage: ScanMessageDto = {
+                id: expectedScanId,
+                target: expectedTarget,
+            };
+            const expectedArgs: CreateScanArgs = {
+                input: {
+                    target: expectedTarget,
+                    projectId: expectedProjectId,
+                    schedule: expectedSchedule,
+                },
+            };
+            const expectedContext: GraphQlContext = {
+                user: { id: expectedUserId },
+            };
+            const [expectedScanEntity, expectedScanInsert] = createScanFixture(
+                expectedProjectId,
+                expectedTarget,
+                expectedNextRunAt,
+                expectedSchedule,
+                expectedScanId,
+            );
+            mockCreateScan.mockResolvedValue(expectedScanEntity);
+            mockEncodeCursor.mockReturnValue(expectedCursor);
+            mockGetNextRunDate.mockReturnValue(expectedNextRunAt);
+            const scanService: ScanService = createScanService(expectedScanServiceFactoryDeps);
+            // Act
+            const actualCreateScanPayload: CreateEntityPayload<Edge<ScanDto>> =
+                await scanService.createScan(expectedParent, expectedArgs, expectedContext);
+            // Assert
+            expect(mockPublish).toHaveBeenLastCalledWith(expectedScanMessage);
+            expect(actualCreateScanPayload.edge!.node).toEqual(expectedScan);
+            expect(actualCreateScanPayload.edge!.cursor).toEqual(expectedCursor);
+            expect(actualCreateScanPayload.errors).toEqual(expectedValidationErrors);
+            expect(mockCreateScan).toHaveBeenCalledWith(expectedScanInsert);
+        });
+
         test('ad-hoc (no schedule)', async () => {
             // Arrange
             const expectedTarget = '192.168.50.0/16';
@@ -159,6 +218,7 @@ describe('scan.service', () => {
             const [expectedScanEntity, expectedScanInsert] = createScanFixture(
                 expectedProjectId,
                 expectedTarget,
+                undefined,
                 undefined,
                 expectedScanId,
             );
