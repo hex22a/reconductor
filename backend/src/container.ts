@@ -34,8 +34,6 @@ const container = createContainer({
     strict: true,
 });
 
-const queueService = await createQueueService({ mq });
-
 container.register({
     sessionStrategy: asClass(SessionStrategy),
     handleCallStrategy: asClass(HandleCallStrategy),
@@ -60,7 +58,7 @@ container.register({
     sql: asValue(sql),
     kv: asValue(kv),
     mq: asValue(mq),
-    queueService: asValue(queueService),
+    queueService: asFunction(createQueueService).singleton(),
     createGraphQlServer: asValue(createYoga),
     createGraphQlSchema: asValue(createSchema),
     createAuthDecorators: asValue(createAuthDecorators),

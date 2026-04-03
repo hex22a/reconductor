@@ -41,18 +41,28 @@ describe('queue.service', () => {
         mockCloseConnection.mockReset();
     });
 
-    test('creatreQueueService', async () => {
+    test('creatreQueueService', () => {
         // Arrange
         const expectedQueueService: QueueService = {
+            ensureConnected: expect.any(Function),
             publish: expect.any(Function),
             close: expect.any(Function),
         };
-        mockConnect.mockResolvedValue(mockConnection);
         // Act
-        const actualQueueService: QueueService = await createQueueService(expectedQueueServiceDeps);
+        const actualQueueService: QueueService = createQueueService(expectedQueueServiceDeps);
         // Assert
         expect(actualQueueService).toEqual(expectedQueueService);
-        expect(mockConnect).toHaveBeenLastCalledWith(RABBITMQ_URL);
+    });
+
+    test('ensureConnected', async () => {
+        // Arrange
+        mockConnect.mockResolvedValue(mockConnection);
+        mockCreateChannel.mockResolvedValue(mockChannel);
+        const queueService: QueueService = createQueueService(expectedQueueServiceDeps);
+        // Act
+        await queueService.ensureConnected();
+        // Assert
+        expect(mockConnect).toHaveBeenCalledWith(RABBITMQ_URL);
         expect(mockCreateChannel).toHaveBeenCalled();
     });
 
@@ -67,10 +77,12 @@ describe('queue.service', () => {
         const expectedMessageBuffer = Buffer.from(JSON.stringify(expectedMessage));
         mockConnect.mockResolvedValue(mockConnection);
         mockCreateChannel.mockResolvedValue(mockChannel);
-        const queueService: QueueService = await createQueueService(expectedQueueServiceDeps);
+        const queueService: QueueService = createQueueService(expectedQueueServiceDeps);
         // Act
         await queueService.publish(expectedMessage);
         // Assert
+        expect(mockConnect).toHaveBeenCalledWith(RABBITMQ_URL);
+        expect(mockCreateChannel).toHaveBeenCalled();
         expect(mockAssertQueue).toHaveBeenCalledWith(SCAN_QUEUE, { durable: true });
         expect(mockSendToQueue).toHaveBeenCalledWith(SCAN_QUEUE, expectedMessageBuffer);
     });
@@ -79,7 +91,8 @@ describe('queue.service', () => {
         // Arrange
         mockConnect.mockResolvedValue(mockConnection);
         mockCreateChannel.mockResolvedValue(mockChannel);
-        const queueService: QueueService = await createQueueService(expectedQueueServiceDeps);
+        const queueService: QueueService = createQueueService(expectedQueueServiceDeps);
+        await queueService.ensureConnected();
         // Act
         await queueService.close();
         // Assert
