@@ -1,5 +1,5 @@
 use uuid::Uuid;
-use sqlx::{PgPool, types::ipnetwork::IpNetwork};
+use sqlx::{PgPool, types::{ipnetwork::IpNetwork, time::OffsetDateTime}};
 
 #[derive(Debug, sqlx::FromRow)]
 pub struct DueScan {
@@ -10,13 +10,18 @@ pub struct DueScan {
 
 pub trait ScanRepository {
     async fn fetch_due_scans(&self) -> anyhow::Result<Vec<DueScan>>;
+    async fn update_next_run(
+            &self,
+            scan_id: Uuid,
+        next_run_at: OffsetDateTime,
+    ) -> anyhow::Result<()>;
 }
 
-pub struct Repository {
-    db: PgPool,
+pub struct PgScanRepository {
+    pub db: PgPool,
 }
 
-impl ScanRepository for Repository {
+impl ScanRepository for PgScanRepository {
     async fn fetch_due_scans(&self) -> anyhow::Result<Vec<DueScan>> {
         let scans = sqlx::query_as!(
             DueScan,
@@ -33,6 +38,25 @@ impl ScanRepository for Repository {
         .await?;
 
         Ok(scans)
+    }
+    async fn update_next_run(
+        &self,
+        scan_id: Uuid,
+        next_run_at: OffsetDateTime,
+    ) -> anyhow::Result<()> {
+        sqlx::query!(
+            r#"
+            UPDATE recon.scans
+            SET next_run_at = $1
+            WHERE id = $2
+            "#,
+            next_run_at,
+            scan_id,
+        )
+        .execute(&self.db)
+        .await?;
+
+        Ok(())
     }
 }
 

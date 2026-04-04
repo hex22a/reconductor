@@ -17,8 +17,8 @@ impl ScanPublisher for RabbitMqPublisher {
         let message = serde_json::json!({ "scanId": scan_id, "target": target });
         self.channel
             .basic_publish(
-                "",
-                "scans",
+                "".into(),
+                "scans".into(),
                 BasicPublishOptions::default(),
                 serde_json::to_vec(&message)?.as_slice(),
                 BasicProperties::default().with_delivery_mode(2),
