@@ -53,6 +53,7 @@ impl<R: ScanRepository, P: ScanPublisher> Scheduler<R, P> {
                     info!("Published scan {} for target {}", scan.id, scan.target);
                     match calculate_next_run(schedule) {
                         Ok(next_run) => {
+                            info!("Next run: {}", next_run);
                             if let Err(e) = self.repository.update_next_run(scan.id, next_run).await {
                                 error!("Failed to update next_run for scan {}: {}", scan.id, e);
                             }
@@ -73,7 +74,8 @@ impl<R: ScanRepository, P: ScanPublisher> Scheduler<R, P> {
 }
 
 fn calculate_next_run(schedule: &str) -> anyhow::Result<OffsetDateTime> {
-    let next = Schedule::from_str(schedule)?
+    let schedule_with_seconds = format!("0 {}", schedule);
+    let next = Schedule::from_str(&schedule_with_seconds)?
         .upcoming(Utc)
         .next()
         .ok_or_else(|| anyhow::anyhow!("No upcoming runs for schedule: {}", schedule))?;

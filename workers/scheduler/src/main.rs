@@ -11,7 +11,9 @@ use tracing::info;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenvy::dotenv().ok();
-
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .init();
     let config = config::Config::from_env()?;
 
     let db = db::init_db(&config.database_url).await;
