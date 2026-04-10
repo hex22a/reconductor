@@ -24,7 +24,7 @@ pub async fn run<R: ScanRepository>(
 ) -> anyhow::Result<()> {
     channel
         .queue_declare(
-            "scans",
+            "scans".into(),
             QueueDeclareOptions { durable: true, ..Default::default() },
             FieldTable::default(),
         )
@@ -35,8 +35,8 @@ pub async fn run<R: ScanRepository>(
 
     let mut consumer = channel
         .basic_consume(
-            "scans",
-            "scanner_worker",
+            "scans".into(),
+            "scanner_worker".into(),
             BasicConsumeOptions::default(),
             FieldTable::default(),
         )
