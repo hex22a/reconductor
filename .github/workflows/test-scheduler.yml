@@ -9,6 +9,8 @@ jobs:
     environment: test
     steps:
       - uses: actions/checkout@v6
+      - name: Install sqlx-cli
+        run: cargo install sqlx-cli
       - name: Run platform tests
         run: ./platform_tests.sh
         working-directory: ./workers/scheduler
