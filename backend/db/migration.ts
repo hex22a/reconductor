@@ -3,7 +3,7 @@ import { readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { waitDb } from './helpers';
 
-const MIGRATIONS_DIR = './migrations/';
+const MIGRATIONS_DIR = '../migrations/';
 const MIGRATION_ADVISORY_LOCK_ID = 1337;
 const MIGRATION_TABLE = 'recon.schema_migrations';
 

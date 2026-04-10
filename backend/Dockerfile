@@ -20,10 +20,12 @@ FROM debian:bookworm-slim
 WORKDIR /shared
 COPY ./shared/schema.graphql .
 
+WORKDIR /migrations
+COPY ./migrations .
+
 WORKDIR /app
 
 COPY --from=build /app/server /app/migration .
-COPY backend/migrations ./migrations
 
 EXPOSE 4000
 
