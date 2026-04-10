@@ -53,7 +53,6 @@ impl<R: ScanRepository, P: ScanPublisher> Scheduler<R, P> {
                     info!("Published scan {} for target {}", scan.id, scan.target);
                     match calculate_next_run(schedule) {
                         Ok(next_run) => {
-                            info!("Next run: {}", next_run);
                             if let Err(e) = self.repository.update_next_run(scan.id, next_run).await {
                                 error!("Failed to update next_run for scan {}: {}", scan.id, e);
                             }
