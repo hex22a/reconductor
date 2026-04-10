@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT id, target, schedule\n            FROM recon.scans\n            WHERE schedule IS NOT NULL\n                AND next_run_at <= NOW()\n                AND status != 'in progress'\n            FOR UPDATE SKIP LOCKED\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "target",
+        "type_info": "Inet"
+      },
+      {
+        "ordinal": 2,
+        "name": "schedule",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "ff1157e8d3ea4d320d4b9cf98088619deb9a961c5a41be9b88f6af9dbdfb6bce"
+}

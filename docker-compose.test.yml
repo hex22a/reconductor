@@ -3,12 +3,12 @@ services:
     image: postgres:18-alpine
     environment:
       POSTGRES_USER: reconductor
-      POSTGRES_DB: reconductor_test
+      POSTGRES_DB: reconductor
       POSTGRES_PASSWORD: reconductor
     ports:
-      - "5433:5432"
+      - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U reconductor -d reconductor_test"]
+      test: ["CMD-SHELL", "pg_isready -U reconductor -d reconductor"]
       interval: 5s
       timeout: 5s
       retries: 5
