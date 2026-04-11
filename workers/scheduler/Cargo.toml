@@ -5,10 +5,8 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.102"
-async-trait = "0.1.89"
 chrono = { version = "0.4.44", features = ["serde"] }
 cron = "0.16.0"
-ctor = "0.9.1"
 dotenvy = "0.15.7"
 lapin = "4.4.0"
 serde = { version = "1.0.228", features = ["derive"] }

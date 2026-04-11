@@ -6,12 +6,10 @@ pub struct RabbitMqPublisher {
     pub channel: Channel,
 }
 
-#[async_trait::async_trait]
 pub trait ScanPublisher {
     async fn publish(&self, scan_id: Uuid, target: &IpNetwork) -> anyhow::Result<()>;
 }
 
-#[async_trait::async_trait]
 impl ScanPublisher for RabbitMqPublisher {
     async fn publish(&self, scan_id: Uuid, target: &IpNetwork) -> anyhow::Result<()> {
         let message = serde_json::json!({ "scanId": scan_id, "target": target });
