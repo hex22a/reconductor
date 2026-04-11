@@ -2,11 +2,7 @@ use uuid::Uuid;
 use scheduler::db::scan::{PgScanRepository, ScanRepository};
 use sqlx::{PgPool, types::ipnetwork::IpNetwork};
 
-#[sqlx::test(migrations = "../../migrations/")]
-async fn test_fetch_due_scans_return_due_scans(db: PgPool) {
-    // Arrange
-    let repo = PgScanRepository { db: db.clone() };
-    let expected_target: IpNetwork = "192.168.50.1/16".parse().unwrap();
+async fn setup_project(db: &PgPool) -> Uuid {
     let expected_user_id: Uuid = sqlx::query_scalar(
         r#"
         INSERT INTO recon.users
@@ -15,7 +11,7 @@ async fn test_fetch_due_scans_return_due_scans(db: PgPool) {
         RETURNING id
         "#
     )
-    .fetch_one(&db)
+    .fetch_one(db)
     .await
     .unwrap();
     let expected_project_id: Uuid = sqlx::query_scalar(
@@ -27,9 +23,18 @@ async fn test_fetch_due_scans_return_due_scans(db: PgPool) {
         "#
     )
     .bind(expected_user_id)
-    .fetch_one(&db)
+    .fetch_one(db)
     .await
     .unwrap();
+    return expected_project_id;
+}
+
+#[sqlx::test(migrations = "../../migrations/")]
+async fn test_fetch_due_scans_return_due_scans(db: PgPool) {
+    // Arrange
+    let repo = PgScanRepository { db: db.clone() };
+    let expected_target: IpNetwork = "192.168.50.1/16".parse().unwrap();
+    let expected_project_id: Uuid = setup_project(&db).await;
     sqlx::query(
         r#"
         INSERT INTO recon.scans
@@ -54,29 +59,7 @@ async fn test_fetch_due_scans_no_schedule(db: PgPool) {
     // Arrange
     let repo = PgScanRepository { db: db.clone() };
     let expected_target: IpNetwork = "192.168.50.1/16".parse().unwrap();
-    let expected_user_id: Uuid = sqlx::query_scalar(
-        r#"
-        INSERT INTO recon.users
-            (username, password_hash)
-        VALUES ('test_user', 'password_hash')
-        RETURNING id
-        "#
-    )
-    .fetch_one(&db)
-    .await
-    .unwrap();
-    let expected_project_id: Uuid = sqlx::query_scalar(
-        r#"
-        INSERT INTO recon.projects
-            (name, owner_id)
-        VALUES ('test_project', $1)
-        RETURNING id
-        "#
-    )
-    .bind(expected_user_id)
-    .fetch_one(&db)
-    .await
-    .unwrap();
+    let expected_project_id: Uuid = setup_project(&db).await;
     sqlx::query(
         r#"
         INSERT INTO recon.scans
@@ -100,29 +83,7 @@ async fn test_fetch_due_scans_next_run_in_future(db: PgPool) {
     // Arrange
     let repo = PgScanRepository { db: db.clone() };
     let expected_target: IpNetwork = "192.168.50.1/16".parse().unwrap();
-    let expected_user_id: Uuid = sqlx::query_scalar(
-        r#"
-        INSERT INTO recon.users
-            (username, password_hash)
-        VALUES ('test_user', 'password_hash')
-        RETURNING id
-        "#
-    )
-    .fetch_one(&db)
-    .await
-    .unwrap();
-    let expected_project_id: Uuid = sqlx::query_scalar(
-        r#"
-        INSERT INTO recon.projects
-            (name, owner_id)
-        VALUES ('test_project', $1)
-        RETURNING id
-        "#
-    )
-    .bind(expected_user_id)
-    .fetch_one(&db)
-    .await
-    .unwrap();
+    let expected_project_id: Uuid = setup_project(&db).await;
     sqlx::query(
         r#"
         INSERT INTO recon.scans
