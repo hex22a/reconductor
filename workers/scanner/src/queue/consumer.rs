@@ -1,4 +1,4 @@
-use crate::db::scan::{ScanHost, ScanPort, ScanRepository};
+use crate::db::scan::{ScanRepository, ScanStatus};
 use crate::nmap;
 use crate::nmap::parser::Host;
 use futures_lite::StreamExt;
@@ -7,6 +7,7 @@ use lapin::{
     types::FieldTable,
     Channel,
 };
+use scanner::db::scan::{ScanHostInsert, ScanPortInsert};
 use serde::Deserialize;
 use tracing::{error, info};
 use uuid::Uuid;
@@ -78,24 +79,23 @@ async fn process<R: ScanRepository>(
     scan_id: Uuid,
     target: &str,
 ) -> anyhow::Result<()> {
-    repository.update_status(scan_id, "RUNNING").await?;
+    repository.update_scan_status(scan_id, ScanStatus::InProgress).await?;
 
     let xml = nmap::run(target).await?;
     let result = nmap::parser::parse(&xml)?;
 
-    let hosts = result.hosts
+    let hosts: Vec<ScanHostInsert> = result.hosts
         .into_iter()
         .filter(|h| h.status.state == "up")
         .map(map_host)
         .collect();
 
-    repository.store_results(scan_id, hosts).await?;
-    repository.update_status(scan_id, "COMPLETED").await?;
+    repository.update_scan_status(scan_id, ScanStatus::Done).await?;
 
     Ok(())
 }
 
-fn map_host(host: Host) -> ScanHost {
+fn map_host(host: Host) -> ScanHostInsert {
     let ip = host.addresses.iter()
         .find(|a| a.addrtype == "ipv4" || a.addrtype == "ipv6")
         .map(|a| a.addr.clone());
@@ -114,7 +114,7 @@ fn map_host(host: Host) -> ScanHost {
 
     let (os_match, os_accuracy) = host.os
         .and_then(|o| o.matches.into_iter().next())
-        .map(|m| (Some(m.name), m.accuracy.parse::<i32>().ok()))
+        .map(|m| (Some(m.name), m.accuracy.parse::<u32>().ok()))
         .unwrap_or((None, None));
 
     let ports = host.ports
@@ -122,8 +122,8 @@ fn map_host(host: Host) -> ScanHost {
         .unwrap_or_default()
         .into_iter()
         .filter(|p| p.state.state == "open")
-        .map(|p| ScanPort {
-            port: p.portid.parse::<i32>().unwrap_or(0),
+        .map(|p| ScanPortInsert {
+            port: p.portid.parse::<u32>().unwrap_or(0),
             protocol: Some(p.protocol),
             state: Some(p.state.state),
             service: p.service.as_ref().and_then(|s| s.name.clone()),
@@ -132,5 +132,5 @@ fn map_host(host: Host) -> ScanHost {
         })
         .collect();
 
-    ScanHost { ip, mac, hostname, vendor, os_match, os_accuracy, ports }
+    ScanHostInsert { ip, mac, hostname, vendor, os_match, os_accuracy, ports }
 }
