@@ -6,6 +6,7 @@ mod scheduler;
 use db::scan::PgScanRepository;
 use queue::publisher::RabbitMqPublisher;
 use scheduler::Scheduler;
+use scheduler::utils::SchedulerUtils;
 use tracing::info;
 
 #[tokio::main]
@@ -29,6 +30,7 @@ async fn main() -> anyhow::Result<()> {
     let scheduler = Scheduler::new(
         PgScanRepository { db },
         RabbitMqPublisher { channel: publish_channel },
+        SchedulerUtils,
         config.poll_interval_secs,
     );
 

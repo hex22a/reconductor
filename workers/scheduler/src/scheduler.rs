@@ -1,23 +1,24 @@
+pub mod utils;
+
 use crate::db::scan::ScanRepository;
 use crate::queue::publisher::ScanPublisher;
-use chrono::{Utc};
-use cron::Schedule;
-use sqlx::types::time::OffsetDateTime;
-use std::str::FromStr;
+use crate::scheduler::utils::Utils;
 use tokio::time::{interval, Duration};
 use tracing::{error, info};
 
-pub struct Scheduler<R: ScanRepository, P: ScanPublisher> {
+pub struct Scheduler<R: ScanRepository, P: ScanPublisher, U: Utils> {
     repository: R,
     publisher: P,
+    utils: U,
     poll_interval: Duration,
 }
 
-impl<R: ScanRepository, P: ScanPublisher> Scheduler<R, P> {
-    pub fn new(repository: R, publisher: P, poll_interval_secs: u64) -> Self {
+impl<R: ScanRepository, P: ScanPublisher, U: Utils> Scheduler<R, P, U> {
+    pub fn new(repository: R, publisher: P, utils: U, poll_interval_secs: u64) -> Self {
         Self {
             repository,
             publisher,
+            utils,
             poll_interval: Duration::from_secs(poll_interval_secs),
         }
     }
@@ -51,7 +52,7 @@ impl<R: ScanRepository, P: ScanPublisher> Scheduler<R, P> {
             match self.publisher.publish(scan.id, &scan.target).await {
                 Ok(_) => {
                     info!("Published scan {} for target {}", scan.id, scan.target);
-                    match calculate_next_run(schedule) {
+                    match self.utils.calculate_next_run(schedule) {
                         Ok(next_run) => {
                             if let Err(e) = self.repository.update_next_run(scan.id, next_run).await {
                                 error!("Failed to update next_run for scan {}: {}", scan.id, e);
@@ -72,13 +73,99 @@ impl<R: ScanRepository, P: ScanPublisher> Scheduler<R, P> {
     }
 }
 
-fn calculate_next_run(schedule: &str) -> anyhow::Result<OffsetDateTime> {
-    let schedule_with_seconds = format!("0 {}", schedule);
-    let next = Schedule::from_str(&schedule_with_seconds)?
-        .upcoming(Utc)
-        .next()
-        .ok_or_else(|| anyhow::anyhow!("No upcoming runs for schedule: {}", schedule))?;
+#[cfg(test)]
+mod tests {
+    use std::sync::{Arc, Mutex};
 
-    Ok(OffsetDateTime::from_unix_timestamp(next.timestamp())?)
+    use anyhow::Ok;
+    use crate::db::scan::{DueScan, ScanRepository};
+    use sqlx::types::{ipnetwork::IpNetwork, time::OffsetDateTime};
+    use uuid::Uuid;
+
+    use crate::{queue::publisher::ScanPublisher, scheduler::utils::Utils};
+
+    use super::Scheduler;
+
+    struct MockScanRepository {
+        due_scans: Vec<DueScan>,
+        fetch_due_scans_calls: Arc<Mutex<Vec<()>>>,
+        update_next_run_calls: Arc<Mutex<Vec<(Uuid, OffsetDateTime)>>>,
+    }
+
+    struct MockScanPublisher {
+        publish_calls: Arc<Mutex<Vec<(Uuid, IpNetwork)>>>
+    }
+
+    struct MockUtils {
+        return_value: OffsetDateTime,
+        calculate_next_run_calls: Arc<Mutex<Vec<String>>>
+    }
+
+    impl ScanRepository for MockScanRepository {
+        async fn fetch_due_scans(&self) -> anyhow::Result<Vec<DueScan>> {
+            self.fetch_due_scans_calls.lock().unwrap().push(());
+            Ok(self.due_scans.clone())
+        }
+        async fn update_next_run(
+                    &self,
+                    scan_id: Uuid,
+                    next_run_at: sqlx::types::time::OffsetDateTime,
+            ) -> anyhow::Result<()> {
+            self.update_next_run_calls.lock().unwrap().push((scan_id, next_run_at));
+            Ok(())
+        }
+    }
+
+    impl ScanPublisher for MockScanPublisher {
+        async fn publish(&self, scan_id: Uuid, target: &IpNetwork) -> anyhow::Result<()> {
+            self.publish_calls.lock().unwrap().push((scan_id, target.clone()));
+            Ok(())
+        }
+    }
+
+    impl Utils for MockUtils {
+        fn calculate_next_run(&self, schedule: &str) -> anyhow::Result<OffsetDateTime> {
+            self.calculate_next_run_calls.lock().unwrap().push(schedule.into());
+            Ok(self.return_value)
+        }
+    }
+
+    #[tokio::test]
+    async fn test_poll_no_due_scans() {
+        // Arrange
+        let expected_poll_interval_secs: u64 = 30;
+        let expected_next_run: OffsetDateTime = OffsetDateTime::now_utc();
+        let expected_due_scans: Vec<DueScan> = vec![];
+        let fetch_due_scans_calls: Arc<Mutex<Vec<()>>> = Arc::new(Mutex::new(vec![]));
+        let update_next_run_calls: Arc<Mutex<Vec<(Uuid, OffsetDateTime)>>> = Arc::new(Mutex::new(vec![]));
+        let publish_calls: Arc<Mutex<Vec<(Uuid, IpNetwork)>>> = Arc::new(Mutex::new(vec![]));
+        let calculate_next_run_calls: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(vec![]));
+        let mock_scan_repository = MockScanRepository {
+            due_scans: expected_due_scans,
+            fetch_due_scans_calls: fetch_due_scans_calls.clone(),
+            update_next_run_calls: update_next_run_calls.clone(),
+        };
+        let mock_scan_publisher = MockScanPublisher {
+            publish_calls: publish_calls.clone(),
+        };
+        let mock_utils = MockUtils {
+            return_value: expected_next_run,
+            calculate_next_run_calls: calculate_next_run_calls.clone(),
+        };
+        let scheduler = Scheduler::new(
+            mock_scan_repository,
+            mock_scan_publisher,
+            mock_utils,
+            expected_poll_interval_secs,
+        );
+        // Act
+        let actual_result = scheduler.poll().await.unwrap();
+
+        // Assert
+        assert_eq!(actual_result, ());
+        assert_eq!(fetch_due_scans_calls.lock().unwrap().len(), 1);
+        assert_eq!(update_next_run_calls.lock().unwrap().len(), 0);
+        assert_eq!(calculate_next_run_calls.lock().unwrap().len(), 0);
+        assert_eq!(publish_calls.lock().unwrap().len(), 0);
+    }
 }
-

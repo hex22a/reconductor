@@ -1,7 +1,7 @@
 use uuid::Uuid;
 use sqlx::{PgPool, types::{ipnetwork::IpNetwork, time::OffsetDateTime}};
 
-#[derive(Debug, sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow)]
 pub struct DueScan {
     pub id: Uuid,
     pub target: IpNetwork,
