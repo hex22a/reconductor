@@ -1,0 +1,19 @@
+name: Test Scanner
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install sqlx-cli
+        run: cargo install sqlx-cli
+      - name: Run platform tests
+        run: ./platform_tests.sh
+        working-directory: ./workers/scanner
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
