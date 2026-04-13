@@ -42,8 +42,8 @@ CREATE INDEX idx_scans_id_desc ON recon.scans (id DESC);
 CREATE TABLE recon.scan_hosts (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     scan_id UUID NOT NULL REFERENCES recon.scans(id),
-    ip VARCHAR(45) NOT NULL,
-    mac VARCHAR(17),
+    ip INET NOT NULL,
+    mac MACADDR,
     vendor TEXT,
     hostname TEXT,
     os_match TEXT,

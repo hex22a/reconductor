@@ -48,13 +48,10 @@ pub trait ScanRepository {
         scan_id: Uuid,
         status: ScanStatus,
     ) -> anyhow::Result<()>;
-    async fn add_scan_host(
+    async fn store_scan_results(
         &self,
-        host_insert: ScanHostInsert,
-    ) -> anyhow::Result<()>;
-    async fn add_port_insert(
-        &self,
-        port_insert: ScanPortInsert,
+        scan_id: Uuid,
+        hosts: Vec<ScanHostInsert>,
     ) -> anyhow::Result<()>;
 }
 
@@ -82,16 +79,10 @@ impl ScanRepository for PgScanRepository {
         Ok(())
     }
 
-    async fn add_scan_host(
+    async fn store_scan_results(
         &self,
-        host_insert: ScanHostInsert,
-    ) -> anyhow::Result<()> {
-        todo!()
-    }
-
-    async fn add_port_insert(
-        &self,
-        port_insert: ScanPortInsert,
+        scan_id: Uuid,
+        hosts: Vec<ScanHostInsert>,
     ) -> anyhow::Result<()> {
         todo!()
     }
