@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use uuid::Uuid;
-use sqlx::{PgPool, types::{ipnetwork::IpNetwork}};
+use sqlx::{PgPool, types::{ipnetwork::IpNetwork, mac_address::MacAddress}};
 
 pub enum ScanStatus {
     InProgress,
@@ -24,17 +24,17 @@ impl Display for ScanStatus {
 }
 
 pub struct ScanHostInsert {
-    pub ip: Option<String>,
-    pub mac: Option<String>,
+    pub ip: Option<IpNetwork>,
+    pub mac: Option<MacAddress>,
     pub vendor: Option<String>,
     pub hostname: Option<String>,
     pub os_match: Option<String>,
-    pub os_accuracy: Option<u32>,
+    pub os_accuracy: Option<i32>,
     pub ports: Vec<ScanPortInsert>,
 }
 
 pub struct ScanPortInsert {
-    pub port: u32,
+    pub port: i32,
     pub protocol: Option<String>,
     pub state: Option<String>,
     pub service: Option<String>,
@@ -84,7 +84,67 @@ impl ScanRepository for PgScanRepository {
         scan_id: Uuid,
         hosts: Vec<ScanHostInsert>,
     ) -> anyhow::Result<()> {
-        todo!()
+        let mut tx = self.db.begin().await?;
+        for host in hosts {
+            let host_id: Uuid = sqlx::query_scalar!(
+                r#"
+                INSERT INTO recon.scan_hosts
+                    (scan_id, ip, mac, hostname, vendor, os_match, os_accuracy)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                RETURNING id
+                "#,
+                scan_id,
+                host.ip,
+                host.mac,
+                host.hostname,
+                host.vendor,
+                host.os_match,
+                host.os_accuracy,
+            )
+            .fetch_one(&mut *tx)
+            .await?;
+
+            if !host.ports.is_empty() {
+                let host_ids = vec![host_id; host.ports.len()];
+                let ports: Vec<i32> = host.ports.iter().map(|p| p.port).collect();
+                let protocols: Vec<Option<String>> = host.ports
+                    .iter().map(|p| p.protocol.clone()).collect();
+                let states: Vec<Option<String>> = host.ports
+                    .iter().map(|p| p.state.clone()).collect();
+                let services: Vec<Option<String>> = host.ports
+                    .iter().map(|p| p.service.clone()).collect();
+                let products: Vec<Option<String>> = host.ports
+                    .iter().map(|p| p.product.clone()).collect();
+                let versions: Vec<Option<String>> = host.ports
+                    .iter().map(|p| p.version.clone()).collect();
+                sqlx::query!(
+                    r#"
+                    INSERT INTO recon.scan_ports
+                        (host_id, port, protocol, state, service, product, version)
+                    SELECT * FROM UNNEST(
+                        $1::uuid[],
+                        $2::int[],
+                        $3::text[],
+                        $4::text[],
+                        $5::text[],
+                        $6::text[],
+                        $7::text[]
+                    )
+                    "#,
+                    &host_ids as &[Uuid],
+                    &ports as &[i32],
+                    &protocols as &[Option<String>],
+                    &states as &[Option<String>],
+                    &services as &[Option<String>],
+                    &products as &[Option<String>],
+                    &versions as &[Option<String>],
+                )
+                .execute(&mut *tx)
+                .await?;
+            }
+        }
+        tx.commit().await?;
+        Ok(())
     }
 }
 

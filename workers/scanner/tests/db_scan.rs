@@ -1,5 +1,7 @@
-use scanner::db::scan::{PgScanRepository, ScanRepository, ScanStatus};
-use sqlx::{PgPool, types::ipnetwork::IpNetwork};
+use std::str::FromStr;
+
+use scanner::db::scan::{PgScanRepository, ScanHostInsert, ScanPortInsert, ScanRepository, ScanStatus};
+use sqlx::{PgPool, types::{ipnetwork::IpNetwork, mac_address::MacAddress}};
 use uuid::Uuid;
 
 async fn setup_scans(db: &PgPool) -> Uuid {
@@ -63,6 +65,48 @@ async fn test_update_scan_status_in_progress(db: PgPool) {
     let expected_scan_id: Uuid = setup_scans(&db).await;
     // Act
     let actual_result = repo.update_scan_status(expected_scan_id, expected_status).await;
+    // Assert
+    assert_eq!(actual_result.unwrap(), ());
+}
+
+#[sqlx::test(migrations = "../../migrations/")]
+async fn test_store_scan_results(db: PgPool) {
+    // Arrange
+    let expected_host_ip: IpNetwork = "192.168.0.1".parse().unwrap();
+    let expected_host_mac_address: MacAddress = MacAddress::from_str("08:00:2b:01:02:03").unwrap();
+    let expected_ports: Vec<ScanPortInsert> = vec![
+        ScanPortInsert {
+            port: 22,
+            protocol: Some("ssh".to_string()),
+            state: Some("up".to_string()),
+            service: Some("ssh".to_string()),
+            product: Some("ssh".to_string()),
+            version: Some("1.0.1".to_string()),
+        },
+        ScanPortInsert {
+            port: 80,
+            protocol: Some("http".to_string()),
+            state: Some("up".to_string()),
+            service: Some("server".to_string()),
+            product: Some("bun".to_string()),
+            version: Some("1.0.1".to_string()),
+        }
+    ];
+    let expected_hosts: Vec<ScanHostInsert> = vec![
+        ScanHostInsert {
+            ip: Some(expected_host_ip),
+            mac: Some(expected_host_mac_address),
+            vendor: Some("linux".to_string()),
+            hostname: Some("durandal".to_string()),
+            os_match: Some("debian".to_string()),
+            os_accuracy: Some(90),
+            ports: expected_ports,
+        }
+    ];
+    let repo = PgScanRepository { db: db.clone() };
+    let expected_scan_id: Uuid = setup_scans(&db).await;
+    // Act
+    let actual_result = repo.store_scan_results(expected_scan_id, expected_hosts).await;
     // Assert
     assert_eq!(actual_result.unwrap(), ());
 }

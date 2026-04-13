@@ -1,4 +1,4 @@
-use crate::db::scan::{ScanRepository, ScanStatus};
+use crate::db::scan::{ScanRepository, ScanStatus, ScanHostInsert, ScanPortInsert};
 use crate::nmap;
 use crate::nmap::parser::Host;
 use futures_lite::StreamExt;
@@ -7,8 +7,9 @@ use lapin::{
     types::FieldTable,
     Channel,
 };
-use scanner::db::scan::{ScanHostInsert, ScanPortInsert};
 use serde::Deserialize;
+use sqlx::types::ipnetwork::IpNetwork;
+use sqlx::types::mac_address::MacAddress;
 use tracing::{error, info};
 use uuid::Uuid;
 
@@ -90,19 +91,21 @@ async fn process<R: ScanRepository>(
         .map(map_host)
         .collect();
 
+    repository.store_scan_results(scan_id, hosts).await?;
+
     repository.update_scan_status(scan_id, ScanStatus::Done).await?;
 
     Ok(())
 }
 
 fn map_host(host: Host) -> ScanHostInsert {
-    let ip = host.addresses.iter()
+    let ip: Option<IpNetwork> = host.addresses.iter()
         .find(|a| a.addrtype == "ipv4" || a.addrtype == "ipv6")
-        .map(|a| a.addr.clone());
+        .map(|a| a.addr.clone().parse().unwrap());
 
-    let mac = host.addresses.iter()
+    let mac: Option<MacAddress> = host.addresses.iter()
         .find(|a| a.addrtype == "mac")
-        .map(|a| a.addr.clone());
+        .map(|a| a.addr.clone().parse().unwrap());
 
     let vendor = host.addresses.iter()
         .find(|a| a.addrtype == "mac")
@@ -114,7 +117,7 @@ fn map_host(host: Host) -> ScanHostInsert {
 
     let (os_match, os_accuracy) = host.os
         .and_then(|o| o.matches.into_iter().next())
-        .map(|m| (Some(m.name), m.accuracy.parse::<u32>().ok()))
+        .map(|m| (Some(m.name), m.accuracy.parse::<i32>().ok()))
         .unwrap_or((None, None));
 
     let ports = host.ports
@@ -123,7 +126,7 @@ fn map_host(host: Host) -> ScanHostInsert {
         .into_iter()
         .filter(|p| p.state.state == "open")
         .map(|p| ScanPortInsert {
-            port: p.portid.parse::<u32>().unwrap_or(0),
+            port: p.portid.parse::<i32>().unwrap_or(0),
             protocol: Some(p.protocol),
             state: Some(p.state.state),
             service: p.service.as_ref().and_then(|s| s.name.clone()),
