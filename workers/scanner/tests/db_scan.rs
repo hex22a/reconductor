@@ -44,6 +44,18 @@ async fn setup_scans(db: &PgPool) -> Uuid {
 }
 
 #[sqlx::test(migrations = "../../migrations/")]
+async fn test_update_scan_status_done(db: PgPool) {
+    // Arrange
+    let expected_status = ScanStatus::Done;
+    let repo = PgScanRepository { db: db.clone() };
+    let expected_scan_id: Uuid = setup_scans(&db).await;
+    // Act
+    let actual_result = repo.update_scan_status(expected_scan_id, expected_status).await;
+    // Assert
+    assert_eq!(actual_result.unwrap(), ());
+}
+
+#[sqlx::test(migrations = "../../migrations/")]
 async fn test_update_scan_status_in_progress(db: PgPool) {
     // Arrange
     let expected_status = ScanStatus::InProgress;
