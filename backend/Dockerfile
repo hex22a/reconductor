@@ -1,5 +1,5 @@
 # Build
-FROM oven/bun:1.3.9 as build
+FROM oven/bun:1.3.12 as build
 
 WORKDIR /shared
 COPY ./shared .
@@ -15,7 +15,7 @@ RUN bun build --compile --outfile=server ./src/server.ts
 RUN bun build --compile --outfile=migration ./db/migration.ts
 
 # Server
-FROM debian:bookworm-slim
+FROM debian:13.4-slim
 
 WORKDIR /shared
 COPY ./shared/schema.graphql .
