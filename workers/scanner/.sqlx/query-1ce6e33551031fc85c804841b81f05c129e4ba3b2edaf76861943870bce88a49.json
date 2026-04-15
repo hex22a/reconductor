@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE recon.scans\n            SET status = $1::scan_status\n            WHERE id = $2\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "scan_status",
+            "kind": {
+              "Enum": [
+                "scheduled",
+                "in progress",
+                "done"
+              ]
+            }
+          }
+        },
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1ce6e33551031fc85c804841b81f05c129e4ba3b2edaf76861943870bce88a49"
+}

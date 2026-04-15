@@ -30,6 +30,7 @@ import { mq } from './queue/mq.ts';
 import { createQueueService } from './queue/queue.service.ts';
 import { CronExpressionParser } from 'cron-parser';
 import { createCronParser } from './utils/cron.ts';
+import { health } from './controllers/health.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -41,6 +42,7 @@ container.register({
     handleCallStrategy: asClass(HandleCallStrategy),
     handleWithContextStrategy: asClass(HandleWithContextStrategy),
     preflightController: asValue(preflight),
+    healthController: asValue(health),
     registerController: asFunction(createRegisterController),
     loginController: asFunction(createLoginController),
     logoutController: asFunction(createLogoutController),

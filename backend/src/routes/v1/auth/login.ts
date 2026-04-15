@@ -11,7 +11,7 @@ export default function createLoginRoutes() {
     const loginController: LoginController = container.resolve('loginController');
     const withErrorHandling: WithErrorHandlingDecorator = container.resolve('withErrorHandling');
     const withCors: WithCorsDecorator = container.resolve('withCors');
-    const preflight: RequestHandler = container.resolve('preflightController');
+    const preflight: RequestHandler<void> = container.resolve('preflightController');
     return {
         [API_LOGIN_ENDPOINT_V1]: {
             POST: withCors(withErrorHandling(loginController.post)),

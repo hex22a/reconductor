@@ -28,6 +28,7 @@ export const API_REGISTER_ENDPOINT_V1 = '/api/v1/register';
 export const API_LOGIN_ENDPOINT_V1 = '/api/v1/login';
 export const API_ME_ENDPOINT_V1 = '/api/v1/me';
 export const API_LOGOUT_ENDPOINT_V1 = '/api/v1/logout';
+export const API_HEALTH_ENDPOINT_V1 = '/api/v1/health';
 export const GRAPHQL_ENDPOINT = '/graphql';
 
 export const MIN_USERNAME_LENGTH = 4;
