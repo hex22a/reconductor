@@ -1,21 +1,27 @@
 # Build
 FROM node:24-alpine AS build
 
+WORKDIR /shared
+COPY ./shared .
+
 WORKDIR /app
 RUN corepack enable
 
-COPY package.json pnpm-lock.yaml ./
+COPY dashboard/package.json dashboard/pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-COPY . .
+COPY dashboard .
 RUN pnpm build
 
 # Server
 FROM nginx:alpine
 
+WORKDIR /shared
+COPY ./shared .
+
 RUN rm -rf /usr/share/nginx/html/*
 COPY --from=build /app/build/client /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY dashboard/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

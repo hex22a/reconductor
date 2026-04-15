@@ -2,7 +2,6 @@ services:
   db:
     profiles:
       - backend
-      - workers
     image: postgres:18-alpine
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -18,7 +17,6 @@ services:
   redis:
     profiles:
       - backend
-      - workers
     image: redis:8.6.0-alpine
     command: redis-server --requirepass ${REDIS_PASSWORD}
     ports:
@@ -31,7 +29,6 @@ services:
   rabbitmq:
     profiles:
       - backend
-      - workers
     image: rabbitmq:4.2.5-management
     userns_mode: keep-id
     environment:
@@ -51,7 +48,6 @@ services:
   backend:
     profiles:
       - backend
-      - workers
     build:
       context: .
       dockerfile: ./backend/Dockerfile
@@ -110,10 +106,14 @@ services:
   dashboard:
     profiles:
       - frontend
-    build: ./dashboard
+    build:
+      context: .
+      dockerfile: ./dashboard/Dockerfile
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    environment:
+      VITE_API_URL: http://backend:4000
     ports:
-      - 3000:80
-
+      - 8080:80
 
