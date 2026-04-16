@@ -16,7 +16,7 @@ use uuid::Uuid;
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct ScanMessage {
-    scan_id: Uuid,
+    id: Uuid,
     target: String,
 }
 
@@ -58,15 +58,15 @@ pub async fn run<R: ScanRepository>(
             }
         };
 
-        info!("Received scan job {} for target {}", msg.scan_id, msg.target);
+        info!("Received scan job {} for target {}", msg.id, msg.target);
 
-        match process(&repository, msg.scan_id, &msg.target).await {
+        match process(&repository, msg.id, &msg.target).await {
             Ok(_) => {
-                info!("Scan {} completed", msg.scan_id);
+                info!("Scan {} completed", msg.id);
                 delivery.ack(BasicAckOptions::default()).await?;
             }
             Err(e) => {
-                error!("Scan {} failed: {}", msg.scan_id, e);
+                error!("Scan {} failed: {}", msg.id, e);
                 delivery.nack(BasicNackOptions { requeue: true, ..Default::default() }).await?;
             }
         }

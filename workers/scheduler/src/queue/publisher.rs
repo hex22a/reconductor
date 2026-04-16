@@ -12,7 +12,7 @@ pub trait ScanPublisher {
 
 impl ScanPublisher for RabbitMqPublisher {
     async fn publish(&self, scan_id: Uuid, target: &IpNetwork) -> anyhow::Result<()> {
-        let message = serde_json::json!({ "scanId": scan_id, "target": target });
+        let message = serde_json::json!({ "id": scan_id, "target": target });
         self.channel
             .basic_publish(
                 "".into(),
