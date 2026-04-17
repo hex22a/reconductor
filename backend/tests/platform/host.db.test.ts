@@ -31,7 +31,6 @@ describe('host.db', () => {
                         await hostRepository.getHost(expectedExistingHostId);
                     // Assert
                     expect(actualHost.id).toEqual(expectedExistingHostId);
-                    expect(actualHost.created_at).toBeDate();
                     expect(actualHost.ip).toEqual(expectedHostIp);
                 });
             });

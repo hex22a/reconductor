@@ -3,8 +3,7 @@ export const expectedHostIp = '192.168.0.15';
 
 export type HostEntity = {
     id: string;
-    scan_id: string;
-    created_at: Date;
+    scan_run_id: string;
     ip: string;
     mac?: string;
     vendor?: string;
@@ -13,4 +12,4 @@ export type HostEntity = {
     os_accuracy?: number;
 };
 
-export type HostInsertSeed = Pick<HostEntity, 'id' | 'scan_id' | 'ip'>;
+export type HostInsertSeed = Pick<HostEntity, 'id' | 'scan_run_id' | 'ip'>;

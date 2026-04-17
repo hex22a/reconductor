@@ -16,14 +16,13 @@ export function createHostRepository({ sql }: HostRepositoryDeps): HostRepositor
             const [host] = await sql<Array<HostEntity>>`
                 SELECT
                     id,
-                    scan_id,
+                    scan_run_id,
                     ip,
                     mac,
                     vendor,
                     hostname,
                     os_match,
-                    os_accuracy,
-                    created_at
+                    os_accuracy
                 FROM recon.scan_hosts
                 WHERE id=${id}
                 LIMIT 1;

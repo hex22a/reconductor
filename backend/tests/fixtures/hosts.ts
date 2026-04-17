@@ -2,22 +2,20 @@ import type { HostEntity, HostInsertSeed } from '@/src/domain/host.entity';
 import { randomUUIDv7 } from 'bun';
 
 export function createHostFixture(
-    scanId: string,
+    scanRunId: string,
     ip: string,
     hostId?: string,
 ): [HostEntity, HostInsertSeed] {
     const id = hostId || randomUUIDv7();
-    const date = new Date();
     return [
         {
             id,
-            scan_id: scanId,
-            created_at: date,
+            scan_run_id: scanRunId,
             ip,
         },
         {
             id,
-            scan_id: scanId,
+            scan_run_id: scanRunId,
             ip,
         },
     ];

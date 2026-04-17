@@ -8,6 +8,7 @@ import {
     expectedExistingProjectId,
     expectedExistingProjectName,
 } from '@/tests/fixtures/projects';
+import { createScanRunFixture, expectedExistingScanRunId } from '@/tests/fixtures/scanRuns';
 import {
     createScanFixture,
     expectedExistingScanId,
@@ -65,17 +66,27 @@ async function seedScans(sql: SQL): Promise<void> {
     `;
 }
 
+async function seedSeedRuns(sql: SQL): Promise<void> {
+    const scanRun = createScanRunFixture(expectedExistingScanId, expectedExistingScanRunId);
+    await sql`
+        INSERT INTO recon.scan_runs
+            (id, scan_id)
+        VALUES
+            (${scanRun.id}, ${scanRun.scan_id});
+    `;
+}
+
 async function seedHosts(sql: SQL): Promise<void> {
     const [, host] = createHostFixture(
-        expectedExistingScanId,
+        expectedExistingScanRunId,
         expectedHostIp,
         expectedExistingHostId,
     );
     await sql`
         INSERT into recon.scan_hosts
-            (id, scan_id, ip)
+            (id, scan_run_id, ip)
         VALUES
-            (${host.id}, ${host.scan_id}, ${host.ip});
+            (${host.id}, ${host.scan_run_id}, ${host.ip});
     `;
 }
 
@@ -97,6 +108,7 @@ export async function seedDb(sql: SQL): Promise<void> {
     await seedUsers(sql);
     await seedProjects(sql);
     await seedScans(sql);
+    await seedSeedRuns(sql);
     await seedHosts(sql);
     await seedPorts(sql);
 }
