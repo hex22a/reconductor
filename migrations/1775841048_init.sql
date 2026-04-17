@@ -39,16 +39,23 @@ CREATE TABLE recon.scans (
 
 CREATE INDEX idx_scans_id_desc ON recon.scans (id DESC);
 
-CREATE TABLE recon.scan_hosts (
+CREATE TABLE recon.scan_runs (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     scan_id UUID NOT NULL REFERENCES recon.scans(id),
+    created_at TIMESTAMP DEFAULT now()
+);
+
+CREATE INDEX idx_scan_runs_id_desc ON recon.scan_runs (id DESC);
+
+CREATE TABLE recon.scan_hosts (
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    scan_run_id UUID NOT NULL REFERENCES recon.scan_runs(id),
     ip INET NOT NULL,
     mac MACADDR,
     vendor TEXT,
     hostname TEXT,
     os_match TEXT,
-    os_accuracy INT,
-    created_at TIMESTAMP DEFAULT now()
+    os_accuracy INT
 );
 
 CREATE INDEX idx_scan_hosts_id_desc ON recon.scan_hosts (id DESC);

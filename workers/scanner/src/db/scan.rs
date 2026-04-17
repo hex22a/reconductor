@@ -1,7 +1,10 @@
 use std::fmt::Display;
 
+use sqlx::{
+    PgPool,
+    types::{ipnetwork::IpNetwork, mac_address::MacAddress},
+};
 use uuid::Uuid;
-use sqlx::{PgPool, types::{ipnetwork::IpNetwork, mac_address::MacAddress}};
 
 pub enum ScanStatus {
     InProgress,
@@ -9,7 +12,7 @@ pub enum ScanStatus {
 }
 
 impl ScanStatus {
-    fn as_str(&self) -> &str{
+    fn as_str(&self) -> &str {
         match self {
             ScanStatus::InProgress => "in progress",
             ScanStatus::Done => "done",
@@ -43,11 +46,7 @@ pub struct ScanPortInsert {
 }
 
 pub trait ScanRepository {
-    async fn update_scan_status(
-        &self,
-        scan_id: Uuid,
-        status: ScanStatus,
-    ) -> anyhow::Result<()>;
+    async fn update_scan_status(&self, scan_id: Uuid, status: ScanStatus) -> anyhow::Result<()>;
     async fn store_scan_results(
         &self,
         scan_id: Uuid,
@@ -60,11 +59,7 @@ pub struct PgScanRepository {
 }
 
 impl ScanRepository for PgScanRepository {
-    async fn update_scan_status(
-        &self,
-        scan_id: Uuid,
-        status: ScanStatus,
-    ) -> anyhow::Result<()> {
+    async fn update_scan_status(&self, scan_id: Uuid, status: ScanStatus) -> anyhow::Result<()> {
         sqlx::query!(
             r#"
             UPDATE recon.scans
@@ -85,15 +80,29 @@ impl ScanRepository for PgScanRepository {
         hosts: Vec<ScanHostInsert>,
     ) -> anyhow::Result<()> {
         let mut tx = self.db.begin().await?;
+
+        let scan_run_id: Uuid = sqlx::query_scalar!(
+            r#"
+            INSERT INTO recon.scan_runs
+                (scan_id)
+            VALUES
+                ($1)
+            RETURNING id
+            "#,
+            scan_id,
+        )
+        .fetch_one(&mut *tx)
+        .await?;
+
         for host in hosts {
             let host_id: Uuid = sqlx::query_scalar!(
                 r#"
                 INSERT INTO recon.scan_hosts
-                    (scan_id, ip, mac, hostname, vendor, os_match, os_accuracy)
+                    (scan_run_id, ip, mac, hostname, vendor, os_match, os_accuracy)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
                 RETURNING id
                 "#,
-                scan_id,
+                scan_run_id,
                 host.ip,
                 host.mac,
                 host.hostname,
@@ -107,16 +116,16 @@ impl ScanRepository for PgScanRepository {
             if !host.ports.is_empty() {
                 let host_ids = vec![host_id; host.ports.len()];
                 let ports: Vec<i32> = host.ports.iter().map(|p| p.port).collect();
-                let protocols: Vec<Option<String>> = host.ports
-                    .iter().map(|p| p.protocol.clone()).collect();
-                let states: Vec<Option<String>> = host.ports
-                    .iter().map(|p| p.state.clone()).collect();
-                let services: Vec<Option<String>> = host.ports
-                    .iter().map(|p| p.service.clone()).collect();
-                let products: Vec<Option<String>> = host.ports
-                    .iter().map(|p| p.product.clone()).collect();
-                let versions: Vec<Option<String>> = host.ports
-                    .iter().map(|p| p.version.clone()).collect();
+                let protocols: Vec<Option<String>> =
+                    host.ports.iter().map(|p| p.protocol.clone()).collect();
+                let states: Vec<Option<String>> =
+                    host.ports.iter().map(|p| p.state.clone()).collect();
+                let services: Vec<Option<String>> =
+                    host.ports.iter().map(|p| p.service.clone()).collect();
+                let products: Vec<Option<String>> =
+                    host.ports.iter().map(|p| p.product.clone()).collect();
+                let versions: Vec<Option<String>> =
+                    host.ports.iter().map(|p| p.version.clone()).collect();
                 sqlx::query!(
                     r#"
                     INSERT INTO recon.scan_ports
@@ -147,4 +156,3 @@ impl ScanRepository for PgScanRepository {
         Ok(())
     }
 }
-
