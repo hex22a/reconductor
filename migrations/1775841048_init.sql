@@ -42,7 +42,7 @@ CREATE INDEX idx_scans_id_desc ON recon.scans (id DESC);
 CREATE TABLE recon.scan_runs (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     scan_id UUID NOT NULL REFERENCES recon.scans(id),
-    created_at TIMESTAMP DEFAULT now()
+    created_at TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE INDEX idx_scan_runs_id_desc ON recon.scan_runs (id DESC);

@@ -42,6 +42,7 @@ type Scan implements Node {
   status: String!
   created_at: String!
   schedule: String
+  runs(first: Int, after: String): ScanRunConnection!
 }
 
 type ScanEdge {
@@ -59,15 +60,32 @@ type ScanConnection {
   pageInfo: PageInfo!
 }
 
-type Host {
+type ScanRun implements Node {
   id: ID!
+  scan_id: String!
   created_at: String!
+  hosts(first: Int, after: String): HostConnection!
+}
+
+type ScanRunEdge {
+  cursor: String!
+  node: ScanRun!
+}
+
+type ScanRunConnection {
+  edges: [ScanRunEdge!]!
+  pageInfo: PageInfo!
+}
+
+type Host implements Node {
+  id: ID!
   ip: String
   mac: String
   hostname: String
   vendor: String
   os_match: String
   os_accuracy: Int
+  posts(first: Int, after: String): PortConnection!
 }
 
 type HostEdge {
@@ -80,7 +98,7 @@ type HostConnection {
   pageInfo: PageInfo!
 }
 
-type Port {
+type Port implements Node {
   id: ID!
   created_at: String!
   port: Int!
