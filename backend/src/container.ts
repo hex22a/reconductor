@@ -31,6 +31,8 @@ import { createQueueService } from './queue/queue.service.ts';
 import { CronExpressionParser } from 'cron-parser';
 import { createCronParser } from './utils/cron.ts';
 import { health } from './controllers/health.ts';
+import { createScanRunRepository } from './persistence/scanRun.ts';
+import { createScanRunService } from './graphql/scanRun/scanRun.service.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -53,8 +55,10 @@ container.register({
     sessionRepository: asFunction(createSessionRepository).singleton(),
     projectRepository: asFunction(createProjectRepository).singleton(),
     scanRepository: asFunction(createScanRepository).singleton(),
+    scanRunRepository: asFunction(createScanRunRepository).singleton(),
     projectService: asFunction(createProjectService).singleton(),
     scanService: asFunction(createScanService).singleton(),
+    scanRunService: asFunction(createScanRunService).singleton(),
     generateRandomToken: asFunction(createGenerateRandomToken),
     cryptoProvider: asValue(crypto),
     hashFn: asValue(Bun.password.hash),

@@ -1,7 +1,8 @@
 import type { ScanDto } from '@/src/transport/scan.dto';
 import type { MutationResolver, PaginatonResolver } from '../types';
-import type { CreateScanArgs, ListScansArgs, ScanService } from './scan.service';
+import type { CreateScanArgs, ScanService } from './scan.service';
 import type { WithValidationDecorator } from '../decorators/mutation';
+import type { ProjectDto } from '@/src/transport/project.dto';
 
 export type ScanResolverFactoryDeps = {
     scanService: ScanService;
@@ -10,7 +11,7 @@ export type ScanResolverFactoryDeps = {
 
 export type ScanResolver = {
     Project: {
-        scans: PaginatonResolver<ScanDto, ListScansArgs>;
+        scans: PaginatonResolver<ScanDto, ProjectDto>;
     };
     Mutation: {
         createScan: MutationResolver<ScanDto, CreateScanArgs>;
