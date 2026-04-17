@@ -1,27 +1,80 @@
-use lapin::{BasicProperties, Channel, options::BasicPublishOptions};
 use sqlx::types::ipnetwork::IpNetwork;
 use uuid::Uuid;
 
-pub struct RabbitMqPublisher {
-    pub channel: Channel,
+use crate::queue::provider::MqProvider;
+
+pub trait Publisher {
+    async fn publish_scan(&self, scan_id: Uuid, target: &IpNetwork) -> anyhow::Result<()>;
 }
 
-pub trait ScanPublisher {
-    async fn publish(&self, scan_id: Uuid, target: &IpNetwork) -> anyhow::Result<()>;
+pub struct MqPublisher<T: MqProvider> {
+    pub provider: T,
 }
 
-impl ScanPublisher for RabbitMqPublisher {
-    async fn publish(&self, scan_id: Uuid, target: &IpNetwork) -> anyhow::Result<()> {
+impl<T: MqProvider> Publisher for MqPublisher<T> {
+    async fn publish_scan(&self, scan_id: Uuid, target: &IpNetwork) -> anyhow::Result<()> {
         let message = serde_json::json!({ "id": scan_id, "target": target });
-        self.channel
-            .basic_publish(
-                "".into(),
-                "scans".into(),
-                BasicPublishOptions::default(),
-                serde_json::to_vec(&message)?.as_slice(),
-                BasicProperties::default().with_delivery_mode(2),
-            )
-            .await?;
+        self.provider.publish("scans".into(), message).await?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{
+        str::FromStr,
+        sync::{Arc, Mutex},
+    };
+
+    use anyhow::Ok;
+    use lapin::types::ShortString;
+    use serde_json::Value;
+    use sqlx::types::ipnetwork::{IpNetwork, Ipv4Network};
+    use uuid::Uuid;
+
+    use crate::queue::{
+        provider::MqProvider,
+        publisher::{MqPublisher, Publisher},
+    };
+
+    struct MockMqProvider {
+        publish_calls: Arc<Mutex<Vec<(ShortString, Value)>>>,
+    }
+
+    impl MqProvider for MockMqProvider {
+        async fn publish(&self, channel: ShortString, message: Value) -> anyhow::Result<()> {
+            self.publish_calls.lock().unwrap().push((channel, message));
+            Ok(())
+        }
+    }
+
+    #[tokio::test]
+    async fn test_publush_scan() {
+        // Arrange
+        let expected_scan_id: Uuid = Uuid::now_v7();
+        let expected_target: IpNetwork =
+            IpNetwork::V4(Ipv4Network::from_str("192.168.0.0/16").unwrap());
+        let expected_channel: ShortString = "scans".into();
+        let expected_message: Value =
+            serde_json::json!({ "id": expected_scan_id, "target": expected_target });
+        let publish_calls: Arc<Mutex<Vec<(ShortString, Value)>>> = Arc::new(Mutex::new(vec![]));
+        let mock_mq_provider = MockMqProvider {
+            publish_calls: publish_calls.clone(),
+        };
+        let publisher = MqPublisher {
+            provider: mock_mq_provider,
+        };
+        // Act
+        let actual_result = publisher
+            .publish_scan(expected_scan_id, &expected_target)
+            .await
+            .unwrap();
+        // Assert
+        assert_eq!(actual_result, ());
+        assert_eq!(publish_calls.lock().unwrap().len(), 1);
+        assert_eq!(
+            publish_calls.lock().unwrap()[0],
+            (expected_channel, expected_message)
+        )
     }
 }

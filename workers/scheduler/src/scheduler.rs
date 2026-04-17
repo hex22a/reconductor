@@ -1,19 +1,19 @@
 pub mod utils;
 
 use crate::db::scan::ScanRepository;
-use crate::queue::publisher::ScanPublisher;
+use crate::queue::publisher::Publisher;
 use crate::scheduler::utils::Utils;
-use tokio::time::{interval, Duration};
+use tokio::time::{Duration, interval};
 use tracing::{error, info};
 
-pub struct Scheduler<R: ScanRepository, P: ScanPublisher, U: Utils> {
+pub struct Scheduler<R: ScanRepository, P: Publisher, U: Utils> {
     repository: R,
     publisher: P,
     utils: U,
     poll_interval: Duration,
 }
 
-impl<R: ScanRepository, P: ScanPublisher, U: Utils> Scheduler<R, P, U> {
+impl<R: ScanRepository, P: Publisher, U: Utils> Scheduler<R, P, U> {
     pub fn new(repository: R, publisher: P, utils: U, poll_interval_secs: u64) -> Self {
         Self {
             repository,
@@ -24,7 +24,10 @@ impl<R: ScanRepository, P: ScanPublisher, U: Utils> Scheduler<R, P, U> {
     }
 
     pub async fn run(&self) -> anyhow::Result<()> {
-        info!("Scheduler started, polling every {}s", self.poll_interval.as_secs());
+        info!(
+            "Scheduler started, polling every {}s",
+            self.poll_interval.as_secs()
+        );
         let mut ticker = interval(self.poll_interval);
         loop {
             ticker.tick().await;
@@ -49,12 +52,13 @@ impl<R: ScanRepository, P: ScanPublisher, U: Utils> Scheduler<R, P, U> {
                 continue;
             };
 
-            match self.publisher.publish(scan.id, &scan.target).await {
+            match self.publisher.publish_scan(scan.id, &scan.target).await {
                 Ok(_) => {
                     info!("Published scan {} for target {}", scan.id, scan.target);
                     match self.utils.calculate_next_run(schedule) {
                         Ok(next_run) => {
-                            if let Err(e) = self.repository.update_next_run(scan.id, next_run).await {
+                            if let Err(e) = self.repository.update_next_run(scan.id, next_run).await
+                            {
                                 error!("Failed to update next_run for scan {}: {}", scan.id, e);
                             }
                         }
@@ -75,14 +79,20 @@ impl<R: ScanRepository, P: ScanPublisher, U: Utils> Scheduler<R, P, U> {
 
 #[cfg(test)]
 mod tests {
-    use std::{str::FromStr, sync::{Arc, Mutex}};
+    use std::{
+        str::FromStr,
+        sync::{Arc, Mutex},
+    };
 
-    use anyhow::Ok;
     use crate::db::scan::{DueScan, ScanRepository};
-    use sqlx::types::{ipnetwork::{IpNetwork, Ipv4Network}, time::OffsetDateTime};
+    use anyhow::Ok;
+    use sqlx::types::{
+        ipnetwork::{IpNetwork, Ipv4Network},
+        time::OffsetDateTime,
+    };
     use uuid::Uuid;
 
-    use crate::{queue::publisher::ScanPublisher, scheduler::utils::Utils};
+    use crate::{queue::publisher::Publisher, scheduler::utils::Utils};
 
     use super::Scheduler;
 
@@ -93,12 +103,12 @@ mod tests {
     }
 
     struct MockScanPublisher {
-        publish_calls: Arc<Mutex<Vec<(Uuid, IpNetwork)>>>
+        publish_calls: Arc<Mutex<Vec<(Uuid, IpNetwork)>>>,
     }
 
     struct MockUtils {
         return_value: OffsetDateTime,
-        calculate_next_run_calls: Arc<Mutex<Vec<String>>>
+        calculate_next_run_calls: Arc<Mutex<Vec<String>>>,
     }
 
     impl ScanRepository for MockScanRepository {
@@ -107,25 +117,34 @@ mod tests {
             Ok(self.due_scans.clone())
         }
         async fn update_next_run(
-                    &self,
-                    scan_id: Uuid,
-                    next_run_at: sqlx::types::time::OffsetDateTime,
-            ) -> anyhow::Result<()> {
-            self.update_next_run_calls.lock().unwrap().push((scan_id, next_run_at));
+            &self,
+            scan_id: Uuid,
+            next_run_at: sqlx::types::time::OffsetDateTime,
+        ) -> anyhow::Result<()> {
+            self.update_next_run_calls
+                .lock()
+                .unwrap()
+                .push((scan_id, next_run_at));
             Ok(())
         }
     }
 
-    impl ScanPublisher for MockScanPublisher {
-        async fn publish(&self, scan_id: Uuid, target: &IpNetwork) -> anyhow::Result<()> {
-            self.publish_calls.lock().unwrap().push((scan_id, target.clone()));
+    impl Publisher for MockScanPublisher {
+        async fn publish_scan(&self, scan_id: Uuid, target: &IpNetwork) -> anyhow::Result<()> {
+            self.publish_calls
+                .lock()
+                .unwrap()
+                .push((scan_id, target.clone()));
             Ok(())
         }
     }
 
     impl Utils for MockUtils {
         fn calculate_next_run(&self, schedule: &str) -> anyhow::Result<OffsetDateTime> {
-            self.calculate_next_run_calls.lock().unwrap().push(schedule.into());
+            self.calculate_next_run_calls
+                .lock()
+                .unwrap()
+                .push(schedule.into());
             Ok(self.return_value)
         }
     }
@@ -137,7 +156,8 @@ mod tests {
         let expected_next_run: OffsetDateTime = OffsetDateTime::now_utc();
         let expected_due_scans: Vec<DueScan> = vec![];
         let fetch_due_scans_calls: Arc<Mutex<Vec<()>>> = Arc::new(Mutex::new(vec![]));
-        let update_next_run_calls: Arc<Mutex<Vec<(Uuid, OffsetDateTime)>>> = Arc::new(Mutex::new(vec![]));
+        let update_next_run_calls: Arc<Mutex<Vec<(Uuid, OffsetDateTime)>>> =
+            Arc::new(Mutex::new(vec![]));
         let publish_calls: Arc<Mutex<Vec<(Uuid, IpNetwork)>>> = Arc::new(Mutex::new(vec![]));
         let calculate_next_run_calls: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(vec![]));
         let mock_scan_repository = MockScanRepository {
@@ -173,19 +193,19 @@ mod tests {
     async fn test_poll_happy_path() {
         // Arrange
         let expected_scan_id: Uuid = Uuid::now_v7();
-        let expected_target: IpNetwork = IpNetwork::V4(Ipv4Network::from_str("192.168.0.0/16").unwrap());
+        let expected_target: IpNetwork =
+            IpNetwork::V4(Ipv4Network::from_str("192.168.0.0/16").unwrap());
         let expected_schedule: String = String::from_str("5 * * * *").unwrap();
         let expected_poll_interval_secs: u64 = 30;
         let expected_next_run: OffsetDateTime = OffsetDateTime::now_utc();
-        let expected_due_scans: Vec<DueScan> = vec![
-            DueScan {
-                id: expected_scan_id,
-                target: expected_target,
-                schedule: Some(expected_schedule),
-            }
-        ];
+        let expected_due_scans: Vec<DueScan> = vec![DueScan {
+            id: expected_scan_id,
+            target: expected_target,
+            schedule: Some(expected_schedule),
+        }];
         let fetch_due_scans_calls: Arc<Mutex<Vec<()>>> = Arc::new(Mutex::new(vec![]));
-        let update_next_run_calls: Arc<Mutex<Vec<(Uuid, OffsetDateTime)>>> = Arc::new(Mutex::new(vec![]));
+        let update_next_run_calls: Arc<Mutex<Vec<(Uuid, OffsetDateTime)>>> =
+            Arc::new(Mutex::new(vec![]));
         let publish_calls: Arc<Mutex<Vec<(Uuid, IpNetwork)>>> = Arc::new(Mutex::new(vec![]));
         let calculate_next_run_calls: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(vec![]));
         let mock_scan_repository = MockScanRepository {
@@ -213,9 +233,15 @@ mod tests {
         assert_eq!(actual_result, ());
         assert_eq!(fetch_due_scans_calls.lock().unwrap().len(), 1);
         assert_eq!(update_next_run_calls.lock().unwrap().len(), 1);
-        assert_eq!(update_next_run_calls.lock().unwrap()[0], (expected_scan_id, expected_next_run));
+        assert_eq!(
+            update_next_run_calls.lock().unwrap()[0],
+            (expected_scan_id, expected_next_run)
+        );
         assert_eq!(calculate_next_run_calls.lock().unwrap().len(), 1);
         assert_eq!(publish_calls.lock().unwrap().len(), 1);
-        assert_eq!(publish_calls.lock().unwrap()[0], (expected_scan_id, expected_target));
+        assert_eq!(
+            publish_calls.lock().unwrap()[0],
+            (expected_scan_id, expected_target)
+        );
     }
 }

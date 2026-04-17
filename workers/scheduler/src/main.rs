@@ -4,7 +4,8 @@ mod queue;
 mod scheduler;
 
 use db::scan::PgScanRepository;
-use queue::publisher::RabbitMqPublisher;
+use queue::provider::RabbitMqProvider;
+use queue::publisher::MqPublisher;
 use scheduler::Scheduler;
 use scheduler::utils::SchedulerUtils;
 use tracing::info;
@@ -18,18 +19,20 @@ async fn main() -> anyhow::Result<()> {
     let config = config::Config::from_env()?;
 
     let db = db::init_db(&config.database_url).await;
-    let conn = lapin::Connection::connect(
-        &config.rabbitmq_url,
-        lapin::ConnectionProperties::default(),
-    )
-    .await?;
+    let conn =
+        lapin::Connection::connect(&config.rabbitmq_url, lapin::ConnectionProperties::default())
+            .await?;
     info!("Connected to RabbitMQ");
 
     let publish_channel = conn.create_channel().await?;
 
     let scheduler = Scheduler::new(
         PgScanRepository { db },
-        RabbitMqPublisher { channel: publish_channel },
+        MqPublisher {
+            provider: RabbitMqProvider {
+                channel: publish_channel,
+            },
+        },
         SchedulerUtils,
         config.poll_interval_secs,
     );
