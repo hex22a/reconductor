@@ -64,3 +64,5 @@ export const UNAUTHORIZED_ERROR_MESSAGE = 'Unauthorized';
 export const PROJECTS_PAGE_SIZE = 15;
 export const SCANS_PAGE_SIZE = 25;
 export const SCAN_RUNS_PAGE_SIZE = 35;
+export const HOSTS_PAGE_SIZE = 35;
+export const PORTS_PAGE_SIZE = 35;

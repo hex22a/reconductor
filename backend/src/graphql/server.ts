@@ -1,8 +1,8 @@
 import type { BunRequest } from 'bun';
-import type { ProjectResolver } from './resolvers/project';
+import type { ProjectResolver } from './project/project.resovler';
 import type { GraphQLSchemaWithContext, YogaServerInstance } from 'graphql-yoga';
 import type { GraphQlContext } from '../transport/graphql.context';
-import type { ScanResolver } from './resolvers/scan';
+import type { ScanResolver } from './scan/scan.resolver';
 
 const typeDefs = await Bun.file('../shared/schema.graphql').text();
 
