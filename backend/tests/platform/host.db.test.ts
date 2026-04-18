@@ -61,10 +61,10 @@ describe('host.db', () => {
             await catchRollback(async () => {
                 await withTrx(async (trx) => {
                     // Arrange
-                    const scanRepository: HostRepository = createHostRepository({ sql: trx });
+                    const hostRepository: HostRepository = createHostRepository({ sql: trx });
                     // Act
                     const { hosts, hasNextPage } =
-                        await scanRepository.listHosts(expectedExistingScanRunId);
+                        await hostRepository.listHosts(expectedExistingScanRunId);
                     // Assert
                     expect(hosts).toHaveLength(1);
                     expect(hasNextPage).toBeFalse();

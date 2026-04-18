@@ -3,6 +3,7 @@ import { catchRollback, withTrx } from '../decorators';
 import { createPortRepository, type PortRepository } from '@/src/persistence/port.db';
 import { expectedExistingPortId, expectedPort, type PortEntity } from '@/src/domain/port.entity';
 import { PortNotFoundError } from '@/src/domain/errors/PortNotFoundError';
+import { expectedExistingHostId } from '@/src/domain/host.entity';
 
 describe('port.db', () => {
     test('createPortRepository', async () => {
@@ -11,6 +12,7 @@ describe('port.db', () => {
                 // Arrange
                 const expectedPortRepository: PortRepository = {
                     getPort: expect.any(Function),
+                    listPorts: expect.any(Function),
                 };
                 // Act
                 const actualPortRepository: PortRepository = createPortRepository({ sql: trx });
@@ -49,6 +51,23 @@ describe('port.db', () => {
                         // Assert
                         expect(actualError).toBeInstanceOf(PortNotFoundError);
                     }
+                });
+            });
+        });
+    });
+
+    describe('listPorts', () => {
+        it('returns list of all ports for a given host', async () => {
+            await catchRollback(async () => {
+                await withTrx(async (trx) => {
+                    // Arrange
+                    const portRepository: PortRepository = createPortRepository({ sql: trx });
+                    // Act
+                    const { ports, hasNextPage } =
+                        await portRepository.listPorts(expectedExistingHostId);
+                    // Assert
+                    expect(ports).toHaveLength(1);
+                    expect(hasNextPage).toBeFalse();
                 });
             });
         });

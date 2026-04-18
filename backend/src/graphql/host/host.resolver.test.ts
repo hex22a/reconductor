@@ -21,16 +21,16 @@ describe('host.resolver', () => {
 
     test('createScanRunResolver', () => {
         // Arrange
-        const expectedScanResolver: HostResolver = {
+        const expectedHostResolver: HostResolver = {
             ScanRun: {
                 hosts: mockListHosts,
             },
         };
         // Act
-        const actualScanResolver: HostResolver = createHostResolver(
+        const actualHostResolver: HostResolver = createHostResolver(
             expectedHostResolverFactoryDeps,
         );
         // Assert
-        expect(actualScanResolver).toEqual(expectedScanResolver);
+        expect(actualHostResolver).toEqual(expectedHostResolver);
     });
 });

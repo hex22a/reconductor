@@ -38,7 +38,7 @@ export function createHostService({
                     os_match: hostEntity.os_match,
                     os_accuracy: hostEntity.os_accuracy,
                 },
-                cursor: encodeCursor(hostEntity.ip),
+                cursor: encodeCursor(hostEntity.id),
             }));
             return {
                 edges,

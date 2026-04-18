@@ -21,16 +21,16 @@ describe('scanRun.resolver', () => {
 
     test('createScanRunResolver', () => {
         // Arrange
-        const expectedScanResolver: ScanRunResolver = {
+        const expectedScanRunResolver: ScanRunResolver = {
             Scan: {
                 scan_runs: mockListScanRuns,
             },
         };
         // Act
-        const actualScanResolver: ScanRunResolver = createScanRunResolver(
+        const actualScanRunResolver: ScanRunResolver = createScanRunResolver(
             expectedScanResolverFactoryDeps,
         );
         // Assert
-        expect(actualScanResolver).toEqual(expectedScanResolver);
+        expect(actualScanRunResolver).toEqual(expectedScanRunResolver);
     });
 });
