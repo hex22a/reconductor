@@ -100,7 +100,6 @@ type HostConnection {
 
 type Port implements Node {
   id: ID!
-  created_at: String!
   port: Int!
   protocol: String
   state: String

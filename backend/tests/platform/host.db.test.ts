@@ -11,6 +11,7 @@ describe('host.db', () => {
                 // Arrange
                 const expectedHostRepository: HostRepository = {
                     getHost: expect.any(Function),
+                    listHosts: expect.any(Function),
                 };
                 // Act
                 const actualHostRepository: HostRepository = createHostRepository({ sql: trx });
