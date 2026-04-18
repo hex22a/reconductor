@@ -3,6 +3,7 @@ import { catchRollback, withTrx } from '../decorators';
 import { createHostRepository, type HostRepository } from '@/src/persistence/host.db';
 import { expectedExistingHostId, expectedHostIp, type HostEntity } from '@/src/domain/host.entity';
 import { HostNotFoundError } from '@/src/domain/errors/HostNotFoundError';
+import { expectedExistingScanRunId } from '../fixtures/scanRuns';
 
 describe('host.db', () => {
     test('createHostRepository', async () => {
@@ -50,6 +51,23 @@ describe('host.db', () => {
                         // Assert
                         expect(actualError).toBeInstanceOf(HostNotFoundError);
                     }
+                });
+            });
+        });
+    });
+
+    describe('listHosts', () => {
+        it('returns list of all hosts for a given scan run', async () => {
+            await catchRollback(async () => {
+                await withTrx(async (trx) => {
+                    // Arrange
+                    const scanRepository: HostRepository = createHostRepository({ sql: trx });
+                    // Act
+                    const { hosts, hasNextPage } =
+                        await scanRepository.listHosts(expectedExistingScanRunId);
+                    // Assert
+                    expect(hosts).toHaveLength(1);
+                    expect(hasNextPage).toBeFalse();
                 });
             });
         });

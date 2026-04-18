@@ -62,7 +62,7 @@ describe('scanRun.db', () => {
         });
     });
 
-    describe('listScans', () => {
+    describe('listScanRuns', () => {
         it('returns list of all scan runs for a given scan', async () => {
             await catchRollback(async () => {
                 await withTrx(async (trx) => {
