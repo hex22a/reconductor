@@ -37,6 +37,19 @@ pnpm dev
 
 Your application will be available at `http://localhost:5173`.
 
+Relay depends upon ahead-of-time compilation of GraphQL queries and fragments to generate artifacts that are used at runtime.
+To compile schema run
+
+```bash
+pnpm relay
+```
+
+or alternatively
+
+```bash
+pnom relay:watch
+```
+
 ## Building for Production
 
 Create a production build:
