@@ -23,7 +23,7 @@ describe('scanRun.resolver', () => {
         // Arrange
         const expectedScanRunResolver: ScanRunResolver = {
             Scan: {
-                scan_runs: mockListScanRuns,
+                runs: mockListScanRuns,
             },
         };
         // Act

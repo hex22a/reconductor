@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<e1a68d09cd54034fa7ea27113c8eeea3>>
+ * @generated SignedSource<<bb8a0954af3a30ae7e71bf101edaa9c5>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,6 +12,7 @@ import { ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type ScanItemFragment$data = {
   readonly created_at: string;
+  readonly id: string;
   readonly schedule: string | null | undefined;
   readonly status: string;
   readonly target: string;
@@ -28,6 +29,13 @@ const node: ReaderFragment = {
   "metadata": null,
   "name": "ScanItemFragment",
   "selections": [
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "id",
+      "storageKey": null
+    },
     {
       "alias": null,
       "args": null,
@@ -61,6 +69,6 @@ const node: ReaderFragment = {
   "abstractKey": null
 };
 
-(node as any).hash = "575aad60f7766d1831c2321fcf93ea93";
+(node as any).hash = "b68a00f29c176e674f9b55921a7f1ddf";
 
 export default node;

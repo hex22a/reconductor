@@ -13,9 +13,9 @@ export function Scan({ fragmentRef }: ScanProps) {
   return (
     <>
       <div className="font-special">Scan Details</div>
-      <div>Target: ${data.target}</div>
-      <div>Schedle: ${data.schedule}</div>
-      <div>Created At: ${date}</div>
+      <div>Target: {data.target}</div>
+      <div>Schedle: {data.schedule}</div>
+      <div>Created At: {date}</div>
       <ScanRunList fragmentRef={data} />
     </>
   );

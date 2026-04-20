@@ -9,8 +9,10 @@ import type { ScanService } from './scan.service';
 describe('scan.resolver', () => {
     const mockCreateScan = mock();
     const mockListScans = mock();
+    const mockGetScan = mock();
     const mockWithValidation = mock();
     const mockScanService: ScanService = {
+        getScan: mockGetScan,
         createScan: mockCreateScan,
         listScans: mockListScans,
     };
@@ -30,11 +32,14 @@ describe('scan.resolver', () => {
         const mockDecoratedMutation = mock();
         mockWithValidation.mockReturnValue(mockDecoratedMutation);
         const expectedScanResolver: ScanResolver = {
-            Project: {
-                scans: mockListScans,
+            Query: {
+                scan: mockGetScan,
             },
             Mutation: {
                 createScan: mockDecoratedMutation,
+            },
+            Project: {
+                scans: mockListScans,
             },
         };
         // Act

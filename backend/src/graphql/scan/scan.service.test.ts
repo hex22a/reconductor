@@ -3,13 +3,14 @@ import type { ScanRepository } from '@/src/persistence/scan.db';
 import {
     createScanService,
     type CreateScanArgs,
+    type GetScanArgs,
     type ListScansArgs,
     type ScanService,
     type ScanServiceFactoryDeps,
 } from './scan.service';
 import type { ScanDto, ScanMessageDto } from '@/src/transport/scan.dto';
 import type { GraphQlContext } from '@/src/transport/graphql.context';
-import { createScanFixture } from '@/tests/fixtures/scans';
+import { createScanFixture, expectedScanTarget } from '@/tests/fixtures/scans';
 import type { ScanEntity } from '@/src/domain/scan.entity';
 import type { PageInfo } from '@/src/transport/pageInfo.dto';
 import type { Edge } from '@/src/transport/edge.dto';
@@ -76,6 +77,7 @@ describe('scan.service', () => {
     test('createScanService', () => {
         // Arrange
         const expectedScanService: ScanService = {
+            getScan: expect.any(Function),
             listScans: expect.any(Function),
             createScan: expect.any(Function),
         };
@@ -83,6 +85,32 @@ describe('scan.service', () => {
         const actualScanService: ScanService = createScanService(expectedScanServiceFactoryDeps);
         // Assert
         expect(actualScanService).toEqual(expectedScanService);
+    });
+
+    test('getScan', async () => {
+        // Arrange
+        const expectedGetScanArgs: GetScanArgs = {
+            id: expectedScanId,
+        };
+        const [expectedScanEntity] = createScanFixture(
+            expectedProjectId,
+            expectedScanTarget,
+            undefined,
+            undefined,
+            expectedScanId,
+        );
+        const expectedScan: ScanDto = {
+            id: expectedScanId,
+            status: expectedStatus,
+            target: expectedScanTarget,
+            created_at: expectedScanEntity.created_at,
+        };
+        mockGetScan.mockResolvedValue(expectedScanEntity);
+        const scanService: ScanService = createScanService(expectedScanServiceFactoryDeps);
+        // Act
+        const actualScan = await scanService.getScan(null, expectedGetScanArgs);
+        // Assert
+        expect(actualScan).toEqual(expectedScan);
     });
 
     describe('listScans', () => {

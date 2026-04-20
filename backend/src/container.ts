@@ -33,6 +33,7 @@ import { createCronParser } from './utils/cron.ts';
 import { health } from './controllers/health.ts';
 import { createScanRunRepository } from './persistence/scanRun.ts';
 import { createScanRunService } from './graphql/scanRun/scanRun.service.ts';
+import { createScanRunResolver } from './graphql/scanRun/scanRun.resolver.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -50,6 +51,7 @@ container.register({
     logoutController: asFunction(createLogoutController),
     meController: asValue(me),
     projectResolver: asFunction(createProjectResolver).singleton(),
+    scanRunResolver: asFunction(createScanRunResolver).singleton(),
     scanResolver: asFunction(createScanResolver).singleton(),
     userRepository: asFunction(createUserRepository),
     sessionRepository: asFunction(createSessionRepository).singleton(),

@@ -6,8 +6,8 @@ export type ScanEntity = {
     created_at: Date;
     target: string;
     status: ScanStatus;
-    schedule: string | null;
-    next_run_at: Date | null;
+    schedule?: string;
+    next_run_at?: Date;
 };
 
 export type ScanInsert = Pick<ScanEntity, 'project_id' | 'target' | 'schedule' | 'next_run_at'>;

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<dcd786383da4ec23a4585cf2cbfec4f0>>
+ * @generated SignedSource<<1c7189861fdf31d10c865dd6ac989c51>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,17 +10,17 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type ProjectQuery$variables = {
+export type ScanQuery$variables = {
   id: string;
 };
-export type ProjectQuery$data = {
-  readonly project: {
-    readonly " $fragmentSpreads": FragmentRefs<"ProjectFragment">;
+export type ScanQuery$data = {
+  readonly scan: {
+    readonly " $fragmentSpreads": FragmentRefs<"ScanFragment">;
   } | null | undefined;
 };
-export type ProjectQuery = {
-  response: ProjectQuery$data;
-  variables: ProjectQuery$variables;
+export type ScanQuery = {
+  response: ScanQuery$data;
+  variables: ScanQuery$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -64,20 +64,20 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "ProjectQuery",
+    "name": "ScanQuery",
     "selections": [
       {
         "alias": null,
         "args": (v1/*: any*/),
-        "concreteType": "Project",
+        "concreteType": "Scan",
         "kind": "LinkedField",
-        "name": "project",
+        "name": "scan",
         "plural": false,
         "selections": [
           {
             "args": null,
             "kind": "FragmentSpread",
-            "name": "ProjectFragment"
+            "name": "ScanFragment"
           }
         ],
         "storageKey": null
@@ -90,36 +90,50 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "ProjectQuery",
+    "name": "ScanQuery",
     "selections": [
       {
         "alias": null,
         "args": (v1/*: any*/),
-        "concreteType": "Project",
+        "concreteType": "Scan",
         "kind": "LinkedField",
-        "name": "project",
+        "name": "scan",
         "plural": false,
         "selections": [
           {
             "alias": null,
             "args": null,
             "kind": "ScalarField",
-            "name": "name",
+            "name": "target",
             "storageKey": null
           },
           (v2/*: any*/),
           {
             "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "status",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "schedule",
+            "storageKey": null
+          },
+          {
+            "alias": null,
             "args": (v3/*: any*/),
-            "concreteType": "ScanConnection",
+            "concreteType": "ScanRunConnection",
             "kind": "LinkedField",
-            "name": "scans",
+            "name": "runs",
             "plural": false,
             "selections": [
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "ScanEdge",
+                "concreteType": "ScanRunEdge",
                 "kind": "LinkedField",
                 "name": "edges",
                 "plural": true,
@@ -127,34 +141,13 @@ return {
                   {
                     "alias": null,
                     "args": null,
-                    "concreteType": "Scan",
+                    "concreteType": "ScanRun",
                     "kind": "LinkedField",
                     "name": "node",
                     "plural": false,
                     "selections": [
                       (v4/*: any*/),
                       (v2/*: any*/),
-                      {
-                        "alias": null,
-                        "args": null,
-                        "kind": "ScalarField",
-                        "name": "target",
-                        "storageKey": null
-                      },
-                      {
-                        "alias": null,
-                        "args": null,
-                        "kind": "ScalarField",
-                        "name": "status",
-                        "storageKey": null
-                      },
-                      {
-                        "alias": null,
-                        "args": null,
-                        "kind": "ScalarField",
-                        "name": "schedule",
-                        "storageKey": null
-                      },
                       {
                         "alias": null,
                         "args": null,
@@ -201,16 +194,16 @@ return {
                 "storageKey": null
               }
             ],
-            "storageKey": "scans(first:15)"
+            "storageKey": "runs(first:15)"
           },
           {
             "alias": null,
             "args": (v3/*: any*/),
             "filters": null,
             "handle": "connection",
-            "key": "ScanList_scans",
+            "key": "ScanRunList_runs",
             "kind": "LinkedHandle",
-            "name": "scans"
+            "name": "runs"
           },
           (v4/*: any*/)
         ],
@@ -219,16 +212,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "9021bfde1bef74cec285197772d25643",
+    "cacheID": "32799fb439c73dad9cd43ba424757110",
     "id": null,
     "metadata": {},
-    "name": "ProjectQuery",
+    "name": "ScanQuery",
     "operationKind": "query",
-    "text": "query ProjectQuery(\n  $id: ID!\n) {\n  project(id: $id) {\n    ...ProjectFragment\n    id\n  }\n}\n\nfragment ProjectFragment on Project {\n  name\n  created_at\n  ...ScanListFragment\n}\n\nfragment ScanItemFragment on Scan {\n  id\n  created_at\n  target\n  status\n  schedule\n}\n\nfragment ScanListFragment on Project {\n  scans(first: 15) {\n    edges {\n      node {\n        id\n        ...ScanItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
+    "text": "query ScanQuery(\n  $id: ID!\n) {\n  scan(id: $id) {\n    ...ScanFragment\n    id\n  }\n}\n\nfragment ScanFragment on Scan {\n  target\n  created_at\n  status\n  schedule\n  ...ScanRunListFragment\n}\n\nfragment ScanRunItemFragment on ScanRun {\n  created_at\n}\n\nfragment ScanRunListFragment on Scan {\n  runs(first: 15) {\n    edges {\n      node {\n        id\n        ...ScanRunItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
   }
 };
 })();
 
-(node as any).hash = "3d4dccc96c5c8629f85b6352574f5d58";
+(node as any).hash = "3aeacc605b1f246ad79984e5742d188a";
 
 export default node;

@@ -1,6 +1,6 @@
 import type { ScanRepository } from '@/src/persistence/scan.db';
 import type { CursorDecoder, CursorEncoder } from '@/src/utils/cursor';
-import type { MutationResolver, PaginatonResolver } from '../types';
+import type { EntityResolver, MutationResolver, PaginatonResolver } from '../types';
 import type { CreateScanDto, ScanDto } from '@/src/transport/scan.dto';
 import type { Pagination } from '@/src/transport/pagination.dto';
 import type { Edge } from '@/src/transport/edge.dto';
@@ -13,6 +13,10 @@ import type { CronParser } from '@/src/utils/cron';
 
 export type CreateScanArgs = {
     input: CreateScanDto;
+};
+
+export type GetScanArgs = {
+    id: string;
 };
 
 export type ListScansArgs = {
@@ -29,6 +33,7 @@ export type ScanServiceFactoryDeps = {
 };
 
 export type ScanService = {
+    getScan: EntityResolver<ScanDto, GetScanArgs>;
     listScans: PaginatonResolver<ScanDto, ProjectDto>;
     createScan: MutationResolver<ScanDto, CreateScanArgs>;
 };
@@ -40,6 +45,16 @@ export function createScanService({
     cronParser,
 }: ScanServiceFactoryDeps): ScanService {
     return {
+        async getScan(_, { id }: GetScanArgs): Promise<ScanDto> {
+            const scan: ScanEntity = await scanRepository.getScan(id);
+            return {
+                id: scan.id,
+                target: scan.target,
+                status: scan.status,
+                schedule: scan.schedule,
+                created_at: scan.created_at,
+            };
+        },
         async listScans(parent: ProjectDto): Promise<Pagination<Edge<ScanDto>>> {
             const { scans, hasNextPage } = await scanRepository.listScans(parent.id);
             const edges = scans.map((scanEntity) => ({
@@ -66,15 +81,15 @@ export function createScanService({
             { input }: CreateScanArgs,
         ): Promise<CreateEntityPayload<Edge<ScanDto>>> {
             const { target, projectId, schedule }: CreateScanDto = scanSchema.parse(input);
-            let nextRunAt: Date | null = null;
+            let nextRunAt;
             if (schedule) {
                 nextRunAt = cronParser.getNextRunDate(schedule);
             }
             const scan: ScanEntity = await scanRepository.createScan({
                 target,
                 project_id: projectId,
-                next_run_at: nextRunAt ?? null,
-                schedule: schedule ?? null,
+                next_run_at: nextRunAt,
+                schedule: schedule,
             });
             await queueService.publish({
                 id: scan.id,

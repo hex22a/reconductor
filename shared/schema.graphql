@@ -122,6 +122,7 @@ type Query {
   node(id: ID!): Node
   projects(first: Int, after: String): ProjectConnection!
   project(id: ID!): Project
+  scan(id: ID!): Scan
 }
 
 input CreateProjectInput {

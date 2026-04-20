@@ -1,12 +1,13 @@
 import { describe, expect, mock, test } from 'bun:test';
-import type { ProjectResolver } from './resolvers/project';
+import type { ProjectResolver } from './project/project.resovler';
 import type { GraphQLSchemaWithContext } from 'graphql-yoga';
 import {
     getGraphQlServerInstance,
     type GraphQlServerFactoryDeps,
     type GraphQlServerInstance,
 } from './server';
-import type { ScanResolver } from './resolvers/scan';
+import type { ScanResolver } from './scan/scan.resolver';
+import type { ScanRunResolver } from './scanRun/scanRun.resolver';
 
 describe('graphql', () => {
     test('getGraphQlServerInstance', async () => {
@@ -27,15 +28,23 @@ describe('graphql', () => {
         };
         const mockScanResolver: ScanResolver = {
             Query: {
-                scans: mock(),
+                scan: mock(),
             },
             Mutation: {
                 createScan: mock(),
             },
+            Project: {
+                scans: mock(),
+            },
+        };
+        const mockScanRunResolver: ScanRunResolver = {
+            Scan: {
+                runs: mock(),
+            },
         };
         const expectedSchemaDefinition = {
             typeDefs: expectedTypeDefs,
-            resolvers: [mockProjectResolver, mockScanResolver],
+            resolvers: [mockProjectResolver, mockScanResolver, mockScanRunResolver],
         };
         const expectedSchema = {} satisfies Partial<GraphQLSchemaWithContext<never>>;
         const expectedServerOptions = {
@@ -50,6 +59,7 @@ describe('graphql', () => {
             graphQlContextResolver: mockGraphQlContextResolver,
             projectResolver: mockProjectResolver,
             scanResolver: mockScanResolver,
+            scanRunResolver: mockScanRunResolver,
         };
         // Act
         const actualGraphQlServerInstance: GraphQlServerInstance = getGraphQlServerInstance(

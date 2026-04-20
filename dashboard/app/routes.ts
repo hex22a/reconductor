@@ -9,5 +9,6 @@ export default [
     layout('./layouts/dashboard.tsx', [
         route('projects', 'routes/Projects/projects.tsx'),
         route('project/:id', 'routes/Project/project.tsx'),
+        route('scan/:id', 'routes/Scan/scan.tsx'),
     ]),
 ] satisfies RouteConfig;

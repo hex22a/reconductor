@@ -21,21 +21,21 @@ export function createScanFixture(
             target,
             created_at: date,
             status: 'scheduled',
-            schedule: schedule ?? null,
-            next_run_at: nextRunAt ?? null,
+            schedule: schedule,
+            next_run_at: nextRunAt,
         },
         {
             project_id: projectId,
             target,
-            schedule: schedule ?? null,
-            next_run_at: nextRunAt ?? null,
+            schedule: schedule,
+            next_run_at: nextRunAt,
         },
         {
             id,
             project_id: projectId,
             target,
-            schedule: schedule ?? null,
-            next_run_at: nextRunAt ?? null,
+            schedule: schedule,
+            next_run_at: nextRunAt,
         },
     ];
 }

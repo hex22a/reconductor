@@ -9,7 +9,7 @@ export type ScanRunResolverFactoryDeps = {
 
 export type ScanRunResolver = {
     Scan: {
-        scan_runs: PaginatonResolver<ScanRunDto, ScanDto>;
+        runs: PaginatonResolver<ScanRunDto, ScanDto>;
     };
 };
 
@@ -18,7 +18,7 @@ export function createScanRunResolver({
 }: ScanRunResolverFactoryDeps): ScanRunResolver {
     return {
         Scan: {
-            scan_runs: scanRunService.listScanRuns,
+            runs: scanRunService.listScanRuns,
         },
     };
 }
