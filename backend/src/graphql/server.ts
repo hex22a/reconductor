@@ -4,6 +4,7 @@ import type { GraphQLSchemaWithContext, YogaServerInstance } from 'graphql-yoga'
 import type { GraphQlContext } from '../transport/graphql.context';
 import type { ScanResolver } from './scan/scan.resolver';
 import type { ScanRunResolver } from './scanRun/scanRun.resolver';
+import type { HostResolver } from './host/host.resolver';
 
 const typeDefs = await Bun.file('../shared/schema.graphql').text();
 
@@ -41,6 +42,7 @@ export type GraphQlServerFactoryDeps = {
     projectResolver: ProjectResolver;
     scanResolver: ScanResolver;
     scanRunResolver: ScanRunResolver;
+    hostResolver: HostResolver;
 };
 
 export function getGraphQlServerInstance({
@@ -50,11 +52,12 @@ export function getGraphQlServerInstance({
     projectResolver,
     scanResolver,
     scanRunResolver,
+    hostResolver,
 }: GraphQlServerFactoryDeps) {
     return createGraphQlServer({
         schema: createGraphQlSchema({
             typeDefs,
-            resolvers: [projectResolver, scanResolver, scanRunResolver],
+            resolvers: [projectResolver, scanResolver, scanRunResolver, hostResolver],
         }),
         context: graphQlContextResolver,
     });

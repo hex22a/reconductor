@@ -8,7 +8,9 @@ import {
 
 describe('scanRun.resolver', () => {
     const mockListScanRuns = mock();
+    const mockGetScanRuns = mock();
     const mockScanRunService: ScanRunService = {
+        getScanRun: mockGetScanRuns,
         listScanRuns: mockListScanRuns,
     };
     const expectedScanResolverFactoryDeps: ScanRunResolverFactoryDeps = {
@@ -16,12 +18,16 @@ describe('scanRun.resolver', () => {
     };
 
     afterEach(() => {
+        mockGetScanRuns.mockReset();
         mockListScanRuns.mockReset();
     });
 
     test('createScanRunResolver', () => {
         // Arrange
         const expectedScanRunResolver: ScanRunResolver = {
+            Query: {
+                run: mockGetScanRuns,
+            },
             Scan: {
                 runs: mockListScanRuns,
             },

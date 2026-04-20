@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<e41f0a3caec9bdda843920437a751a6b>>
+ * @generated SignedSource<<77229bfb56de786e9d2e0a97f12c7bad>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,41 +10,39 @@
 
 import { ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type ScanRunItemFragment$data = {
+export type ScanRunFragment$data = {
   readonly created_at: string;
-  readonly id: string;
-  readonly " $fragmentType": "ScanRunItemFragment";
+  readonly " $fragmentSpreads": FragmentRefs<"HostListFragment">;
+  readonly " $fragmentType": "ScanRunFragment";
 };
-export type ScanRunItemFragment$key = {
-  readonly " $data"?: ScanRunItemFragment$data;
-  readonly " $fragmentSpreads": FragmentRefs<"ScanRunItemFragment">;
+export type ScanRunFragment$key = {
+  readonly " $data"?: ScanRunFragment$data;
+  readonly " $fragmentSpreads": FragmentRefs<"ScanRunFragment">;
 };
 
 const node: ReaderFragment = {
   "argumentDefinitions": [],
   "kind": "Fragment",
   "metadata": null,
-  "name": "ScanRunItemFragment",
+  "name": "ScanRunFragment",
   "selections": [
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "id",
-      "storageKey": null
-    },
     {
       "alias": null,
       "args": null,
       "kind": "ScalarField",
       "name": "created_at",
       "storageKey": null
+    },
+    {
+      "args": null,
+      "kind": "FragmentSpread",
+      "name": "HostListFragment"
     }
   ],
   "type": "ScanRun",
   "abstractKey": null
 };
 
-(node as any).hash = "7c055b59bace1607e0951c371f7f61f8";
+(node as any).hash = "b4a40d8fd6685bc08a8fca84ac14594e";
 
 export default node;

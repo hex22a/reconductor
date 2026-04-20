@@ -1,5 +1,5 @@
 import type { ScanRunRepository } from '@/src/persistence/scanRun';
-import type { PaginatonResolver } from '../types';
+import type { EntityResolver, PaginatonResolver } from '../types';
 import type { ScanRunDto } from '@/src/transport/scanRun.dto';
 import type { ScanDto } from '@/src/transport/scan.dto';
 import type { CursorDecoder, CursorEncoder } from '@/src/utils/cursor';
@@ -12,12 +12,17 @@ export type ScanRunServiceFactoryDeps = {
     decodeCursor: CursorDecoder;
 };
 
+export type GetScanRunArgs = {
+    id: string;
+};
+
 export type ListScanRunsArgs = {
     first: number;
     after: string;
 };
 
 export type ScanRunService = {
+    getScanRun: EntityResolver<ScanRunDto, GetScanRunArgs>;
     listScanRuns: PaginatonResolver<ScanRunDto, ScanDto>;
 };
 
@@ -26,6 +31,14 @@ export function createScanRunService({
     encodeCursor,
 }: ScanRunServiceFactoryDeps): ScanRunService {
     return {
+        async getScanRun(_, { id }: GetScanRunArgs): Promise<ScanRunDto> {
+            const scanRun = await scanRunRepository.getScanRun(id);
+            return {
+                id: scanRun.id,
+                scan_id: scanRun.scan_id,
+                created_at: scanRun.created_at,
+            };
+        },
         async listScanRuns(parent: ScanDto): Promise<Pagination<Edge<ScanRunDto>>> {
             const { scanRuns, hasNextPage } = await scanRunRepository.listScanRuns(parent.id);
             const edges = scanRuns.map((scanRunEntity) => ({

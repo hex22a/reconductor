@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d52526b89d084f3e00f617472d4dc67d>>
+ * @generated SignedSource<<ff86bd47758ab706fd39c7216e86a2ad>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,17 +10,17 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type ScanQuery$variables = {
+export type RunQuery$variables = {
   id: string;
 };
-export type ScanQuery$data = {
-  readonly scan: {
-    readonly " $fragmentSpreads": FragmentRefs<"ScanFragment">;
+export type RunQuery$data = {
+  readonly run: {
+    readonly " $fragmentSpreads": FragmentRefs<"ScanRunFragment">;
   } | null | undefined;
 };
-export type ScanQuery = {
-  response: ScanQuery$data;
-  variables: ScanQuery$variables;
+export type RunQuery = {
+  response: RunQuery$data;
+  variables: RunQuery$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -38,21 +38,14 @@ v1 = [
     "variableName": "id"
   }
 ],
-v2 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "created_at",
-  "storageKey": null
-},
-v3 = [
+v2 = [
   {
     "kind": "Literal",
     "name": "first",
     "value": 15
   }
 ],
-v4 = {
+v3 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
@@ -64,20 +57,20 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "ScanQuery",
+    "name": "RunQuery",
     "selections": [
       {
         "alias": null,
         "args": (v1/*: any*/),
-        "concreteType": "Scan",
+        "concreteType": "ScanRun",
         "kind": "LinkedField",
-        "name": "scan",
+        "name": "run",
         "plural": false,
         "selections": [
           {
             "args": null,
             "kind": "FragmentSpread",
-            "name": "ScanFragment"
+            "name": "ScanRunFragment"
           }
         ],
         "storageKey": null
@@ -90,50 +83,35 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "ScanQuery",
+    "name": "RunQuery",
     "selections": [
       {
         "alias": null,
         "args": (v1/*: any*/),
-        "concreteType": "Scan",
+        "concreteType": "ScanRun",
         "kind": "LinkedField",
-        "name": "scan",
+        "name": "run",
         "plural": false,
         "selections": [
           {
             "alias": null,
             "args": null,
             "kind": "ScalarField",
-            "name": "target",
-            "storageKey": null
-          },
-          (v2/*: any*/),
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "status",
+            "name": "created_at",
             "storageKey": null
           },
           {
             "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "schedule",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": (v3/*: any*/),
-            "concreteType": "ScanRunConnection",
+            "args": (v2/*: any*/),
+            "concreteType": "HostConnection",
             "kind": "LinkedField",
-            "name": "runs",
+            "name": "hosts",
             "plural": false,
             "selections": [
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "ScanRunEdge",
+                "concreteType": "HostEdge",
                 "kind": "LinkedField",
                 "name": "edges",
                 "plural": true,
@@ -141,13 +119,54 @@ return {
                   {
                     "alias": null,
                     "args": null,
-                    "concreteType": "ScanRun",
+                    "concreteType": "Host",
                     "kind": "LinkedField",
                     "name": "node",
                     "plural": false,
                     "selections": [
-                      (v4/*: any*/),
-                      (v2/*: any*/),
+                      (v3/*: any*/),
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "ip",
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "mac",
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "hostname",
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "vendor",
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "os_match",
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "os_accuracy",
+                        "storageKey": null
+                      },
                       {
                         "alias": null,
                         "args": null,
@@ -194,34 +213,34 @@ return {
                 "storageKey": null
               }
             ],
-            "storageKey": "runs(first:15)"
+            "storageKey": "hosts(first:15)"
           },
           {
             "alias": null,
-            "args": (v3/*: any*/),
+            "args": (v2/*: any*/),
             "filters": null,
             "handle": "connection",
-            "key": "ScanRunList_runs",
+            "key": "HostList_hosts",
             "kind": "LinkedHandle",
-            "name": "runs"
+            "name": "hosts"
           },
-          (v4/*: any*/)
+          (v3/*: any*/)
         ],
         "storageKey": null
       }
     ]
   },
   "params": {
-    "cacheID": "73292fd94f2d0b0ba349e07c4c92ddd6",
+    "cacheID": "ec6950f52082ec06dcac7028d7fd5a0d",
     "id": null,
     "metadata": {},
-    "name": "ScanQuery",
+    "name": "RunQuery",
     "operationKind": "query",
-    "text": "query ScanQuery(\n  $id: ID!\n) {\n  scan(id: $id) {\n    ...ScanFragment\n    id\n  }\n}\n\nfragment ScanFragment on Scan {\n  target\n  created_at\n  status\n  schedule\n  ...ScanRunListFragment\n}\n\nfragment ScanRunItemFragment on ScanRun {\n  id\n  created_at\n}\n\nfragment ScanRunListFragment on Scan {\n  runs(first: 15) {\n    edges {\n      node {\n        id\n        ...ScanRunItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
+    "text": "query RunQuery(\n  $id: ID!\n) {\n  run(id: $id) {\n    ...ScanRunFragment\n    id\n  }\n}\n\nfragment HostItemFragment on Host {\n  ip\n  mac\n  hostname\n  vendor\n  os_match\n  os_accuracy\n}\n\nfragment HostListFragment on ScanRun {\n  hosts(first: 15) {\n    edges {\n      node {\n        id\n        ...HostItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n\nfragment ScanRunFragment on ScanRun {\n  created_at\n  ...HostListFragment\n}\n"
   }
 };
 })();
 
-(node as any).hash = "3aeacc605b1f246ad79984e5742d188a";
+(node as any).hash = "1c88c465d2d6c667cd2adbf041a9e0b0";
 
 export default node;

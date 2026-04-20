@@ -34,6 +34,9 @@ import { health } from './controllers/health.ts';
 import { createScanRunRepository } from './persistence/scanRun.ts';
 import { createScanRunService } from './graphql/scanRun/scanRun.service.ts';
 import { createScanRunResolver } from './graphql/scanRun/scanRun.resolver.ts';
+import { createHostRepository } from './persistence/host.db.ts';
+import { createHostService } from './graphql/host/host.service.ts';
+import { createHostResolver } from './graphql/host/host.resolver.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -53,14 +56,17 @@ container.register({
     projectResolver: asFunction(createProjectResolver).singleton(),
     scanRunResolver: asFunction(createScanRunResolver).singleton(),
     scanResolver: asFunction(createScanResolver).singleton(),
+    hostResolver: asFunction(createHostResolver).singleton(),
     userRepository: asFunction(createUserRepository),
     sessionRepository: asFunction(createSessionRepository).singleton(),
     projectRepository: asFunction(createProjectRepository).singleton(),
     scanRepository: asFunction(createScanRepository).singleton(),
     scanRunRepository: asFunction(createScanRunRepository).singleton(),
+    hostRepository: asFunction(createHostRepository).singleton(),
     projectService: asFunction(createProjectService).singleton(),
     scanService: asFunction(createScanService).singleton(),
     scanRunService: asFunction(createScanRunService).singleton(),
+    hostService: asFunction(createHostService).singleton(),
     generateRandomToken: asFunction(createGenerateRandomToken),
     cryptoProvider: asValue(crypto),
     hashFn: asValue(Bun.password.hash),

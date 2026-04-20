@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<34b88beffde84cb8c4387b1984f50629>>
+ * @generated SignedSource<<482ab8ef1b70a0079fceb6e46543b3ab>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,19 +10,19 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type ScanRunPaginationQuery$variables = {
+export type HostPaginationQuery$variables = {
   after?: string | null | undefined;
   first?: number | null | undefined;
   id: string;
 };
-export type ScanRunPaginationQuery$data = {
+export type HostPaginationQuery$data = {
   readonly node: {
-    readonly " $fragmentSpreads": FragmentRefs<"ScanRunListFragment">;
+    readonly " $fragmentSpreads": FragmentRefs<"HostListFragment">;
   } | null | undefined;
 };
-export type ScanRunPaginationQuery = {
-  response: ScanRunPaginationQuery$data;
-  variables: ScanRunPaginationQuery$variables;
+export type HostPaginationQuery = {
+  response: HostPaginationQuery$data;
+  variables: HostPaginationQuery$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -81,7 +81,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "ScanRunPaginationQuery",
+    "name": "HostPaginationQuery",
     "selections": [
       {
         "alias": null,
@@ -94,7 +94,7 @@ return {
           {
             "args": (v2/*: any*/),
             "kind": "FragmentSpread",
-            "name": "ScanRunListFragment"
+            "name": "HostListFragment"
           }
         ],
         "storageKey": null
@@ -107,7 +107,7 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "ScanRunPaginationQuery",
+    "name": "HostPaginationQuery",
     "selections": [
       {
         "alias": null,
@@ -125,15 +125,15 @@ return {
               {
                 "alias": null,
                 "args": (v2/*: any*/),
-                "concreteType": "ScanRunConnection",
+                "concreteType": "HostConnection",
                 "kind": "LinkedField",
-                "name": "runs",
+                "name": "hosts",
                 "plural": false,
                 "selections": [
                   {
                     "alias": null,
                     "args": null,
-                    "concreteType": "ScanRunEdge",
+                    "concreteType": "HostEdge",
                     "kind": "LinkedField",
                     "name": "edges",
                     "plural": true,
@@ -141,7 +141,7 @@ return {
                       {
                         "alias": null,
                         "args": null,
-                        "concreteType": "ScanRun",
+                        "concreteType": "Host",
                         "kind": "LinkedField",
                         "name": "node",
                         "plural": false,
@@ -151,7 +151,42 @@ return {
                             "alias": null,
                             "args": null,
                             "kind": "ScalarField",
-                            "name": "created_at",
+                            "name": "ip",
+                            "storageKey": null
+                          },
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "mac",
+                            "storageKey": null
+                          },
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "hostname",
+                            "storageKey": null
+                          },
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "vendor",
+                            "storageKey": null
+                          },
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "os_match",
+                            "storageKey": null
+                          },
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "os_accuracy",
                             "storageKey": null
                           },
                           (v3/*: any*/)
@@ -201,12 +236,12 @@ return {
                 "args": (v2/*: any*/),
                 "filters": null,
                 "handle": "connection",
-                "key": "ScanRunList_runs",
+                "key": "HostList_hosts",
                 "kind": "LinkedHandle",
-                "name": "runs"
+                "name": "hosts"
               }
             ],
-            "type": "Scan",
+            "type": "ScanRun",
             "abstractKey": null
           }
         ],
@@ -215,16 +250,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "f9ca29b9f4990186020befca843d7337",
+    "cacheID": "bb8b2b5021f09d48ebc581a116cd420d",
     "id": null,
     "metadata": {},
-    "name": "ScanRunPaginationQuery",
+    "name": "HostPaginationQuery",
     "operationKind": "query",
-    "text": "query ScanRunPaginationQuery(\n  $after: String\n  $first: Int = 15\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...ScanRunListFragment_2HEEH6\n    id\n  }\n}\n\nfragment ScanRunItemFragment on ScanRun {\n  id\n  created_at\n}\n\nfragment ScanRunListFragment_2HEEH6 on Scan {\n  runs(first: $first, after: $after) {\n    edges {\n      node {\n        id\n        ...ScanRunItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
+    "text": "query HostPaginationQuery(\n  $after: String\n  $first: Int = 15\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...HostListFragment_2HEEH6\n    id\n  }\n}\n\nfragment HostItemFragment on Host {\n  ip\n  mac\n  hostname\n  vendor\n  os_match\n  os_accuracy\n}\n\nfragment HostListFragment_2HEEH6 on ScanRun {\n  hosts(first: $first, after: $after) {\n    edges {\n      node {\n        id\n        ...HostItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
   }
 };
 })();
 
-(node as any).hash = "2aa3d41d8b02c924072d6449e3fa34e2";
+(node as any).hash = "5a3fe55f7d17d046bed11085e72d5464";
 
 export default node;

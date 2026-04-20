@@ -5,6 +5,7 @@ import type { Edge } from '@/src/transport/edge.dto';
 import type { Pagination } from '@/src/transport/pagination.dto';
 import {
     createScanRunService,
+    type GetScanRunArgs,
     type ListScanRunsArgs,
     type ScanRunService,
     type ScanRunServiceFactoryDeps,
@@ -48,6 +49,7 @@ describe('scanRun.service', () => {
     test('createScanRunService', () => {
         // Arrange
         const expectedScanRunService: ScanRunService = {
+            getScanRun: expect.any(Function),
             listScanRuns: expect.any(Function),
         };
         // Act
@@ -56,6 +58,31 @@ describe('scanRun.service', () => {
         );
         // Assert
         expect(actualScanRunService).toEqual(expectedScanRunService);
+    });
+
+    test('getScanRun', async () => {
+        // Arrange
+        const expectedGetScanRunArgs: GetScanRunArgs = {
+            id: expectedScanRunId,
+        };
+        const expectedScanRunEntity: ScanRunEntity = createScanRunFixture(
+            expectedScanId,
+            expectedScanRunId,
+        );
+        const expectedScanRun: ScanRunDto = {
+            id: expectedScanRunId,
+            scan_id: expectedScanId,
+            created_at: expectedScanRunEntity.created_at,
+        };
+        mockGetScanRun.mockResolvedValue(expectedScanRunEntity);
+        const scanRunService: ScanRunService = createScanRunService(expectedScanServiceFactoryDeps);
+        // Act
+        const actualScanRun: ScanRunDto = await scanRunService.getScanRun(
+            null,
+            expectedGetScanRunArgs,
+        );
+        // Assert
+        expect(actualScanRun).toEqual(expectedScanRun);
     });
 
     describe('listScanRuns', () => {

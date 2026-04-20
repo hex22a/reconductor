@@ -123,6 +123,7 @@ type Query {
   projects(first: Int, after: String): ProjectConnection!
   project(id: ID!): Project
   scan(id: ID!): Scan
+  run(id: ID!): ScanRun
 }
 
 input CreateProjectInput {

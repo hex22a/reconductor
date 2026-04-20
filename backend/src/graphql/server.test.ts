@@ -8,6 +8,7 @@ import {
 } from './server';
 import type { ScanResolver } from './scan/scan.resolver';
 import type { ScanRunResolver } from './scanRun/scanRun.resolver';
+import type { HostResolver } from './host/host.resolver';
 
 describe('graphql', () => {
     test('getGraphQlServerInstance', async () => {
@@ -38,13 +39,26 @@ describe('graphql', () => {
             },
         };
         const mockScanRunResolver: ScanRunResolver = {
+            Query: {
+                run: mock(),
+            },
             Scan: {
                 runs: mock(),
             },
         };
+        const mockHostResolver: HostResolver = {
+            ScanRun: {
+                hosts: mock(),
+            },
+        };
         const expectedSchemaDefinition = {
             typeDefs: expectedTypeDefs,
-            resolvers: [mockProjectResolver, mockScanResolver, mockScanRunResolver],
+            resolvers: [
+                mockProjectResolver,
+                mockScanResolver,
+                mockScanRunResolver,
+                mockHostResolver,
+            ],
         };
         const expectedSchema = {} satisfies Partial<GraphQLSchemaWithContext<never>>;
         const expectedServerOptions = {
@@ -60,6 +74,7 @@ describe('graphql', () => {
             projectResolver: mockProjectResolver,
             scanResolver: mockScanResolver,
             scanRunResolver: mockScanRunResolver,
+            hostResolver: mockHostResolver,
         };
         // Act
         const actualGraphQlServerInstance: GraphQlServerInstance = getGraphQlServerInstance(
