@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<5cfa8be5e491c4ee6da8096a2bcce016>>
+ * @generated SignedSource<<c60abbfc835770e2e0e62442e4ea8d07>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,17 +10,17 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type RunQuery$variables = {
+export type HostQuery$variables = {
   id: string;
 };
-export type RunQuery$data = {
-  readonly run: {
-    readonly " $fragmentSpreads": FragmentRefs<"ScanRunFragment">;
+export type HostQuery$data = {
+  readonly host: {
+    readonly " $fragmentSpreads": FragmentRefs<"HostFragment">;
   } | null | undefined;
 };
-export type RunQuery = {
-  response: RunQuery$data;
-  variables: RunQuery$variables;
+export type HostQuery = {
+  response: HostQuery$data;
+  variables: HostQuery$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -57,20 +57,20 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "RunQuery",
+    "name": "HostQuery",
     "selections": [
       {
         "alias": null,
         "args": (v1/*: any*/),
-        "concreteType": "ScanRun",
+        "concreteType": "Host",
         "kind": "LinkedField",
-        "name": "run",
+        "name": "host",
         "plural": false,
         "selections": [
           {
             "args": null,
             "kind": "FragmentSpread",
-            "name": "ScanRunFragment"
+            "name": "HostFragment"
           }
         ],
         "storageKey": null
@@ -83,35 +83,42 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "RunQuery",
+    "name": "HostQuery",
     "selections": [
       {
         "alias": null,
         "args": (v1/*: any*/),
-        "concreteType": "ScanRun",
+        "concreteType": "Host",
         "kind": "LinkedField",
-        "name": "run",
+        "name": "host",
         "plural": false,
         "selections": [
           {
             "alias": null,
             "args": null,
             "kind": "ScalarField",
-            "name": "created_at",
+            "name": "ip",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "hostname",
             "storageKey": null
           },
           {
             "alias": null,
             "args": (v2/*: any*/),
-            "concreteType": "HostConnection",
+            "concreteType": "PortConnection",
             "kind": "LinkedField",
-            "name": "hosts",
+            "name": "ports",
             "plural": false,
             "selections": [
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "HostEdge",
+                "concreteType": "PortEdge",
                 "kind": "LinkedField",
                 "name": "edges",
                 "plural": true,
@@ -119,7 +126,7 @@ return {
                   {
                     "alias": null,
                     "args": null,
-                    "concreteType": "Host",
+                    "concreteType": "Port",
                     "kind": "LinkedField",
                     "name": "node",
                     "plural": false,
@@ -129,42 +136,42 @@ return {
                         "alias": null,
                         "args": null,
                         "kind": "ScalarField",
-                        "name": "ip",
+                        "name": "port",
                         "storageKey": null
                       },
                       {
                         "alias": null,
                         "args": null,
                         "kind": "ScalarField",
-                        "name": "mac",
+                        "name": "protocol",
                         "storageKey": null
                       },
                       {
                         "alias": null,
                         "args": null,
                         "kind": "ScalarField",
-                        "name": "hostname",
+                        "name": "state",
                         "storageKey": null
                       },
                       {
                         "alias": null,
                         "args": null,
                         "kind": "ScalarField",
-                        "name": "vendor",
+                        "name": "service",
                         "storageKey": null
                       },
                       {
                         "alias": null,
                         "args": null,
                         "kind": "ScalarField",
-                        "name": "os_match",
+                        "name": "product",
                         "storageKey": null
                       },
                       {
                         "alias": null,
                         "args": null,
                         "kind": "ScalarField",
-                        "name": "os_accuracy",
+                        "name": "version",
                         "storageKey": null
                       },
                       {
@@ -213,16 +220,16 @@ return {
                 "storageKey": null
               }
             ],
-            "storageKey": "hosts(first:15)"
+            "storageKey": "ports(first:15)"
           },
           {
             "alias": null,
             "args": (v2/*: any*/),
             "filters": null,
             "handle": "connection",
-            "key": "HostList_hosts",
+            "key": "PortList_ports",
             "kind": "LinkedHandle",
-            "name": "hosts"
+            "name": "ports"
           },
           (v3/*: any*/)
         ],
@@ -231,16 +238,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "6c40734544856a8fa8fc9adf57f756ff",
+    "cacheID": "a9ecd865736b18fa840f60e450d7633e",
     "id": null,
     "metadata": {},
-    "name": "RunQuery",
+    "name": "HostQuery",
     "operationKind": "query",
-    "text": "query RunQuery(\n  $id: ID!\n) {\n  run(id: $id) {\n    ...ScanRunFragment\n    id\n  }\n}\n\nfragment HostItemFragment on Host {\n  id\n  ip\n  mac\n  hostname\n  vendor\n  os_match\n  os_accuracy\n}\n\nfragment HostListFragment on ScanRun {\n  hosts(first: 15) {\n    edges {\n      node {\n        id\n        ...HostItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n\nfragment ScanRunFragment on ScanRun {\n  created_at\n  ...HostListFragment\n}\n"
+    "text": "query HostQuery(\n  $id: ID!\n) {\n  host(id: $id) {\n    ...HostFragment\n    id\n  }\n}\n\nfragment HostFragment on Host {\n  ip\n  hostname\n  ...PortListFragment\n}\n\nfragment PortItemFragment on Port {\n  port\n  protocol\n  state\n  service\n  product\n  version\n}\n\nfragment PortListFragment on Host {\n  ports(first: 15) {\n    edges {\n      node {\n        id\n        ...PortItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
   }
 };
 })();
 
-(node as any).hash = "1c88c465d2d6c667cd2adbf041a9e0b0";
+(node as any).hash = "f7b302b9367e6ed8baf11b9317337c52";
 
 export default node;

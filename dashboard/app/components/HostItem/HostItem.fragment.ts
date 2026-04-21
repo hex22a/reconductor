@@ -2,6 +2,7 @@ import { graphql } from 'react-relay';
 
 export const fragment = graphql`
     fragment HostItemFragment on Host {
+        id
         ip
         mac
         hostname

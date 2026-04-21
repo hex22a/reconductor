@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<cfb9c8e7265caa74a9f7bef32581a59a>>
+ * @generated SignedSource<<b086e3a9d6fad77951b7b636e7cab1ef>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,19 +10,19 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type HostPaginationQuery$variables = {
+export type PortPaginationQuery$variables = {
   after?: string | null | undefined;
   first?: number | null | undefined;
   id: string;
 };
-export type HostPaginationQuery$data = {
+export type PortPaginationQuery$data = {
   readonly node: {
-    readonly " $fragmentSpreads": FragmentRefs<"HostListFragment">;
+    readonly " $fragmentSpreads": FragmentRefs<"PortListFragment">;
   } | null | undefined;
 };
-export type HostPaginationQuery = {
-  response: HostPaginationQuery$data;
-  variables: HostPaginationQuery$variables;
+export type PortPaginationQuery = {
+  response: PortPaginationQuery$data;
+  variables: PortPaginationQuery$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -81,7 +81,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "HostPaginationQuery",
+    "name": "PortPaginationQuery",
     "selections": [
       {
         "alias": null,
@@ -94,7 +94,7 @@ return {
           {
             "args": (v2/*: any*/),
             "kind": "FragmentSpread",
-            "name": "HostListFragment"
+            "name": "PortListFragment"
           }
         ],
         "storageKey": null
@@ -107,7 +107,7 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "HostPaginationQuery",
+    "name": "PortPaginationQuery",
     "selections": [
       {
         "alias": null,
@@ -125,15 +125,15 @@ return {
               {
                 "alias": null,
                 "args": (v2/*: any*/),
-                "concreteType": "HostConnection",
+                "concreteType": "PortConnection",
                 "kind": "LinkedField",
-                "name": "hosts",
+                "name": "ports",
                 "plural": false,
                 "selections": [
                   {
                     "alias": null,
                     "args": null,
-                    "concreteType": "HostEdge",
+                    "concreteType": "PortEdge",
                     "kind": "LinkedField",
                     "name": "edges",
                     "plural": true,
@@ -141,7 +141,7 @@ return {
                       {
                         "alias": null,
                         "args": null,
-                        "concreteType": "Host",
+                        "concreteType": "Port",
                         "kind": "LinkedField",
                         "name": "node",
                         "plural": false,
@@ -151,42 +151,42 @@ return {
                             "alias": null,
                             "args": null,
                             "kind": "ScalarField",
-                            "name": "ip",
+                            "name": "port",
                             "storageKey": null
                           },
                           {
                             "alias": null,
                             "args": null,
                             "kind": "ScalarField",
-                            "name": "mac",
+                            "name": "protocol",
                             "storageKey": null
                           },
                           {
                             "alias": null,
                             "args": null,
                             "kind": "ScalarField",
-                            "name": "hostname",
+                            "name": "state",
                             "storageKey": null
                           },
                           {
                             "alias": null,
                             "args": null,
                             "kind": "ScalarField",
-                            "name": "vendor",
+                            "name": "service",
                             "storageKey": null
                           },
                           {
                             "alias": null,
                             "args": null,
                             "kind": "ScalarField",
-                            "name": "os_match",
+                            "name": "product",
                             "storageKey": null
                           },
                           {
                             "alias": null,
                             "args": null,
                             "kind": "ScalarField",
-                            "name": "os_accuracy",
+                            "name": "version",
                             "storageKey": null
                           },
                           (v3/*: any*/)
@@ -236,12 +236,12 @@ return {
                 "args": (v2/*: any*/),
                 "filters": null,
                 "handle": "connection",
-                "key": "HostList_hosts",
+                "key": "PortList_ports",
                 "kind": "LinkedHandle",
-                "name": "hosts"
+                "name": "ports"
               }
             ],
-            "type": "ScanRun",
+            "type": "Host",
             "abstractKey": null
           }
         ],
@@ -250,16 +250,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "dc8dc8f0cece924539c3339bd5fb2761",
+    "cacheID": "7bb39c4d8610e631311f5a2582ad5cd3",
     "id": null,
     "metadata": {},
-    "name": "HostPaginationQuery",
+    "name": "PortPaginationQuery",
     "operationKind": "query",
-    "text": "query HostPaginationQuery(\n  $after: String\n  $first: Int = 15\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...HostListFragment_2HEEH6\n    id\n  }\n}\n\nfragment HostItemFragment on Host {\n  id\n  ip\n  mac\n  hostname\n  vendor\n  os_match\n  os_accuracy\n}\n\nfragment HostListFragment_2HEEH6 on ScanRun {\n  hosts(first: $first, after: $after) {\n    edges {\n      node {\n        id\n        ...HostItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
+    "text": "query PortPaginationQuery(\n  $after: String\n  $first: Int = 15\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...PortListFragment_2HEEH6\n    id\n  }\n}\n\nfragment PortItemFragment on Port {\n  port\n  protocol\n  state\n  service\n  product\n  version\n}\n\nfragment PortListFragment_2HEEH6 on Host {\n  ports(first: $first, after: $after) {\n    edges {\n      node {\n        id\n        ...PortItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
   }
 };
 })();
 
-(node as any).hash = "5a3fe55f7d17d046bed11085e72d5464";
+(node as any).hash = "7d2ff857fc7dd4d94f969674a5a6027f";
 
 export default node;

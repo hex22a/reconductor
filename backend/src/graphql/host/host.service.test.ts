@@ -5,6 +5,7 @@ import type { Edge } from '@/src/transport/edge.dto';
 import type { Pagination } from '@/src/transport/pagination.dto';
 import {
     createHostService,
+    type GetHostArgs,
     type HostService,
     type HostServiceFactoryDeps,
     type ListHostsArgs,
@@ -12,7 +13,7 @@ import {
 import type { ScanRunDto } from '@/src/transport/scanRun.dto';
 import type { HostRepository } from '@/src/persistence/host.db';
 import { createHostFixture } from '@/tests/fixtures/hosts';
-import type { HostEntity } from '@/src/domain/host.entity';
+import { expectedHostIp, type HostEntity } from '@/src/domain/host.entity';
 import type { HostDto } from '@/src/transport/host.dto';
 
 describe('host.service', () => {
@@ -48,12 +49,40 @@ describe('host.service', () => {
     test('createHostService', () => {
         // Arrange
         const expectedHostService: HostService = {
+            getHost: expect.any(Function),
             listHosts: expect.any(Function),
         };
         // Act
         const actualHostService: HostService = createHostService(expectedHostServiceFactoryDeps);
         // Assert
         expect(actualHostService).toEqual(expectedHostService);
+    });
+
+    test('getHost', async () => {
+        // Arrange
+        const [expectedHostEntity] = createHostFixture(
+            expectedScanRunId,
+            expectedHostIp,
+            expectedHostId,
+        );
+        const expectedHost: HostDto = {
+            id: expectedHostId,
+            ip: expectedHostIp,
+            hostname: expectedHostEntity.hostname,
+            os_match: expectedHostEntity.os_match,
+            os_accuracy: expectedHostEntity.os_accuracy,
+            vendor: expectedHostEntity.vendor,
+            mac: expectedHostEntity.mac,
+        };
+        const expectedGetHostArgs: GetHostArgs = {
+            id: expectedHostId,
+        };
+        mockGetHost.mockResolvedValue(expectedHostEntity);
+        const hostService: HostService = createHostService(expectedHostServiceFactoryDeps);
+        // Act
+        const actualHost: HostDto = await hostService.getHost(null, expectedGetHostArgs);
+        // Assert
+        expect(actualHost).toEqual(expectedHost);
     });
 
     describe('listHosts', () => {

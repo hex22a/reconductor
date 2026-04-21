@@ -11,5 +11,6 @@ export default [
         route('project/:id', 'routes/Project/project.tsx'),
         route('scan/:id', 'routes/Scan/scan.tsx'),
         route('run/:id', 'routes/Run/run.tsx'),
+        route('host/:id', 'routes/Host/host.tsx'),
     ]),
 ] satisfies RouteConfig;

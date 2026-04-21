@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<807373888043b8576ffe7c2be501af96>>
+ * @generated SignedSource<<4d2607984f2b71d118575916455963f0>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,81 +10,73 @@
 
 import { ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type HostItemFragment$data = {
-  readonly hostname: string | null | undefined;
-  readonly id: string;
-  readonly ip: string | null | undefined;
-  readonly mac: string | null | undefined;
-  readonly os_accuracy: number | null | undefined;
-  readonly os_match: string | null | undefined;
-  readonly vendor: string | null | undefined;
-  readonly " $fragmentType": "HostItemFragment";
+export type PortItemFragment$data = {
+  readonly port: number;
+  readonly product: string | null | undefined;
+  readonly protocol: string | null | undefined;
+  readonly service: string | null | undefined;
+  readonly state: string | null | undefined;
+  readonly version: string | null | undefined;
+  readonly " $fragmentType": "PortItemFragment";
 };
-export type HostItemFragment$key = {
-  readonly " $data"?: HostItemFragment$data;
-  readonly " $fragmentSpreads": FragmentRefs<"HostItemFragment">;
+export type PortItemFragment$key = {
+  readonly " $data"?: PortItemFragment$data;
+  readonly " $fragmentSpreads": FragmentRefs<"PortItemFragment">;
 };
 
 const node: ReaderFragment = {
   "argumentDefinitions": [],
   "kind": "Fragment",
   "metadata": null,
-  "name": "HostItemFragment",
+  "name": "PortItemFragment",
   "selections": [
     {
       "alias": null,
       "args": null,
       "kind": "ScalarField",
-      "name": "id",
+      "name": "port",
       "storageKey": null
     },
     {
       "alias": null,
       "args": null,
       "kind": "ScalarField",
-      "name": "ip",
+      "name": "protocol",
       "storageKey": null
     },
     {
       "alias": null,
       "args": null,
       "kind": "ScalarField",
-      "name": "mac",
+      "name": "state",
       "storageKey": null
     },
     {
       "alias": null,
       "args": null,
       "kind": "ScalarField",
-      "name": "hostname",
+      "name": "service",
       "storageKey": null
     },
     {
       "alias": null,
       "args": null,
       "kind": "ScalarField",
-      "name": "vendor",
+      "name": "product",
       "storageKey": null
     },
     {
       "alias": null,
       "args": null,
       "kind": "ScalarField",
-      "name": "os_match",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "os_accuracy",
+      "name": "version",
       "storageKey": null
     }
   ],
-  "type": "Host",
+  "type": "Port",
   "abstractKey": null
 };
 
-(node as any).hash = "3866d7d33da61b59673f9f6e908413c7";
+(node as any).hash = "a57eb363de31ab85fa260199b07f89bc";
 
 export default node;

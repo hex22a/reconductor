@@ -7,8 +7,10 @@ import {
 } from './host.resolver';
 
 describe('host.resolver', () => {
+    const mockGetHost = mock();
     const mockListHosts = mock();
     const mockHostService: HostService = {
+        getHost: mockGetHost,
         listHosts: mockListHosts,
     };
     const expectedHostResolverFactoryDeps: HostResolverFactoryDeps = {
@@ -22,6 +24,9 @@ describe('host.resolver', () => {
     test('createScanRunResolver', () => {
         // Arrange
         const expectedHostResolver: HostResolver = {
+            Query: {
+                host: mockGetHost,
+            },
             ScanRun: {
                 hosts: mockListHosts,
             },

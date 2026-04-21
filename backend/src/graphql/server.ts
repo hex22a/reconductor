@@ -5,6 +5,7 @@ import type { GraphQlContext } from '../transport/graphql.context';
 import type { ScanResolver } from './scan/scan.resolver';
 import type { ScanRunResolver } from './scanRun/scanRun.resolver';
 import type { HostResolver } from './host/host.resolver';
+import type { PortResolver } from './port/port.resolver';
 
 const typeDefs = await Bun.file('../shared/schema.graphql').text();
 
@@ -43,6 +44,7 @@ export type GraphQlServerFactoryDeps = {
     scanResolver: ScanResolver;
     scanRunResolver: ScanRunResolver;
     hostResolver: HostResolver;
+    portResolver: PortResolver;
 };
 
 export function getGraphQlServerInstance({
@@ -53,11 +55,12 @@ export function getGraphQlServerInstance({
     scanResolver,
     scanRunResolver,
     hostResolver,
+    portResolver,
 }: GraphQlServerFactoryDeps) {
     return createGraphQlServer({
         schema: createGraphQlSchema({
             typeDefs,
-            resolvers: [projectResolver, scanResolver, scanRunResolver, hostResolver],
+            resolvers: [projectResolver, scanResolver, scanRunResolver, hostResolver, portResolver],
         }),
         context: graphQlContextResolver,
     });

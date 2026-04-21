@@ -85,7 +85,7 @@ type Host implements Node {
   vendor: String
   os_match: String
   os_accuracy: Int
-  posts(first: Int, after: String): PortConnection!
+  ports(first: Int, after: String): PortConnection!
 }
 
 type HostEdge {
@@ -124,6 +124,7 @@ type Query {
   project(id: ID!): Project
   scan(id: ID!): Scan
   run(id: ID!): ScanRun
+  host(id: ID!): Host
 }
 
 input CreateProjectInput {
