@@ -12,10 +12,12 @@ export function ProjectItem({ projectRef }: ProjectItemProps) {
   const createdAt = new Date(parseInt(data.created_at));
 
   return (
-    <div className="my-3 flex gap-3">
-      <span>{createdAt.toUTCString()}</span>
-      <span>{data.name}</span>
-      <NavLink to={`/project/${data.id}`}>details</NavLink>
-    </div>
+    <tr>
+      <td className="p-1">{createdAt.toUTCString()}</td>
+      <td className="p-1">{data.name}</td>
+      <td className="p-1">
+        <NavLink to={`/project/${data.id}`}>details</NavLink>
+      </td>
+    </tr>
   );
 }

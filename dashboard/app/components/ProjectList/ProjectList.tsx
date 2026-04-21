@@ -13,12 +13,21 @@ export function ProjectList({ fragmentRef }: ProjectsProps) {
   return (
     <div className="w-3xl">
       <CreateProjectForm />
-      <div className="my-2">
-        <h1 className="font-special">Projects</h1>
-        {data.projects.edges.map((edge) => (
-          <ProjectItem key={edge.node.id} projectRef={edge.node} />
-        ))}
-      </div>
+      <h1 className="font-special">Projects</h1>
+      <table className="my-2 w-full">
+        <thead className="py-2">
+          <tr>
+            <th className="p-1 text-left">Created at</th>
+            <th className="p-1 text-left">Name</th>
+            <th className="p-1 text-left"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.projects.edges.map((edge) => (
+            <ProjectItem key={edge.node.id} projectRef={edge.node} />
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
