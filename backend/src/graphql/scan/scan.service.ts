@@ -101,6 +101,7 @@ export function createScanService({
                         id: scan.id,
                         created_at: scan.created_at,
                         target,
+                        schedule,
                         status: scan.status,
                     },
                     cursor: encodeCursor(scan.id),

@@ -183,6 +183,7 @@ describe('scan.service', () => {
                 created_at: expect.any(Date),
                 target: expectedTarget,
                 status: expectedStatus,
+                schedule: expectedSchedule,
             };
             const expectedScanMessage: ScanMessageDto = {
                 id: expectedScanId,
