@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<e38c473e1af7842608441098a3dc0a67>>
+ * @generated SignedSource<<be54c925cbacbf79ff61cc01e37efbb1>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,8 +15,11 @@ export type ScanListFragment$data = {
   readonly scans: {
     readonly edges: ReadonlyArray<{
       readonly node: {
+        readonly created_at: string;
         readonly id: string;
-        readonly " $fragmentSpreads": FragmentRefs<"ScanItemFragment">;
+        readonly schedule: string | null | undefined;
+        readonly status: string;
+        readonly target: string;
       };
     }>;
   };
@@ -110,9 +113,32 @@ return {
               "selections": [
                 (v1/*: any*/),
                 {
+                  "alias": null,
                   "args": null,
-                  "kind": "FragmentSpread",
-                  "name": "ScanItemFragment"
+                  "kind": "ScalarField",
+                  "name": "created_at",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "target",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "status",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "schedule",
+                  "storageKey": null
                 },
                 {
                   "alias": null,
@@ -169,6 +195,6 @@ return {
 };
 })();
 
-(node as any).hash = "55c2171cbaa0fc66c84d4554d9c6911b";
+(node as any).hash = "13228b8e5bb01ded7010df67fe93d93f";
 
 export default node;

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<5cfa8be5e491c4ee6da8096a2bcce016>>
+ * @generated SignedSource<<6e79d449e8bc5cbb6c6af5144ef61de4>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -231,12 +231,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "6c40734544856a8fa8fc9adf57f756ff",
+    "cacheID": "fbc94af3204e898f57c814ea8ba25130",
     "id": null,
     "metadata": {},
     "name": "RunQuery",
     "operationKind": "query",
-    "text": "query RunQuery(\n  $id: ID!\n) {\n  run(id: $id) {\n    ...ScanRunFragment\n    id\n  }\n}\n\nfragment HostItemFragment on Host {\n  id\n  ip\n  mac\n  hostname\n  vendor\n  os_match\n  os_accuracy\n}\n\nfragment HostListFragment on ScanRun {\n  hosts(first: 15) {\n    edges {\n      node {\n        id\n        ...HostItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n\nfragment ScanRunFragment on ScanRun {\n  created_at\n  ...HostListFragment\n}\n"
+    "text": "query RunQuery(\n  $id: ID!\n) {\n  run(id: $id) {\n    ...ScanRunFragment\n    id\n  }\n}\n\nfragment HostListFragment on ScanRun {\n  hosts(first: 15) {\n    edges {\n      node {\n        id\n        ip\n        mac\n        hostname\n        vendor\n        os_match\n        os_accuracy\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n\nfragment ScanRunFragment on ScanRun {\n  created_at\n  ...HostListFragment\n}\n"
   }
 };
 })();

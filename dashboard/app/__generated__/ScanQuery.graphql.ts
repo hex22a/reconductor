@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d52526b89d084f3e00f617472d4dc67d>>
+ * @generated SignedSource<<dc2ed9256607962a07fadd780a5c683c>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -212,12 +212,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "73292fd94f2d0b0ba349e07c4c92ddd6",
+    "cacheID": "5adeac58bc04de99a1faa10bbbd20f05",
     "id": null,
     "metadata": {},
     "name": "ScanQuery",
     "operationKind": "query",
-    "text": "query ScanQuery(\n  $id: ID!\n) {\n  scan(id: $id) {\n    ...ScanFragment\n    id\n  }\n}\n\nfragment ScanFragment on Scan {\n  target\n  created_at\n  status\n  schedule\n  ...ScanRunListFragment\n}\n\nfragment ScanRunItemFragment on ScanRun {\n  id\n  created_at\n}\n\nfragment ScanRunListFragment on Scan {\n  runs(first: 15) {\n    edges {\n      node {\n        id\n        ...ScanRunItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
+    "text": "query ScanQuery(\n  $id: ID!\n) {\n  scan(id: $id) {\n    ...ScanFragment\n    id\n  }\n}\n\nfragment ScanFragment on Scan {\n  target\n  created_at\n  status\n  schedule\n  ...ScanRunListFragment\n}\n\nfragment ScanRunListFragment on Scan {\n  runs(first: 15) {\n    edges {\n      node {\n        id\n        created_at\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
   }
 };
 })();

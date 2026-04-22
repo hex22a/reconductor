@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<b086e3a9d6fad77951b7b636e7cab1ef>>
+ * @generated SignedSource<<742dcad7aa71b4c7156cf3bc31db26e9>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -250,16 +250,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "7bb39c4d8610e631311f5a2582ad5cd3",
+    "cacheID": "ee1bf42d37d1c6a5e4127c558d743103",
     "id": null,
     "metadata": {},
     "name": "PortPaginationQuery",
     "operationKind": "query",
-    "text": "query PortPaginationQuery(\n  $after: String\n  $first: Int = 15\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...PortListFragment_2HEEH6\n    id\n  }\n}\n\nfragment PortItemFragment on Port {\n  port\n  protocol\n  state\n  service\n  product\n  version\n}\n\nfragment PortListFragment_2HEEH6 on Host {\n  ports(first: $first, after: $after) {\n    edges {\n      node {\n        id\n        ...PortItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
+    "text": "query PortPaginationQuery(\n  $after: String\n  $first: Int = 15\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...PortListFragment_2HEEH6\n    id\n  }\n}\n\nfragment PortListFragment_2HEEH6 on Host {\n  ports(first: $first, after: $after) {\n    edges {\n      node {\n        id\n        port\n        protocol\n        state\n        service\n        product\n        version\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
   }
 };
 })();
 
-(node as any).hash = "7d2ff857fc7dd4d94f969674a5a6027f";
+(node as any).hash = "cccfc89feece2d857830aa7c5862c96c";
 
 export default node;

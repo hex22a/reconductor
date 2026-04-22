@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<dcd786383da4ec23a4585cf2cbfec4f0>>
+ * @generated SignedSource<<569f3ccdfecdb83dce34dad9de415339>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -219,12 +219,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "9021bfde1bef74cec285197772d25643",
+    "cacheID": "1e723c70da394a56600e84eac96ee91d",
     "id": null,
     "metadata": {},
     "name": "ProjectQuery",
     "operationKind": "query",
-    "text": "query ProjectQuery(\n  $id: ID!\n) {\n  project(id: $id) {\n    ...ProjectFragment\n    id\n  }\n}\n\nfragment ProjectFragment on Project {\n  name\n  created_at\n  ...ScanListFragment\n}\n\nfragment ScanItemFragment on Scan {\n  id\n  created_at\n  target\n  status\n  schedule\n}\n\nfragment ScanListFragment on Project {\n  scans(first: 15) {\n    edges {\n      node {\n        id\n        ...ScanItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
+    "text": "query ProjectQuery(\n  $id: ID!\n) {\n  project(id: $id) {\n    ...ProjectFragment\n    id\n  }\n}\n\nfragment ProjectFragment on Project {\n  name\n  created_at\n  ...ScanListFragment\n}\n\nfragment ScanListFragment on Project {\n  scans(first: 15) {\n    edges {\n      node {\n        id\n        created_at\n        target\n        status\n        schedule\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
   }
 };
 })();

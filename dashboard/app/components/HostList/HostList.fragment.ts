@@ -8,7 +8,12 @@ export const fragment = graphql`
             edges {
                 node {
                     id
-                    ...HostItemFragment
+                    ip
+                    mac
+                    hostname
+                    vendor
+                    os_match
+                    os_accuracy
                 }
             }
         }

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<ea1bee6ee4651f7a61574179ab04fb9c>>
+ * @generated SignedSource<<b87252f72a322c526136bdf603bbb133>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -174,16 +174,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "9a9595a7ada1da5b07857a68bf1ad369",
+    "cacheID": "efc3dacfedcbcfe383e7a8987fdc1f47",
     "id": null,
     "metadata": {},
     "name": "ProjectsPaginationQuery",
     "operationKind": "query",
-    "text": "query ProjectsPaginationQuery(\n  $after: String\n  $first: Int = 15\n) {\n  ...ProjectListFragment_2HEEH6\n}\n\nfragment ProjectItemFragment on Project {\n  id\n  name\n  created_at\n}\n\nfragment ProjectListFragment_2HEEH6 on Query {\n  projects(first: $first, after: $after) {\n    edges {\n      node {\n        id\n        ...ProjectItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n"
+    "text": "query ProjectsPaginationQuery(\n  $after: String\n  $first: Int = 15\n) {\n  ...ProjectListFragment_2HEEH6\n}\n\nfragment ProjectListFragment_2HEEH6 on Query {\n  projects(first: $first, after: $after) {\n    edges {\n      node {\n        id\n        name\n        created_at\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "fd4d68c40c25ad53788445910d551583";
+(node as any).hash = "c721115ce587650ca623bb5014bf4a86";
 
 export default node;

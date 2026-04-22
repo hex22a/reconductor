@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<2bf1fd04fff5de56a39d69f7e72a6520>>
+ * @generated SignedSource<<ee60a0beefbf79f3c70f290de53739c6>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,8 +15,8 @@ export type ScanRunListFragment$data = {
   readonly runs: {
     readonly edges: ReadonlyArray<{
       readonly node: {
+        readonly created_at: string;
         readonly id: string;
-        readonly " $fragmentSpreads": FragmentRefs<"ScanRunItemFragment">;
       };
     }>;
   };
@@ -110,9 +110,11 @@ return {
               "selections": [
                 (v1/*: any*/),
                 {
+                  "alias": null,
                   "args": null,
-                  "kind": "FragmentSpread",
-                  "name": "ScanRunItemFragment"
+                  "kind": "ScalarField",
+                  "name": "created_at",
+                  "storageKey": null
                 },
                 {
                   "alias": null,
@@ -169,6 +171,6 @@ return {
 };
 })();
 
-(node as any).hash = "2aa3d41d8b02c924072d6449e3fa34e2";
+(node as any).hash = "2332bbeb2d99c8fd5f14f91f18b6ce88";
 
 export default node;

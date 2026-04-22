@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<c60abbfc835770e2e0e62442e4ea8d07>>
+ * @generated SignedSource<<f9dae42f4b9fe6665e61c73b549b5d9a>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -238,12 +238,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "a9ecd865736b18fa840f60e450d7633e",
+    "cacheID": "bb30499d697b27f66093a0c52fcd8073",
     "id": null,
     "metadata": {},
     "name": "HostQuery",
     "operationKind": "query",
-    "text": "query HostQuery(\n  $id: ID!\n) {\n  host(id: $id) {\n    ...HostFragment\n    id\n  }\n}\n\nfragment HostFragment on Host {\n  ip\n  hostname\n  ...PortListFragment\n}\n\nfragment PortItemFragment on Port {\n  port\n  protocol\n  state\n  service\n  product\n  version\n}\n\nfragment PortListFragment on Host {\n  ports(first: 15) {\n    edges {\n      node {\n        id\n        ...PortItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
+    "text": "query HostQuery(\n  $id: ID!\n) {\n  host(id: $id) {\n    ...HostFragment\n    id\n  }\n}\n\nfragment HostFragment on Host {\n  ip\n  hostname\n  ...PortListFragment\n}\n\nfragment PortListFragment on Host {\n  ports(first: 15) {\n    edges {\n      node {\n        id\n        port\n        protocol\n        state\n        service\n        product\n        version\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
   }
 };
 })();

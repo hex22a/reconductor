@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<dc68a055792b2fd31b76a714672b3b5b>>
+ * @generated SignedSource<<29ca03e427950a00ee39b42efc102569>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -16,7 +16,12 @@ export type PortListFragment$data = {
     readonly edges: ReadonlyArray<{
       readonly node: {
         readonly id: string;
-        readonly " $fragmentSpreads": FragmentRefs<"PortItemFragment">;
+        readonly port: number;
+        readonly product: string | null | undefined;
+        readonly protocol: string | null | undefined;
+        readonly service: string | null | undefined;
+        readonly state: string | null | undefined;
+        readonly version: string | null | undefined;
       };
     }>;
   };
@@ -110,9 +115,46 @@ return {
               "selections": [
                 (v1/*: any*/),
                 {
+                  "alias": null,
                   "args": null,
-                  "kind": "FragmentSpread",
-                  "name": "PortItemFragment"
+                  "kind": "ScalarField",
+                  "name": "port",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "protocol",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "state",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "service",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "product",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "version",
+                  "storageKey": null
                 },
                 {
                   "alias": null,
@@ -169,6 +211,6 @@ return {
 };
 })();
 
-(node as any).hash = "7d2ff857fc7dd4d94f969674a5a6027f";
+(node as any).hash = "cccfc89feece2d857830aa7c5862c96c";
 
 export default node;

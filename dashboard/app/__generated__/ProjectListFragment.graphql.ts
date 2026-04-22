@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<0c1483ec1709291082569f257b7adc68>>
+ * @generated SignedSource<<2c28c83136905793acf4b8bc431086dd>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -14,8 +14,9 @@ export type ProjectListFragment$data = {
   readonly projects: {
     readonly edges: ReadonlyArray<{
       readonly node: {
+        readonly created_at: string;
         readonly id: string;
-        readonly " $fragmentSpreads": FragmentRefs<"ProjectItemFragment">;
+        readonly name: string;
       };
     }>;
   };
@@ -102,9 +103,18 @@ return {
                   "storageKey": null
                 },
                 {
+                  "alias": null,
                   "args": null,
-                  "kind": "FragmentSpread",
-                  "name": "ProjectItemFragment"
+                  "kind": "ScalarField",
+                  "name": "name",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "created_at",
+                  "storageKey": null
                 },
                 {
                   "alias": null,
@@ -160,6 +170,6 @@ return {
 };
 })();
 
-(node as any).hash = "fd4d68c40c25ad53788445910d551583";
+(node as any).hash = "c721115ce587650ca623bb5014bf4a86";
 
 export default node;

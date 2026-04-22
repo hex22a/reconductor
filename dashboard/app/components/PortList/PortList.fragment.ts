@@ -8,7 +8,12 @@ export const fragment = graphql`
             edges {
                 node {
                     id
-                    ...PortItemFragment
+                    port
+                    protocol
+                    state
+                    service
+                    product
+                    version
                 }
             }
         }

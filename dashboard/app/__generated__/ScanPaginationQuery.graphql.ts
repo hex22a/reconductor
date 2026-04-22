@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<47f9cad3de40082d3f6d4cb5343e1759>>
+ * @generated SignedSource<<5cd794224c3d02287bd5ee6851fd9559>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -236,16 +236,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "55781ae5e30a944be8844f45fc41294d",
+    "cacheID": "b761ef6fe964599c779d2b5a02b40bff",
     "id": null,
     "metadata": {},
     "name": "ScanPaginationQuery",
     "operationKind": "query",
-    "text": "query ScanPaginationQuery(\n  $after: String\n  $first: Int = 15\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...ScanListFragment_2HEEH6\n    id\n  }\n}\n\nfragment ScanItemFragment on Scan {\n  id\n  created_at\n  target\n  status\n  schedule\n}\n\nfragment ScanListFragment_2HEEH6 on Project {\n  scans(first: $first, after: $after) {\n    edges {\n      node {\n        id\n        ...ScanItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
+    "text": "query ScanPaginationQuery(\n  $after: String\n  $first: Int = 15\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...ScanListFragment_2HEEH6\n    id\n  }\n}\n\nfragment ScanListFragment_2HEEH6 on Project {\n  scans(first: $first, after: $after) {\n    edges {\n      node {\n        id\n        created_at\n        target\n        status\n        schedule\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
   }
 };
 })();
 
-(node as any).hash = "55c2171cbaa0fc66c84d4554d9c6911b";
+(node as any).hash = "13228b8e5bb01ded7010df67fe93d93f";
 
 export default node;

@@ -8,7 +8,7 @@ export const fragment = graphql`
             edges {
                 node {
                     id
-                    ...ScanRunItemFragment
+                    created_at
                 }
             }
         }

@@ -8,7 +8,8 @@ export const fragment = graphql`
             edges {
                 node {
                     id
-                    ...ProjectItemFragment
+                    name
+                    created_at
                 }
             }
         }

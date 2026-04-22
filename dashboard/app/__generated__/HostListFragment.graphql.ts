@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<e8ce477eefcc6c985fa3ef36f0206eb7>>
+ * @generated SignedSource<<9f1010492c8ffd61018e7efe9da541b1>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -14,8 +14,13 @@ export type HostListFragment$data = {
   readonly hosts: {
     readonly edges: ReadonlyArray<{
       readonly node: {
+        readonly hostname: string | null | undefined;
         readonly id: string;
-        readonly " $fragmentSpreads": FragmentRefs<"HostItemFragment">;
+        readonly ip: string | null | undefined;
+        readonly mac: string | null | undefined;
+        readonly os_accuracy: number | null | undefined;
+        readonly os_match: string | null | undefined;
+        readonly vendor: string | null | undefined;
       };
     }>;
   };
@@ -110,9 +115,46 @@ return {
               "selections": [
                 (v1/*: any*/),
                 {
+                  "alias": null,
                   "args": null,
-                  "kind": "FragmentSpread",
-                  "name": "HostItemFragment"
+                  "kind": "ScalarField",
+                  "name": "ip",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "mac",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "hostname",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "vendor",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "os_match",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "os_accuracy",
+                  "storageKey": null
                 },
                 {
                   "alias": null,
@@ -169,6 +211,6 @@ return {
 };
 })();
 
-(node as any).hash = "5a3fe55f7d17d046bed11085e72d5464";
+(node as any).hash = "d2866f817d77479c794468caa864a0d1";
 
 export default node;

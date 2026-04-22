@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<692d1abb36624000b7cf881f3aca1e05>>
+ * @generated SignedSource<<c63cc4b1e8616adb64c256057aa07789>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -154,12 +154,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "603441d37f0649f2aefb6a3502d2b2ab",
+    "cacheID": "d8b13fd803576228c466181815821175",
     "id": null,
     "metadata": {},
     "name": "ProjectsQuery",
     "operationKind": "query",
-    "text": "query ProjectsQuery {\n  ...ProjectListFragment\n}\n\nfragment ProjectItemFragment on Project {\n  id\n  name\n  created_at\n}\n\nfragment ProjectListFragment on Query {\n  projects(first: 15) {\n    edges {\n      node {\n        id\n        ...ProjectItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n"
+    "text": "query ProjectsQuery {\n  ...ProjectListFragment\n}\n\nfragment ProjectListFragment on Query {\n  projects(first: 15) {\n    edges {\n      node {\n        id\n        name\n        created_at\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n"
   }
 };
 })();

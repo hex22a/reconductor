@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<34b88beffde84cb8c4387b1984f50629>>
+ * @generated SignedSource<<ee7e934e10944ad7add31038aeb18f21>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -215,16 +215,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "f9ca29b9f4990186020befca843d7337",
+    "cacheID": "ff28d8b7a7fbc7ea022fd3528a078537",
     "id": null,
     "metadata": {},
     "name": "ScanRunPaginationQuery",
     "operationKind": "query",
-    "text": "query ScanRunPaginationQuery(\n  $after: String\n  $first: Int = 15\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...ScanRunListFragment_2HEEH6\n    id\n  }\n}\n\nfragment ScanRunItemFragment on ScanRun {\n  id\n  created_at\n}\n\nfragment ScanRunListFragment_2HEEH6 on Scan {\n  runs(first: $first, after: $after) {\n    edges {\n      node {\n        id\n        ...ScanRunItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
+    "text": "query ScanRunPaginationQuery(\n  $after: String\n  $first: Int = 15\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...ScanRunListFragment_2HEEH6\n    id\n  }\n}\n\nfragment ScanRunListFragment_2HEEH6 on Scan {\n  runs(first: $first, after: $after) {\n    edges {\n      node {\n        id\n        created_at\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  id\n}\n"
   }
 };
 })();
 
-(node as any).hash = "2aa3d41d8b02c924072d6449e3fa34e2";
+(node as any).hash = "2332bbeb2d99c8fd5f14f91f18b6ce88";
 
 export default node;
