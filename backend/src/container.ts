@@ -5,7 +5,7 @@ import { sql } from './persistence/db';
 import { createSessionRepository } from './persistence/session.kv';
 import { kv } from './persistence/kv';
 import { createLoginController } from './controllers/auth/login';
-import { createGenerateRandomToken } from './utils/random';
+import { createTokenProvider } from './providers/token.ts';
 import { createProjectRepository } from './persistence/project.db';
 import { createProjectResolver } from './graphql/project/project.resovler';
 import { createSchema, createYoga } from 'graphql-yoga';
@@ -40,6 +40,7 @@ import { createHostResolver } from './graphql/host/host.resolver.ts';
 import { createPortRepository } from './persistence/port.db.ts';
 import { createPortService } from './graphql/port/port.service.ts';
 import { createPortResolver } from './graphql/port/port.resolver.ts';
+import { csrf } from './providers/csrf.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -73,8 +74,9 @@ container.register({
     scanRunService: asFunction(createScanRunService).singleton(),
     hostService: asFunction(createHostService).singleton(),
     portService: asFunction(createPortService).singleton(),
-    generateRandomToken: asFunction(createGenerateRandomToken),
+    tokenProvider: asFunction(createTokenProvider),
     cryptoProvider: asValue(crypto),
+    csrfProvider: asValue(csrf),
     hashFn: asValue(Bun.password.hash),
     verifyHash: asValue(Bun.password.verify),
     sql: asValue(sql),

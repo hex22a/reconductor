@@ -27,10 +27,12 @@ describe('session', () => {
         const expectedUsername = 'user';
         const expectedUserId = '019c6c94-0fb1-7241-922f-b3eb297a5a2f';
         const expectedToken = 'random_value';
+        const expectedCsrfToken = 'csrf_token';
         const expectedUserSession: UserSession = {
             token: expectedToken,
             userId: expectedUserId,
             username: expectedUsername,
+            csrfToken: expectedCsrfToken,
         };
         const sessionRepository = createSessionRepository({ kv });
         // Act
@@ -58,10 +60,12 @@ describe('session', () => {
         const expectedUsername = 'user';
         const expectedToken = 'some_token';
         const expectedUserId = '019c6c94-0fb1-7241-922f-b3eb297a5a2f';
+        const expectedCsrfToken = 'csrf_token';
         const expectedUserSession: UserSession = {
             token: expectedToken,
             userId: expectedUserId,
             username: expectedUsername,
+            csrfToken: expectedCsrfToken,
         };
         const sessionRepository = createSessionRepository({ kv });
         await sessionRepository.createUserSession(expectedUserSession);
@@ -76,10 +80,12 @@ describe('session', () => {
         const expectedUsername = 'user';
         const expectedToken = 'some_token';
         const expectedUserId = '019c6c94-0fb1-7241-922f-b3eb297a5a2f';
+        const expectedCsrfToken = 'csrf_token';
         const expectedUserSession: UserSession = {
             token: expectedToken,
             userId: expectedUserId,
             username: expectedUsername,
+            csrfToken: expectedCsrfToken,
         };
         const sessionRepository = createSessionRepository({ kv });
         await sessionRepository.createUserSession(expectedUserSession);

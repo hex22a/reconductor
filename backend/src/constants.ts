@@ -8,6 +8,8 @@ export const RABBITMQ_URL: string =
     (process.env.NODE_ENV === 'production' ? process.env.RABBITMQ_URL : DEFAULT_RABBITMQ_URL) ||
     DEFAULT_RABBITMQ_URL;
 
+export const CSRF_SECRET = process.env.CSRF_SECRET;
+
 export const SCAN_QUEUE = 'scans';
 
 export const ACCESS_CONTROL_ALLOW_ORIGIN_HEADER = 'access-control-allow-origin';
@@ -51,8 +53,9 @@ export const UNEXPECTED_ERROR_MESSAGE = 'Unexpected error';
 export const DATABASE_ERROR_MESSAGE = 'Something went wrong';
 
 export const USER_SESSION_COOKIE_NAME = 'recon_user_session';
-export const USER_SESSION_TTL_SECONDS = 15 * 60;
 export const USER_SESSION_PREFIX = 'user_session';
+export const USER_SESSION_TTL_SECONDS = 15 * 60;
+export const USER_SESSION_TTL_MILLISECONDS = USER_SESSION_TTL_SECONDS * 1000;
 
 export const TOKEN_RANDOM_BYTES_ARRAY_LENGTH = 32;
 

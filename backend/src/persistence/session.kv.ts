@@ -16,19 +16,29 @@ export type SessionRepository = {
 export function createSessionRepository({ kv }: SessionRepositoryDeps): SessionRepository {
     return {
         async createUserSession(userSession: UserSession): Promise<UserSession> {
-            const { token, userId, username } = userSession;
+            const { token, userId, username, csrfToken } = userSession;
             const key = `${USER_SESSION_PREFIX}:${token}`;
             await kv.hset(key, userSession);
             await kv.expire(key, USER_SESSION_TTL_SECONDS);
-            return { token, userId, username };
+            return { token, userId, username, csrfToken };
         },
         async getUserSession(token: string): Promise<UserSession> {
             const key = `${USER_SESSION_PREFIX}:${token}`;
             const userSession = await kv.hgetall(key);
-            if (!userSession || !userSession.userId || !userSession.username) {
+            if (
+                !userSession ||
+                !userSession.userId ||
+                !userSession.username ||
+                !userSession.csrfToken
+            ) {
                 throw new SessionNotFoundError();
             }
-            return { token, userId: userSession.userId, username: userSession.username };
+            return {
+                token,
+                userId: userSession.userId,
+                username: userSession.username,
+                csrfToken: userSession.csrfToken,
+            };
         },
         async deleteUserSession(token: string): Promise<void> {
             const key = `${USER_SESSION_PREFIX}:${token}`;

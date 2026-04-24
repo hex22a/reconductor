@@ -7,6 +7,7 @@ import { USER_SESSION_TTL_SECONDS, USER_SESSION_COOKIE_NAME } from '@/src/consta
 import { createUserFixture } from '@/tests/fixtures/users';
 import { constants } from 'node:http2';
 import type { UserSession } from '@/src/domain/session.entity';
+import type { TokenProvider } from '@/src/providers/token';
 
 describe('login', () => {
     const mockSetCookies = mock();
@@ -17,6 +18,8 @@ describe('login', () => {
     const mockDeleteUserSession = mock();
     const mockGetUserSession = mock();
     const mockGetRandomToken = mock();
+    const mockGenerateCsrfToken = mock();
+    const mockVerifyCsrfToken = mock();
     const mockUserRepository: UserRepository = {
         addUser: mockAddUser,
         getUserByUsername: mockGetUserByUsername,
@@ -29,12 +32,17 @@ describe('login', () => {
     const mockCookies = {
         set: mockSetCookies,
     } satisfies Partial<CookieMap>;
+    const mockTokenProvider: TokenProvider = {
+        generateRandomToken: mockGetRandomToken,
+        generateCsrfToken: mockGenerateCsrfToken,
+        verifyCsrfToken: mockVerifyCsrfToken,
+    };
 
     const expectedLoginControllerDeps: LoginControllerDeps = {
         userRepository: mockUserRepository,
         sessionRepository: mockSessionRepository,
         verifyHash: mockVerifyHash,
-        generateRandomToken: mockGetRandomToken,
+        tokenProvider: mockTokenProvider,
     };
 
     afterEach(() => {
@@ -46,6 +54,8 @@ describe('login', () => {
         mockGetUserSession.mockReset();
         mockDeleteUserSession.mockReset();
         mockGetRandomToken.mockReset();
+        mockGenerateCsrfToken.mockReset();
+        mockVerifyCsrfToken.mockReset();
     });
 
     test('createLoginController', () => {
@@ -61,7 +71,8 @@ describe('login', () => {
     describe('post controller', () => {
         test('passwords match', async () => {
             // Arrange
-            const expectedResponseJson = { ok: true };
+            const expectedCsrfToken = 'csrf_token';
+            const expectedResponseJson = { ok: true, csrfToken: expectedCsrfToken };
             const expectedToken = 'random_token';
             const expectedUsername = 'username';
             const expectedPassword = 'password';
@@ -86,10 +97,12 @@ describe('login', () => {
                 token: expectedToken,
                 username: expectedUsername,
                 userId: expectedUserEntity.id,
+                csrfToken: expectedCsrfToken,
             };
             mockVerifyHash.mockResolvedValue(true);
             mockGetUserByUsername.mockResolvedValue(expectedUserEntity);
             mockGetRandomToken.mockReturnValue(expectedToken);
+            mockGenerateCsrfToken.mockReturnValue(expectedCsrfToken);
 
             const loginController: LoginController = createLoginController(
                 expectedLoginControllerDeps,
@@ -103,6 +116,7 @@ describe('login', () => {
             expect(mockVerifyHash).toHaveBeenCalledWith(expectedPassword, expectedHashedPassword);
             expect(mockGetUserByUsername).toHaveBeenCalledWith(expectedUsername);
             expect(mockGetRandomToken).toHaveBeenCalled();
+            expect(mockGenerateCsrfToken).toHaveBeenCalled();
             expect(mockCreateUserSession).toHaveBeenCalledWith(expectedUserSessionInsert);
             expect(mockSetCookies).toHaveBeenCalledWith(
                 USER_SESSION_COOKIE_NAME,

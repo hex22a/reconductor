@@ -60,6 +60,7 @@ services:
         condition: service_healthy
     environment:
       DASHBOARD_URL: ${DASHBOARD_URL}
+      CSRF_SECRET: ${CSRF_SECRET}
       DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0

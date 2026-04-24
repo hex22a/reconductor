@@ -6,12 +6,13 @@ import { registerSchema } from '@/src/transport/user.schema';
 import type { BunRequest } from 'bun';
 import { constants } from 'node:http2';
 import type { RequestHandler } from '../types';
+import type { TokenProvider } from '@/src/providers/token';
 
 export type LoginControllerDeps = {
     userRepository: UserRepository;
     sessionRepository: SessionRepository;
     verifyHash: (password: string, hash: string) => Promise<boolean>;
-    generateRandomToken: () => string;
+    tokenProvider: TokenProvider;
 };
 
 export type LoginController = {
@@ -22,7 +23,7 @@ export function createLoginController({
     userRepository,
     sessionRepository,
     verifyHash,
-    generateRandomToken,
+    tokenProvider,
 }: LoginControllerDeps): LoginController {
     return {
         async post(req: BunRequest): Promise<Response> {
@@ -33,9 +34,11 @@ export function createLoginController({
             if (!passwordsMatch) {
                 return Response.json({ ok: false }, { status: constants.HTTP_STATUS_UNAUTHORIZED });
             }
-            const token = generateRandomToken();
+            const token = tokenProvider.generateRandomToken();
+            const csrfToken = tokenProvider.generateCsrfToken();
             await sessionRepository.createUserSession({
                 token,
+                csrfToken,
                 userId: user.id,
                 username: user.username,
             });
@@ -45,7 +48,7 @@ export function createLoginController({
                 secure: true,
                 path: '/',
             });
-            return Response.json({ ok: true });
+            return Response.json({ ok: true, csrfToken });
         },
     };
 }
