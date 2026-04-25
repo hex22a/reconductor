@@ -56,6 +56,9 @@ export const USER_SESSION_COOKIE_NAME = 'recon_user_session';
 export const USER_SESSION_PREFIX = 'user_session';
 export const USER_SESSION_TTL_SECONDS = 15 * 60;
 export const USER_SESSION_TTL_MILLISECONDS = USER_SESSION_TTL_SECONDS * 1000;
+export const ANONYMOUS_CSRF_PREFIX = 'csrf_anonymous';
+export const ANONYMOUS_CSRF_TTL_SECONDS = 5 * 60;
+export const ANONYMOUS_CSRF_TTL_MILLISECONDS = ANONYMOUS_CSRF_TTL_SECONDS * 1000;
 
 export const TOKEN_RANDOM_BYTES_ARRAY_LENGTH = 32;
 
