@@ -31,6 +31,7 @@ export const API_LOGIN_ENDPOINT_V1 = '/api/v1/login';
 export const API_ME_ENDPOINT_V1 = '/api/v1/me';
 export const API_LOGOUT_ENDPOINT_V1 = '/api/v1/logout';
 export const API_HEALTH_ENDPOINT_V1 = '/api/v1/health';
+export const API_CSRF_CONTROLLER_V1 = '/api/v1/csrf';
 export const GRAPHQL_ENDPOINT = '/graphql';
 
 export const MIN_USERNAME_LENGTH = 4;

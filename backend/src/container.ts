@@ -41,6 +41,8 @@ import { createPortRepository } from './persistence/port.db.ts';
 import { createPortService } from './graphql/port/port.service.ts';
 import { createPortResolver } from './graphql/port/port.resolver.ts';
 import { csrf } from './providers/csrf.ts';
+import { createCsrfRepository } from './persistence/csrf.kv.ts';
+import { createCsrfController } from './controllers/csrf.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -56,6 +58,7 @@ container.register({
     registerController: asFunction(createRegisterController),
     loginController: asFunction(createLoginController),
     logoutController: asFunction(createLogoutController),
+    csrfController: asFunction(createCsrfController),
     meController: asValue(me),
     projectResolver: asFunction(createProjectResolver).singleton(),
     scanRunResolver: asFunction(createScanRunResolver).singleton(),
@@ -64,6 +67,7 @@ container.register({
     portResolver: asFunction(createPortResolver).singleton(),
     userRepository: asFunction(createUserRepository),
     sessionRepository: asFunction(createSessionRepository).singleton(),
+    csrfRepository: asFunction(createCsrfRepository).singleton(),
     projectRepository: asFunction(createProjectRepository).singleton(),
     scanRepository: asFunction(createScanRepository).singleton(),
     scanRunRepository: asFunction(createScanRunRepository).singleton(),
