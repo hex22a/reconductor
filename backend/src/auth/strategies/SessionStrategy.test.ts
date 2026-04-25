@@ -12,9 +12,11 @@ describe('auth', () => {
     const mockGetUserSession = mock();
     const mockGetCookies = mock();
     const mockController = mock();
+    const mockDeleteUserSession = mock();
     const mockSessionRepository: SessionRepository = {
         createUserSession: mockCreateUserSession,
         getUserSession: mockGetUserSession,
+        deleteUserSession: mockDeleteUserSession,
     };
     const mockCookies = {
         get: mockGetCookies,
@@ -30,6 +32,7 @@ describe('auth', () => {
         mockController.mockReset();
         mockCreateUserSession.mockReset();
         mockGetUserSession.mockReset();
+        mockDeleteUserSession.mockReset();
     });
 
     test('constructor', () => {
@@ -47,9 +50,12 @@ describe('auth', () => {
             const expectedUserId = '019c94f3-4826-7c85-a663-98055fe5cba4';
             const expectedUsername = 'username';
             const expectedToken = 'token';
+            const expectedCsrfToken = 'csrf_token';
             const expectedUserSession: UserSession = {
                 userId: expectedUserId,
                 username: expectedUsername,
+                csrfToken: expectedCsrfToken,
+                token: expectedToken,
             };
             mockGetCookies.mockReturnValue(expectedToken);
             mockGetUserSession.mockReturnValue(expectedUserSession);

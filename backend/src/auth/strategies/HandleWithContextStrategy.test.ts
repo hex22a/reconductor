@@ -11,10 +11,12 @@ describe('HandleWithContextStrategy', () => {
         const expectedToken = 'token';
         const expectedUserId = '019cb419-2d24-727d-b66a-cf6390891464';
         const expectedUsername = 'username';
+        const expectedCsrfToken = 'csrf_token';
         const expectedUserSession: UserSession = {
             token: expectedToken,
             userId: expectedUserId,
             username: expectedUsername,
+            csrfToken: expectedCsrfToken,
         };
         const expectedResponseJson = { respose: 'some valid response' };
         const expectedResponse: Response = Response.json(expectedResponseJson);
