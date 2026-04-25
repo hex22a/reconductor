@@ -56,10 +56,12 @@ describe('auth', () => {
             const expectedUserId = '019c94f3-4826-7c85-a663-98055fe5cba4';
             const expectedUsername = 'username';
             const expectedToken = 'token';
+            const expectedCsrfToken = 'csrf_token';
             const expectedUserSession: UserSession = {
                 token: expectedToken,
                 userId: expectedUserId,
                 username: expectedUsername,
+                csrfToken: expectedCsrfToken,
             };
             const expectedContext: RequestContext = {
                 user: expectedUserSession,
