@@ -1,6 +1,5 @@
 import type React from 'react';
 import { useState } from 'react';
-import { API_REGISTER_URL } from '~/constants';
 import { FormError } from '../FormError/FormError';
 import { useNavigate } from 'react-router';
 import {
@@ -9,6 +8,7 @@ import {
   DATABASE_ERROR_CODE,
   UNEXPECTED_ERROR_CODE,
 } from '$/constants';
+import { signUp } from '~/services/auth';
 
 export function SignUp() {
   const navigate = useNavigate();
@@ -28,16 +28,10 @@ export function SignUp() {
     e.preventDefault();
     const target = e.currentTarget as HTMLFormElement;
     const formData = new FormData(target);
-    const username = formData.get('username');
-    const password = formData.get('password');
+    const username = formData.get('username')?.toString();
+    const password = formData.get('password')?.toString();
     try {
-      const res = await fetch(API_REGISTER_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
+      const res = await signUp(username, password);
       const result = await res.json();
       switch (result.code) {
         case VALIDATION_ERROR_CODE:

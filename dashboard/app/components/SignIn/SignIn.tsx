@@ -1,6 +1,5 @@
 import type React from 'react';
 import { useState } from 'react';
-import { API_LOGIN_URL } from '~/constants';
 import { FormError } from '../FormError/FormError';
 import { useNavigate } from 'react-router';
 import {
@@ -10,6 +9,7 @@ import {
   UNEXPECTED_ERROR_CODE,
 } from '$/constants';
 import { useAuth } from '~/providers/AuthProvider';
+import { signIn } from '~/services/auth';
 
 export function SignIn() {
   const navigate = useNavigate();
@@ -30,17 +30,10 @@ export function SignIn() {
     e.preventDefault();
     const target = e.currentTarget as HTMLFormElement;
     const formData = new FormData(target);
-    const username = formData.get('username');
-    const password = formData.get('password');
+    const username = formData.get('username')?.toString();
+    const password = formData.get('password')?.toString();
     try {
-      const res = await fetch(API_LOGIN_URL, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
+      const res = await signIn(username, password);
       const result = await res.json();
       switch (result.code) {
         case VALIDATION_ERROR_CODE:
