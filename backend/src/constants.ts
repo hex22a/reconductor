@@ -17,7 +17,7 @@ export const ACCESS_CONTROL_ALLOW_METHODS_HEADER = 'access-control-allow-methods
 export const ACCESS_CONTROL_ALLOW_HEADERS_HEADER = 'access-control-allow-headers';
 export const ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER = 'access-control-allow-credentials';
 export const CORS_ALLOWED_METHODS = 'GET,POST,OPTIONS';
-export const CORS_ALLOWED_HEADERS = 'Content-Type';
+export const CORS_ALLOWED_HEADERS = 'Content-Type,X-CSRF-Token';
 export const CORS_ALLOW_CREDENTIALS = 'true';
 export const CORS_HEADERS = {
     [ACCESS_CONTROL_ALLOW_ORIGIN_HEADER]: DASHBOARD_URL,

@@ -10,6 +10,7 @@ import { AuthProvider } from './providers/AuthProvider';
 import type { Route } from './+types/root';
 import './app.css';
 import { RelayProvider } from './providers/GraphQlProvider';
+import { CsrfProvider } from './providers/CsrfProvider';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -44,11 +45,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <RelayProvider>
-        <Outlet />
-      </RelayProvider>
-    </AuthProvider>
+    <CsrfProvider>
+      <AuthProvider>
+        <RelayProvider>
+          <Outlet />
+        </RelayProvider>
+      </AuthProvider>
+    </CsrfProvider>
   );
 }
 

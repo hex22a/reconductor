@@ -10,10 +10,12 @@ import {
 } from '$/constants';
 import { useAuth } from '~/providers/AuthProvider';
 import { signIn } from '~/services/auth';
+import { useCsrf } from '~/providers/CsrfProvider';
 
 export function SignIn() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { csrfToken } = useCsrf();
   const [genericError, setGenericError] = useState<string | null>(null);
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
@@ -33,7 +35,7 @@ export function SignIn() {
     const username = formData.get('username')?.toString();
     const password = formData.get('password')?.toString();
     try {
-      const res = await signIn(username, password);
+      const res = await signIn(csrfToken, username, password);
       const result = await res.json();
       switch (result.code) {
         case VALIDATION_ERROR_CODE:

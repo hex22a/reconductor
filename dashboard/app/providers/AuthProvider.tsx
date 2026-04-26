@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { API_LOGOUT_URL, API_ME_URL } from '~/constants';
+import { API_LOGOUT_URL } from '~/constants';
+import { fetchMe } from '~/services/auth';
 
 type User = { username: string } | null;
 
@@ -17,7 +18,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch(API_ME_URL, { credentials: 'include' })
+    fetchMe()
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data) setUser(data);
