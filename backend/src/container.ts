@@ -12,7 +12,7 @@ import { createSchema, createYoga } from 'graphql-yoga';
 import { getGraphQlServerInstance } from './graphql/server';
 import { createGraphQlContext } from './graphql/context';
 import { createAuthDecorators } from './auth/decorators/auth.ts';
-import { withCors, withErrorHandling } from './controllers/decorators/controller';
+import { withCors } from './controllers/decorators/withCors.ts';
 import { preflight } from './controllers/preflight';
 import { SessionStrategy } from './auth/strategies/SessionStrategy.ts';
 import { HandleCallStrategy } from './auth/strategies/HandleCallStrategy.ts';
@@ -43,6 +43,7 @@ import { createPortResolver } from './graphql/port/port.resolver.ts';
 import { csrf } from './providers/csrf.ts';
 import { createCsrfRepository } from './persistence/csrf.kv.ts';
 import { createCsrfController } from './controllers/csrf.ts';
+import { withErrorHandling } from './controllers/decorators/withErrorHandling.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
