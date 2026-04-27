@@ -12,7 +12,7 @@ describe('csrf', () => {
     const mockCreateUserSession = mock();
     const mockDeleteUserSesssion = mock();
     const mockGetUserSession = mock();
-    const mockCheckAnonymousCsrf = mock();
+    const mockVerifyAnonymousCsrf = mock();
     const mockCreateAnonymousCsrf = mock();
     const mockDeleteAnonymousCsrf = mock();
     const mockGetCookie = mock();
@@ -25,7 +25,7 @@ describe('csrf', () => {
         getUserSession: mockGetUserSession,
     };
     const mockCsrfRepository: CsrfRepository = {
-        checkAnonymousCsrf: mockCheckAnonymousCsrf,
+        verifyAnonymousCsrf: mockVerifyAnonymousCsrf,
         createAnonymousCsrf: mockCreateAnonymousCsrf,
         deleteAnonymousCsrf: mockDeleteAnonymousCsrf,
     };
@@ -47,7 +47,7 @@ describe('csrf', () => {
         mockCreateUserSession.mockReset();
         mockDeleteUserSesssion.mockReset();
         mockGetUserSession.mockReset();
-        mockCheckAnonymousCsrf.mockReset();
+        mockVerifyAnonymousCsrf.mockReset();
         mockCreateAnonymousCsrf.mockReset();
         mockDeleteAnonymousCsrf.mockReset();
         mockGetCookie.mockReset();

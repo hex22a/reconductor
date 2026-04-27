@@ -5,7 +5,7 @@ import { createAuthDecorators, type AuthDecorators, type AuthDecoratorsFactoryDe
 import { CORS_HEADERS, UNAUTHORIZED_ERROR_MESSAGE } from '@/src/constants';
 import type { UserSession } from '@/src/domain/session.entity';
 import type { IAuthStrategy } from '../strategies/IAuthStrategy';
-import type { IHandleStrategy } from '../strategies/IHandleStrategy';
+import type { IHandleStrategy } from '../../controllers/strategies/IHandleStrategy';
 import type { RequestContext } from '@/src/controllers/types';
 import { UnauthorizedError } from '@/src/domain/errors/UnauthorizedError';
 

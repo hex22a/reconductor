@@ -3,7 +3,7 @@ import { constants } from 'node:http2';
 import { UNAUTHORIZED_ERROR_MESSAGE } from '@/src/constants';
 import type { RequestContext, RequestHandler } from '@/src/controllers/types';
 import type { IAuthStrategy } from '../strategies/IAuthStrategy';
-import type { IHandleStrategy } from '../strategies/IHandleStrategy';
+import type { IHandleStrategy } from '../../controllers/strategies/IHandleStrategy';
 
 export type AuthDecorators<Context extends RequestContext | void> = {
     withAuth: (handler: RequestHandler<Context>) => RequestHandler<void>;

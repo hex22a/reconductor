@@ -11,7 +11,7 @@ describe('csrf', () => {
         // Arrange
         const expectedCsrfRepository: CsrfRepository = {
             createAnonymousCsrf: expect.any(Function),
-            checkAnonymousCsrf: expect.any(Function),
+            verifyAnonymousCsrf: expect.any(Function),
             deleteAnonymousCsrf: expect.any(Function),
         };
         // Act
@@ -35,7 +35,7 @@ describe('csrf', () => {
         const expectedToken = 'does_not_exist';
         const csrfRepository = createCsrfRepository({ kv });
         // Act
-        const actualIsFound = await csrfRepository.checkAnonymousCsrf(expectedToken);
+        const actualIsFound = await csrfRepository.verifyAnonymousCsrf(expectedToken);
         // Assert
         expect(actualIsFound).toEqual(false);
     });
@@ -46,7 +46,7 @@ describe('csrf', () => {
         const csrfRepository = createCsrfRepository({ kv });
         await csrfRepository.createAnonymousCsrf(expectedToken);
         // Act
-        const actualIsFound = await csrfRepository.checkAnonymousCsrf(expectedToken);
+        const actualIsFound = await csrfRepository.verifyAnonymousCsrf(expectedToken);
         // Assert
         expect(actualIsFound).toEqual(true);
     });
@@ -58,7 +58,7 @@ describe('csrf', () => {
         // Act
         await csrfRepository.deleteAnonymousCsrf(expectedToken);
         // Assert
-        const actualIsFound = await csrfRepository.checkAnonymousCsrf(expectedToken);
+        const actualIsFound = await csrfRepository.verifyAnonymousCsrf(expectedToken);
         expect(actualIsFound).toEqual(false);
     });
 });

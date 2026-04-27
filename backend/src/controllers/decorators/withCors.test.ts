@@ -4,14 +4,14 @@ import { withCors } from './withCors';
 import type { RequestHandler } from '@/src/controllers/types';
 import { CORS_HEADERS } from '@/src/constants';
 
-describe('controller decorators', () => {
+describe('withCors', () => {
     const mockController = mock();
 
     afterEach(() => {
         mockController.mockReset();
     });
 
-    test('withCors', async () => {
+    test('adds cors headers', async () => {
         // Arrange
         const expectedResponseJson = { respose: 'some valid response' };
         const expectedCustomHeaders = {

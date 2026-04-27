@@ -7,7 +7,7 @@ export type CsrfRepositoryDeps = {
 
 export type CsrfRepository = {
     createAnonymousCsrf: (token: string) => Promise<boolean>;
-    checkAnonymousCsrf: (token: string) => Promise<boolean>;
+    verifyAnonymousCsrf: (token: string) => Promise<boolean>;
     deleteAnonymousCsrf: (token: string) => Promise<void>;
 };
 
@@ -19,7 +19,7 @@ export function createCsrfRepository({ kv }: CsrfRepositoryDeps): CsrfRepository
             await kv.expire(key, ANONYMOUS_CSRF_TTL_SECONDS);
             return true;
         },
-        async checkAnonymousCsrf(token: string): Promise<boolean> {
+        async verifyAnonymousCsrf(token: string): Promise<boolean> {
             const key = `${ANONYMOUS_CSRF_PREFIX}:${token}`;
             const bit = await kv.getbit(key, 0);
             return bit === 1;

@@ -12,12 +12,13 @@ export const CSRF_SECRET = process.env.CSRF_SECRET;
 
 export const SCAN_QUEUE = 'scans';
 
+export const CSRF_HEADER = 'X-CSRF-Token';
 export const ACCESS_CONTROL_ALLOW_ORIGIN_HEADER = 'access-control-allow-origin';
 export const ACCESS_CONTROL_ALLOW_METHODS_HEADER = 'access-control-allow-methods';
 export const ACCESS_CONTROL_ALLOW_HEADERS_HEADER = 'access-control-allow-headers';
 export const ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER = 'access-control-allow-credentials';
 export const CORS_ALLOWED_METHODS = 'GET,POST,OPTIONS';
-export const CORS_ALLOWED_HEADERS = 'Content-Type,X-CSRF-Token';
+export const CORS_ALLOWED_HEADERS = `Content-Type,${CSRF_HEADER}`;
 export const CORS_ALLOW_CREDENTIALS = 'true';
 export const CORS_HEADERS = {
     [ACCESS_CONTROL_ALLOW_ORIGIN_HEADER]: DASHBOARD_URL,
@@ -67,6 +68,7 @@ export const GRAPHQL_UNAUTHORIZED_ERROR_MESSAGE = 'Unauthorized';
 export const GRAPHQL_ERROR_EXTENSION_CODE = 'FORBIDDEN';
 
 export const UNAUTHORIZED_ERROR_MESSAGE = 'Unauthorized';
+export const FORBIDDEN_ERROR_MESSAGE = 'Forbidden';
 
 export const PROJECTS_PAGE_SIZE = 15;
 export const SCANS_PAGE_SIZE = 25;
