@@ -5,7 +5,6 @@ import container from '../container';
 import { asFunction, asValue } from 'awilix';
 import type { AuthDecorators, AuthDecoratorsFactoryDeps } from '@/src/auth/decorators/auth';
 import { SessionStrategy } from '../auth/strategies/SessionStrategy';
-import type { HandleCallStrategy } from '../auth/strategies/HandleCallStrategy';
 
 describe('graphql', () => {
     test('createGraphQlRoutes', () => {
@@ -15,10 +14,8 @@ describe('graphql', () => {
         const mockControllerWithCors = mock();
         const mockPreflightController = mock();
         const expectedSessionStrategy: SessionStrategy = {} as unknown as SessionStrategy;
-        const expectedHandleCallStrategy: HandleCallStrategy = {} as unknown as HandleCallStrategy;
-        const expectedAuthDecoratorsDeps: AuthDecoratorsFactoryDeps<void> = {
+        const expectedAuthDecoratorsDeps: AuthDecoratorsFactoryDeps = {
             authStrategy: expectedSessionStrategy,
-            handleStrategy: expectedHandleCallStrategy,
         };
         const mockGraphQlServer = {
             fetch: mock(),
@@ -32,7 +29,6 @@ describe('graphql', () => {
         const mockWithCors = mock().mockReturnValue(mockControllerWithCors);
         container.register({
             sessionStrategy: asValue(expectedSessionStrategy),
-            handleCallStrategy: asValue(expectedHandleCallStrategy),
             graphQlServer: asFunction(mockGetGraphQlServerInstance).singleton(),
             createAuthDecorators: asValue(mockCreateAuthDecorators),
             fetchToHandlerAdapter: asValue(mockFetchToHandlerAdapter),
