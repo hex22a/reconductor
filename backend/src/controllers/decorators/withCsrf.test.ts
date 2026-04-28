@@ -6,7 +6,6 @@ import {
 } from './withCsrf';
 import type { RequestContext } from '../types';
 import type { BunRequest, MaybePromise } from 'bun';
-import type { IHandleStrategy } from '../strategies/IHandleStrategy';
 import type { ICsrfStrategy } from '../strategies/ICsrfStrategy';
 import type { CsrfProvider } from '@/src/providers/csrf';
 import type { UserSession } from '@/src/domain/session.entity';
@@ -27,28 +26,18 @@ describe('csrf', () => {
             throw new Error('Called mock method');
         }
     }
-    class MockHandleStrategy implements IHandleStrategy<RequestContext> {
-        handle(): MaybePromise<Response> {
-            throw new Error('Method not implemented.');
-        }
-    }
-    const mockHandle = mock();
     const mockVerifyCsrfToken = mock();
-    const mockHandleStrategy = new MockHandleStrategy();
     const mockCsrfStrategy = new MockCsrfStrategy();
-    mockHandleStrategy.handle = mockHandle;
     mockCsrfStrategy.verifyCsrfToken = mockVerifyCsrfToken;
 
     const mockCsrfDecoratorsDeps: CsrfDecoratorsFactoryDeps<RequestContext> = {
         csrfStrategy: mockCsrfStrategy,
-        handleStrategy: mockHandleStrategy,
     };
 
     const mockController = mock();
 
     afterEach(() => {
         mockController.mockReset();
-        mockHandle.mockReset();
         mockVerifyCsrfToken.mockReset();
     });
 
@@ -87,7 +76,7 @@ describe('csrf', () => {
             const csrfDecorators: CsrfDecorators<RequestContext> =
                 createCsrfDecorators(mockCsrfDecoratorsDeps);
             const decoratedController = csrfDecorators.withCsrf(mockController);
-            mockHandle.mockResolvedValue(expectedResponse);
+            mockController.mockResolvedValue(expectedResponse);
             mockVerifyCsrfToken.mockReturnValue(true);
 
             // Act

@@ -4,7 +4,6 @@ import { API_ME_ENDPOINT_V1 } from '@/src/constants';
 import container from '@/src/container';
 import { asValue } from 'awilix';
 import type { SessionStrategy } from '@/src/auth/strategies/SessionStrategy';
-import type { HandleWithContextStrategy } from '@/src/auth/strategies/HandleWithContextStrategy';
 import { type AuthDecorators, type AuthDecoratorsFactoryDeps } from '@/src/auth/decorators/auth';
 import type { RequestContext } from '@/src/controllers/types';
 
@@ -16,11 +15,8 @@ describe('me', () => {
         const mockPreflightController = mock();
         const mockControllerWithCors = mock();
         const expectedSessionStrategy: SessionStrategy = {} as unknown as SessionStrategy;
-        const expectedHandleWithContextStrategy: HandleWithContextStrategy =
-            {} as unknown as HandleWithContextStrategy;
-        const expectedAuthDecoratorsDeps: AuthDecoratorsFactoryDeps<RequestContext> = {
+        const expectedAuthDecoratorsDeps: AuthDecoratorsFactoryDeps = {
             authStrategy: expectedSessionStrategy,
-            handleStrategy: expectedHandleWithContextStrategy,
         };
         const mockAuthDecorators: AuthDecorators<RequestContext> = {
             withAuth: mock().mockReturnValue(mockHandlerWithAuth),
@@ -29,7 +25,6 @@ describe('me', () => {
         const mockWithCors = mock().mockReturnValue(mockControllerWithCors);
         container.register({
             sessionStrategy: asValue(expectedSessionStrategy),
-            heandleWithContextStrategy: asValue(expectedHandleWithContextStrategy),
             createAuthDecorators: asValue(mockCreateAuthDecorators),
             meController: asValue(mockMeController),
             preflightController: asValue(mockPreflightController),

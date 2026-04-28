@@ -15,8 +15,6 @@ import { createAuthDecorators } from './auth/decorators/auth.ts';
 import { withCors } from './controllers/decorators/withCors.ts';
 import { preflight } from './controllers/preflight';
 import { SessionStrategy } from './auth/strategies/SessionStrategy.ts';
-import { HandleCallStrategy } from './controllers/strategies/HandleCallStrategy.ts';
-import { HandleWithContextStrategy } from './controllers/strategies/HandleWithContextStrategy.ts';
 import { me } from './controllers/auth/me.ts';
 import { toHandler } from './graphql/adapters/FetchToHandlerAdapter.ts';
 import { createLogoutController } from './controllers/auth/logout.ts';
@@ -52,8 +50,6 @@ const container = createContainer({
 
 container.register({
     sessionStrategy: asClass(SessionStrategy),
-    handleCallStrategy: asClass(HandleCallStrategy),
-    handleWithContextStrategy: asClass(HandleWithContextStrategy),
     preflightController: asValue(preflight),
     healthController: asValue(health),
     registerController: asFunction(createRegisterController),

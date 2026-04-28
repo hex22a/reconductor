@@ -1,11 +1,10 @@
 import { describe, test, it, mock, afterEach, expect } from 'bun:test';
 import { constants } from 'node:http2';
-import type { BunRequest, MaybePromise } from 'bun';
+import type { BunRequest } from 'bun';
 import { createAuthDecorators, type AuthDecorators, type AuthDecoratorsFactoryDeps } from './auth';
 import { CORS_HEADERS, UNAUTHORIZED_ERROR_MESSAGE } from '@/src/constants';
 import type { UserSession } from '@/src/domain/session.entity';
 import type { IAuthStrategy } from '../strategies/IAuthStrategy';
-import type { IHandleStrategy } from '../../controllers/strategies/IHandleStrategy';
 import type { RequestContext } from '@/src/controllers/types';
 import { UnauthorizedError } from '@/src/domain/errors/UnauthorizedError';
 
@@ -15,27 +14,17 @@ describe('auth', () => {
             throw new Error('Method not implemented.');
         }
     }
-    class MockHandleStrategy implements IHandleStrategy<RequestContext> {
-        handle(): MaybePromise<Response> {
-            throw new Error('Method not implemented.');
-        }
-    }
     const mockAuthenticate = mock();
-    const mockHandle = mock();
     const mockAuthStrategy = new MockAuthStrategy();
-    const mockHandleStrategy = new MockHandleStrategy();
     mockAuthStrategy.authenticate = mockAuthenticate;
-    mockHandleStrategy.handle = mockHandle;
     const mockController = mock();
     const expectedRequest = {} satisfies Partial<BunRequest>;
-    const expectedAuthDecoratorsDeps: AuthDecoratorsFactoryDeps<RequestContext> = {
+    const expectedAuthDecoratorsDeps: AuthDecoratorsFactoryDeps = {
         authStrategy: mockAuthStrategy,
-        handleStrategy: mockHandleStrategy,
     };
 
     afterEach(() => {
         mockController.mockReset();
-        mockHandle.mockReset();
         mockAuthenticate.mockReset();
     });
 
@@ -74,7 +63,7 @@ describe('auth', () => {
                 expectedResponseJson,
                 expectedResponseInit,
             );
-            mockHandle.mockResolvedValue(expectedResponse);
+            mockController.mockResolvedValue(expectedResponse);
             mockAuthenticate.mockResolvedValue(expectedUserSession);
 
             const authDecorators = createAuthDecorators(expectedAuthDecoratorsDeps);
@@ -85,11 +74,7 @@ describe('auth', () => {
             );
             // Assert
             expect(mockAuthenticate).toHaveBeenCalledWith(expectedRequest);
-            expect(mockHandle).toHaveBeenCalledWith(
-                mockController,
-                expectedRequest,
-                expectedContext,
-            );
+            expect(mockController).toHaveBeenCalledWith(expectedRequest, expectedContext);
             expect(await actualResponse.json()).toEqual(expectedResponseJson);
             expect(actualResponse.headers.toJSON()).toEqual(expectedResponse.headers.toJSON());
             expect(actualResponse.status).toEqual(expectedResponse.status);
