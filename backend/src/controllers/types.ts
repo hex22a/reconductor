@@ -7,4 +7,4 @@ export type RequestContext = {
 
 export type RequestHandler<Context extends RequestContext | void> = Context extends void
     ? (req: BunRequest) => MaybePromise<Response>
-    : (req: BunRequest, context: RequestContext) => MaybePromise<Response>;
+    : (req: BunRequest, context: Context) => MaybePromise<Response>;

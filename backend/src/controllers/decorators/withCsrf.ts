@@ -10,7 +10,7 @@ export type CsrfDecorators<Context extends RequestContext | void> = {
 };
 
 export type CsrfDecoratorsFactoryDeps<Context extends RequestContext | void> = {
-    csrfStrategy: ICsrfStrategy;
+    csrfStrategy: ICsrfStrategy<Context>;
     handleStrategy: IHandleStrategy<Context>;
 };
 

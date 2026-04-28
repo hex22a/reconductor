@@ -9,7 +9,7 @@ export type AnonymousCsrfStrategyDeps = {
     csrfRepository: CsrfRepository;
 };
 
-export class AnonymousCsrfStrategy implements ICsrfStrategy {
+export class AnonymousCsrfStrategy implements ICsrfStrategy<void> {
     csrfProvider: CsrfProvider;
     csrfRepository: CsrfRepository;
 

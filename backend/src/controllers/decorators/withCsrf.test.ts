@@ -21,7 +21,7 @@ describe('csrf', () => {
         generate: mockGenerateCsrf,
         verify: mockVerifyCsrf,
     };
-    class MockCsrfStrategy implements ICsrfStrategy {
+    class MockCsrfStrategy implements ICsrfStrategy<RequestContext> {
         csrfProvider: CsrfProvider = mockCsrfProvider;
         verifyCsrfToken(): MaybePromise<boolean> {
             throw new Error('Called mock method');

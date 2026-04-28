@@ -8,7 +8,7 @@ export type SessionCsrfStrategyDeps = {
     csrfProvider: CsrfProvider;
 };
 
-export class SessionCsrfStrategy implements ICsrfStrategy {
+export class SessionCsrfStrategy implements ICsrfStrategy<RequestContext> {
     csrfProvider: CsrfProvider;
 
     constructor({ csrfProvider }: SessionCsrfStrategyDeps) {

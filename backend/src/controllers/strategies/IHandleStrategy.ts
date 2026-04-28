@@ -5,6 +5,6 @@ export interface IHandleStrategy<Context extends RequestContext | void> {
     handle(
         handler: RequestHandler<Context>,
         request: BunRequest,
-        context?: RequestContext,
+        context: Context,
     ): MaybePromise<Response>;
 }
