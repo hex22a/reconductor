@@ -30,3 +30,5 @@ export function createCsrfDecorators<Context extends RequestContext | void>({
         },
     };
 }
+
+export type CsrfDecoratorsFactory = typeof createCsrfDecorators;

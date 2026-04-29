@@ -42,6 +42,8 @@ import { csrf } from './providers/csrf.ts';
 import { createCsrfRepository } from './persistence/csrf.kv.ts';
 import { createCsrfController } from './controllers/csrf.ts';
 import { withErrorHandling } from './controllers/decorators/withErrorHandling.ts';
+import { AnonymousCsrfStrategy } from './controllers/strategies/AnonymousCsrfStrategy.ts';
+import { createCsrfDecorators } from './controllers/decorators/withCsrf.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -50,6 +52,7 @@ const container = createContainer({
 
 container.register({
     sessionStrategy: asClass(SessionStrategy),
+    anonymousCsrfStrategy: asClass(AnonymousCsrfStrategy),
     preflightController: asValue(preflight),
     healthController: asValue(health),
     registerController: asFunction(createRegisterController),
@@ -89,6 +92,7 @@ container.register({
     createGraphQlServer: asValue(createYoga),
     createGraphQlSchema: asValue(createSchema),
     createAuthDecorators: asValue(createAuthDecorators),
+    createCsrfDecorators: asValue(createCsrfDecorators),
     graphQlContextResolver: asFunction(createGraphQlContext).singleton(),
     graphQlServer: asFunction(getGraphQlServerInstance).singleton(),
     withErrorHandling: asValue(withErrorHandling),
