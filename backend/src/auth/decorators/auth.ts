@@ -23,7 +23,7 @@ export function createAuthDecorators<Context extends RequestContext | void>({
                     const context: RequestContext = {
                         user: userSession,
                     };
-                    return handler(req, context);
+                    return handler(req, context as Context);
                 } catch {
                     return Response.json(
                         { error: UNAUTHORIZED_ERROR_MESSAGE },
