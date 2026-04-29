@@ -1,20 +1,20 @@
 import { CSRF_HEADER } from '@/src/constants';
 import type { ICsrfStrategy } from './ICsrfStrategy';
 import type { CsrfRepository } from '@/src/persistence/csrf.kv';
-import type { CsrfProvider } from '@/src/providers/csrf';
 import type { BunRequest } from 'bun';
+import type { TokenProvider } from '@/src/providers/token';
 
 export type AnonymousCsrfStrategyDeps = {
-    csrfProvider: CsrfProvider;
+    tokenProvider: TokenProvider;
     csrfRepository: CsrfRepository;
 };
 
 export class AnonymousCsrfStrategy implements ICsrfStrategy<void> {
-    csrfProvider: CsrfProvider;
+    tokenProvider: TokenProvider;
     csrfRepository: CsrfRepository;
 
-    constructor({ csrfRepository, csrfProvider }: AnonymousCsrfStrategyDeps) {
-        this.csrfProvider = csrfProvider;
+    constructor({ csrfRepository, tokenProvider }: AnonymousCsrfStrategyDeps) {
+        this.tokenProvider = tokenProvider;
         this.csrfRepository = csrfRepository;
     }
 
@@ -22,7 +22,7 @@ export class AnonymousCsrfStrategy implements ICsrfStrategy<void> {
         const csrfToken = req.headers.get(CSRF_HEADER);
         return (
             !!csrfToken &&
-            this.csrfProvider.verify(csrfToken) &&
+            this.tokenProvider.verifyCsrfToken(csrfToken) &&
             (await this.csrfRepository.verifyAnonymousCsrf(csrfToken))
         );
     }

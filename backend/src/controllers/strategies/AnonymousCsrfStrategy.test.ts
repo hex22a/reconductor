@@ -1,9 +1,9 @@
 import { describe, expect, mock, test } from 'bun:test';
 import { AnonymousCsrfStrategy, type AnonymousCsrfStrategyDeps } from './AnonymousCsrfStrategy';
 import type { CsrfRepository } from '@/src/persistence/csrf.kv';
-import type { CsrfProvider } from '@/src/providers/csrf';
 import type { BunRequest } from 'bun';
 import { CSRF_HEADER } from '@/src/constants';
+import type { TokenProvider } from '@/src/providers/token';
 
 describe('AnonymousCsrfStrategy', () => {
     const expectedCsrfToken = 'csrf_token';
@@ -13,18 +13,20 @@ describe('AnonymousCsrfStrategy', () => {
     const mockGenerateCsrf = mock();
     const mockVerifyCsrf = mock();
     const mockGetHeader = mock();
+    const mockGenerateRandomToken = mock();
 
     const mockCsrfRepository: CsrfRepository = {
         verifyAnonymousCsrf: mockVerifyAnonymousCsrf,
         createAnonymousCsrf: mockCreateAnonymousCsrf,
         deleteAnonymousCsrf: mockDeleteAnonymousCsrf,
     };
-    const mockCsrfProvider: CsrfProvider = {
-        generate: mockGenerateCsrf,
-        verify: mockVerifyCsrf,
+    const mockCsrfProvider: TokenProvider = {
+        generateCsrfToken: mockGenerateCsrf,
+        generateRandomToken: mockGenerateRandomToken,
+        verifyCsrfToken: mockVerifyCsrf,
     };
     const mockAnonymousCsrfStrategyDeps: AnonymousCsrfStrategyDeps = {
-        csrfProvider: mockCsrfProvider,
+        tokenProvider: mockCsrfProvider,
         csrfRepository: mockCsrfRepository,
     };
     const mockHeaders = {
@@ -42,7 +44,7 @@ describe('AnonymousCsrfStrategy', () => {
         );
         // Assert
         expect(actualAnonymousCsrfStrategy.verifyCsrfToken).toBeFunction();
-        expect(actualAnonymousCsrfStrategy.csrfProvider).toEqual(mockCsrfProvider);
+        expect(actualAnonymousCsrfStrategy.tokenProvider).toEqual(mockCsrfProvider);
         expect(actualAnonymousCsrfStrategy.csrfRepository).toEqual(mockCsrfRepository);
     });
 

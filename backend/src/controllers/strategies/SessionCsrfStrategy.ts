@@ -1,25 +1,25 @@
 import type { BunRequest, MaybePromise } from 'bun';
 import type { ICsrfStrategy } from './ICsrfStrategy';
-import type { CsrfProvider } from '@/src/providers/csrf';
 import type { RequestContext } from '../types';
 import { CSRF_HEADER } from '@/src/constants';
+import type { TokenProvider } from '@/src/providers/token';
 
 export type SessionCsrfStrategyDeps = {
-    csrfProvider: CsrfProvider;
+    tokenProvider: TokenProvider;
 };
 
 export class SessionCsrfStrategy implements ICsrfStrategy<RequestContext> {
-    csrfProvider: CsrfProvider;
+    tokenProvider: TokenProvider;
 
-    constructor({ csrfProvider }: SessionCsrfStrategyDeps) {
-        this.csrfProvider = csrfProvider;
+    constructor({ tokenProvider }: SessionCsrfStrategyDeps) {
+        this.tokenProvider = tokenProvider;
     }
 
     verifyCsrfToken(req: BunRequest, context: RequestContext): MaybePromise<boolean> {
         const csrfToken = req.headers.get(CSRF_HEADER);
         return (
             !!csrfToken &&
-            this.csrfProvider.verify(csrfToken) &&
+            this.tokenProvider.verifyCsrfToken(csrfToken) &&
             csrfToken === context.user.csrfToken
         );
     }

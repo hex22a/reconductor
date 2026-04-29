@@ -1,10 +1,10 @@
-import { describe, expect, mock, test } from 'bun:test';
-import type { CsrfProvider } from '@/src/providers/csrf';
+import { afterEach, describe, expect, mock, test } from 'bun:test';
 import { SessionCsrfStrategy, type SessionCsrfStrategyDeps } from './SessionCsrfStrategy';
 import type { BunRequest } from 'bun';
 import type { RequestContext } from '../types';
 import type { UserSession } from '@/src/domain/session.entity';
 import { CSRF_HEADER } from '@/src/constants';
+import type { TokenProvider } from '@/src/providers/token';
 
 describe('SessionCsrfStrategy', () => {
     const expectedCsrfToken = 'csrf_token';
@@ -13,14 +13,16 @@ describe('SessionCsrfStrategy', () => {
     const expectedUserId = '019dcef9-9208-7748-ac23-ed2e7467e806';
     const mockGenerateCsrf = mock();
     const mockVerifyCsrf = mock();
+    const mockGenerateRandomToken = mock();
     const mockGetHeader = mock();
 
-    const mockCsrfProvider: CsrfProvider = {
-        generate: mockGenerateCsrf,
-        verify: mockVerifyCsrf,
+    const mockCsrfProvider: TokenProvider = {
+        generateCsrfToken: mockGenerateCsrf,
+        generateRandomToken: mockGenerateRandomToken,
+        verifyCsrfToken: mockVerifyCsrf,
     };
-    const mockAnonymousCsrfStrategyDeps: SessionCsrfStrategyDeps = {
-        csrfProvider: mockCsrfProvider,
+    const mockSessionCsrfStrategyDeps: SessionCsrfStrategyDeps = {
+        tokenProvider: mockCsrfProvider,
     };
     const mockHeaders = {
         get: mockGetHeader,
@@ -29,13 +31,20 @@ describe('SessionCsrfStrategy', () => {
         headers: mockHeaders as unknown as Headers,
     } satisfies Partial<BunRequest>;
 
+    afterEach(() => {
+        mockGenerateCsrf.mockReset();
+        mockVerifyCsrf.mockReset();
+        mockGenerateRandomToken.mockReset();
+        mockGetHeader.mockReset();
+    });
+
     test('constructor', () => {
         // Arrange
         // Act
-        const actualSessionCsrfStrategy = new SessionCsrfStrategy(mockAnonymousCsrfStrategyDeps);
+        const actualSessionCsrfStrategy = new SessionCsrfStrategy(mockSessionCsrfStrategyDeps);
         // Assert
         expect(actualSessionCsrfStrategy.verifyCsrfToken).toBeFunction();
-        expect(actualSessionCsrfStrategy.csrfProvider).toEqual(mockCsrfProvider);
+        expect(actualSessionCsrfStrategy.tokenProvider).toEqual(mockCsrfProvider);
     });
 
     describe('verifyCsrfToken', () => {
@@ -52,7 +61,7 @@ describe('SessionCsrfStrategy', () => {
             };
             mockVerifyCsrf.mockReturnValue(true);
             mockGetHeader.mockReturnValue(expectedCsrfToken);
-            const sessionCsrfStrategy = new SessionCsrfStrategy(mockAnonymousCsrfStrategyDeps);
+            const sessionCsrfStrategy = new SessionCsrfStrategy(mockSessionCsrfStrategyDeps);
             // Act
             const actualIsValid = await sessionCsrfStrategy.verifyCsrfToken(
                 expectedRequest as unknown as BunRequest,
@@ -77,7 +86,7 @@ describe('SessionCsrfStrategy', () => {
             };
             mockVerifyCsrf.mockReturnValue(false);
             mockGetHeader.mockReturnValue(expectedCsrfToken);
-            const sessionCsrfStrategy = new SessionCsrfStrategy(mockAnonymousCsrfStrategyDeps);
+            const sessionCsrfStrategy = new SessionCsrfStrategy(mockSessionCsrfStrategyDeps);
             // Act
             const actualIsValid = await sessionCsrfStrategy.verifyCsrfToken(
                 expectedRequest as unknown as BunRequest,
@@ -103,7 +112,7 @@ describe('SessionCsrfStrategy', () => {
             };
             mockVerifyCsrf.mockReturnValue(true);
             mockGetHeader.mockReturnValue(expectedCsrfToken);
-            const sessionCsrfStrategy = new SessionCsrfStrategy(mockAnonymousCsrfStrategyDeps);
+            const sessionCsrfStrategy = new SessionCsrfStrategy(mockSessionCsrfStrategyDeps);
             // Act
             const actualIsValid = await sessionCsrfStrategy.verifyCsrfToken(
                 expectedRequest as unknown as BunRequest,
@@ -129,7 +138,7 @@ describe('SessionCsrfStrategy', () => {
             };
             mockVerifyCsrf.mockReturnValue(true);
             mockGetHeader.mockReturnValue(null);
-            const sessionCsrfStrategy = new SessionCsrfStrategy(mockAnonymousCsrfStrategyDeps);
+            const sessionCsrfStrategy = new SessionCsrfStrategy(mockSessionCsrfStrategyDeps);
             // Act
             const actualIsValid = await sessionCsrfStrategy.verifyCsrfToken(
                 expectedRequest as unknown as BunRequest,
@@ -138,7 +147,6 @@ describe('SessionCsrfStrategy', () => {
             // Assert
             expect(actualIsValid).toBeFalse();
             expect(mockGetHeader).toHaveBeenCalledWith(CSRF_HEADER);
-            expect(mockVerifyCsrf).toHaveBeenCalledWith(expectedCsrfToken);
         });
     });
 });

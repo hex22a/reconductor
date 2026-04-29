@@ -44,6 +44,7 @@ import { createCsrfController } from './controllers/csrf.ts';
 import { withErrorHandling } from './controllers/decorators/withErrorHandling.ts';
 import { AnonymousCsrfStrategy } from './controllers/strategies/AnonymousCsrfStrategy.ts';
 import { createCsrfDecorators } from './controllers/decorators/withCsrf.ts';
+import { SessionCsrfStrategy } from './controllers/strategies/SessionCsrfStrategy.ts';
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY,
@@ -53,6 +54,7 @@ const container = createContainer({
 container.register({
     sessionStrategy: asClass(SessionStrategy),
     anonymousCsrfStrategy: asClass(AnonymousCsrfStrategy),
+    sessionCsrfStrategy: asClass(SessionCsrfStrategy),
     preflightController: asValue(preflight),
     healthController: asValue(health),
     registerController: asFunction(createRegisterController),
