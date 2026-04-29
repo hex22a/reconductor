@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { API_LOGOUT_URL } from '~/constants';
 import { fetchMe } from '~/services/auth';
+import { useCsrf } from './CsrfProvider';
 
 type User = { username: string } | null;
 
 type AuthContextType = {
   user: User;
   isLoading: boolean;
-  login: (username: string) => void;
+  login: (username: string, csrfToken: string) => void;
   logout: () => Promise<void>;
 };
 
@@ -16,6 +17,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { updateCsrfToken } = useCsrf();
 
   useEffect(() => {
     fetchMe()
@@ -31,8 +33,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
   }, []);
 
-  function login(username: string) {
+  function login(username: string, csrfToken: string) {
     setUser({ username });
+    updateCsrfToken(csrfToken);
   }
 
   async function logout() {

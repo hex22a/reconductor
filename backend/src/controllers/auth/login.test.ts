@@ -3,11 +3,12 @@ import { afterEach, describe, expect, mock, test } from 'bun:test';
 import { createLoginController, type LoginController, type LoginControllerDeps } from './login';
 import type { SessionRepository } from '@/src/persistence/session.kv';
 import type { BunRequest, CookieInit, CookieMap } from 'bun';
-import { USER_SESSION_TTL_SECONDS, USER_SESSION_COOKIE_NAME } from '@/src/constants';
+import { USER_SESSION_TTL_SECONDS, USER_SESSION_COOKIE_NAME, CSRF_HEADER } from '@/src/constants';
 import { createUserFixture } from '@/tests/fixtures/users';
 import { constants } from 'node:http2';
 import type { UserSession } from '@/src/domain/session.entity';
 import type { TokenProvider } from '@/src/providers/token';
+import type { CsrfRepository } from '@/src/persistence/csrf.kv';
 
 describe('login', () => {
     const mockSetCookies = mock();
@@ -20,6 +21,10 @@ describe('login', () => {
     const mockGetRandomToken = mock();
     const mockGenerateCsrfToken = mock();
     const mockVerifyCsrfToken = mock();
+    const mockCreateAnonymousCsrf = mock();
+    const mockDeleteAnonymousCsrf = mock();
+    const mockVerifyAnonymousCsrf = mock();
+    const mockGetHeader = mock();
     const mockUserRepository: UserRepository = {
         addUser: mockAddUser,
         getUserByUsername: mockGetUserByUsername,
@@ -29,9 +34,17 @@ describe('login', () => {
         getUserSession: mockGetUserSession,
         deleteUserSession: mockDeleteUserSession,
     };
+    const mockCsrfRepository: CsrfRepository = {
+        createAnonymousCsrf: mockCreateAnonymousCsrf,
+        deleteAnonymousCsrf: mockDeleteAnonymousCsrf,
+        verifyAnonymousCsrf: mockVerifyAnonymousCsrf,
+    };
     const mockCookies = {
         set: mockSetCookies,
     } satisfies Partial<CookieMap>;
+    const mockHeaders = {
+        get: mockGetHeader,
+    } satisfies Partial<Headers>;
     const mockTokenProvider: TokenProvider = {
         generateRandomToken: mockGetRandomToken,
         generateCsrfToken: mockGenerateCsrfToken,
@@ -41,6 +54,7 @@ describe('login', () => {
     const expectedLoginControllerDeps: LoginControllerDeps = {
         userRepository: mockUserRepository,
         sessionRepository: mockSessionRepository,
+        csrfRepository: mockCsrfRepository,
         verifyHash: mockVerifyHash,
         tokenProvider: mockTokenProvider,
     };
@@ -56,6 +70,9 @@ describe('login', () => {
         mockGetRandomToken.mockReset();
         mockGenerateCsrfToken.mockReset();
         mockVerifyCsrfToken.mockReset();
+        mockCreateAnonymousCsrf.mockReset();
+        mockDeleteAnonymousCsrf.mockReset();
+        mockVerifyAnonymousCsrf.mockReset();
     });
 
     test('createLoginController', () => {
@@ -72,6 +89,7 @@ describe('login', () => {
         test('passwords match', async () => {
             // Arrange
             const expectedCsrfToken = 'csrf_token';
+            const expectedAnonymousCsrfToken = 'anonymous_csrf';
             const expectedResponseJson = { ok: true, csrfToken: expectedCsrfToken };
             const expectedToken = 'random_token';
             const expectedUsername = 'username';
@@ -86,6 +104,7 @@ describe('login', () => {
             const expectedRequest = {
                 json: mock().mockResolvedValue(expectedRequestJson),
                 cookies: mockCookies as unknown as CookieMap,
+                headers: mockHeaders as unknown as Headers,
             } satisfies Partial<BunRequest>;
             const expectedCookieInit: CookieInit = {
                 maxAge: USER_SESSION_TTL_SECONDS,
@@ -103,6 +122,7 @@ describe('login', () => {
             mockGetUserByUsername.mockResolvedValue(expectedUserEntity);
             mockGetRandomToken.mockReturnValue(expectedToken);
             mockGenerateCsrfToken.mockReturnValue(expectedCsrfToken);
+            mockGetHeader.mockReturnValue(expectedAnonymousCsrfToken);
 
             const loginController: LoginController = createLoginController(
                 expectedLoginControllerDeps,
@@ -123,6 +143,8 @@ describe('login', () => {
                 expectedToken,
                 expectedCookieInit,
             );
+            expect(mockGetHeader).toHaveBeenCalledWith(CSRF_HEADER);
+            expect(mockDeleteAnonymousCsrf).toHaveBeenCalledWith(expectedAnonymousCsrfToken);
             expect(await actualResponse.json()).toEqual(expectedResponseJson);
             expect(actualResponse.headers.toJSON()).toEqual(expectedResponse.headers.toJSON());
             expect(actualResponse.status).toEqual(expectedResponse.status);

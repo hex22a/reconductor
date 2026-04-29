@@ -1,4 +1,4 @@
-import { USER_SESSION_TTL_SECONDS, USER_SESSION_COOKIE_NAME } from '@/src/constants';
+import { USER_SESSION_TTL_SECONDS, USER_SESSION_COOKIE_NAME, CSRF_HEADER } from '@/src/constants';
 import type { UserEntity } from '@/src/domain/user.entity';
 import type { SessionRepository } from '@/src/persistence/session.kv';
 import type { UserRepository } from '@/src/persistence/user.db';
@@ -7,10 +7,12 @@ import type { BunRequest } from 'bun';
 import { constants } from 'node:http2';
 import type { RequestHandler } from '../types';
 import type { TokenProvider } from '@/src/providers/token';
+import type { CsrfRepository } from '@/src/persistence/csrf.kv';
 
 export type LoginControllerDeps = {
     userRepository: UserRepository;
     sessionRepository: SessionRepository;
+    csrfRepository: CsrfRepository;
     verifyHash: (password: string, hash: string) => Promise<boolean>;
     tokenProvider: TokenProvider;
 };
@@ -22,6 +24,7 @@ export type LoginController = {
 export function createLoginController({
     userRepository,
     sessionRepository,
+    csrfRepository,
     verifyHash,
     tokenProvider,
 }: LoginControllerDeps): LoginController {
@@ -35,6 +38,7 @@ export function createLoginController({
                 return Response.json({ ok: false }, { status: constants.HTTP_STATUS_UNAUTHORIZED });
             }
             const token = tokenProvider.generateRandomToken();
+            const anonymousCsrfToken = req.headers.get(CSRF_HEADER);
             const csrfToken = tokenProvider.generateCsrfToken();
             await sessionRepository.createUserSession({
                 token,
@@ -42,6 +46,7 @@ export function createLoginController({
                 userId: user.id,
                 username: user.username,
             });
+            await csrfRepository.deleteAnonymousCsrf(anonymousCsrfToken!);
             req.cookies.set(USER_SESSION_COOKIE_NAME, token, {
                 maxAge: USER_SESSION_TTL_SECONDS,
                 httpOnly: true,

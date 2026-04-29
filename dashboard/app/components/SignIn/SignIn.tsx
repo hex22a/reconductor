@@ -52,7 +52,7 @@ export function SignIn() {
           setGenericError(result.error);
           break;
         default:
-          login(username!.toString());
+          login(username!.toString(), result.csrfToken);
           navigate('/projects');
       }
     } catch (err) {

@@ -4,6 +4,7 @@ import { fetchCsrf } from '~/services/csrf';
 
 type CsrfContextType = {
   csrfToken: string | null;
+  updateCsrfToken: (token: string) => void;
 };
 
 const CsrfContext = createContext<CsrfContextType | null>(null);
@@ -20,7 +21,14 @@ export function CsrfProvider({ children }: { children: React.ReactNode }) {
         setCsrfToken(null);
       });
   }, []);
-  return <CsrfContext.Provider value={{ csrfToken }}>{children}</CsrfContext.Provider>;
+
+  function updateCsrfToken(token: string) {
+    setCsrfToken(token);
+  }
+
+  return (
+    <CsrfContext.Provider value={{ csrfToken, updateCsrfToken }}>{children}</CsrfContext.Provider>
+  );
 }
 
 export function useCsrf() {
