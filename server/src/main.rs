@@ -2,6 +2,7 @@ use axum::Router;
 
 mod constants;
 mod controllers;
+mod persistence;
 mod routes;
 
 use crate::routes::api::v1;
