@@ -5,17 +5,19 @@ use sqlx::types::Uuid;
 
 use crate::{constants::USER_SESSION_PREFIX, persistence::kv::KvProvider};
 
+#[derive(Debug)]
 pub enum SessionError {
     NotFound,
     StorageError(fred::error::Error),
     ParseError,
 }
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct UserSession {
-    token: String,
-    user_id: Uuid,
-    username: String,
-    csrf_token: String,
+    pub token: String,
+    pub user_id: Uuid,
+    pub username: String,
+    pub csrf_token: String,
 }
 
 impl From<UserSession> for HashMap<String, String> {
@@ -75,7 +77,7 @@ pub struct SessionStore<K: KvProvider> {
 }
 
 impl<K: KvProvider> SessionStore<K> {
-    pub fn new(&self, kv: K) -> Self {
+    pub fn new(kv: K) -> Self {
         Self { kv }
     }
 }
