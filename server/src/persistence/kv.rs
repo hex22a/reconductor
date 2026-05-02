@@ -5,6 +5,8 @@ use fred::{
     types::Builder,
 };
 
+pub mod session;
+
 #[allow(async_fn_in_trait)]
 pub trait KvProvider {
     async fn get(&self, key: &str) -> Result<Option<String>, fred::error::Error>;
@@ -19,7 +21,7 @@ pub trait KvProvider {
     async fn hset(
         &self,
         key: &str,
-        values: Vec<(String, String)>,
+        values: HashMap<String, String>,
     ) -> Result<(), fred::error::Error>;
     async fn expire(&self, key: &str, ttl: Duration) -> Result<(), fred::error::Error>;
     async fn del(&self, key: &str) -> Result<(), fred::error::Error>;
@@ -73,7 +75,7 @@ impl KvProvider for FredKvProvider {
     async fn hset(
         &self,
         key: &str,
-        values: Vec<(String, String)>,
+        values: HashMap<String, String>,
     ) -> Result<(), fred::error::Error> {
         self.client.hset(key, values).await
     }
