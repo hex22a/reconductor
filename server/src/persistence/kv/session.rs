@@ -1,9 +1,12 @@
 use core::fmt;
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
 use sqlx::types::Uuid;
 
-use crate::{constants::USER_SESSION_PREFIX, persistence::kv::KvProvider};
+use crate::{
+    constants::{USER_SESSION_PREFIX, USER_SESSION_TTL_SECONDS},
+    persistence::kv::KvProvider,
+};
 
 #[derive(Debug)]
 pub enum SessionError {
@@ -85,7 +88,9 @@ impl<K: KvProvider> SessionStore<K> {
 impl<K: KvProvider> SessionRepository for SessionStore<K> {
     async fn create_user_session(&self, user_session: UserSession) -> Result<(), SessionError> {
         let key = format!("{}:{}", USER_SESSION_PREFIX, user_session.token);
+        let ttl = Duration::from_secs(USER_SESSION_TTL_SECONDS);
         self.kv.hset(&key, user_session.into()).await?;
+        self.kv.expire(&key, ttl).await?;
         Ok(())
     }
 

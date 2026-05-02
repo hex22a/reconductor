@@ -5,6 +5,7 @@ use fred::{
     types::Builder,
 };
 
+pub mod csrf;
 pub mod session;
 
 #[allow(async_fn_in_trait)]
