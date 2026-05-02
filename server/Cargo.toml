@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-anyhow = "1.0.102"
 axum = "0.8.9"
 fred = "10.1.0"
 lapin = "4.6.0"
