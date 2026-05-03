@@ -4,6 +4,7 @@ mod constants;
 mod controllers;
 mod persistence;
 mod routes;
+mod services;
 
 use crate::routes::api::v1;
 

@@ -46,10 +46,7 @@ impl UserRepository for PgUserRepository {
         Ok(())
     }
 
-    async fn get_user_by_username(
-        &self,
-        username: &str,
-    ) -> anyhow::Result<UserEntity, sqlx::Error> {
+    async fn get_user_by_username(&self, username: &str) -> Result<UserEntity, sqlx::Error> {
         let user = sqlx::query_as!(
             UserEntity,
             r#"
