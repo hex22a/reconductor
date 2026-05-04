@@ -35,7 +35,7 @@ impl fmt::Display for CsrfServiceError {
     }
 }
 
-trait CsrfService {
+pub trait CsrfService {
     fn generate(&mut self, ttl: u64) -> Result<(String, String), CsrfServiceError>;
     fn verify(&self, token: &str, cookie: &str) -> bool;
 }

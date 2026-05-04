@@ -9,7 +9,7 @@ use crate::constants::{
     PASSWORD_MEMORY_COST_BYTES, PASSWORD_PARALLELISM, PASSWORD_TIME_COST_PASSES,
 };
 
-enum PasswordServiceError {
+pub enum PasswordServiceError {
     HashError(String),
     ParseError(String),
 }
@@ -32,7 +32,7 @@ pub trait PasswordService {
     ) -> Result<bool, PasswordServiceError>;
 }
 
-struct Argon2Service;
+pub struct Argon2Service;
 
 impl PasswordService for Argon2Service {
     fn hash_password(&self, password: &str) -> Result<String, PasswordServiceError> {
