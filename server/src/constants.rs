@@ -13,3 +13,11 @@ pub const SESSION_COOKIE_SIZE_BYTES: usize = 32;
 pub const PASSWORD_MEMORY_COST_BYTES: u32 = 46 * 1024;
 pub const PASSWORD_TIME_COST_PASSES: u32 = 1;
 pub const PASSWORD_PARALLELISM: u32 = 1;
+
+pub const MIN_USERNAME_LENGTH: usize = 4;
+pub const MAX_USERNAME_LENGTH: usize = 32;
+pub const MIN_PASSWORD_LENGTH: usize = 6;
+pub const MAX_PASSWORD_LENGTH: usize = 74;
+
+pub const UNEXPECTED_ERROR_MESSAGE: &str = "Unexpected error";
+pub const DATABASE_ERROR_MESSAGE: &str = "Something went wrong";

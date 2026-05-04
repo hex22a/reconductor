@@ -1,7 +1,7 @@
 use csrf::{AesGcmCsrfProtection, CsrfError, CsrfProtection};
 use std::fmt;
 
-use crate::services::random::{OsRngService, RngService, RngServiceError};
+use crate::infra::random::{OsRngService, RngService, RngServiceError};
 
 enum CsrfServiceError {
     NotGenerated(String),

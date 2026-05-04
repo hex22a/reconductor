@@ -2,9 +2,12 @@ use axum::Router;
 
 mod constants;
 mod controllers;
+mod domain;
+mod features;
+mod infra;
 mod persistence;
 mod routes;
-mod services;
+mod transport;
 
 use crate::routes::api::v1;
 
