@@ -6,13 +6,13 @@ pub trait RegisterFeature {
     async fn register(&self, username: &str, password: &str) -> Result<(), ServerError>;
 }
 
-struct UserRegisterFeature<P: PasswordService, R: UserRepository> {
+pub struct UserRegisterFeature<P: PasswordService, R: UserRepository> {
     password_service: P,
     user_repository: R,
 }
 
 impl<P: PasswordService, R: UserRepository> UserRegisterFeature<P, R> {
-    fn new(password_service: P, user_repository: R) -> Self {
+    pub fn new(password_service: P, user_repository: R) -> Self {
         Self {
             password_service,
             user_repository,

@@ -8,9 +8,10 @@ use crate::{
     features::user::dto::RegisterUserRequest,
 };
 
-struct RegisterUser {
-    username: String,
-    password: String,
+#[derive(Debug, PartialEq)]
+pub struct RegisterUser {
+    pub username: String,
+    pub password: String,
 }
 
 impl TryFrom<RegisterUserRequest> for RegisterUser {
@@ -50,5 +51,30 @@ impl TryFrom<RegisterUserRequest> for RegisterUser {
                 password: value.password,
             }),
         };
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::features::user::{dto::RegisterUserRequest, model::RegisterUser};
+
+    #[test]
+    fn test_valid_username_and_password() {
+        // Arrange
+        let expected_username = "test".to_string();
+        let expected_password = "password".to_string();
+        let expected_register_user = RegisterUser {
+            username: expected_username.clone(),
+            password: expected_password.clone(),
+        };
+        let expected_register_user_request = RegisterUserRequest {
+            username: expected_username.clone(),
+            password: expected_password.clone(),
+        };
+        // Act
+        let actual_register_user: RegisterUser =
+            RegisterUser::try_from(expected_register_user_request).unwrap();
+        // Assert
+        assert_eq!(actual_register_user, expected_register_user);
     }
 }

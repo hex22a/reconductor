@@ -32,6 +32,7 @@ pub trait PasswordService {
     ) -> Result<bool, PasswordServiceError>;
 }
 
+#[derive(Clone)]
 pub struct Argon2Service;
 
 impl PasswordService for Argon2Service {

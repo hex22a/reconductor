@@ -25,6 +25,7 @@ pub trait UserRepository {
     async fn get_user_by_username(&self, username: &str) -> Result<UserEntity, sqlx::Error>;
 }
 
+#[derive(Clone)]
 pub struct PgUserRepository {
     pub db: PgPool,
 }

@@ -1,4 +1,5 @@
 pub const API_HEALTH_ENDPOINT_V1: &str = "/api/v1/health";
+pub const API_REGISTER_ENDPOINT_V1: &str = "/api/v1/auth/register";
 
 pub const USER_SESSION_PREFIX: &str = "user_session";
 pub const ANONYMOUS_CSRF_PREFIX: &str = "csrf_anonymous";
