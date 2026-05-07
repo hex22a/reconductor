@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 async fn create_store() -> SessionStore<FredKvProvider> {
     let kv = FredKvProvider::new(
-        &std::env::var("REDIS_URL").unwrap_or("redis://localhost:6379".to_string()),
+        std::env::var("REDIS_URL").unwrap_or("redis://localhost:6379".to_string()),
         2,
     )
     .await
@@ -14,9 +14,9 @@ async fn create_store() -> SessionStore<FredKvProvider> {
     SessionStore::new(kv)
 }
 
-fn create_user_session_fixture(token: &str) -> UserSession {
+fn create_user_session_fixture(token: String) -> UserSession {
     UserSession {
-        token: token.to_string(),
+        token: token,
         user_id: Uuid::now_v7(),
         username: "testuser".to_string(),
         csrf_token: "csrf_token".to_string(),
@@ -27,7 +27,7 @@ fn create_user_session_fixture(token: &str) -> UserSession {
 async fn stores_session_under_correct_key() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "store_under_correct_key";
+    let expected_token = "store_under_correct_key".to_string();
     let expected_user_session = create_user_session_fixture(expected_token);
 
     // Act
@@ -44,7 +44,7 @@ async fn stores_session_under_correct_key() {
 async fn returns_not_found_error_for_missing_session() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "does_not_exist";
+    let expected_token = "does_not_exist".to_string();
 
     // Act
     let actual_result = store.get_user_session(expected_token).await;
@@ -57,8 +57,8 @@ async fn returns_not_found_error_for_missing_session() {
 async fn gets_session_from_storage() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "get_session_from_storage";
-    let expected_user_session = create_user_session_fixture(expected_token);
+    let expected_token = "get_session_from_storage".to_string();
+    let expected_user_session = create_user_session_fixture(expected_token.clone());
     store
         .create_user_session(expected_user_session.clone())
         .await
@@ -75,15 +75,18 @@ async fn gets_session_from_storage() {
 async fn deletes_session_from_storage() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "token_to_delete";
-    let expected_user_session = create_user_session_fixture(expected_token);
+    let expected_token = "token_to_delete".to_string();
+    let expected_user_session = create_user_session_fixture(expected_token.clone());
     store
         .create_user_session(expected_user_session)
         .await
         .unwrap();
 
     // Act
-    store.delete_user_session(expected_token).await.unwrap();
+    store
+        .delete_user_session(expected_token.clone())
+        .await
+        .unwrap();
 
     // Assert
     let result = store.get_user_session(expected_token).await;

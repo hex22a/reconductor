@@ -45,19 +45,19 @@ impl<K: KvProvider> CsrfRepository for CsrfStore<K> {
     async fn create_anonymous_csrf(&self, token: &str) -> Result<(), CsrfError> {
         let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token);
         let ttl = Duration::from_secs(ANONYMOUS_CSRF_TTL_SECONDS);
-        self.kv.set(&key, "1", Some(ttl)).await?;
+        self.kv.set(key, "1".to_string(), Some(ttl)).await?;
         Ok(())
     }
 
     async fn verify_anonymous_csrf(&self, token: &str) -> Result<bool, CsrfError> {
         let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token);
-        let csrf = self.kv.get(&key).await?;
+        let csrf = self.kv.get(key).await?;
         Ok(csrf != None)
     }
 
     async fn delete_anonymous_csrf(&self, token: &str) -> Result<(), CsrfError> {
         let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token);
-        self.kv.del(&key).await?;
+        self.kv.del(key).await?;
         Ok(())
     }
 }

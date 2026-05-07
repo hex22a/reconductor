@@ -1,11 +1,11 @@
 use server::persistence::kv::{
     FredKvProvider,
-    csrf::{CsrfError, CsrfRepository, CsrfStore},
+    csrf::{CsrfRepository, CsrfStore},
 };
 
 async fn create_store() -> CsrfStore<FredKvProvider> {
     let kv = FredKvProvider::new(
-        &std::env::var("REDIS_URL").unwrap_or("redis://localhost:6379".to_string()),
+        std::env::var("REDIS_URL").unwrap_or("redis://localhost:6379".to_string()),
         2,
     )
     .await

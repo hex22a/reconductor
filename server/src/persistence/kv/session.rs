@@ -68,11 +68,19 @@ impl From<fred::error::Error> for SessionError {
     }
 }
 
-#[allow(async_fn_in_trait)]
 pub trait SessionRepository {
-    async fn create_user_session(&self, user_session: UserSession) -> Result<(), SessionError>;
-    async fn get_user_session(&self, token: &str) -> Result<UserSession, SessionError>;
-    async fn delete_user_session(&self, token: &str) -> Result<(), SessionError>;
+    fn create_user_session(
+        &self,
+        user_session: UserSession,
+    ) -> impl Future<Output = Result<(), SessionError>> + Send;
+    fn get_user_session(
+        &self,
+        token: String,
+    ) -> impl Future<Output = Result<UserSession, SessionError>> + Send;
+    fn delete_user_session(
+        &self,
+        token: String,
+    ) -> impl Future<Output = Result<(), SessionError>> + Send;
 }
 
 pub struct SessionStore<K: KvProvider> {
@@ -85,24 +93,24 @@ impl<K: KvProvider> SessionStore<K> {
     }
 }
 
-impl<K: KvProvider> SessionRepository for SessionStore<K> {
+impl<K: KvProvider + Send + Sync> SessionRepository for SessionStore<K> {
     async fn create_user_session(&self, user_session: UserSession) -> Result<(), SessionError> {
         let key = format!("{}:{}", USER_SESSION_PREFIX, user_session.token);
         let ttl = Duration::from_secs(USER_SESSION_TTL_SECONDS);
-        self.kv.hset(&key, user_session.into()).await?;
-        self.kv.expire(&key, ttl).await?;
+        self.kv.hset(key.clone(), user_session.into()).await?;
+        self.kv.expire(key, ttl).await?;
         Ok(())
     }
 
-    async fn get_user_session(&self, token: &str) -> Result<UserSession, SessionError> {
+    async fn get_user_session(&self, token: String) -> Result<UserSession, SessionError> {
         let key = format!("{}:{}", USER_SESSION_PREFIX, token);
-        let session = self.kv.hgetall(&key).await?.try_into()?;
+        let session = self.kv.hgetall(key).await?.try_into()?;
         Ok(session)
     }
 
-    async fn delete_user_session(&self, token: &str) -> Result<(), SessionError> {
+    async fn delete_user_session(&self, token: String) -> Result<(), SessionError> {
         let key = format!("{}:{}", USER_SESSION_PREFIX, token);
-        self.kv.del(&key).await?;
+        self.kv.del(key).await?;
         Ok(())
     }
 }

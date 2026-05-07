@@ -3,7 +3,7 @@ use std::fmt;
 
 use crate::infra::random::{OsRngService, RngService, RngServiceError};
 
-enum CsrfServiceError {
+pub enum CsrfServiceError {
     NotGenerated(String),
     RngError(RngServiceError),
     CsrfInternalError,
