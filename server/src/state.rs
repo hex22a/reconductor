@@ -1,8 +1,6 @@
-use crate::infra::password::PasswordService;
-use crate::persistence::db::user::UserRepository;
+use crate::features::user::register::RegisterFeature;
 
 #[derive(Clone)]
-pub struct AppState<P: PasswordService, U: UserRepository> {
-    pub password_service: P,
-    pub user_repository: U,
+pub struct AppState<R: RegisterFeature> {
+    pub register_feature: R,
 }

@@ -3,9 +3,14 @@ use crate::infra::password::PasswordService;
 use crate::persistence::db::user::{UserInsert, UserRepository};
 
 pub trait RegisterFeature {
-    async fn register(&self, username: &str, password: &str) -> Result<(), ServerError>;
+    fn register(
+        &self,
+        username: String,
+        password: String,
+    ) -> impl Future<Output = Result<(), ServerError>> + Send;
 }
 
+#[derive(Clone)]
 pub struct UserRegisterFeature<P: PasswordService, R: UserRepository> {
     password_service: P,
     user_repository: R,
@@ -20,12 +25,16 @@ impl<P: PasswordService, R: UserRepository> UserRegisterFeature<P, R> {
     }
 }
 
-impl<P: PasswordService, R: UserRepository> RegisterFeature for UserRegisterFeature<P, R> {
-    async fn register(&self, username: &str, password: &str) -> Result<(), ServerError> {
-        let password_hash = self.password_service.hash_password(password)?;
+impl<P, R> RegisterFeature for UserRegisterFeature<P, R>
+where
+    P: PasswordService + Send + Sync,
+    R: UserRepository + Send + Sync,
+{
+    async fn register(&self, username: String, password: String) -> Result<(), ServerError> {
+        let password_hash = self.password_service.hash_password(&password)?;
         self.user_repository
             .add_user(UserInsert {
-                username: username.to_string(),
+                username,
                 password_hash,
             })
             .await?;
@@ -67,8 +76,8 @@ mod tests {
     #[tokio::test]
     async fn test_register_feature() {
         // Arrange
-        let expected_username = "test";
-        let expected_password = "password";
+        let expected_username = "test".to_string();
+        let expected_password = "password".to_string();
         let mock_password_service = MockPasswordService;
         let mock_user_repository = MockUserRepository;
         let feature = UserRegisterFeature::new(mock_password_service, mock_user_repository);

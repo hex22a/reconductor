@@ -1,4 +1,5 @@
 use crate::{
+    features::user::register::UserRegisterFeature,
     infra::password::Argon2Service,
     persistence::db::{self, user::PgUserRepository},
 };
@@ -27,10 +28,8 @@ async fn main() -> anyhow::Result<()> {
     let db = db::init_db(&config.database_url).await;
     let user_repository = PgUserRepository { db };
     let password_service = Argon2Service;
-    let app_state = AppState {
-        user_repository,
-        password_service,
-    };
+    let register_feature = UserRegisterFeature::new(password_service, user_repository);
+    let app_state = AppState { register_feature };
 
     let app = Router::new()
         .merge(v1::health::routes())
