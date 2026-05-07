@@ -1,5 +1,5 @@
 use crate::constants::API_HEALTH_ENDPOINT_V1;
-use crate::controllers::health::get_health;
+use crate::features::health::handler::get_health;
 use axum::Router;
 use axum::routing::get;
 

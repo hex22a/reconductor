@@ -1,19 +1,15 @@
 use axum::{Json, http::StatusCode};
-use serde::Serialize;
 
-#[derive(Debug, PartialEq, Serialize)]
-pub struct HealthResponse {
-    healthy: bool,
-}
+use crate::features::health::dto::HealthResponse;
+
 pub async fn get_health() -> (StatusCode, Json<HealthResponse>) {
     (StatusCode::OK, Json(HealthResponse { healthy: true }))
 }
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use axum::{Json, http::StatusCode};
-
-    use crate::controllers::health::{HealthResponse, get_health};
 
     #[tokio::test]
     async fn test_get_health() {

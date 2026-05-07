@@ -7,7 +7,6 @@ use axum::Router;
 
 mod config;
 mod constants;
-mod controllers;
 mod domain;
 mod features;
 mod infra;
