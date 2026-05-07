@@ -19,10 +19,15 @@ pub struct UserInsert {
     pub password_hash: String,
 }
 
-#[allow(async_fn_in_trait)]
 pub trait UserRepository {
-    async fn add_user(&self, user_insert: UserInsert) -> Result<(), sqlx::Error>;
-    async fn get_user_by_username(&self, username: &str) -> Result<UserEntity, sqlx::Error>;
+    fn add_user(
+        &self,
+        user_insert: UserInsert,
+    ) -> impl Future<Output = Result<(), sqlx::Error>> + Send;
+    fn get_user_by_username(
+        &self,
+        username: &str,
+    ) -> impl Future<Output = Result<UserEntity, sqlx::Error>> + Send;
 }
 
 #[derive(Clone)]

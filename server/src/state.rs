@@ -1,8 +1,8 @@
-use crate::infra::password::Argon2Service;
-use crate::persistence::db::user::PgUserRepository;
+use crate::infra::password::PasswordService;
+use crate::persistence::db::user::UserRepository;
 
 #[derive(Clone)]
-pub struct AppState {
-    pub password_service: Argon2Service,
-    pub user_repository: PgUserRepository,
+pub struct AppState<P: PasswordService, U: UserRepository> {
+    pub password_service: P,
+    pub user_repository: U,
 }
