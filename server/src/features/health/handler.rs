@@ -2,7 +2,7 @@ use axum::{Json, http::StatusCode};
 
 use crate::features::health::dto::HealthResponse;
 
-pub async fn get_health() -> (StatusCode, Json<HealthResponse>) {
+pub async fn handle() -> (StatusCode, Json<HealthResponse>) {
     (StatusCode::OK, Json(HealthResponse { healthy: true }))
 }
 
@@ -17,7 +17,7 @@ mod tests {
         let expected_health_response = HealthResponse { healthy: true };
         let expected_health = (StatusCode::OK, Json(expected_health_response));
         // Act
-        let actual_health = get_health().await;
+        let actual_health = handle().await;
         // Assert
         assert_eq!(actual_health.0, expected_health.0);
         assert_eq!(actual_health.1.0, expected_health.1.0);

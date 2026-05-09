@@ -3,7 +3,7 @@ use axum::{Router, routing::get};
 use crate::{
     constants::API_CSRF_ENDPOINT_V1,
     features::{
-        csrf::{handler::csrf, token::TokenFeature},
+        csrf::{handler::handle, token::TokenFeature},
         user::register::RegisterFeature,
     },
     state::AppState,
@@ -15,6 +15,6 @@ where
     T: TokenFeature + Clone + Send + Sync + 'static,
 {
     Router::new()
-        .route(API_CSRF_ENDPOINT_V1, get(csrf::<R, T>))
+        .route(API_CSRF_ENDPOINT_V1, get(handle::<R, T>))
         .with_state(state)
 }

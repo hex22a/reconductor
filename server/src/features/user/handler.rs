@@ -8,7 +8,7 @@ use crate::{
     domain::error::ServerError, features::user::dto::RegisterUserRequest, state::AppState,
 };
 
-pub async fn register<R, T>(
+pub async fn handle<R, T>(
     State(state): State<AppState<R, T>>,
     Json(req): Json<RegisterUserRequest>,
 ) -> Result<impl IntoResponse, ServerError>

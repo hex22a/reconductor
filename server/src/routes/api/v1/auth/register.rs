@@ -4,7 +4,7 @@ use crate::{
     constants::API_REGISTER_ENDPOINT_V1,
     features::{
         csrf::token::TokenFeature,
-        user::{handler::register, register::RegisterFeature},
+        user::{handler::handle, register::RegisterFeature},
     },
     state::AppState,
 };
@@ -15,7 +15,7 @@ where
     T: TokenFeature + Clone + Send + Sync + 'static,
 {
     Router::new()
-        .route(API_REGISTER_ENDPOINT_V1, post(register::<R, T>))
+        .route(API_REGISTER_ENDPOINT_V1, post(handle::<R, T>))
         .with_state(state)
 }
 

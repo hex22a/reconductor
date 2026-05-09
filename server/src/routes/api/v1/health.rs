@@ -1,10 +1,10 @@
 use crate::constants::API_HEALTH_ENDPOINT_V1;
-use crate::features::health::handler::get_health;
+use crate::features::health::handler::handle;
 use axum::Router;
 use axum::routing::get;
 
 pub fn routes() -> Router {
-    Router::new().route(API_HEALTH_ENDPOINT_V1, get(get_health))
+    Router::new().route(API_HEALTH_ENDPOINT_V1, get(handle))
 }
 
 #[cfg(test)]

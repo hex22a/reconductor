@@ -41,9 +41,9 @@ where
 {
     async fn get_token(
         &mut self,
-        session_token: Option<String>,
+        session_cookie: Option<String>,
     ) -> Result<CsrfTokenPair, ServerError> {
-        match session_token {
+        match session_cookie {
             Some(token) => {
                 let user_session_result = self.session_repository.get_user_session(token).await;
                 match user_session_result {

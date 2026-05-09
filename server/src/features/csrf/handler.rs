@@ -11,7 +11,7 @@ use crate::{
     state::AppState,
 };
 
-pub async fn csrf<R, T>(
+pub async fn handle<R, T>(
     State(mut state): State<AppState<R, T>>,
     jar: CookieJar,
 ) -> Result<impl IntoResponse, ServerError>
