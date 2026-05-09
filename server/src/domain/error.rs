@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
-use crate::{infra::password::PasswordServiceError, persistence::kv::session::SessionError};
+use crate::{
+    infra::{csrf::CsrfServiceError, password::PasswordServiceError},
+    persistence::kv::{csrf::CsrfError, session::SessionError},
+};
 
 pub type FieldErrors = HashMap<String, Vec<String>>;
 
@@ -26,5 +29,16 @@ impl From<sqlx::Error> for ServerError {
 impl From<SessionError> for ServerError {
     fn from(value: SessionError) -> Self {
         ServerError::DatabaseError
+    }
+}
+impl From<CsrfServiceError> for ServerError {
+    fn from(value: CsrfServiceError) -> Self {
+        ServerError::Internal
+    }
+}
+
+impl From<CsrfError> for ServerError {
+    fn from(value: CsrfError) -> Self {
+        ServerError::Internal
     }
 }

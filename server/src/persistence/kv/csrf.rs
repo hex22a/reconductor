@@ -24,11 +24,19 @@ impl From<fred::error::Error> for CsrfError {
     }
 }
 
-#[allow(async_fn_in_trait)]
 pub trait CsrfRepository {
-    async fn create_anonymous_csrf(&self, token: &str) -> Result<(), CsrfError>;
-    async fn verify_anonymous_csrf(&self, token: &str) -> Result<bool, CsrfError>;
-    async fn delete_anonymous_csrf(&self, token: &str) -> Result<(), CsrfError>;
+    fn create_anonymous_csrf(
+        &self,
+        token: String,
+    ) -> impl Future<Output = Result<(), CsrfError>> + Send;
+    fn verify_anonymous_csrf(
+        &self,
+        token: String,
+    ) -> impl Future<Output = Result<bool, CsrfError>> + Send;
+    fn delete_anonymous_csrf(
+        &self,
+        token: String,
+    ) -> impl Future<Output = Result<(), CsrfError>> + Send;
 }
 
 pub struct CsrfStore<K: KvProvider> {
@@ -41,21 +49,21 @@ impl<K: KvProvider> CsrfStore<K> {
     }
 }
 
-impl<K: KvProvider> CsrfRepository for CsrfStore<K> {
-    async fn create_anonymous_csrf(&self, token: &str) -> Result<(), CsrfError> {
+impl<K: KvProvider + Sync> CsrfRepository for CsrfStore<K> {
+    async fn create_anonymous_csrf(&self, token: String) -> Result<(), CsrfError> {
         let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token);
         let ttl = Duration::from_secs(ANONYMOUS_CSRF_TTL_SECONDS);
         self.kv.set(key, "1".to_string(), Some(ttl)).await?;
         Ok(())
     }
 
-    async fn verify_anonymous_csrf(&self, token: &str) -> Result<bool, CsrfError> {
+    async fn verify_anonymous_csrf(&self, token: String) -> Result<bool, CsrfError> {
         let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token);
         let csrf = self.kv.get(key).await?;
         Ok(csrf != None)
     }
 
-    async fn delete_anonymous_csrf(&self, token: &str) -> Result<(), CsrfError> {
+    async fn delete_anonymous_csrf(&self, token: String) -> Result<(), CsrfError> {
         let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token);
         self.kv.del(key).await?;
         Ok(())

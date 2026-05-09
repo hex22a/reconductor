@@ -17,7 +17,7 @@ async fn create_store() -> CsrfStore<FredKvProvider> {
 async fn stores_csrf_under_correct_key() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "store_csrf_under_correct_key";
+    let expected_token = "store_csrf_under_correct_key".to_string();
 
     // Act
     let actual_result = store.create_anonymous_csrf(expected_token).await.unwrap();
@@ -30,7 +30,7 @@ async fn stores_csrf_under_correct_key() {
 async fn returns_false_for_missing_csrf() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "csrf_does_not_exist";
+    let expected_token = "csrf_does_not_exist".to_string();
 
     // Act
     let actual_result = store.verify_anonymous_csrf(expected_token).await.unwrap();
@@ -43,8 +43,11 @@ async fn returns_false_for_missing_csrf() {
 async fn gets_session_from_storage() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "get_csrf_from_storage";
-    store.create_anonymous_csrf(expected_token).await.unwrap();
+    let expected_token = "get_csrf_from_storage".to_string();
+    store
+        .create_anonymous_csrf(expected_token.clone())
+        .await
+        .unwrap();
 
     // Act
     let actual_user_session = store.verify_anonymous_csrf(expected_token).await.unwrap();
@@ -57,11 +60,17 @@ async fn gets_session_from_storage() {
 async fn deletes_session_from_storage() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "csrf_token_to_delete";
-    store.create_anonymous_csrf(expected_token).await.unwrap();
+    let expected_token = "csrf_token_to_delete".to_string();
+    store
+        .create_anonymous_csrf(expected_token.clone())
+        .await
+        .unwrap();
 
     // Act
-    store.delete_anonymous_csrf(expected_token).await.unwrap();
+    store
+        .delete_anonymous_csrf(expected_token.clone())
+        .await
+        .unwrap();
 
     // Assert
     let result = store.verify_anonymous_csrf(expected_token).await.unwrap();
