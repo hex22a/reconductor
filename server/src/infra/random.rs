@@ -9,7 +9,7 @@ use rand::{
     rngs::{SysError, SysRng},
 };
 
-use crate::constants::{NONCE_SIZE_BYTES, SESSION_COOKIE_SIZE_BYTES};
+use crate::constants::{NONCE_SIZE_BYTES, SESSION_ID_SIZE_BYTES};
 
 pub enum RngServiceError {
     OsError(SysError),
@@ -31,7 +31,7 @@ impl fmt::Display for RngServiceError {
 
 pub trait RngService {
     fn generate_nonce(&self) -> Result<[u8; NONCE_SIZE_BYTES], RngServiceError>;
-    fn generate_string(&self) -> Result<String, RngServiceError>;
+    fn generate_session_id(&self) -> Result<String, RngServiceError>;
 }
 
 #[derive(Clone)]
@@ -52,8 +52,8 @@ impl RngService for OsRngService {
         Ok(key)
     }
 
-    fn generate_string(&self) -> Result<String, RngServiceError> {
-        let mut key = [0u8; SESSION_COOKIE_SIZE_BYTES];
+    fn generate_session_id(&self) -> Result<String, RngServiceError> {
+        let mut key = [0u8; SESSION_ID_SIZE_BYTES];
         self.rng.lock().unwrap().try_fill_bytes(&mut key)?;
         Ok(BASE64_URL_SAFE_NO_PAD.encode(&key))
     }
