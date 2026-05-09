@@ -1,6 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use crate::{
+    constants::REDIS_POOL_SIZE,
     features::{csrf::token::CsrfTokenFeature, user::register::UserRegisterFeature},
     infra::{
         csrf::AesGcmCsrfService,
@@ -34,7 +35,7 @@ async fn main() -> anyhow::Result<()> {
         .init();
     let config = config::Config::from_env()?;
     let db = db::init_db(&config.database_url).await;
-    let kv = Arc::new(FredKvProvider::new(config.redis_url, 2).await?);
+    let kv = Arc::new(FredKvProvider::new(config.redis_url, REDIS_POOL_SIZE).await?);
     let user_repository = PgUserRepository { db };
     let session_repository = SessionStore::new(Arc::clone(&kv));
     let csrf_repository = CsrfStore::new(Arc::clone(&kv));
