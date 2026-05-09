@@ -1,4 +1,4 @@
-use std::{fmt, time::Duration};
+use std::{fmt, sync::Arc, time::Duration};
 
 use crate::{
     constants::{ANONYMOUS_CSRF_PREFIX, ANONYMOUS_CSRF_TTL_SECONDS},
@@ -41,11 +41,11 @@ pub trait CsrfRepository {
 
 #[derive(Clone)]
 pub struct CsrfStore<K: KvProvider> {
-    kv: K,
+    kv: Arc<K>,
 }
 
 impl<K: KvProvider> CsrfStore<K> {
-    pub fn new(kv: K) -> Self {
+    pub fn new(kv: Arc<K>) -> Self {
         Self { kv }
     }
 }

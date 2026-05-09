@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use server::infra::persistence::kv::{
     FredKvProvider,
     session::{SessionError, SessionRepository, SessionStore, UserSession},
@@ -5,12 +7,14 @@ use server::infra::persistence::kv::{
 use uuid::Uuid;
 
 async fn create_store() -> SessionStore<FredKvProvider> {
-    let kv = FredKvProvider::new(
-        std::env::var("REDIS_URL").unwrap_or("redis://localhost:6379".to_string()),
-        2,
-    )
-    .await
-    .expect("failed to connect to Redis");
+    let kv = Arc::new(
+        FredKvProvider::new(
+            std::env::var("REDIS_URL").unwrap_or("redis://localhost:6379".to_string()),
+            2,
+        )
+        .await
+        .expect("failed to connect to Redis"),
+    );
     SessionStore::new(kv)
 }
 

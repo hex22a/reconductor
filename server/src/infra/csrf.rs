@@ -36,7 +36,7 @@ impl fmt::Display for CsrfServiceError {
 }
 
 pub trait CsrfService {
-    fn generate(&mut self, ttl: u64) -> Result<(String, String), CsrfServiceError>;
+    fn generate(&self, ttl: u64) -> Result<(String, String), CsrfServiceError>;
     fn verify(&self, token: &str, cookie: &str) -> bool;
 }
 
@@ -56,7 +56,7 @@ impl AesGcmCsrfService {
 }
 
 impl CsrfService for AesGcmCsrfService {
-    fn generate(&mut self, ttl: u64) -> Result<(String, String), CsrfServiceError> {
+    fn generate(&self, ttl: u64) -> Result<(String, String), CsrfServiceError> {
         let nonce = self.rng.generate_nonce()?;
         let (token, cookie) = self.protect.generate_token_pair(Some(&nonce), ttl as i64)?;
         Ok((token.b64_string(), cookie.b64_string()))

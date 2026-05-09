@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{Router, routing::get};
 
 use crate::{
@@ -9,7 +11,7 @@ use crate::{
     state::AppState,
 };
 
-pub fn routes<R, T>(state: AppState<R, T>) -> Router
+pub fn routes<R, T>(state: Arc<AppState<R, T>>) -> Router
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,

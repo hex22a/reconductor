@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::features::{
     csrf::token::TokenFeature,
     user::{model::RegisterUser, register::RegisterFeature},
@@ -9,7 +11,7 @@ use crate::{
 };
 
 pub async fn handle<R, T>(
-    State(state): State<AppState<R, T>>,
+    State(state): State<Arc<AppState<R, T>>>,
     Json(req): Json<RegisterUserRequest>,
 ) -> Result<impl IntoResponse, ServerError>
 where

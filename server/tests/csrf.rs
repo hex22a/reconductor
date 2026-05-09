@@ -1,15 +1,19 @@
+use std::sync::Arc;
+
 use server::infra::persistence::kv::{
     FredKvProvider,
     csrf::{CsrfRepository, CsrfStore},
 };
 
 async fn create_store() -> CsrfStore<FredKvProvider> {
-    let kv = FredKvProvider::new(
-        std::env::var("REDIS_URL").unwrap_or("redis://localhost:6379".to_string()),
-        2,
-    )
-    .await
-    .expect("failed to connect to Redis");
+    let kv = Arc::new(
+        FredKvProvider::new(
+            std::env::var("REDIS_URL").unwrap_or("redis://localhost:6379".to_string()),
+            2,
+        )
+        .await
+        .expect("failed to connect to Redis"),
+    );
     CsrfStore::new(kv)
 }
 

@@ -1,4 +1,7 @@
-use std::fmt;
+use std::{
+    fmt,
+    sync::{Arc, Mutex},
+};
 
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
 use rand::{
@@ -27,31 +30,31 @@ impl fmt::Display for RngServiceError {
 }
 
 pub trait RngService {
-    fn generate_nonce(&mut self) -> Result<[u8; NONCE_SIZE_BYTES], RngServiceError>;
-    fn generate_string(&mut self) -> Result<String, RngServiceError>;
+    fn generate_nonce(&self) -> Result<[u8; NONCE_SIZE_BYTES], RngServiceError>;
+    fn generate_string(&self) -> Result<String, RngServiceError>;
 }
 
 #[derive(Clone)]
 pub struct OsRngService {
-    rng: SysRng,
+    rng: Arc<Mutex<SysRng>>,
 }
 
 impl OsRngService {
-    pub fn new(rng: SysRng) -> Self {
+    pub fn new(rng: Arc<Mutex<SysRng>>) -> Self {
         Self { rng }
     }
 }
 
 impl RngService for OsRngService {
-    fn generate_nonce(&mut self) -> Result<[u8; NONCE_SIZE_BYTES], RngServiceError> {
+    fn generate_nonce(&self) -> Result<[u8; NONCE_SIZE_BYTES], RngServiceError> {
         let mut key = [0u8; NONCE_SIZE_BYTES];
-        self.rng.try_fill_bytes(&mut key)?;
+        self.rng.lock().unwrap().try_fill_bytes(&mut key)?;
         Ok(key)
     }
 
-    fn generate_string(&mut self) -> Result<String, RngServiceError> {
+    fn generate_string(&self) -> Result<String, RngServiceError> {
         let mut key = [0u8; SESSION_COOKIE_SIZE_BYTES];
-        self.rng.try_fill_bytes(&mut key)?;
+        self.rng.lock().unwrap().try_fill_bytes(&mut key)?;
         Ok(BASE64_URL_SAFE_NO_PAD.encode(&key))
     }
 }

@@ -1,5 +1,5 @@
 use core::fmt;
-use std::{collections::HashMap, time::Duration};
+use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use sqlx::types::Uuid;
 
@@ -85,11 +85,11 @@ pub trait SessionRepository {
 
 #[derive(Clone)]
 pub struct SessionStore<K: KvProvider> {
-    kv: K,
+    kv: Arc<K>,
 }
 
 impl<K: KvProvider> SessionStore<K> {
-    pub fn new(kv: K) -> Self {
+    pub fn new(kv: Arc<K>) -> Self {
         Self { kv }
     }
 }

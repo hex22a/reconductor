@@ -13,7 +13,7 @@ use crate::{
 
 pub trait TokenFeature {
     fn get_token(
-        &mut self,
+        &self,
         session_token: Option<String>,
     ) -> impl Future<Output = Result<CsrfTokenPair, ServerError>> + Send;
 }
@@ -42,7 +42,7 @@ where
     S: CsrfService + Send + Sync,
 {
     async fn get_token(
-        &mut self,
+        &self,
         session_cookie: Option<String>,
     ) -> Result<CsrfTokenPair, ServerError> {
         match session_cookie {
@@ -135,7 +135,7 @@ mod tests {
         }
     }
     impl CsrfService for MockCsrfService {
-        fn generate(&mut self, _: u64) -> Result<(String, String), CsrfServiceError> {
+        fn generate(&self, _: u64) -> Result<(String, String), CsrfServiceError> {
             match self.error.lock().unwrap().take() {
                 Some(e) => Err(e),
                 None => Ok(self.return_value.clone()),
@@ -174,7 +174,7 @@ mod tests {
             error: Mutex::new(None),
             return_value: (expected_csrf_token.clone(), expected_csrf_cookie),
         };
-        let mut feature = CsrfTokenFeature::new(
+        let feature = CsrfTokenFeature::new(
             mock_session_repository,
             mock_csrf_repository,
             mock_csrf_service,
@@ -216,7 +216,7 @@ mod tests {
             error: Mutex::new(None),
             return_value: (expected_anonymous_csrf_token.clone(), expected_csrf_cookie),
         };
-        let mut feature = CsrfTokenFeature::new(
+        let feature = CsrfTokenFeature::new(
             mock_session_repository,
             mock_csrf_repository,
             mock_csrf_service,
@@ -258,7 +258,7 @@ mod tests {
             error: Mutex::new(None),
             return_value: (expected_anonymous_csrf_token.clone(), expected_csrf_cookie),
         };
-        let mut feature = CsrfTokenFeature::new(
+        let feature = CsrfTokenFeature::new(
             mock_session_repository,
             mock_csrf_repository,
             mock_csrf_service,

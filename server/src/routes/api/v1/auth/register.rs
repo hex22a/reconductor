@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{Router, routing::post};
 
 use crate::{
@@ -9,7 +11,7 @@ use crate::{
     state::AppState,
 };
 
-pub fn routes<R, T>(state: AppState<R, T>) -> Router
+pub fn routes<R, T>(state: Arc<AppState<R, T>>) -> Router
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,
@@ -51,7 +53,7 @@ mod tests {
         }
     }
     impl TokenFeature for MockTokenFeature {
-        async fn get_token(&mut self, _: Option<String>) -> Result<CsrfTokenPair, ServerError> {
+        async fn get_token(&self, _: Option<String>) -> Result<CsrfTokenPair, ServerError> {
             todo!()
         }
     }
@@ -63,10 +65,10 @@ mod tests {
         let expected_password = "password".to_string();
         let mock_register_feature = MockRegisterFeature;
         let mock_token_feature = MockTokenFeature;
-        let expected_app_state = AppState {
+        let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             csrf_feature: mock_token_feature,
-        };
+        });
         let expected_register_request = RegisterUserRequest {
             username: expected_username,
             password: expected_password,
@@ -96,10 +98,10 @@ mod tests {
         let expected_password = "password".to_string();
         let mock_register_feature = MockRegisterFeature;
         let mock_token_feature = MockTokenFeature;
-        let expected_app_state = AppState {
+        let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             csrf_feature: mock_token_feature,
-        };
+        });
         let expected_register_request = RegisterUserRequest {
             username: expected_username,
             password: expected_password,

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
 use axum_extra::extract::CookieJar;
 
@@ -12,7 +14,7 @@ use crate::{
 };
 
 pub async fn handle<R, T>(
-    State(mut state): State<AppState<R, T>>,
+    State(state): State<Arc<AppState<R, T>>>,
     jar: CookieJar,
 ) -> Result<impl IntoResponse, ServerError>
 where
