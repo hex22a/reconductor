@@ -1,4 +1,4 @@
-use server::persistence::kv::{
+use server::infra::persistence::kv::{
     FredKvProvider,
     csrf::{CsrfRepository, CsrfStore},
 };

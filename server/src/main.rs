@@ -1,9 +1,13 @@
 use crate::{
     features::{csrf::token::CsrfTokenFeature, user::register::UserRegisterFeature},
-    infra::{csrf::AesGcmCsrfService, password::Argon2Service, random::OsRngService},
-    persistence::{
-        db::{self, user::PgUserRepository},
-        kv::{FredKvProvider, csrf::CsrfStore, session::SessionStore},
+    infra::{
+        csrf::AesGcmCsrfService,
+        password::Argon2Service,
+        persistence::{
+            db::{self, user::PgUserRepository},
+            kv::{FredKvProvider, csrf::CsrfStore, session::SessionStore},
+        },
+        random::OsRngService,
     },
 };
 use axum::Router;
@@ -14,7 +18,6 @@ mod constants;
 mod domain;
 mod features;
 mod infra;
-mod persistence;
 mod routes;
 mod state;
 mod transport;

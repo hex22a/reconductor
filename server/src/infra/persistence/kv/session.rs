@@ -5,7 +5,7 @@ use sqlx::types::Uuid;
 
 use crate::{
     constants::{USER_SESSION_PREFIX, USER_SESSION_TTL_SECONDS},
-    persistence::kv::KvProvider,
+    infra::persistence::kv::KvProvider,
 };
 
 #[derive(Debug)]

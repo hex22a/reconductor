@@ -1,6 +1,6 @@
 use crate::domain::error::ServerError;
 use crate::infra::password::PasswordService;
-use crate::persistence::db::user::{UserInsert, UserRepository};
+use crate::infra::persistence::db::user::{UserInsert, UserRepository};
 
 pub trait RegisterFeature {
     fn register(
@@ -48,9 +48,9 @@ mod tests {
     use crate::features::user::register::UserRegisterFeature;
     use crate::infra::password::PasswordService;
     use crate::infra::password::PasswordServiceError;
-    use crate::persistence::db::user::UserEntity;
-    use crate::persistence::db::user::UserInsert;
-    use crate::persistence::db::user::UserRepository;
+    use crate::infra::persistence::db::user::UserEntity;
+    use crate::infra::persistence::db::user::UserInsert;
+    use crate::infra::persistence::db::user::UserRepository;
 
     struct MockUserRepository;
     struct MockPasswordService;

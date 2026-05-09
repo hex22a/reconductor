@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
-use crate::{
-    infra::{csrf::CsrfServiceError, password::PasswordServiceError},
+use crate::infra::{
+    csrf::CsrfServiceError,
+    password::PasswordServiceError,
     persistence::kv::{csrf::CsrfError, session::SessionError},
 };
 

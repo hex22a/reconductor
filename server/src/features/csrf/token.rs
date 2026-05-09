@@ -2,10 +2,12 @@ use crate::{
     constants::ANONYMOUS_CSRF_TTL_SECONDS,
     domain::error::ServerError,
     features::csrf::model::CsrfTokenPair,
-    infra::csrf::CsrfService,
-    persistence::kv::{
-        csrf::CsrfRepository,
-        session::{SessionError, SessionRepository},
+    infra::{
+        csrf::CsrfService,
+        persistence::kv::{
+            csrf::CsrfRepository,
+            session::{SessionError, SessionRepository},
+        },
     },
 };
 
@@ -89,12 +91,9 @@ mod tests {
     use uuid::Uuid;
 
     use super::*;
-    use crate::{
-        infra::csrf::{CsrfService, CsrfServiceError},
-        persistence::kv::{
-            csrf::CsrfError,
-            session::{SessionError, SessionRepository, UserSession},
-        },
+    use crate::infra::{
+        csrf::{CsrfService, CsrfServiceError},
+        persistence::kv::{csrf::CsrfError, session::UserSession},
     };
 
     struct MockSessionRepository {

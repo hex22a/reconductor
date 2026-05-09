@@ -1,7 +1,9 @@
 use crate::{
     domain::error::ServerError,
-    infra::password::PasswordService,
-    persistence::{db::user::UserRepository, kv::session::SessionRepository},
+    infra::{
+        password::PasswordService,
+        persistence::{db::user::UserRepository, kv::session::SessionRepository},
+    },
 };
 
 pub trait LoginFeature {

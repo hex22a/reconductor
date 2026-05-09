@@ -1,4 +1,4 @@
-use server::persistence::kv::{
+use server::infra::persistence::kv::{
     FredKvProvider,
     session::{SessionError, SessionRepository, SessionStore, UserSession},
 };

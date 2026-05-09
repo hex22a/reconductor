@@ -2,7 +2,7 @@ use std::{fmt, time::Duration};
 
 use crate::{
     constants::{ANONYMOUS_CSRF_PREFIX, ANONYMOUS_CSRF_TTL_SECONDS},
-    persistence::kv::KvProvider,
+    infra::persistence::kv::KvProvider,
 };
 
 #[derive(Debug)]
