@@ -39,6 +39,7 @@ pub trait CsrfRepository {
     ) -> impl Future<Output = Result<(), CsrfError>> + Send;
 }
 
+#[derive(Clone)]
 pub struct CsrfStore<K: KvProvider> {
     kv: K,
 }
@@ -49,7 +50,7 @@ impl<K: KvProvider> CsrfStore<K> {
     }
 }
 
-impl<K: KvProvider + Sync> CsrfRepository for CsrfStore<K> {
+impl<K: KvProvider + Send + Sync> CsrfRepository for CsrfStore<K> {
     async fn create_anonymous_csrf(&self, token: String) -> Result<(), CsrfError> {
         let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token);
         let ttl = Duration::from_secs(ANONYMOUS_CSRF_TTL_SECONDS);

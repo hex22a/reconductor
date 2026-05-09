@@ -31,8 +31,15 @@ pub trait RngService {
     fn generate_string(&mut self) -> Result<String, RngServiceError>;
 }
 
+#[derive(Clone)]
 pub struct OsRngService {
     rng: SysRng,
+}
+
+impl OsRngService {
+    pub fn new(rng: SysRng) -> Self {
+        Self { rng }
+    }
 }
 
 impl RngService for OsRngService {

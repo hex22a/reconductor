@@ -1,3 +1,3 @@
 pub mod csrf;
 pub mod password;
-mod random;
+pub mod random;

@@ -83,6 +83,7 @@ pub trait SessionRepository {
     ) -> impl Future<Output = Result<(), SessionError>> + Send;
 }
 
+#[derive(Clone)]
 pub struct SessionStore<K: KvProvider> {
     kv: K,
 }

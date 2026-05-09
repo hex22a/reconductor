@@ -2,16 +2,20 @@ use axum::{Router, routing::post};
 
 use crate::{
     constants::API_REGISTER_ENDPOINT_V1,
-    features::user::{handler::register, register::RegisterFeature},
+    features::{
+        csrf::token::TokenFeature,
+        user::{handler::register, register::RegisterFeature},
+    },
     state::AppState,
 };
 
-pub fn routes<R>(state: AppState<R>) -> Router
+pub fn routes<R, T>(state: AppState<R, T>) -> Router
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
+    T: TokenFeature + Clone + Send + Sync + 'static,
 {
     Router::new()
-        .route(API_REGISTER_ENDPOINT_V1, post(register::<R>))
+        .route(API_REGISTER_ENDPOINT_V1, post(register::<R, T>))
         .with_state(state)
 }
 
@@ -25,12 +29,18 @@ mod tests {
 
     use super::*;
     use crate::{
-        features::user::{dto::RegisterUserRequest, register::RegisterFeature},
+        domain::error::ServerError,
+        features::{
+            csrf::model::CsrfTokenPair,
+            user::{dto::RegisterUserRequest, register::RegisterFeature},
+        },
         state::AppState,
     };
 
     #[derive(Clone)]
     struct MockRegisterFeature;
+    #[derive(Clone)]
+    struct MockTokenFeature;
     impl RegisterFeature for MockRegisterFeature {
         async fn register(
             &self,
@@ -40,6 +50,11 @@ mod tests {
             Ok(())
         }
     }
+    impl TokenFeature for MockTokenFeature {
+        async fn get_token(&mut self, _: Option<String>) -> Result<CsrfTokenPair, ServerError> {
+            todo!()
+        }
+    }
 
     #[tokio::test]
     async fn test_register_post() {
@@ -47,8 +62,10 @@ mod tests {
         let expected_username = "test".to_string();
         let expected_password = "password".to_string();
         let mock_register_feature = MockRegisterFeature;
+        let mock_token_feature = MockTokenFeature;
         let expected_app_state = AppState {
             register_feature: mock_register_feature,
+            csrf_feature: mock_token_feature,
         };
         let expected_register_request = RegisterUserRequest {
             username: expected_username,
@@ -78,8 +95,10 @@ mod tests {
         let expected_username = "test".to_string();
         let expected_password = "password".to_string();
         let mock_register_feature = MockRegisterFeature;
+        let mock_token_feature = MockTokenFeature;
         let expected_app_state = AppState {
             register_feature: mock_register_feature,
+            csrf_feature: mock_token_feature,
         };
         let expected_register_request = RegisterUserRequest {
             username: expected_username,

@@ -7,10 +7,12 @@ edition = "2024"
 anyhow = "1.0.102"
 argon2 = "0.5.3"
 axum = "0.8.9"
+axum-extra = { version = "0.12.6", features = ["cookie", "cookie-private"] }
 base64 = "0.22.1"
 csrf = "0.5.0"
 dotenvy = "0.15.7"
 fred = "10.1.0"
+hex = "0.4.3"
 lapin = "4.6.0"
 rand = "0.10.1"
 serde = { version = "1.0.228", features = ["derive"] }

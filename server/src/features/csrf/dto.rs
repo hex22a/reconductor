@@ -1,6 +1,6 @@
 use serde::Serialize;
 
 #[derive(Serialize)]
-struct CsrfResponse {
-    csrf_token: String,
+pub struct CsrfResponse {
+    pub csrf_token: String,
 }

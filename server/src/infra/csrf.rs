@@ -40,13 +40,14 @@ pub trait CsrfService {
     fn verify(&self, token: &str, cookie: &str) -> bool;
 }
 
-struct AesGcmCsrfService {
+#[derive(Clone)]
+pub struct AesGcmCsrfService {
     protect: AesGcmCsrfProtection,
     rng: OsRngService,
 }
 
 impl AesGcmCsrfService {
-    fn new(rng: OsRngService, key: [u8; 32]) -> Self {
+    pub fn new(rng: OsRngService, key: [u8; 32]) -> Self {
         Self {
             protect: AesGcmCsrfProtection::from_key(key),
             rng,

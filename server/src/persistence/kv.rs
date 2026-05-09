@@ -37,6 +37,7 @@ pub trait KvProvider {
     fn del(&self, key: String) -> impl Future<Output = Result<(), fred::error::Error>> + Send;
 }
 
+#[derive(Clone)]
 pub struct FredKvProvider {
     client: Pool,
 }

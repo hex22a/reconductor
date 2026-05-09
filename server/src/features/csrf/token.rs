@@ -16,7 +16,8 @@ pub trait TokenFeature {
     ) -> impl Future<Output = Result<CsrfTokenPair, ServerError>> + Send;
 }
 
-struct CsrfTokenFeature<R: SessionRepository, C: CsrfRepository, S: CsrfService> {
+#[derive(Clone)]
+pub struct CsrfTokenFeature<R: SessionRepository, C: CsrfRepository, S: CsrfService> {
     session_repository: R,
     csrf_repository: C,
     csrf_service: S,
