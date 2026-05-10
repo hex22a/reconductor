@@ -8,17 +8,18 @@ use crate::{
     domain::error::ServerError,
     features::{
         csrf::{dto::CsrfResponse, token::TokenFeature},
-        user::register::RegisterFeature,
+        user::{login::LoginFeature, register::RegisterFeature},
     },
     state::AppState,
 };
 
-pub async fn handle<R, T>(
-    State(state): State<Arc<AppState<R, T>>>,
+pub async fn handle<R, L, T>(
+    State(state): State<Arc<AppState<R, L, T>>>,
     jar: CookieJar,
 ) -> Result<impl IntoResponse, ServerError>
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
+    L: LoginFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,
 {
     let session_cookie = jar

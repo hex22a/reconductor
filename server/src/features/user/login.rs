@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::{
     constants::USER_SESSION_TTL_SECONDS,
     features::user::{error::UserError, model::AuthSession},
@@ -32,12 +34,12 @@ pub struct UserLoginFeature<
     PS: PasswordService,
     R: RngService,
 > {
-    user_repository: UR,
-    session_repository: SR,
-    csrf_repository: CR,
-    csrf_service: CS,
-    password_service: PS,
-    rng_service: R,
+    user_repository: Arc<UR>,
+    session_repository: Arc<SR>,
+    csrf_repository: Arc<CR>,
+    csrf_service: Arc<CS>,
+    password_service: Arc<PS>,
+    rng_service: Arc<R>,
 }
 
 impl<UR, SR, CR, CS, PS, R> UserLoginFeature<UR, SR, CR, CS, PS, R>
@@ -50,12 +52,12 @@ where
     R: RngService + Send + Sync,
 {
     pub fn new(
-        user_repository: UR,
-        session_repository: SR,
-        csrf_repository: CR,
-        csrf_service: CS,
-        password_service: PS,
-        rng_service: R,
+        user_repository: Arc<UR>,
+        session_repository: Arc<SR>,
+        csrf_repository: Arc<CR>,
+        csrf_service: Arc<CS>,
+        password_service: Arc<PS>,
+        rng_service: Arc<R>,
     ) -> Self {
         Self {
             password_service,
@@ -245,22 +247,22 @@ mod tests {
             session_id: expected_session_cookie.clone(),
             csrf_token: expected_csrf_token.clone(),
         };
-        let mock_password_service = MockPasswordService {
+        let mock_password_service = Arc::new(MockPasswordService {
             error: Mutex::new(None),
             is_valid: true,
-        };
-        let mock_user_repository = MockUserRepository {
+        });
+        let mock_user_repository = Arc::new(MockUserRepository {
             error: Mutex::new(None),
             return_value: expected_user_entity,
-        };
-        let mock_session_repository = MockSessionRepository;
-        let mock_csrf_repository = MockCsrfRepository;
-        let mock_csrf_service = MockCsrfService {
+        });
+        let mock_session_repository = Arc::new(MockSessionRepository);
+        let mock_csrf_repository = Arc::new(MockCsrfRepository);
+        let mock_csrf_service = Arc::new(MockCsrfService {
             return_value: expected_csrf_service_generated_value,
-        };
-        let mock_rng_service = MockRngService {
+        });
+        let mock_rng_service = Arc::new(MockRngService {
             return_value: expected_session_cookie.clone(),
-        };
+        });
         let feature = UserLoginFeature::new(
             mock_user_repository,
             mock_session_repository,
@@ -305,22 +307,22 @@ mod tests {
         };
         let expected_csrf_service_generated_value =
             (expected_csrf_token, expected_csrf_cookie_value);
-        let mock_password_service = MockPasswordService {
+        let mock_password_service = Arc::new(MockPasswordService {
             error: Mutex::new(None),
             is_valid: false,
-        };
-        let mock_user_repository = MockUserRepository {
+        });
+        let mock_user_repository = Arc::new(MockUserRepository {
             error: Mutex::new(None),
             return_value: expected_user_entity,
-        };
-        let mock_session_repository = MockSessionRepository;
-        let mock_csrf_repository = MockCsrfRepository;
-        let mock_csrf_service = MockCsrfService {
+        });
+        let mock_session_repository = Arc::new(MockSessionRepository);
+        let mock_csrf_repository = Arc::new(MockCsrfRepository);
+        let mock_csrf_service = Arc::new(MockCsrfService {
             return_value: expected_csrf_service_generated_value,
-        };
-        let mock_rng_service = MockRngService {
+        });
+        let mock_rng_service = Arc::new(MockRngService {
             return_value: expected_session_cookie.clone(),
-        };
+        });
         let feature = UserLoginFeature::new(
             mock_user_repository,
             mock_session_repository,

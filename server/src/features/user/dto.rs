@@ -1,7 +1,12 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
-pub struct RegisterUserRequest {
+pub struct UserInputRequest {
     pub username: String,
     pub password: String,
+}
+
+#[derive(Serialize)]
+pub struct LoginResponse {
+    pub csrf_token: String,
 }

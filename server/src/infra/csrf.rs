@@ -1,5 +1,5 @@
 use csrf::{AesGcmCsrfProtection, CsrfError, CsrfProtection};
-use std::fmt;
+use std::{fmt, sync::Arc};
 
 use crate::infra::random::{OsRngService, RngService, RngServiceError};
 
@@ -43,11 +43,11 @@ pub trait CsrfService {
 #[derive(Clone)]
 pub struct AesGcmCsrfService {
     protect: AesGcmCsrfProtection,
-    rng: OsRngService,
+    rng: Arc<OsRngService>,
 }
 
 impl AesGcmCsrfService {
-    pub fn new(rng: OsRngService, key: [u8; 32]) -> Self {
+    pub fn new(rng: Arc<OsRngService>, key: [u8; 32]) -> Self {
         Self {
             protect: AesGcmCsrfProtection::from_key(key),
             rng,

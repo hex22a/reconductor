@@ -6,18 +6,19 @@ use crate::{
     constants::API_CSRF_ENDPOINT_V1,
     features::{
         csrf::{handler::handle, token::TokenFeature},
-        user::register::RegisterFeature,
+        user::{login::LoginFeature, register::RegisterFeature},
     },
     state::AppState,
 };
 
-pub fn routes<R, T>(state: Arc<AppState<R, T>>) -> Router
+pub fn routes<R, L, T>(state: Arc<AppState<R, L, T>>) -> Router
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
+    L: LoginFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,
 {
     Router::new()
-        .route(API_CSRF_ENDPOINT_V1, get(handle::<R, T>))
+        .route(API_CSRF_ENDPOINT_V1, get(handle::<R, L, T>))
         .with_state(state)
 }
 
@@ -35,7 +36,7 @@ mod tests {
         constants::USER_SESSION_COOKIE_NAME,
         features::{
             csrf::{error::CsrfError, model::CsrfTokenPair, token::TokenFeature},
-            user::{error::UserError, register::RegisterFeature},
+            user::{error::UserError, model::AuthSession, register::RegisterFeature},
         },
     };
 
@@ -45,8 +46,15 @@ mod tests {
     struct MockTokenFeature {
         return_value: CsrfTokenPair,
     }
+    #[derive(Clone)]
+    struct MockLoginFeature;
     impl RegisterFeature for MockRegisterFeature {
         async fn register(&self, _: String, _: String) -> Result<(), UserError> {
+            todo!()
+        }
+    }
+    impl LoginFeature for MockLoginFeature {
+        async fn login(&self, _: String, _: String) -> Result<AuthSession, UserError> {
             todo!()
         }
     }
@@ -69,11 +77,13 @@ mod tests {
             cookie_value: Some(expected_csrf_cookie_value),
         };
         let mock_register_feature = MockRegisterFeature;
+        let mock_login_feature = MockLoginFeature;
         let mock_token_feature = MockTokenFeature {
             return_value: expected_csrf_token_pair,
         };
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
+            login_feature: mock_login_feature,
             csrf_feature: mock_token_feature,
         });
         let app = routes(expected_app_state);
@@ -106,11 +116,13 @@ mod tests {
             cookie_value: Some(expected_csrf_cookie_value),
         };
         let mock_register_feature = MockRegisterFeature;
+        let mock_login_feature = MockLoginFeature;
         let mock_token_feature = MockTokenFeature {
             return_value: expected_csrf_token_pair,
         };
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
+            login_feature: mock_login_feature,
             csrf_feature: mock_token_feature,
         });
         let app = routes(expected_app_state);

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::features::user::error::UserError;
 use crate::infra::password::PasswordService;
 use crate::infra::persistence::db::user::{UserInsert, UserRepository};
@@ -12,12 +14,12 @@ pub trait RegisterFeature {
 
 #[derive(Clone)]
 pub struct UserRegisterFeature<P: PasswordService, R: UserRepository> {
-    password_service: P,
-    user_repository: R,
+    password_service: Arc<P>,
+    user_repository: Arc<R>,
 }
 
 impl<P: PasswordService, R: UserRepository> UserRegisterFeature<P, R> {
-    pub fn new(password_service: P, user_repository: R) -> Self {
+    pub fn new(password_service: Arc<P>, user_repository: Arc<R>) -> Self {
         Self {
             password_service,
             user_repository,
@@ -44,6 +46,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use crate::features::user::register::RegisterFeature;
     use crate::features::user::register::UserRegisterFeature;
     use crate::infra::password::PasswordService;
@@ -78,8 +82,8 @@ mod tests {
         // Arrange
         let expected_username = "test".to_string();
         let expected_password = "password".to_string();
-        let mock_password_service = MockPasswordService;
-        let mock_user_repository = MockUserRepository;
+        let mock_password_service = Arc::new(MockPasswordService);
+        let mock_user_repository = Arc::new(MockUserRepository);
         let feature = UserRegisterFeature::new(mock_password_service, mock_user_repository);
         // Act
         let actual_result = feature

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::{
     constants::ANONYMOUS_CSRF_TTL_SECONDS,
     features::csrf::{error::CsrfError, model::CsrfTokenPair},
@@ -19,13 +21,13 @@ pub trait TokenFeature {
 
 #[derive(Clone)]
 pub struct CsrfTokenFeature<R: SessionRepository, C: CsrfRepository, S: CsrfService> {
-    session_repository: R,
-    csrf_repository: C,
-    csrf_service: S,
+    session_repository: Arc<R>,
+    csrf_repository: Arc<C>,
+    csrf_service: Arc<S>,
 }
 
 impl<R: SessionRepository, C: CsrfRepository, S: CsrfService> CsrfTokenFeature<R, C, S> {
-    pub fn new(session_repository: R, csrf_repository: C, csrf_service: S) -> Self {
+    pub fn new(session_repository: Arc<R>, csrf_repository: Arc<C>, csrf_service: Arc<S>) -> Self {
         Self {
             session_repository,
             csrf_repository,
@@ -166,15 +168,15 @@ mod tests {
             username: expected_username,
             csrf_token: expected_csrf_token.clone(),
         };
-        let mock_session_repository = MockSessionRepository {
+        let mock_session_repository = Arc::new(MockSessionRepository {
             error: Mutex::new(None),
             return_value: expected_user_session,
-        };
-        let mock_csrf_repository = MockCsrfRepository;
-        let mock_csrf_service = MockCsrfService {
+        });
+        let mock_csrf_repository = Arc::new(MockCsrfRepository);
+        let mock_csrf_service = Arc::new(MockCsrfService {
             error: Mutex::new(None),
             return_value: (expected_csrf_token.clone(), expected_csrf_cookie),
-        };
+        });
         let feature = CsrfTokenFeature::new(
             mock_session_repository,
             mock_csrf_repository,
@@ -208,15 +210,15 @@ mod tests {
             username: expected_username,
             csrf_token: expected_csrf_token.clone(),
         };
-        let mock_session_repository = MockSessionRepository {
+        let mock_session_repository = Arc::new(MockSessionRepository {
             error: Mutex::new(Some(SessionError::NotFound)),
             return_value: expected_user_session,
-        };
-        let mock_csrf_repository = MockCsrfRepository;
-        let mock_csrf_service = MockCsrfService {
+        });
+        let mock_csrf_repository = Arc::new(MockCsrfRepository);
+        let mock_csrf_service = Arc::new(MockCsrfService {
             error: Mutex::new(None),
             return_value: (expected_anonymous_csrf_token.clone(), expected_csrf_cookie),
-        };
+        });
         let feature = CsrfTokenFeature::new(
             mock_session_repository,
             mock_csrf_repository,
@@ -250,15 +252,15 @@ mod tests {
             username: expected_username,
             csrf_token: expected_csrf_token.clone(),
         };
-        let mock_session_repository = MockSessionRepository {
+        let mock_session_repository = Arc::new(MockSessionRepository {
             error: Mutex::new(Some(SessionError::NotFound)),
             return_value: expected_user_session,
-        };
-        let mock_csrf_repository = MockCsrfRepository;
-        let mock_csrf_service = MockCsrfService {
+        });
+        let mock_csrf_repository = Arc::new(MockCsrfRepository);
+        let mock_csrf_service = Arc::new(MockCsrfService {
             error: Mutex::new(None),
             return_value: (expected_anonymous_csrf_token.clone(), expected_csrf_cookie),
-        };
+        });
         let feature = CsrfTokenFeature::new(
             mock_session_repository,
             mock_csrf_repository,

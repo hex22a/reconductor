@@ -2,7 +2,10 @@ use std::sync::{Arc, Mutex};
 
 use crate::{
     constants::REDIS_POOL_SIZE,
-    features::{csrf::token::CsrfTokenFeature, user::register::UserRegisterFeature},
+    features::{
+        csrf::token::CsrfTokenFeature,
+        user::{login::UserLoginFeature, register::UserRegisterFeature},
+    },
     infra::{
         csrf::AesGcmCsrfService,
         password::Argon2Service,
@@ -36,22 +39,40 @@ async fn main() -> anyhow::Result<()> {
     let config = config::Config::from_env()?;
     let db = db::init_db(&config.database_url).await;
     let kv = Arc::new(FredKvProvider::new(config.redis_url, REDIS_POOL_SIZE).await?);
-    let user_repository = PgUserRepository { db };
-    let session_repository = SessionStore::new(Arc::clone(&kv));
-    let csrf_repository = CsrfStore::new(Arc::clone(&kv));
-    let password_service = Argon2Service;
-    let os_rng_serivce = OsRngService::new(Arc::new(Mutex::new(SysRng)));
-    let csrf_service = AesGcmCsrfService::new(os_rng_serivce, config.csrf_key);
-    let register_feature = UserRegisterFeature::new(password_service, user_repository);
-    let csrf_feature = CsrfTokenFeature::new(session_repository, csrf_repository, csrf_service);
+    let user_repository = Arc::new(PgUserRepository { db });
+    let session_repository = Arc::new(SessionStore::new(Arc::clone(&kv)));
+    let csrf_repository = Arc::new(CsrfStore::new(Arc::clone(&kv)));
+    let password_service = Arc::new(Argon2Service);
+    let os_rng_serivce = Arc::new(OsRngService::new(Arc::new(Mutex::new(SysRng))));
+    let csrf_service = Arc::new(AesGcmCsrfService::new(
+        Arc::clone(&os_rng_serivce),
+        config.csrf_key,
+    ));
+    let register_feature =
+        UserRegisterFeature::new(Arc::clone(&password_service), Arc::clone(&user_repository));
+    let login_feature = UserLoginFeature::new(
+        Arc::clone(&user_repository),
+        Arc::clone(&session_repository),
+        Arc::clone(&csrf_repository),
+        Arc::clone(&csrf_service),
+        Arc::clone(&password_service),
+        Arc::clone(&os_rng_serivce),
+    );
+    let csrf_feature = CsrfTokenFeature::new(
+        Arc::clone(&session_repository),
+        Arc::clone(&csrf_repository),
+        Arc::clone(&csrf_service),
+    );
     let app_state = Arc::new(AppState {
         register_feature,
+        login_feature,
         csrf_feature,
     });
 
     let app = Router::new()
         .merge(v1::health::routes())
         .merge(v1::auth::register::routes(Arc::clone(&app_state)))
+        .merge(v1::auth::login::routes(Arc::clone(&app_state)))
         .merge(v1::csrf::routes(Arc::clone(&app_state)));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();

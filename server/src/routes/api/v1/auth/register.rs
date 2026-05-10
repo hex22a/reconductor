@@ -6,18 +6,19 @@ use crate::{
     constants::API_REGISTER_ENDPOINT_V1,
     features::{
         csrf::token::TokenFeature,
-        user::{handler::handle, register::RegisterFeature},
+        user::{handler::register, login::LoginFeature, register::RegisterFeature},
     },
     state::AppState,
 };
 
-pub fn routes<R, T>(state: Arc<AppState<R, T>>) -> Router
+pub fn routes<R, L, T>(state: Arc<AppState<R, L, T>>) -> Router
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
+    L: LoginFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,
 {
     Router::new()
-        .route(API_REGISTER_ENDPOINT_V1, post(handle::<R, T>))
+        .route(API_REGISTER_ENDPOINT_V1, post(register::<R, L, T>))
         .with_state(state)
 }
 
@@ -33,7 +34,10 @@ mod tests {
     use crate::{
         features::{
             csrf::{error::CsrfError, model::CsrfTokenPair},
-            user::{dto::RegisterUserRequest, error::UserError, register::RegisterFeature},
+            user::{
+                dto::UserInputRequest, error::UserError, model::AuthSession,
+                register::RegisterFeature,
+            },
         },
         state::AppState,
     };
@@ -42,9 +46,16 @@ mod tests {
     struct MockRegisterFeature;
     #[derive(Clone)]
     struct MockTokenFeature;
+    #[derive(Clone)]
+    struct MockLoginFeature;
     impl RegisterFeature for MockRegisterFeature {
         async fn register(&self, _: String, _: String) -> Result<(), UserError> {
             Ok(())
+        }
+    }
+    impl LoginFeature for MockLoginFeature {
+        async fn login(&self, _: String, _: String) -> Result<AuthSession, UserError> {
+            todo!()
         }
     }
     impl TokenFeature for MockTokenFeature {
@@ -60,11 +71,13 @@ mod tests {
         let expected_password = "password".to_string();
         let mock_register_feature = MockRegisterFeature;
         let mock_token_feature = MockTokenFeature;
+        let mock_login_feature = MockLoginFeature;
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
+            login_feature: mock_login_feature,
             csrf_feature: mock_token_feature,
         });
-        let expected_register_request = RegisterUserRequest {
+        let expected_register_request = UserInputRequest {
             username: expected_username,
             password: expected_password,
         };
@@ -93,11 +106,13 @@ mod tests {
         let expected_password = "password".to_string();
         let mock_register_feature = MockRegisterFeature;
         let mock_token_feature = MockTokenFeature;
+        let mock_login_feature = MockLoginFeature;
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
+            login_feature: mock_login_feature,
             csrf_feature: mock_token_feature,
         });
-        let expected_register_request = RegisterUserRequest {
+        let expected_register_request = UserInputRequest {
             username: expected_username,
             password: expected_password,
         };
