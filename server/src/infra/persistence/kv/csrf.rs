@@ -6,21 +6,21 @@ use crate::{
 };
 
 #[derive(Debug)]
-pub enum CsrfError {
+pub enum CsrfRepositoryError {
     StorageError(fred::error::Error),
 }
 
-impl fmt::Display for CsrfError {
+impl fmt::Display for CsrfRepositoryError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            CsrfError::StorageError(e) => write!(f, "storage error: {}", e),
+            CsrfRepositoryError::StorageError(e) => write!(f, "storage error: {}", e),
         }
     }
 }
 
-impl From<fred::error::Error> for CsrfError {
+impl From<fred::error::Error> for CsrfRepositoryError {
     fn from(value: fred::error::Error) -> Self {
-        CsrfError::StorageError(value)
+        CsrfRepositoryError::StorageError(value)
     }
 }
 
@@ -28,15 +28,15 @@ pub trait CsrfRepository {
     fn create_anonymous_csrf(
         &self,
         token: String,
-    ) -> impl Future<Output = Result<(), CsrfError>> + Send;
+    ) -> impl Future<Output = Result<(), CsrfRepositoryError>> + Send;
     fn verify_anonymous_csrf(
         &self,
         token: String,
-    ) -> impl Future<Output = Result<bool, CsrfError>> + Send;
+    ) -> impl Future<Output = Result<bool, CsrfRepositoryError>> + Send;
     fn delete_anonymous_csrf(
         &self,
         token: String,
-    ) -> impl Future<Output = Result<(), CsrfError>> + Send;
+    ) -> impl Future<Output = Result<(), CsrfRepositoryError>> + Send;
 }
 
 #[derive(Clone)]
@@ -51,20 +51,20 @@ impl<K: KvProvider> CsrfStore<K> {
 }
 
 impl<K: KvProvider + Send + Sync> CsrfRepository for CsrfStore<K> {
-    async fn create_anonymous_csrf(&self, token: String) -> Result<(), CsrfError> {
+    async fn create_anonymous_csrf(&self, token: String) -> Result<(), CsrfRepositoryError> {
         let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token);
         let ttl = Duration::from_secs(ANONYMOUS_CSRF_TTL_SECONDS);
         self.kv.set(key, "1".to_string(), Some(ttl)).await?;
         Ok(())
     }
 
-    async fn verify_anonymous_csrf(&self, token: String) -> Result<bool, CsrfError> {
+    async fn verify_anonymous_csrf(&self, token: String) -> Result<bool, CsrfRepositoryError> {
         let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token);
         let csrf = self.kv.get(key).await?;
         Ok(csrf != None)
     }
 
-    async fn delete_anonymous_csrf(&self, token: String) -> Result<(), CsrfError> {
+    async fn delete_anonymous_csrf(&self, token: String) -> Result<(), CsrfRepositoryError> {
         let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token);
         self.kv.del(key).await?;
         Ok(())

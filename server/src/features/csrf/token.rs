@@ -1,7 +1,6 @@
 use crate::{
     constants::ANONYMOUS_CSRF_TTL_SECONDS,
-    domain::error::ServerError,
-    features::csrf::model::CsrfTokenPair,
+    features::csrf::{error::CsrfError, model::CsrfTokenPair},
     infra::{
         csrf::CsrfService,
         persistence::kv::{
@@ -15,7 +14,7 @@ pub trait TokenFeature {
     fn get_token(
         &self,
         session_token: Option<String>,
-    ) -> impl Future<Output = Result<CsrfTokenPair, ServerError>> + Send;
+    ) -> impl Future<Output = Result<CsrfTokenPair, CsrfError>> + Send;
 }
 
 #[derive(Clone)]
@@ -41,10 +40,7 @@ where
     C: CsrfRepository + Send + Sync,
     S: CsrfService + Send + Sync,
 {
-    async fn get_token(
-        &self,
-        session_cookie: Option<String>,
-    ) -> Result<CsrfTokenPair, ServerError> {
+    async fn get_token(&self, session_cookie: Option<String>) -> Result<CsrfTokenPair, CsrfError> {
         match session_cookie {
             Some(token) => {
                 let user_session_result = self.session_repository.get_user_session(token).await;
@@ -65,7 +61,12 @@ where
                                 cookie_value: Some(cookie_value),
                             })
                         }
-                        _ => Err(ServerError::Internal),
+                        SessionError::ParseError => Err(CsrfError::StorageError(
+                            "error parsing user session".to_string(),
+                        )),
+                        SessionError::StorageError(e) => {
+                            Err(CsrfError::StorageError(e.to_string()))
+                        }
                     },
                 }
             }
@@ -93,7 +94,7 @@ mod tests {
     use super::*;
     use crate::infra::{
         csrf::{CsrfService, CsrfServiceError},
-        persistence::kv::{csrf::CsrfError, session::UserSession},
+        persistence::kv::{csrf::CsrfRepositoryError, session::UserSession},
     };
 
     struct MockSessionRepository {
@@ -122,15 +123,15 @@ mod tests {
         }
     }
     impl CsrfRepository for MockCsrfRepository {
-        async fn create_anonymous_csrf(&self, _: String) -> Result<(), CsrfError> {
+        async fn create_anonymous_csrf(&self, _: String) -> Result<(), CsrfRepositoryError> {
             Ok(())
         }
 
-        async fn verify_anonymous_csrf(&self, _: String) -> Result<bool, CsrfError> {
+        async fn verify_anonymous_csrf(&self, _: String) -> Result<bool, CsrfRepositoryError> {
             todo!()
         }
 
-        async fn delete_anonymous_csrf(&self, _: String) -> Result<(), CsrfError> {
+        async fn delete_anonymous_csrf(&self, _: String) -> Result<(), CsrfRepositoryError> {
             todo!()
         }
     }

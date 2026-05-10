@@ -33,10 +33,9 @@ mod tests {
 
     use crate::{
         constants::USER_SESSION_COOKIE_NAME,
-        domain::error::ServerError,
         features::{
-            csrf::{model::CsrfTokenPair, token::TokenFeature},
-            user::register::RegisterFeature,
+            csrf::{error::CsrfError, model::CsrfTokenPair, token::TokenFeature},
+            user::{error::UserError, register::RegisterFeature},
         },
     };
 
@@ -47,12 +46,12 @@ mod tests {
         return_value: CsrfTokenPair,
     }
     impl RegisterFeature for MockRegisterFeature {
-        async fn register(&self, _: String, _: String) -> Result<(), ServerError> {
+        async fn register(&self, _: String, _: String) -> Result<(), UserError> {
             todo!()
         }
     }
     impl TokenFeature for MockTokenFeature {
-        async fn get_token(&self, _: Option<String>) -> Result<CsrfTokenPair, ServerError> {
+        async fn get_token(&self, _: Option<String>) -> Result<CsrfTokenPair, CsrfError> {
             Ok(self.return_value.clone())
         }
     }

@@ -1,4 +1,4 @@
-use crate::domain::error::ServerError;
+use crate::features::user::error::UserError;
 use crate::infra::password::PasswordService;
 use crate::infra::persistence::db::user::{UserInsert, UserRepository};
 
@@ -7,7 +7,7 @@ pub trait RegisterFeature {
         &self,
         username: String,
         password: String,
-    ) -> impl Future<Output = Result<(), ServerError>> + Send;
+    ) -> impl Future<Output = Result<(), UserError>> + Send;
 }
 
 #[derive(Clone)]
@@ -30,7 +30,7 @@ where
     P: PasswordService + Send + Sync,
     R: UserRepository + Send + Sync,
 {
-    async fn register(&self, username: String, password: String) -> Result<(), ServerError> {
+    async fn register(&self, username: String, password: String) -> Result<(), UserError> {
         let password_hash = self.password_service.hash_password(&password)?;
         self.user_repository
             .add_user(UserInsert {

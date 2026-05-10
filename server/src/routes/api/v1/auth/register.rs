@@ -31,10 +31,9 @@ mod tests {
 
     use super::*;
     use crate::{
-        domain::error::ServerError,
         features::{
-            csrf::model::CsrfTokenPair,
-            user::{dto::RegisterUserRequest, register::RegisterFeature},
+            csrf::{error::CsrfError, model::CsrfTokenPair},
+            user::{dto::RegisterUserRequest, error::UserError, register::RegisterFeature},
         },
         state::AppState,
     };
@@ -44,16 +43,12 @@ mod tests {
     #[derive(Clone)]
     struct MockTokenFeature;
     impl RegisterFeature for MockRegisterFeature {
-        async fn register(
-            &self,
-            _: String,
-            _: String,
-        ) -> Result<(), crate::domain::error::ServerError> {
+        async fn register(&self, _: String, _: String) -> Result<(), UserError> {
             Ok(())
         }
     }
     impl TokenFeature for MockTokenFeature {
-        async fn get_token(&self, _: Option<String>) -> Result<CsrfTokenPair, ServerError> {
+        async fn get_token(&self, _: Option<String>) -> Result<CsrfTokenPair, CsrfError> {
             todo!()
         }
     }

@@ -1,9 +1,12 @@
 use std::collections::HashMap;
 
-use crate::infra::{
-    csrf::CsrfServiceError,
-    password::PasswordServiceError,
-    persistence::kv::{csrf::CsrfError, session::SessionError},
+use crate::{
+    features::{csrf::error::CsrfError, user::error::UserError},
+    infra::{
+        csrf::CsrfServiceError,
+        password::PasswordServiceError,
+        persistence::kv::{csrf::CsrfRepositoryError, session::SessionError},
+    },
 };
 
 pub type FieldErrors = HashMap<String, Vec<String>>;
@@ -13,6 +16,18 @@ pub enum ServerError {
     Internal,
     DatabaseError,
     ValidationError(FieldErrors),
+}
+
+impl From<CsrfError> for ServerError {
+    fn from(_: CsrfError) -> Self {
+        ServerError::Internal
+    }
+}
+
+impl From<UserError> for ServerError {
+    fn from(_: UserError) -> Self {
+        ServerError::Internal
+    }
 }
 
 impl From<PasswordServiceError> for ServerError {
@@ -38,8 +53,8 @@ impl From<CsrfServiceError> for ServerError {
     }
 }
 
-impl From<CsrfError> for ServerError {
-    fn from(value: CsrfError) -> Self {
+impl From<CsrfRepositoryError> for ServerError {
+    fn from(value: CsrfRepositoryError) -> Self {
         ServerError::Internal
     }
 }

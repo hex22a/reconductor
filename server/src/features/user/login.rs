@@ -1,5 +1,5 @@
 use crate::{
-    domain::error::ServerError,
+    features::user::error::UserError,
     infra::{
         password::PasswordService,
         persistence::{db::user::UserRepository, kv::session::SessionRepository},
@@ -7,17 +7,12 @@ use crate::{
     },
 };
 
-#[derive(Debug)]
-enum LoginError {
-    PasswordMismatch,
-}
-
 pub trait LoginFeature {
     fn login(
         &self,
         username: String,
         password: String,
-    ) -> impl Future<Output = Result<String, LoginError>> + Send;
+    ) -> impl Future<Output = Result<String, UserError>> + Send;
 }
 
 #[derive(Clone)]
@@ -62,7 +57,7 @@ where
     S: SessionRepository + Send + Sync,
     N: RngService + Send + Sync,
 {
-    async fn login(&self, username: String, password: String) -> Result<String, LoginError> {
+    async fn login(&self, username: String, password: String) -> Result<String, UserError> {
         todo!()
     }
 }
@@ -242,7 +237,7 @@ mod tests {
         // Assert
         assert!(matches!(
             actual_login_result,
-            Err(LoginError::PasswordMismatch)
+            Err(UserError::PasswordMismatch)
         ));
     }
 }
