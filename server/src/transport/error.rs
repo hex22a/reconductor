@@ -2,7 +2,7 @@ use axum::{Json, http::StatusCode, response::IntoResponse};
 use serde::Serialize;
 
 use crate::{
-    constants::{DATABASE_ERROR_MESSAGE, UNEXPECTED_ERROR_MESSAGE},
+    constants::UNEXPECTED_ERROR_MESSAGE,
     domain::error::{FieldErrors, ServerError},
 };
 
@@ -40,14 +40,6 @@ impl IntoResponse for ServerError {
                 Json(ErrorResponse {
                     code: ErrorCode::UnexpectedError,
                     error: ErrorDetail::Message(UNEXPECTED_ERROR_MESSAGE.to_string()),
-                }),
-            )
-                .into_response(),
-            ServerError::DatabaseError => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorResponse {
-                    code: ErrorCode::UnexpectedError,
-                    error: ErrorDetail::Message(DATABASE_ERROR_MESSAGE.to_string()),
                 }),
             )
                 .into_response(),
