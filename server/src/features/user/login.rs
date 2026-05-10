@@ -1,8 +1,16 @@
 use crate::{
-    features::user::error::UserError,
+    constants::USER_SESSION_TTL_SECONDS,
+    features::user::{error::UserError, model::AuthSession},
     infra::{
+        csrf::CsrfService,
         password::PasswordService,
-        persistence::{db::user::UserRepository, kv::session::SessionRepository},
+        persistence::{
+            db::user::UserRepository,
+            kv::{
+                csrf::CsrfRepository,
+                session::{SessionRepository, UserSession},
+            },
+        },
         random::RngService,
     },
 };
@@ -12,53 +20,86 @@ pub trait LoginFeature {
         &self,
         username: String,
         password: String,
-    ) -> impl Future<Output = Result<String, UserError>> + Send;
+    ) -> impl Future<Output = Result<AuthSession, UserError>> + Send;
 }
 
 #[derive(Clone)]
 pub struct UserLoginFeature<
-    P: PasswordService,
-    R: UserRepository,
-    S: SessionRepository,
-    N: RngService,
+    UR: UserRepository,
+    SR: SessionRepository,
+    CR: CsrfRepository,
+    CS: CsrfService,
+    PS: PasswordService,
+    R: RngService,
 > {
-    password_service: P,
-    user_repository: R,
-    session_repository: S,
-    rng_service: N,
+    user_repository: UR,
+    session_repository: SR,
+    csrf_repository: CR,
+    csrf_service: CS,
+    password_service: PS,
+    rng_service: R,
 }
 
-impl<P, R, S, N> UserLoginFeature<P, R, S, N>
+impl<UR, SR, CR, CS, PS, R> UserLoginFeature<UR, SR, CR, CS, PS, R>
 where
-    P: PasswordService + Send + Sync,
-    R: UserRepository + Send + Sync,
-    S: SessionRepository + Send + Sync,
-    N: RngService + Send + Sync,
+    UR: UserRepository + Send + Sync,
+    SR: SessionRepository + Send + Sync,
+    CR: CsrfRepository + Send + Sync,
+    CS: CsrfService + Send + Sync,
+    PS: PasswordService + Send + Sync,
+    R: RngService + Send + Sync,
 {
     pub fn new(
-        password_service: P,
-        user_repository: R,
-        session_repository: S,
-        rng_service: N,
+        user_repository: UR,
+        session_repository: SR,
+        csrf_repository: CR,
+        csrf_service: CS,
+        password_service: PS,
+        rng_service: R,
     ) -> Self {
         Self {
             password_service,
             user_repository,
             session_repository,
+            csrf_repository,
+            csrf_service,
             rng_service,
         }
     }
 }
 
-impl<P, R, S, N> LoginFeature for UserLoginFeature<P, R, S, N>
+impl<UR, SR, CR, CS, PS, R> LoginFeature for UserLoginFeature<UR, SR, CR, CS, PS, R>
 where
-    P: PasswordService + Send + Sync,
-    R: UserRepository + Send + Sync,
-    S: SessionRepository + Send + Sync,
-    N: RngService + Send + Sync,
+    UR: UserRepository + Send + Sync,
+    SR: SessionRepository + Send + Sync,
+    CR: CsrfRepository + Send + Sync,
+    CS: CsrfService + Send + Sync,
+    PS: PasswordService + Send + Sync,
+    R: RngService + Send + Sync,
 {
-    async fn login(&self, username: String, password: String) -> Result<String, UserError> {
-        todo!()
+    async fn login(&self, username: String, password: String) -> Result<AuthSession, UserError> {
+        let user = self.user_repository.get_user_by_username(&username).await?;
+        let is_valid = self
+            .password_service
+            .verify_password(&password, &user.password_hash)?;
+        if is_valid {
+            let session_id = self.rng_service.generate_session_id()?;
+            let (csrf_token, _) = self.csrf_service.generate(USER_SESSION_TTL_SECONDS)?;
+            self.session_repository
+                .create_user_session(UserSession {
+                    token: session_id.clone(),
+                    csrf_token: csrf_token.clone(),
+                    user_id: user.id,
+                    username: user.username,
+                })
+                .await?;
+            Ok(AuthSession {
+                session_id,
+                csrf_token,
+            })
+        } else {
+            Err(UserError::PasswordMismatch)
+        }
     }
 }
 
@@ -73,10 +114,14 @@ mod tests {
     use crate::{
         constants::NONCE_SIZE_BYTES,
         infra::{
+            csrf::CsrfServiceError,
             password::{PasswordService, PasswordServiceError},
             persistence::{
                 db::user::{UserEntity, UserInsert},
-                kv::session::{SessionError, UserSession},
+                kv::{
+                    csrf::CsrfRepositoryError,
+                    session::{SessionError, UserSession},
+                },
             },
             random::RngServiceError,
         },
@@ -86,11 +131,15 @@ mod tests {
         error: Mutex<Option<PasswordServiceError>>,
         is_valid: bool,
     }
+    struct MockCsrfRepository;
     struct MockUserRepository {
         error: Mutex<Option<sqlx::Error>>,
         return_value: UserEntity,
     }
     struct MockSessionRepository;
+    struct MockCsrfService {
+        return_value: (String, String),
+    }
     struct MockRngService {
         return_value: String,
     }
@@ -131,6 +180,28 @@ mod tests {
             todo!()
         }
     }
+    impl CsrfRepository for MockCsrfRepository {
+        async fn create_anonymous_csrf(&self, token: String) -> Result<(), CsrfRepositoryError> {
+            todo!()
+        }
+
+        async fn verify_anonymous_csrf(&self, token: String) -> Result<bool, CsrfRepositoryError> {
+            todo!()
+        }
+
+        async fn delete_anonymous_csrf(&self, _: String) -> Result<(), CsrfRepositoryError> {
+            Ok(())
+        }
+    }
+    impl CsrfService for MockCsrfService {
+        fn generate(&self, _: u64) -> Result<(String, String), CsrfServiceError> {
+            Ok(self.return_value.clone())
+        }
+
+        fn verify(&self, _: &str, _: &str) -> bool {
+            todo!()
+        }
+    }
     impl RngService for MockRngService {
         fn generate_nonce(&self) -> Result<[u8; NONCE_SIZE_BYTES], RngServiceError> {
             todo!()
@@ -144,6 +215,8 @@ mod tests {
     #[tokio::test]
     async fn test_login_password_matches() {
         // Arrange
+        let expected_csrf_token = "csrf_token".to_string();
+        let expected_csrf_cookie_value = "csrf_cookie".to_string();
         let expected_session_cookie = "session_cookie".to_string();
         let expected_user_id = Uuid::now_v7();
         let expected_username = "test".to_string();
@@ -163,6 +236,14 @@ mod tests {
             updated_at: expected_updated_at,
             last_login_at: expected_last_login_at,
             is_active: expected_is_active,
+        };
+        let expected_csrf_service_generated_value = (
+            expected_csrf_token.clone(),
+            expected_csrf_cookie_value.clone(),
+        );
+        let expected_auth_session = AuthSession {
+            session_id: expected_session_cookie.clone(),
+            csrf_token: expected_csrf_token.clone(),
         };
         let mock_password_service = MockPasswordService {
             error: Mutex::new(None),
@@ -173,27 +254,35 @@ mod tests {
             return_value: expected_user_entity,
         };
         let mock_session_repository = MockSessionRepository;
+        let mock_csrf_repository = MockCsrfRepository;
+        let mock_csrf_service = MockCsrfService {
+            return_value: expected_csrf_service_generated_value,
+        };
         let mock_rng_service = MockRngService {
             return_value: expected_session_cookie.clone(),
         };
         let feature = UserLoginFeature::new(
-            mock_password_service,
             mock_user_repository,
             mock_session_repository,
+            mock_csrf_repository,
+            mock_csrf_service,
+            mock_password_service,
             mock_rng_service,
         );
         // Act
-        let actual_session_cookie = feature
+        let actual_auth_session = feature
             .login(expected_username, expected_password)
             .await
             .unwrap();
         // Assert
-        assert_eq!(actual_session_cookie, expected_session_cookie);
+        assert_eq!(actual_auth_session, expected_auth_session);
     }
 
     #[tokio::test]
     async fn test_login_password_does_not_match() {
         // Arrange
+        let expected_csrf_token = "csrf_token".to_string();
+        let expected_csrf_cookie_value = "csrf_cookie".to_string();
         let expected_user_id = Uuid::now_v7();
         let expected_session_cookie = "session_cookie".to_string();
         let expected_username = "test".to_string();
@@ -214,6 +303,8 @@ mod tests {
             last_login_at: expected_last_login_at,
             is_active: expected_is_active,
         };
+        let expected_csrf_service_generated_value =
+            (expected_csrf_token, expected_csrf_cookie_value);
         let mock_password_service = MockPasswordService {
             error: Mutex::new(None),
             is_valid: false,
@@ -223,13 +314,19 @@ mod tests {
             return_value: expected_user_entity,
         };
         let mock_session_repository = MockSessionRepository;
+        let mock_csrf_repository = MockCsrfRepository;
+        let mock_csrf_service = MockCsrfService {
+            return_value: expected_csrf_service_generated_value,
+        };
         let mock_rng_service = MockRngService {
             return_value: expected_session_cookie.clone(),
         };
         let feature = UserLoginFeature::new(
-            mock_password_service,
             mock_user_repository,
             mock_session_repository,
+            mock_csrf_repository,
+            mock_csrf_service,
+            mock_password_service,
             mock_rng_service,
         );
         // Act

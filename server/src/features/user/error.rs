@@ -1,11 +1,15 @@
 use core::fmt;
 
-use crate::infra::password::PasswordServiceError;
+use crate::infra::{
+    csrf::CsrfServiceError, password::PasswordServiceError, persistence::kv::session::SessionError,
+    random::RngServiceError,
+};
 
 #[derive(Debug)]
 pub enum UserError {
     PasswordMismatch,
     PasswordError,
+    Interntal,
     StorageError(String),
 }
 
@@ -21,12 +25,34 @@ impl From<sqlx::Error> for UserError {
     }
 }
 
+impl From<RngServiceError> for UserError {
+    fn from(_: RngServiceError) -> Self {
+        UserError::Interntal
+    }
+}
+
+impl From<CsrfServiceError> for UserError {
+    fn from(_: CsrfServiceError) -> Self {
+        UserError::Interntal
+    }
+}
+
+impl From<SessionError> for UserError {
+    fn from(value: SessionError) -> Self {
+        match value {
+            SessionError::StorageError(e) => UserError::StorageError(e.to_string()),
+            _ => UserError::Interntal,
+        }
+    }
+}
+
 impl fmt::Display for UserError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             UserError::StorageError(e) => write!(f, "error storing user: {}", e),
             UserError::PasswordError => write!(f, "password service error"),
             UserError::PasswordMismatch => write!(f, "password mismatch"),
+            UserError::Interntal => write!(f, "internal error"),
         }
     }
 }

@@ -54,6 +54,12 @@ impl TryFrom<RegisterUserRequest> for RegisterUser {
     }
 }
 
+#[derive(Debug, PartialEq)]
+pub struct AuthSession {
+    pub session_id: String,
+    pub csrf_token: String,
+}
+
 #[cfg(test)]
 mod tests {
     use crate::features::user::{dto::RegisterUserRequest, model::RegisterUser};
