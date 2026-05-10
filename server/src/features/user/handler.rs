@@ -1,11 +1,16 @@
 use std::sync::Arc;
 
-use crate::features::{
-    csrf::token::TokenFeature,
-    user::{dto::LoginResponse, login::LoginFeature, model::UserInput, register::RegisterFeature},
+use crate::{
+    constants::USER_SESSION_COOKIE_NAME,
+    features::{
+        csrf::token::TokenFeature,
+        user::{
+            dto::LoginResponse, login::LoginFeature, model::UserInput, register::RegisterFeature,
+        },
+    },
 };
 use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
-use axum_extra::extract::CookieJar;
+use axum_extra::extract::{CookieJar, cookie::Cookie};
 
 use crate::{domain::error::ServerError, features::user::dto::UserInputRequest, state::AppState};
 
@@ -41,8 +46,16 @@ where
         .login_feature
         .login(user.username, user.password)
         .await?;
+    let jar = jar.add(
+        Cookie::build((USER_SESSION_COOKIE_NAME, auth_session.session_id))
+            .http_only(true)
+            .secure(true)
+            .path("/")
+            .build(),
+    );
     Ok((
         StatusCode::OK,
+        jar,
         Json(LoginResponse {
             csrf_token: auth_session.csrf_token,
         }),
