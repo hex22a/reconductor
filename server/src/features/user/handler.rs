@@ -4,13 +4,16 @@ use crate::{
     constants::USER_SESSION_COOKIE_NAME,
     features::{
         csrf::token::TokenFeature,
-        session::auth::AuthFeature,
+        session::{auth::AuthFeature, model::UserSession},
         user::{
-            dto::LoginResponse, login::LoginFeature, model::UserInput, register::RegisterFeature,
+            dto::{LoginResponse, MeResponse},
+            login::LoginFeature,
+            model::UserInput,
+            register::RegisterFeature,
         },
     },
 };
-use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
+use axum::{Extension, Json, extract::State, http::StatusCode, response::IntoResponse};
 use axum_extra::extract::{CookieJar, cookie::Cookie};
 
 use crate::{domain::error::ServerError, features::user::dto::UserInputRequest, state::AppState};
@@ -63,4 +66,13 @@ where
             csrf_token: auth_session.csrf_token,
         }),
     ))
+}
+
+pub async fn me(Extension(user_session): Extension<UserSession>) -> impl IntoResponse {
+    (
+        StatusCode::OK,
+        Json(MeResponse {
+            username: user_session.username,
+        }),
+    )
 }

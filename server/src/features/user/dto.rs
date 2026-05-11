@@ -10,3 +10,8 @@ pub struct UserInputRequest {
 pub struct LoginResponse {
     pub csrf_token: String,
 }
+
+#[derive(Serialize)]
+pub struct MeResponse {
+    pub username: String,
+}

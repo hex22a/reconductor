@@ -76,6 +76,7 @@ async fn main() -> anyhow::Result<()> {
         .merge(v1::health::routes())
         .merge(v1::auth::register::routes(Arc::clone(&app_state)))
         .merge(v1::auth::login::routes(Arc::clone(&app_state)))
+        .merge(v1::me::routes(Arc::clone(&app_state)))
         .merge(v1::csrf::routes(Arc::clone(&app_state)));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
