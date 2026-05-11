@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use crate::{
-    constants::REDIS_POOL_SIZE,
+    constants::{CSRF_HEADER, REDIS_POOL_SIZE},
     features::{
         csrf::token::CsrfTokenFeature,
         session::auth::UserAuthFeature,
@@ -17,8 +17,12 @@ use crate::{
         random::OsRngService,
     },
 };
-use axum::Router;
+use axum::{
+    Router,
+    http::{HeaderName, HeaderValue, Method, header::CONTENT_TYPE},
+};
 use rand::rngs::SysRng;
+use tower_http::cors::CorsLayer;
 
 mod config;
 mod constants;
@@ -72,12 +76,19 @@ async fn main() -> anyhow::Result<()> {
         auth_feature,
     });
 
+    let cors = CorsLayer::new()
+        .allow_origin(config.dashboard_url)
+        .allow_methods([Method::GET, Method::POST])
+        .allow_headers([CONTENT_TYPE, CSRF_HEADER.parse::<HeaderName>().unwrap()])
+        .allow_credentials(true);
+
     let app = Router::new()
         .merge(v1::health::routes())
         .merge(v1::auth::register::routes(Arc::clone(&app_state)))
         .merge(v1::auth::login::routes(Arc::clone(&app_state)))
         .merge(v1::me::routes(Arc::clone(&app_state)))
-        .merge(v1::csrf::routes(Arc::clone(&app_state)));
+        .merge(v1::csrf::routes(Arc::clone(&app_state)))
+        .layer(cors);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
