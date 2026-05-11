@@ -19,7 +19,7 @@ use crate::{
 };
 use axum::{
     Router,
-    http::{HeaderName, HeaderValue, Method, header::CONTENT_TYPE},
+    http::{HeaderName, Method, header::CONTENT_TYPE},
 };
 use rand::rngs::SysRng;
 use tower_http::cors::CorsLayer;
