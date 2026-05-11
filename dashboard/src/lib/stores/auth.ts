@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { signUp, logout, fetchMe } from '@/lib/services/auth';
+import { logout, fetchMe, signIn } from '@/lib/services/auth';
 
 function createAuthStore() {
     const { subscribe, set } = writable<string | null>(null);
@@ -7,7 +7,7 @@ function createAuthStore() {
     return {
         subscribe,
         login: async (username: string, password: string) => {
-            await signUp(username, password);
+            await signIn(username, password);
             set(username);
         },
         logout: async () => {
