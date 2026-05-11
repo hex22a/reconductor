@@ -180,11 +180,11 @@ mod tests {
         }
     }
     impl CsrfRepository for MockCsrfRepository {
-        async fn create_anonymous_csrf(&self, token: String) -> Result<(), CsrfRepositoryError> {
+        async fn create_anonymous_csrf(&self, _: String) -> Result<(), CsrfRepositoryError> {
             todo!()
         }
 
-        async fn verify_anonymous_csrf(&self, token: String) -> Result<bool, CsrfRepositoryError> {
+        async fn verify_anonymous_csrf(&self, _: String) -> Result<bool, CsrfRepositoryError> {
             todo!()
         }
 
