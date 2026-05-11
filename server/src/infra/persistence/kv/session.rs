@@ -1,26 +1,17 @@
 use core::fmt;
 use std::{collections::HashMap, sync::Arc, time::Duration};
 
-use sqlx::types::Uuid;
-
 use crate::{
     constants::{USER_SESSION_PREFIX, USER_SESSION_TTL_SECONDS},
+    features::session::model::UserSession,
     infra::persistence::kv::KvProvider,
 };
 
 #[derive(Debug)]
-pub enum SessionError {
+pub enum SessionRepositoryError {
     NotFound,
     StorageError(fred::error::Error),
     ParseError,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct UserSession {
-    pub token: String,
-    pub user_id: Uuid,
-    pub username: String,
-    pub csrf_token: String,
 }
 
 impl From<UserSession> for HashMap<String, String> {
@@ -35,36 +26,42 @@ impl From<UserSession> for HashMap<String, String> {
 }
 
 impl TryFrom<HashMap<String, String>> for UserSession {
-    type Error = SessionError;
+    type Error = SessionRepositoryError;
 
-    fn try_from(mut map: HashMap<String, String>) -> Result<Self, SessionError> {
+    fn try_from(mut map: HashMap<String, String>) -> Result<Self, SessionRepositoryError> {
         let user_session = UserSession {
-            token: map.remove("token").ok_or(SessionError::NotFound)?,
+            token: map
+                .remove("token")
+                .ok_or(SessionRepositoryError::NotFound)?,
             user_id: map
                 .remove("user_id")
-                .ok_or(SessionError::NotFound)?
+                .ok_or(SessionRepositoryError::NotFound)?
                 .parse()
-                .map_err(|_| SessionError::ParseError)?,
-            username: map.remove("username").ok_or(SessionError::NotFound)?,
-            csrf_token: map.remove("csrf_token").ok_or(SessionError::NotFound)?,
+                .map_err(|_| SessionRepositoryError::ParseError)?,
+            username: map
+                .remove("username")
+                .ok_or(SessionRepositoryError::NotFound)?,
+            csrf_token: map
+                .remove("csrf_token")
+                .ok_or(SessionRepositoryError::NotFound)?,
         };
         Ok(user_session)
     }
 }
 
-impl fmt::Display for SessionError {
+impl fmt::Display for SessionRepositoryError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            SessionError::NotFound => write!(f, "session not found"),
-            SessionError::ParseError => write!(f, "error parsing uuid"),
-            SessionError::StorageError(e) => write!(f, "storage error: {}", e),
+            SessionRepositoryError::NotFound => write!(f, "session not found"),
+            SessionRepositoryError::ParseError => write!(f, "error parsing uuid"),
+            SessionRepositoryError::StorageError(e) => write!(f, "storage error: {}", e),
         }
     }
 }
 
-impl From<fred::error::Error> for SessionError {
+impl From<fred::error::Error> for SessionRepositoryError {
     fn from(value: fred::error::Error) -> Self {
-        SessionError::StorageError(value)
+        SessionRepositoryError::StorageError(value)
     }
 }
 
@@ -72,15 +69,15 @@ pub trait SessionRepository {
     fn create_user_session(
         &self,
         user_session: UserSession,
-    ) -> impl Future<Output = Result<(), SessionError>> + Send;
+    ) -> impl Future<Output = Result<(), SessionRepositoryError>> + Send;
     fn get_user_session(
         &self,
         token: String,
-    ) -> impl Future<Output = Result<UserSession, SessionError>> + Send;
+    ) -> impl Future<Output = Result<UserSession, SessionRepositoryError>> + Send;
     fn delete_user_session(
         &self,
         token: String,
-    ) -> impl Future<Output = Result<(), SessionError>> + Send;
+    ) -> impl Future<Output = Result<(), SessionRepositoryError>> + Send;
 }
 
 #[derive(Clone)]
@@ -95,7 +92,10 @@ impl<K: KvProvider> SessionStore<K> {
 }
 
 impl<K: KvProvider + Send + Sync> SessionRepository for SessionStore<K> {
-    async fn create_user_session(&self, user_session: UserSession) -> Result<(), SessionError> {
+    async fn create_user_session(
+        &self,
+        user_session: UserSession,
+    ) -> Result<(), SessionRepositoryError> {
         let key = format!("{}:{}", USER_SESSION_PREFIX, user_session.token);
         let ttl = Duration::from_secs(USER_SESSION_TTL_SECONDS);
         self.kv.hset(key.clone(), user_session.into()).await?;
@@ -103,13 +103,13 @@ impl<K: KvProvider + Send + Sync> SessionRepository for SessionStore<K> {
         Ok(())
     }
 
-    async fn get_user_session(&self, token: String) -> Result<UserSession, SessionError> {
+    async fn get_user_session(&self, token: String) -> Result<UserSession, SessionRepositoryError> {
         let key = format!("{}:{}", USER_SESSION_PREFIX, token);
         let session = self.kv.hgetall(key).await?.try_into()?;
         Ok(session)
     }
 
-    async fn delete_user_session(&self, token: String) -> Result<(), SessionError> {
+    async fn delete_user_session(&self, token: String) -> Result<(), SessionRepositoryError> {
         let key = format!("{}:{}", USER_SESSION_PREFIX, token);
         self.kv.del(key).await?;
         Ok(())

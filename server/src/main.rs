@@ -4,6 +4,7 @@ use crate::{
     constants::REDIS_POOL_SIZE,
     features::{
         csrf::token::CsrfTokenFeature,
+        session::auth::UserAuthFeature,
         user::{login::UserLoginFeature, register::UserRegisterFeature},
     },
     infra::{
@@ -63,10 +64,12 @@ async fn main() -> anyhow::Result<()> {
         Arc::clone(&csrf_repository),
         Arc::clone(&csrf_service),
     );
+    let auth_feature = UserAuthFeature::new(Arc::clone(&session_repository));
     let app_state = Arc::new(AppState {
         register_feature,
         login_feature,
         csrf_feature,
+        auth_feature,
     });
 
     let app = Router::new()

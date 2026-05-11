@@ -1,8 +1,11 @@
 use std::sync::Arc;
 
-use server::infra::persistence::kv::{
-    FredKvProvider,
-    session::{SessionError, SessionRepository, SessionStore, UserSession},
+use server::{
+    features::session::model::UserSession,
+    infra::persistence::kv::{
+        FredKvProvider,
+        session::{SessionRepository, SessionRepositoryError, SessionStore},
+    },
 };
 use uuid::Uuid;
 
@@ -54,7 +57,10 @@ async fn returns_not_found_error_for_missing_session() {
     let actual_result = store.get_user_session(expected_token).await;
 
     // Assert
-    assert!(matches!(actual_result, Err(SessionError::NotFound)));
+    assert!(matches!(
+        actual_result,
+        Err(SessionRepositoryError::NotFound)
+    ));
 }
 
 #[tokio::test]
@@ -94,5 +100,5 @@ async fn deletes_session_from_storage() {
 
     // Assert
     let result = store.get_user_session(expected_token).await;
-    assert!(matches!(result, Err(SessionError::NotFound)));
+    assert!(matches!(result, Err(SessionRepositoryError::NotFound)));
 }

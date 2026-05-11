@@ -1,22 +1,28 @@
 use std::sync::Arc;
 
-use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
+use axum::{
+    extract::{Request, State},
+    middleware::Next,
+    response::IntoResponse,
+};
 use axum_extra::extract::CookieJar;
 
 use crate::{
     constants::USER_SESSION_COOKIE_NAME,
     domain::error::ServerError,
     features::{
-        csrf::{dto::CsrfResponse, token::TokenFeature},
+        csrf::token::TokenFeature,
         session::auth::AuthFeature,
         user::{login::LoginFeature, register::RegisterFeature},
     },
     state::AppState,
 };
 
-pub async fn handle<R, L, T, A>(
+pub async fn session_middleware<R, L, T, A>(
     State(state): State<Arc<AppState<R, L, T, A>>>,
     jar: CookieJar,
+    mut req: Request,
+    next: Next,
 ) -> Result<impl IntoResponse, ServerError>
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
@@ -24,14 +30,11 @@ where
     T: TokenFeature + Clone + Send + Sync + 'static,
     A: AuthFeature + Clone + Send + Sync + 'static,
 {
-    let session_cookie = jar
+    let session_token = jar
         .get(USER_SESSION_COOKIE_NAME)
-        .map(|c| c.value().to_string());
-    let csrf_token_pair = state.csrf_feature.get_token(session_cookie).await?;
-    Ok((
-        StatusCode::OK,
-        Json(CsrfResponse {
-            csrf_token: csrf_token_pair.token,
-        }),
-    ))
+        .map(|c| c.value().to_string())
+        .ok_or(ServerError::Unauthorized)?;
+    let user_session = state.auth_feature.auth(session_token).await?;
+    req.extensions_mut().insert(user_session);
+    Ok(next.run(req).await)
 }

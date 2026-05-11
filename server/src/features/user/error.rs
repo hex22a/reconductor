@@ -1,8 +1,8 @@
 use core::fmt;
 
 use crate::infra::{
-    csrf::CsrfServiceError, password::PasswordServiceError, persistence::kv::session::SessionError,
-    random::RngServiceError,
+    csrf::CsrfServiceError, password::PasswordServiceError,
+    persistence::kv::session::SessionRepositoryError, random::RngServiceError,
 };
 
 #[derive(Debug)]
@@ -37,10 +37,10 @@ impl From<CsrfServiceError> for UserError {
     }
 }
 
-impl From<SessionError> for UserError {
-    fn from(value: SessionError) -> Self {
+impl From<SessionRepositoryError> for UserError {
+    fn from(value: SessionRepositoryError) -> Self {
         match value {
-            SessionError::StorageError(e) => UserError::StorageError(e.to_string()),
+            SessionRepositoryError::StorageError(e) => UserError::StorageError(e.to_string()),
             _ => UserError::Interntal,
         }
     }

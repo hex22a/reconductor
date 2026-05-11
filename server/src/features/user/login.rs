@@ -2,16 +2,16 @@ use std::sync::Arc;
 
 use crate::{
     constants::USER_SESSION_TTL_SECONDS,
-    features::user::{error::UserError, model::AuthSession},
+    features::{
+        session::model::UserSession,
+        user::{error::UserError, model::AuthSession},
+    },
     infra::{
         csrf::CsrfService,
         password::PasswordService,
         persistence::{
             db::user::UserRepository,
-            kv::{
-                csrf::CsrfRepository,
-                session::{SessionRepository, UserSession},
-            },
+            kv::{csrf::CsrfRepository, session::SessionRepository},
         },
         random::RngService,
     },
@@ -120,10 +120,7 @@ mod tests {
             password::{PasswordService, PasswordServiceError},
             persistence::{
                 db::user::{UserEntity, UserInsert},
-                kv::{
-                    csrf::CsrfRepositoryError,
-                    session::{SessionError, UserSession},
-                },
+                kv::{csrf::CsrfRepositoryError, session::SessionRepositoryError},
             },
             random::RngServiceError,
         },
@@ -170,15 +167,15 @@ mod tests {
         }
     }
     impl SessionRepository for MockSessionRepository {
-        async fn create_user_session(&self, _: UserSession) -> Result<(), SessionError> {
+        async fn create_user_session(&self, _: UserSession) -> Result<(), SessionRepositoryError> {
             Ok(())
         }
 
-        async fn get_user_session(&self, _: String) -> Result<UserSession, SessionError> {
+        async fn get_user_session(&self, _: String) -> Result<UserSession, SessionRepositoryError> {
             todo!()
         }
 
-        async fn delete_user_session(&self, _: String) -> Result<(), SessionError> {
+        async fn delete_user_session(&self, _: String) -> Result<(), SessionRepositoryError> {
             todo!()
         }
     }

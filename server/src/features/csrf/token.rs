@@ -7,7 +7,7 @@ use crate::{
         csrf::CsrfService,
         persistence::kv::{
             csrf::CsrfRepository,
-            session::{SessionError, SessionRepository},
+            session::{SessionRepository, SessionRepositoryError},
         },
     },
 };
@@ -52,7 +52,7 @@ where
                         cookie_value: None,
                     }),
                     Err(error) => match error {
-                        SessionError::NotFound => {
+                        SessionRepositoryError::NotFound => {
                             let (token, cookie_value) =
                                 self.csrf_service.generate(ANONYMOUS_CSRF_TTL_SECONDS)?;
                             self.csrf_repository
@@ -63,10 +63,10 @@ where
                                 cookie_value: Some(cookie_value),
                             })
                         }
-                        SessionError::ParseError => Err(CsrfError::StorageError(
+                        SessionRepositoryError::ParseError => Err(CsrfError::StorageError(
                             "error parsing user session".to_string(),
                         )),
-                        SessionError::StorageError(e) => {
+                        SessionRepositoryError::StorageError(e) => {
                             Err(CsrfError::StorageError(e.to_string()))
                         }
                     },
@@ -94,13 +94,16 @@ mod tests {
     use uuid::Uuid;
 
     use super::*;
-    use crate::infra::{
-        csrf::{CsrfService, CsrfServiceError},
-        persistence::kv::{csrf::CsrfRepositoryError, session::UserSession},
+    use crate::{
+        features::session::model::UserSession,
+        infra::{
+            csrf::{CsrfService, CsrfServiceError},
+            persistence::kv::csrf::CsrfRepositoryError,
+        },
     };
 
     struct MockSessionRepository {
-        error: Mutex<Option<SessionError>>,
+        error: Mutex<Option<SessionRepositoryError>>,
         return_value: UserSession,
     }
     struct MockCsrfRepository;
@@ -109,18 +112,18 @@ mod tests {
         return_value: (String, String),
     }
     impl SessionRepository for MockSessionRepository {
-        async fn create_user_session(&self, _: UserSession) -> Result<(), SessionError> {
+        async fn create_user_session(&self, _: UserSession) -> Result<(), SessionRepositoryError> {
             todo!()
         }
 
-        async fn get_user_session(&self, _: String) -> Result<UserSession, SessionError> {
+        async fn get_user_session(&self, _: String) -> Result<UserSession, SessionRepositoryError> {
             match self.error.lock().unwrap().take() {
                 Some(e) => Err(e),
                 None => Ok(self.return_value.clone()),
             }
         }
 
-        async fn delete_user_session(&self, _: String) -> Result<(), SessionError> {
+        async fn delete_user_session(&self, _: String) -> Result<(), SessionRepositoryError> {
             todo!()
         }
     }
@@ -211,7 +214,7 @@ mod tests {
             csrf_token: expected_csrf_token.clone(),
         };
         let mock_session_repository = Arc::new(MockSessionRepository {
-            error: Mutex::new(Some(SessionError::NotFound)),
+            error: Mutex::new(Some(SessionRepositoryError::NotFound)),
             return_value: expected_user_session,
         });
         let mock_csrf_repository = Arc::new(MockCsrfRepository);
@@ -253,7 +256,7 @@ mod tests {
             csrf_token: expected_csrf_token.clone(),
         };
         let mock_session_repository = Arc::new(MockSessionRepository {
-            error: Mutex::new(Some(SessionError::NotFound)),
+            error: Mutex::new(Some(SessionRepositoryError::NotFound)),
             return_value: expected_user_session,
         });
         let mock_csrf_repository = Arc::new(MockCsrfRepository);

@@ -1,8 +1,12 @@
-use axum::{Json, http::StatusCode, response::IntoResponse};
+use axum::{
+    Json,
+    http::{Response, StatusCode},
+    response::IntoResponse,
+};
 use serde::Serialize;
 
 use crate::{
-    constants::UNEXPECTED_ERROR_MESSAGE,
+    constants::{UNAUTHORIZED_ERROR_MESSAGE, UNEXPECTED_ERROR_MESSAGE},
     domain::error::{FieldErrors, ServerError},
 };
 
@@ -12,6 +16,7 @@ enum ErrorCode {
     DatabaseError,
     ValidationError,
     UnexpectedError,
+    Unauthorized,
     SyntaxError,
 }
 
@@ -48,6 +53,14 @@ impl IntoResponse for ServerError {
                 Json(ErrorResponse {
                     code: ErrorCode::ValidationError,
                     error: ErrorDetail::Object(ValidationError { field_errors }),
+                }),
+            )
+                .into_response(),
+            ServerError::Unauthorized => (
+                StatusCode::UNAUTHORIZED,
+                Json(ErrorResponse {
+                    code: ErrorCode::Unauthorized,
+                    error: ErrorDetail::Message(UNAUTHORIZED_ERROR_MESSAGE.to_string()),
                 }),
             )
                 .into_response(),

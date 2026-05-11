@@ -27,3 +27,4 @@ pub const MIN_PASSWORD_LENGTH: usize = 6;
 pub const MAX_PASSWORD_LENGTH: usize = 74;
 
 pub const UNEXPECTED_ERROR_MESSAGE: &str = "Unexpected error";
+pub const UNAUTHORIZED_ERROR_MESSAGE: &str = "Unauthorized";

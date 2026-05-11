@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    features::{csrf::error::CsrfError, user::error::UserError},
+    features::{csrf::error::CsrfError, session::error::SessionError, user::error::UserError},
     infra::password::PasswordServiceError,
 };
 
@@ -10,6 +10,7 @@ pub type FieldErrors = HashMap<String, Vec<String>>;
 #[derive(Debug)]
 pub enum ServerError {
     Internal,
+    Unauthorized,
     ValidationError(FieldErrors),
 }
 
@@ -28,5 +29,14 @@ impl From<UserError> for ServerError {
 impl From<PasswordServiceError> for ServerError {
     fn from(_: PasswordServiceError) -> Self {
         ServerError::Internal
+    }
+}
+
+impl From<SessionError> for ServerError {
+    fn from(value: SessionError) -> Self {
+        match value {
+            SessionError::NotFound => ServerError::Unauthorized,
+            SessionError::Internal => ServerError::Internal,
+        }
     }
 }

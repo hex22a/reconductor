@@ -6,19 +6,21 @@ use crate::{
     constants::API_CSRF_ENDPOINT_V1,
     features::{
         csrf::{handler::handle, token::TokenFeature},
+        session::auth::AuthFeature,
         user::{login::LoginFeature, register::RegisterFeature},
     },
     state::AppState,
 };
 
-pub fn routes<R, L, T>(state: Arc<AppState<R, L, T>>) -> Router
+pub fn routes<R, L, T, A>(state: Arc<AppState<R, L, T, A>>) -> Router
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
     L: LoginFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,
+    A: AuthFeature + Clone + Send + Sync + 'static,
 {
     Router::new()
-        .route(API_CSRF_ENDPOINT_V1, get(handle::<R, L, T>))
+        .route(API_CSRF_ENDPOINT_V1, get(handle::<R, L, T, A>))
         .with_state(state)
 }
 
@@ -36,6 +38,7 @@ mod tests {
         constants::USER_SESSION_COOKIE_NAME,
         features::{
             csrf::{error::CsrfError, model::CsrfTokenPair, token::TokenFeature},
+            session::{error::SessionError, model::UserSession},
             user::{error::UserError, model::AuthSession, register::RegisterFeature},
         },
     };
@@ -48,6 +51,9 @@ mod tests {
     }
     #[derive(Clone)]
     struct MockLoginFeature;
+    #[derive(Clone)]
+    struct MockAuthFeature;
+
     impl RegisterFeature for MockRegisterFeature {
         async fn register(&self, _: String, _: String) -> Result<(), UserError> {
             todo!()
@@ -61,6 +67,11 @@ mod tests {
     impl TokenFeature for MockTokenFeature {
         async fn get_token(&self, _: Option<String>) -> Result<CsrfTokenPair, CsrfError> {
             Ok(self.return_value.clone())
+        }
+    }
+    impl AuthFeature for MockAuthFeature {
+        async fn auth(&self, _: String) -> Result<UserSession, SessionError> {
+            todo!()
         }
     }
 
@@ -78,6 +89,7 @@ mod tests {
         };
         let mock_register_feature = MockRegisterFeature;
         let mock_login_feature = MockLoginFeature;
+        let mock_auth_feature = MockAuthFeature;
         let mock_token_feature = MockTokenFeature {
             return_value: expected_csrf_token_pair,
         };
@@ -85,6 +97,7 @@ mod tests {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,
             csrf_feature: mock_token_feature,
+            auth_feature: mock_auth_feature,
         });
         let app = routes(expected_app_state);
         // Act
@@ -117,6 +130,7 @@ mod tests {
         };
         let mock_register_feature = MockRegisterFeature;
         let mock_login_feature = MockLoginFeature;
+        let mock_auth_feature = MockAuthFeature;
         let mock_token_feature = MockTokenFeature {
             return_value: expected_csrf_token_pair,
         };
@@ -124,6 +138,7 @@ mod tests {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,
             csrf_feature: mock_token_feature,
+            auth_feature: mock_auth_feature,
         });
         let app = routes(expected_app_state);
         // Act
