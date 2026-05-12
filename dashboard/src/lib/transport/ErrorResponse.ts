@@ -19,7 +19,7 @@ export type ErrorResponse = {
 };
 
 export type ValidationError = {
-    field_errors: Map<string, [string]>;
+    field_errors: Record<string, [string]>;
 };
 
 export function isError(value: unknown): value is ErrorResponse {

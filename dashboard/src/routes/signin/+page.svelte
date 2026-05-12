@@ -1,5 +1,5 @@
 <script lang="ts">
-  import SignInForm from '$lib/components/SignInForm.svelte';
+  import SignInForm from '@/lib/components/forms/SignInForm.svelte';
 </script>
 
 <SignInForm />

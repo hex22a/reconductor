@@ -9,7 +9,10 @@ import {
 import type { ErrorResponse } from '../transport/ErrorResponse';
 import type { LoginResponse, MeResponse } from '../transport/Auth';
 
-export async function signUp(username?: string, password?: string): Promise<null | ErrorResponse> {
+export async function register(
+    username?: string,
+    password?: string,
+): Promise<null | ErrorResponse> {
     try {
         const res = await fetch(API_REGISTER_URL, {
             method: 'POST',
@@ -30,7 +33,7 @@ export async function signUp(username?: string, password?: string): Promise<null
     }
 }
 
-export async function signIn(
+export async function login(
     csrfToken: string | null,
     username?: string,
     password?: string,
