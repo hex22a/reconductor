@@ -8,3 +8,11 @@ export const API_LOGIN_URL = `${API_URL}/api/v1/login`;
 export const API_ME_URL = `${API_URL}/api/v1/me`;
 export const API_LOGOUT_URL = `${API_URL}/api/v1/logout`;
 export const API_CSRF_URL = `${API_URL}/api/v1/csrf`;
+
+export const VALIDATION_ERROR_CODE = 'VALIDATION_ERROR';
+export const SYNTAX_ERROR_CODE = 'SYNTAX_ERROR';
+export const UNEXPECTED_ERROR_CODE = 'UNEXPECTED_ERROR';
+export const DATABASE_ERROR_CODE = 'DATABASE_ERROR';
+export const NETWORK_ERROR_CODE = 'NETWORK_ERROR';
+
+export const NETWORK_ERROR_MESSAGE = 'Network error occured. Check your connection.';

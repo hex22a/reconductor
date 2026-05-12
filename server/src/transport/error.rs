@@ -1,7 +1,7 @@
 use axum::{
     Json,
-    http::{Response, StatusCode},
-    response::IntoResponse,
+    http::StatusCode,
+    response::{IntoResponse, Response},
 };
 use serde::Serialize;
 
@@ -21,6 +21,7 @@ enum ErrorCode {
 }
 
 #[derive(Serialize)]
+#[serde(untagged)]
 enum ErrorDetail {
     Message(String),
     Object(ValidationError),
@@ -38,7 +39,7 @@ struct ValidationError {
 }
 
 impl IntoResponse for ServerError {
-    fn into_response(self) -> axum::response::Response {
+    fn into_response(self) -> Response {
         match self {
             ServerError::Internal => (
                 StatusCode::INTERNAL_SERVER_ERROR,

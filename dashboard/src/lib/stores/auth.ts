@@ -1,27 +1,38 @@
 import { writable, get } from 'svelte/store';
 import { logout, fetchMe, signIn, signUp } from '@/lib/services/auth';
 import { csrf } from './csrf';
+import { isError, type ErrorResponse } from '../transport/ErrorResponse';
 
 function createAuthStore() {
     const { subscribe, set } = writable<string | null>(null);
 
     return {
         subscribe,
-        register: async (username: string, password: string) => {
-            await signUp(username, password);
+        register: async (username: string, password: string): Promise<void | ErrorResponse> => {
+            const signupResponse = await signUp(username, password);
+            if (signupResponse) {
+                return signupResponse;
+            }
         },
-        login: async (username: string, password: string) => {
+        login: async (username: string, password: string): Promise<void | ErrorResponse> => {
             let csrfToken = get(csrf);
-            await signIn(csrfToken, username, password);
+            let signInResponse = await signIn(csrfToken, username, password);
+            if (isError(signInResponse)) {
+                return signInResponse;
+            }
+            csrf.updateCsrf(signInResponse.csrf_token);
             set(username);
         },
-        logout: async () => {
+        logout: async (): Promise<void | ErrorResponse> => {
             await logout();
             set(null);
         },
-        fetchMe: async () => {
-            const username = await fetchMe();
-            set(username);
+        fetchMe: async (): Promise<void | ErrorResponse> => {
+            const meResponse = await fetchMe();
+            if (isError(meResponse)) {
+                return meResponse;
+            }
+            set(meResponse.username);
         },
     };
 }
