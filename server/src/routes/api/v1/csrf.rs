@@ -85,7 +85,7 @@ mod tests {
         let expected_csrf_cookie_value = "csrf_cookie".to_string();
         let expected_csrf_token_pair = CsrfTokenPair {
             token: expected_csrf_token,
-            cookie_value: Some(expected_csrf_cookie_value),
+            cookie_value: expected_csrf_cookie_value,
         };
         let mock_register_feature = MockRegisterFeature;
         let mock_login_feature = MockLoginFeature;
@@ -126,7 +126,7 @@ mod tests {
         let expected_csrf_cookie_value = "csrf_cookie".to_string();
         let expected_csrf_token_pair = CsrfTokenPair {
             token: expected_csrf_token,
-            cookie_value: Some(expected_csrf_cookie_value),
+            cookie_value: expected_csrf_cookie_value,
         };
         let mock_register_feature = MockRegisterFeature;
         let mock_login_feature = MockLoginFeature;

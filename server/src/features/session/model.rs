@@ -6,4 +6,5 @@ pub struct UserSession {
     pub user_id: Uuid,
     pub username: String,
     pub csrf_token: String,
+    pub csrf_cookie: String,
 }

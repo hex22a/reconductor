@@ -86,11 +86,12 @@ where
             .verify_password(&password, &user.password_hash)?;
         if is_valid {
             let session_id = self.rng_service.generate_session_id()?;
-            let (csrf_token, _) = self.csrf_service.generate(USER_SESSION_TTL_SECONDS)?;
+            let (csrf_token, csrf_cookie) = self.csrf_service.generate(USER_SESSION_TTL_SECONDS)?;
             self.session_repository
                 .create_user_session(UserSession {
                     token: session_id.clone(),
                     csrf_token: csrf_token.clone(),
+                    csrf_cookie,
                     user_id: user.id,
                     username: user.username,
                 })

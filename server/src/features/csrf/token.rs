@@ -49,7 +49,7 @@ where
                 match user_session_result {
                     Ok(user_session) => Ok(CsrfTokenPair {
                         token: user_session.csrf_token,
-                        cookie_value: None,
+                        cookie_value: user_session.csrf_cookie,
                     }),
                     Err(error) => match error {
                         SessionRepositoryError::NotFound => {
@@ -60,7 +60,7 @@ where
                                 .await?;
                             Ok(CsrfTokenPair {
                                 token,
-                                cookie_value: Some(cookie_value),
+                                cookie_value: cookie_value,
                             })
                         }
                         SessionRepositoryError::ParseError => Err(CsrfError::StorageError(
@@ -80,7 +80,7 @@ where
                     .await?;
                 Ok(CsrfTokenPair {
                     token,
-                    cookie_value: Some(cookie_value),
+                    cookie_value: cookie_value,
                 })
             }
         }
@@ -163,13 +163,14 @@ mod tests {
         let expected_csrf_cookie = "csrf_cookie".to_string();
         let expected_csrf_token_pair = CsrfTokenPair {
             token: expected_csrf_token.clone(),
-            cookie_value: None,
+            cookie_value: expected_csrf_cookie.clone(),
         };
         let expected_user_session = UserSession {
             token: expected_session_token.clone(),
             user_id: expected_user_id,
             username: expected_username,
             csrf_token: expected_csrf_token.clone(),
+            csrf_cookie: expected_csrf_cookie.clone(),
         };
         let mock_session_repository = Arc::new(MockSessionRepository {
             error: Mutex::new(None),
@@ -205,13 +206,14 @@ mod tests {
         let expected_csrf_cookie = "csrf_cookie".to_string();
         let expected_csrf_token_pair = CsrfTokenPair {
             token: expected_anonymous_csrf_token.clone(),
-            cookie_value: Some(expected_csrf_cookie.clone()),
+            cookie_value: expected_csrf_cookie.clone(),
         };
         let expected_user_session = UserSession {
             token: expected_session_token.clone(),
             user_id: expected_user_id,
             username: expected_username,
             csrf_token: expected_csrf_token.clone(),
+            csrf_cookie: expected_csrf_cookie.clone(),
         };
         let mock_session_repository = Arc::new(MockSessionRepository {
             error: Mutex::new(Some(SessionRepositoryError::NotFound)),
@@ -247,13 +249,14 @@ mod tests {
         let expected_csrf_cookie = "csrf_cookie".to_string();
         let expected_csrf_token_pair = CsrfTokenPair {
             token: expected_anonymous_csrf_token.clone(),
-            cookie_value: Some(expected_csrf_cookie.clone()),
+            cookie_value: expected_csrf_cookie.clone(),
         };
         let expected_user_session = UserSession {
             token: expected_session_token.clone(),
             user_id: expected_user_id,
             username: expected_username,
             csrf_token: expected_csrf_token.clone(),
+            csrf_cookie: expected_csrf_cookie.clone(),
         };
         let mock_session_repository = Arc::new(MockSessionRepository {
             error: Mutex::new(Some(SessionRepositoryError::NotFound)),

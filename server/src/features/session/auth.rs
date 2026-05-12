@@ -72,11 +72,13 @@ mod tests {
         let expected_user_id: Uuid = Uuid::now_v7();
         let expected_username = "test".to_string();
         let expected_csrf_token = "csrf_token".to_string();
+        let expected_csrf_cookie = "csrf_cookie".to_string();
         let expected_user_session = UserSession {
             token: expected_session_token.clone(),
             user_id: expected_user_id,
             username: expected_username,
             csrf_token: expected_csrf_token.clone(),
+            csrf_cookie: expected_csrf_cookie.clone(),
         };
         let mock_session_repository = Arc::new(MockSessionRepository {
             error: Mutex::new(None),
@@ -96,11 +98,13 @@ mod tests {
         let expected_user_id: Uuid = Uuid::now_v7();
         let expected_username = "test".to_string();
         let expected_csrf_token = "csrf_token".to_string();
+        let expected_csrf_cookie = "csrf_cookie".to_string();
         let expected_user_session = UserSession {
             token: expected_session_token.clone(),
             user_id: expected_user_id,
             username: expected_username,
             csrf_token: expected_csrf_token.clone(),
+            csrf_cookie: expected_csrf_cookie.clone(),
         };
         let mock_session_repository = Arc::new(MockSessionRepository {
             error: Mutex::new(Some(SessionRepositoryError::NotFound)),

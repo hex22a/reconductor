@@ -14,7 +14,10 @@ use crate::{
     },
 };
 use axum::{Extension, Json, extract::State, http::StatusCode, response::IntoResponse};
-use axum_extra::extract::{CookieJar, cookie::Cookie};
+use axum_extra::extract::{
+    CookieJar,
+    cookie::{Cookie, SameSite},
+};
 
 use crate::{domain::error::ServerError, features::user::dto::UserInputRequest, state::AppState};
 
@@ -56,6 +59,7 @@ where
         Cookie::build((USER_SESSION_COOKIE_NAME, auth_session.session_id))
             .http_only(true)
             .secure(true)
+            .same_site(SameSite::Lax)
             .path("/")
             .build(),
     );

@@ -27,6 +27,7 @@ fn create_user_session_fixture(token: String) -> UserSession {
         user_id: Uuid::now_v7(),
         username: "testuser".to_string(),
         csrf_token: "csrf_token".to_string(),
+        csrf_cookie: "csrf_cookei".to_string(),
     }
 }
 

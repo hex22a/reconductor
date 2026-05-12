@@ -10,6 +10,7 @@ pub const USER_SESSION_PREFIX: &str = "user_session";
 pub const ANONYMOUS_CSRF_PREFIX: &str = "csrf_anonymous";
 
 pub const USER_SESSION_COOKIE_NAME: &str = "recon_user_session";
+pub const CSRF_COOKIE_NAME: &str = "recon_csrf";
 
 pub const USER_SESSION_TTL_SECONDS: u64 = 15 * 60;
 pub const ANONYMOUS_CSRF_TTL_SECONDS: u64 = 5 * 60;
