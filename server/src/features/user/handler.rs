@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::{
-    constants::USER_SESSION_COOKIE_NAME,
+    constants::{CSRF_COOKIE_NAME, USER_SESSION_COOKIE_NAME},
     features::{
         csrf::token::TokenFeature,
         session::{auth::AuthFeature, model::UserSession},
@@ -55,14 +55,23 @@ where
         .login_feature
         .login(user.username, user.password)
         .await?;
-    let jar = jar.add(
-        Cookie::build((USER_SESSION_COOKIE_NAME, auth_session.session_id))
-            .http_only(true)
-            .secure(true)
-            .same_site(SameSite::Lax)
-            .path("/")
-            .build(),
-    );
+    let jar = jar
+        .add(
+            Cookie::build((USER_SESSION_COOKIE_NAME, auth_session.session_id))
+                .http_only(true)
+                .secure(true)
+                .same_site(SameSite::Lax)
+                .path("/")
+                .build(),
+        )
+        .add(
+            Cookie::build((CSRF_COOKIE_NAME, auth_session.csrf_token.clone()))
+                .http_only(true)
+                .secure(true)
+                .same_site(SameSite::Lax)
+                .path("/")
+                .build(),
+        );
     Ok((
         StatusCode::OK,
         jar,
