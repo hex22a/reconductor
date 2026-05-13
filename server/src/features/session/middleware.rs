@@ -13,13 +13,13 @@ use crate::{
     features::{
         csrf::{token::TokenFeature, verify::VerifyCsrfFeature},
         session::auth::AuthFeature,
-        user::{login::LoginFeature, register::RegisterFeature},
+        user::{login::LoginFeature, logout::LogoutFeature, register::RegisterFeature},
     },
     state::AppState,
 };
 
-pub async fn session_middleware<R, L, T, A, C>(
-    State(state): State<Arc<AppState<R, L, T, A, C>>>,
+pub async fn session_middleware<R, L, O, T, A, C>(
+    State(state): State<Arc<AppState<R, L, O, T, A, C>>>,
     jar: CookieJar,
     mut req: Request,
     next: Next,
@@ -27,6 +27,7 @@ pub async fn session_middleware<R, L, T, A, C>(
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
     L: LoginFeature + Clone + Send + Sync + 'static,
+    O: LogoutFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,
     A: AuthFeature + Clone + Send + Sync + 'static,
     C: VerifyCsrfFeature + Clone + Send + Sync + 'static,

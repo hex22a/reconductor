@@ -7,21 +7,22 @@ use crate::{
     features::{
         csrf::{handler::handle, token::TokenFeature, verify::VerifyCsrfFeature},
         session::auth::AuthFeature,
-        user::{login::LoginFeature, register::RegisterFeature},
+        user::{login::LoginFeature, logout::LogoutFeature, register::RegisterFeature},
     },
     state::AppState,
 };
 
-pub fn routes<R, L, T, A, C>(state: Arc<AppState<R, L, T, A, C>>) -> Router
+pub fn routes<R, L, O, T, A, C>(state: Arc<AppState<R, L, O, T, A, C>>) -> Router
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
     L: LoginFeature + Clone + Send + Sync + 'static,
+    O: LogoutFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,
     A: AuthFeature + Clone + Send + Sync + 'static,
     C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
 {
     Router::new()
-        .route(API_CSRF_ENDPOINT_V1, get(handle::<R, L, T, A, C>))
+        .route(API_CSRF_ENDPOINT_V1, get(handle::<R, L, O, T, A, C>))
         .with_state(state)
 }
 
@@ -53,6 +54,8 @@ mod tests {
     #[derive(Clone)]
     struct MockLoginFeature;
     #[derive(Clone)]
+    struct MockLogoutFeature;
+    #[derive(Clone)]
     struct MockAuthFeature;
     #[derive(Clone)]
     struct MockVerifyCsrfFeature;
@@ -64,6 +67,11 @@ mod tests {
     }
     impl LoginFeature for MockLoginFeature {
         async fn login(&self, _: String, _: String, _: String) -> Result<AuthSession, UserError> {
+            todo!()
+        }
+    }
+    impl LogoutFeature for MockLogoutFeature {
+        async fn logout(&self, _: String) -> Result<(), UserError> {
             todo!()
         }
     }
@@ -101,6 +109,7 @@ mod tests {
         };
         let mock_register_feature = MockRegisterFeature;
         let mock_login_feature = MockLoginFeature;
+        let mock_logout_feature = MockLogoutFeature;
         let mock_auth_feature = MockAuthFeature;
         let mock_token_feature = MockTokenFeature {
             return_value: expected_csrf_token_pair,
@@ -109,6 +118,7 @@ mod tests {
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,
+            logout_feature: mock_logout_feature,
             csrf_feature: mock_token_feature,
             auth_feature: mock_auth_feature,
             verify_csrf_feature: mock_verify_csrf_feature,
@@ -144,6 +154,7 @@ mod tests {
         };
         let mock_register_feature = MockRegisterFeature;
         let mock_login_feature = MockLoginFeature;
+        let mock_logout_feature = MockLogoutFeature;
         let mock_auth_feature = MockAuthFeature;
         let mock_token_feature = MockTokenFeature {
             return_value: expected_csrf_token_pair,
@@ -152,6 +163,7 @@ mod tests {
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,
+            logout_feature: mock_logout_feature,
             csrf_feature: mock_token_feature,
             auth_feature: mock_auth_feature,
             verify_csrf_feature: mock_verify_csrf_feature,

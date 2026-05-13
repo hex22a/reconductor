@@ -1,6 +1,7 @@
 pub const API_HEALTH_ENDPOINT_V1: &str = "/api/v1/health";
 pub const API_REGISTER_ENDPOINT_V1: &str = "/api/v1/register";
 pub const API_LOGIN_ENDPOINT_V1: &str = "/api/v1/login";
+pub const API_LOGOUT_ENDPOINT_V1: &str = "/api/v1/logout";
 pub const API_CSRF_ENDPOINT_V1: &str = "/api/v1/csrf";
 pub const API_ME_ENDPOINT_V1: &str = "/api/v1/me";
 

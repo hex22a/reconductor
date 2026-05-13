@@ -15,13 +15,13 @@ use crate::{
     features::{
         csrf::{token::TokenFeature, verify::VerifyCsrfFeature},
         session::{auth::AuthFeature, model::UserSession},
-        user::{login::LoginFeature, register::RegisterFeature},
+        user::{login::LoginFeature, logout::LogoutFeature, register::RegisterFeature},
     },
     state::AppState,
 };
 
-pub async fn double_submit<R, L, T, A, C>(
-    State(state): State<Arc<AppState<R, L, T, A, C>>>,
+pub async fn double_submit<R, L, O, T, A, C>(
+    State(state): State<Arc<AppState<R, L, O, T, A, C>>>,
     headers: HeaderMap,
     jar: CookieJar,
     req: Request,
@@ -30,6 +30,7 @@ pub async fn double_submit<R, L, T, A, C>(
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
     L: LoginFeature + Clone + Send + Sync + 'static,
+    O: LogoutFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,
     A: AuthFeature + Clone + Send + Sync + 'static,
     C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
@@ -53,8 +54,8 @@ where
     }
 }
 
-pub async fn session_based<R, L, T, A, C>(
-    State(state): State<Arc<AppState<R, L, T, A, C>>>,
+pub async fn session_based<R, L, O, T, A, C>(
+    State(state): State<Arc<AppState<R, L, O, T, A, C>>>,
     headers: HeaderMap,
     jar: CookieJar,
     Extension(session): Extension<UserSession>,
@@ -64,6 +65,7 @@ pub async fn session_based<R, L, T, A, C>(
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
     L: LoginFeature + Clone + Send + Sync + 'static,
+    O: LogoutFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,
     A: AuthFeature + Clone + Send + Sync + 'static,
     C: VerifyCsrfFeature + Clone + Send + Sync + 'static,

@@ -6,7 +6,8 @@ use crate::{
         csrf::{repository::CsrfStore, token::CsrfTokenFeature, verify::StatefulCsrfVerifier},
         session::{auth::UserAuthFeature, repository::SessionStore},
         user::{
-            login::UserLoginFeature, register::UserRegisterFeature, repository::PgUserRepository,
+            login::UserLoginFeature, logout::UserLogoutFeature, register::UserRegisterFeature,
+            repository::PgUserRepository,
         },
     },
     infra::{
@@ -62,6 +63,7 @@ async fn main() -> anyhow::Result<()> {
         Arc::clone(&password_service),
         Arc::clone(&os_rng_serivce),
     );
+    let logout_feature = UserLogoutFeature::new(Arc::clone(&session_repository));
     let csrf_feature = CsrfTokenFeature::new(
         Arc::clone(&session_repository),
         Arc::clone(&csrf_repository),
@@ -73,6 +75,7 @@ async fn main() -> anyhow::Result<()> {
     let app_state = Arc::new(AppState {
         register_feature,
         login_feature,
+        logout_feature,
         csrf_feature,
         auth_feature,
         verify_csrf_feature,
@@ -88,6 +91,7 @@ async fn main() -> anyhow::Result<()> {
         .merge(v1::health::routes())
         .merge(v1::auth::register::routes(Arc::clone(&app_state)))
         .merge(v1::auth::login::routes(Arc::clone(&app_state)))
+        .merge(v1::auth::logout::routes(Arc::clone(&app_state)))
         .merge(v1::me::routes(Arc::clone(&app_state)))
         .merge(v1::csrf::routes(Arc::clone(&app_state)))
         .layer(cors);

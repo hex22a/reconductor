@@ -8,6 +8,7 @@ use crate::{
         user::{
             dto::{LoginResponse, MeResponse},
             login::LoginFeature,
+            logout::LogoutFeature,
             model::UserInput,
             register::RegisterFeature,
         },
@@ -23,13 +24,14 @@ use crate::{
     application::error::ServerError, features::user::dto::UserInputRequest, state::AppState,
 };
 
-pub async fn register<R, L, T, A, C>(
-    State(state): State<Arc<AppState<R, L, T, A, C>>>,
+pub async fn register<R, L, O, T, A, C>(
+    State(state): State<Arc<AppState<R, L, O, T, A, C>>>,
     Json(req): Json<UserInputRequest>,
 ) -> Result<impl IntoResponse, ServerError>
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
     L: LoginFeature + Clone + Send + Sync + 'static,
+    O: LogoutFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,
     A: AuthFeature + Clone + Send + Sync + 'static,
     C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
@@ -42,14 +44,15 @@ where
     Ok((StatusCode::CREATED, ()))
 }
 
-pub async fn login<R, L, T, A, C>(
+pub async fn login<R, L, O, T, A, C>(
     jar: CookieJar,
-    State(state): State<Arc<AppState<R, L, T, A, C>>>,
+    State(state): State<Arc<AppState<R, L, O, T, A, C>>>,
     Json(req): Json<UserInputRequest>,
 ) -> Result<impl IntoResponse, ServerError>
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
     L: LoginFeature + Clone + Send + Sync + 'static,
+    O: LogoutFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,
     A: AuthFeature + Clone + Send + Sync + 'static,
     C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
@@ -57,7 +60,7 @@ where
     let user: UserInput = UserInput::try_from(req)?;
     let anonymous_csrf_token = jar
         .get(CSRF_COOKIE_NAME)
-        .map(|c| c.to_string())
+        .map(|c| c.value().to_string())
         .ok_or(ServerError::Forbidden)?;
     let auth_session = state
         .login_feature
@@ -96,4 +99,32 @@ pub async fn me(Extension(user_session): Extension<UserSession>) -> impl IntoRes
             username: user_session.username,
         }),
     )
+}
+
+pub async fn logout<R, L, O, T, A, C>(
+    jar: CookieJar,
+    State(state): State<Arc<AppState<R, L, O, T, A, C>>>,
+) -> Result<impl IntoResponse, ServerError>
+where
+    R: RegisterFeature + Clone + Send + Sync + 'static,
+    L: LoginFeature + Clone + Send + Sync + 'static,
+    O: LogoutFeature + Clone + Send + Sync + 'static,
+    T: TokenFeature + Clone + Send + Sync + 'static,
+    A: AuthFeature + Clone + Send + Sync + 'static,
+    C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
+{
+    let session_id = jar
+        .get(USER_SESSION_COOKIE_NAME)
+        .map(|c| c.value().to_string())
+        .ok_or(ServerError::Unauthorized)?;
+    state.logout_feature.logout(session_id).await?;
+    let jar = jar.remove(
+        Cookie::build(USER_SESSION_COOKIE_NAME)
+            .http_only(true)
+            .secure(true)
+            .same_site(SameSite::Lax)
+            .path("/")
+            .build(),
+    );
+    Ok((StatusCode::NO_CONTENT, jar))
 }

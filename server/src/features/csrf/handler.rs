@@ -12,18 +12,19 @@ use crate::{
     features::{
         csrf::{dto::CsrfResponse, token::TokenFeature, verify::VerifyCsrfFeature},
         session::auth::AuthFeature,
-        user::{login::LoginFeature, register::RegisterFeature},
+        user::{login::LoginFeature, logout::LogoutFeature, register::RegisterFeature},
     },
     state::AppState,
 };
 
-pub async fn handle<R, L, T, A, C>(
-    State(state): State<Arc<AppState<R, L, T, A, C>>>,
+pub async fn handle<R, L, O, T, A, C>(
+    State(state): State<Arc<AppState<R, L, O, T, A, C>>>,
     jar: CookieJar,
 ) -> Result<impl IntoResponse, ServerError>
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
     L: LoginFeature + Clone + Send + Sync + 'static,
+    O: LogoutFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,
     A: AuthFeature + Clone + Send + Sync + 'static,
     C: VerifyCsrfFeature + Clone + Send + Sync + 'static,

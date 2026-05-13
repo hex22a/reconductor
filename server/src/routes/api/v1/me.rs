@@ -7,15 +7,18 @@ use crate::{
     features::{
         csrf::{token::TokenFeature, verify::VerifyCsrfFeature},
         session::{auth::AuthFeature, middleware::session_middleware},
-        user::{handler::me, login::LoginFeature, register::RegisterFeature},
+        user::{
+            handler::me, login::LoginFeature, logout::LogoutFeature, register::RegisterFeature,
+        },
     },
     state::AppState,
 };
 
-pub fn routes<R, L, T, A, C>(state: Arc<AppState<R, L, T, A, C>>) -> Router
+pub fn routes<R, L, O, T, A, C>(state: Arc<AppState<R, L, O, T, A, C>>) -> Router
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
     L: LoginFeature + Clone + Send + Sync + 'static,
+    O: LogoutFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,
     A: AuthFeature + Clone + Send + Sync + 'static,
     C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
@@ -24,6 +27,6 @@ where
         .route(API_ME_ENDPOINT_V1, get(me))
         .route_layer(middleware::from_fn_with_state(
             state,
-            session_middleware::<R, L, T, A, C>,
+            session_middleware::<R, L, O, T, A, C>,
         ))
 }

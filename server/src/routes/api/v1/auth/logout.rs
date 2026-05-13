@@ -1,14 +1,14 @@
 use std::sync::Arc;
 
-use axum::{Router, middleware, routing::post};
+use axum::{Router, routing::post};
 
 use crate::{
-    constants::API_LOGIN_ENDPOINT_V1,
+    constants::API_LOGOUT_ENDPOINT_V1,
     features::{
-        csrf::{middleware::double_submit, token::TokenFeature, verify::VerifyCsrfFeature},
+        csrf::{token::TokenFeature, verify::VerifyCsrfFeature},
         session::auth::AuthFeature,
         user::{
-            handler::login, login::LoginFeature, logout::LogoutFeature, register::RegisterFeature,
+            handler::logout, login::LoginFeature, logout::LogoutFeature, register::RegisterFeature,
         },
     },
     state::AppState,
@@ -24,10 +24,6 @@ where
     C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
 {
     Router::new()
-        .route(API_LOGIN_ENDPOINT_V1, post(login::<R, L, O, T, A, C>))
-        .route_layer(middleware::from_fn_with_state(
-            Arc::clone(&state),
-            double_submit::<R, L, O, T, A, C>,
-        ))
+        .route(API_LOGOUT_ENDPOINT_V1, post(logout::<R, L, O, T, A, C>))
         .with_state(state)
 }
