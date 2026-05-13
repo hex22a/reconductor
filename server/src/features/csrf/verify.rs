@@ -17,6 +17,7 @@ pub trait VerifyCsrfFeature {
     ) -> impl Future<Output = bool> + Send;
 }
 
+#[derive(Clone)]
 pub struct StatefulCsrfVerifier<C: CsrfService, R: CsrfRepository> {
     csrf_service: Arc<C>,
     csrf_repository: Arc<R>,

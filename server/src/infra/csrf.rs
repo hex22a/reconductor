@@ -1,3 +1,4 @@
+use base64::{Engine, engine::general_purpose};
 use csrf::{AesGcmCsrfProtection, CsrfError, CsrfProtection};
 use std::{fmt, sync::Arc};
 
@@ -63,11 +64,19 @@ impl CsrfService for AesGcmCsrfService {
     }
 
     fn verify(&self, token: &str, cookie: &str) -> bool {
-        let token = match self.protect.parse_token(token.as_bytes()) {
+        let token_bytes = match general_purpose::STANDARD.decode(token) {
+            Ok(b) => b,
+            Err(_) => return false,
+        };
+        let cookie_bytes = match general_purpose::STANDARD.decode(cookie) {
+            Ok(b) => b,
+            Err(_) => return false,
+        };
+        let token = match self.protect.parse_token(&token_bytes) {
             Ok(t) => t,
             Err(_) => return false,
         };
-        let cookie = match self.protect.parse_cookie(cookie.as_bytes()) {
+        let cookie = match self.protect.parse_cookie(&cookie_bytes) {
             Ok(t) => t,
             Err(_) => return false,
         };

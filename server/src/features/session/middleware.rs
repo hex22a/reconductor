@@ -11,15 +11,15 @@ use crate::{
     constants::USER_SESSION_COOKIE_NAME,
     domain::error::ServerError,
     features::{
-        csrf::token::TokenFeature,
+        csrf::{token::TokenFeature, verify::VerifyCsrfFeature},
         session::auth::AuthFeature,
         user::{login::LoginFeature, register::RegisterFeature},
     },
     state::AppState,
 };
 
-pub async fn session_middleware<R, L, T, A>(
-    State(state): State<Arc<AppState<R, L, T, A>>>,
+pub async fn session_middleware<R, L, T, A, C>(
+    State(state): State<Arc<AppState<R, L, T, A, C>>>,
     jar: CookieJar,
     mut req: Request,
     next: Next,
@@ -29,6 +29,7 @@ where
     L: LoginFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,
     A: AuthFeature + Clone + Send + Sync + 'static,
+    C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
 {
     let session_token = jar
         .get(USER_SESSION_COOKIE_NAME)

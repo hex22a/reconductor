@@ -5,22 +5,23 @@ use axum::{Router, routing::post};
 use crate::{
     constants::API_REGISTER_ENDPOINT_V1,
     features::{
-        csrf::token::TokenFeature,
+        csrf::{token::TokenFeature, verify::VerifyCsrfFeature},
         session::auth::AuthFeature,
         user::{handler::register, login::LoginFeature, register::RegisterFeature},
     },
     state::AppState,
 };
 
-pub fn routes<R, L, T, A>(state: Arc<AppState<R, L, T, A>>) -> Router
+pub fn routes<R, L, T, A, C>(state: Arc<AppState<R, L, T, A, C>>) -> Router
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
     L: LoginFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,
     A: AuthFeature + Clone + Send + Sync + 'static,
+    C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
 {
     Router::new()
-        .route(API_REGISTER_ENDPOINT_V1, post(register::<R, L, T, A>))
+        .route(API_REGISTER_ENDPOINT_V1, post(register::<R, L, T, A, C>))
         .with_state(state)
 }
 
@@ -53,6 +54,8 @@ mod tests {
     struct MockLoginFeature;
     #[derive(Clone)]
     struct MockAuthFeature;
+    #[derive(Clone)]
+    struct MockVerifyCsrfFeature;
 
     impl RegisterFeature for MockRegisterFeature {
         async fn register(&self, _: String, _: String) -> Result<(), UserError> {
@@ -74,6 +77,15 @@ mod tests {
             todo!()
         }
     }
+    impl VerifyCsrfFeature for MockVerifyCsrfFeature {
+        async fn verify_anonymous(&self, _: String, _: String) -> bool {
+            todo!()
+        }
+
+        async fn verify_authorized(&self, _: String, _: String, _: String) -> bool {
+            todo!()
+        }
+    }
 
     #[tokio::test]
     async fn test_register_post() {
@@ -84,11 +96,13 @@ mod tests {
         let mock_token_feature = MockTokenFeature;
         let mock_login_feature = MockLoginFeature;
         let mock_auth_feature = MockAuthFeature;
+        let mock_verify_csrf_feature = MockVerifyCsrfFeature;
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,
             csrf_feature: mock_token_feature,
             auth_feature: mock_auth_feature,
+            verify_csrf_feature: mock_verify_csrf_feature,
         });
         let expected_register_request = UserInputRequest {
             username: expected_username,
@@ -121,11 +135,13 @@ mod tests {
         let mock_token_feature = MockTokenFeature;
         let mock_login_feature = MockLoginFeature;
         let mock_auth_feature = MockAuthFeature;
+        let mock_verify_csrf_feature = MockVerifyCsrfFeature;
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,
             csrf_feature: mock_token_feature,
             auth_feature: mock_auth_feature,
+            verify_csrf_feature: mock_verify_csrf_feature,
         });
         let expected_register_request = UserInputRequest {
             username: expected_username,

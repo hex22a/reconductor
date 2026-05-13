@@ -65,6 +65,7 @@ impl IntoResponse for ServerError {
                 }),
             )
                 .into_response(),
+            ServerError::Forbidden => (StatusCode::FORBIDDEN).into_response(),
         }
     }
 }

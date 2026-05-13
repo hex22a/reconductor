@@ -11,6 +11,7 @@ pub type FieldErrors = HashMap<String, Vec<String>>;
 pub enum ServerError {
     Internal,
     Unauthorized,
+    Forbidden,
     ValidationError(FieldErrors),
 }
 

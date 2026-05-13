@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::{
     constants::{CSRF_COOKIE_NAME, USER_SESSION_COOKIE_NAME},
     features::{
-        csrf::token::TokenFeature,
+        csrf::{token::TokenFeature, verify::VerifyCsrfFeature},
         session::{auth::AuthFeature, model::UserSession},
         user::{
             dto::{LoginResponse, MeResponse},
@@ -21,8 +21,8 @@ use axum_extra::extract::{
 
 use crate::{domain::error::ServerError, features::user::dto::UserInputRequest, state::AppState};
 
-pub async fn register<R, L, T, A>(
-    State(state): State<Arc<AppState<R, L, T, A>>>,
+pub async fn register<R, L, T, A, C>(
+    State(state): State<Arc<AppState<R, L, T, A, C>>>,
     Json(req): Json<UserInputRequest>,
 ) -> Result<impl IntoResponse, ServerError>
 where
@@ -30,6 +30,7 @@ where
     L: LoginFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,
     A: AuthFeature + Clone + Send + Sync + 'static,
+    C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
 {
     let user: UserInput = UserInput::try_from(req)?;
     state
@@ -39,9 +40,9 @@ where
     Ok((StatusCode::CREATED, ()))
 }
 
-pub async fn login<R, L, T, A>(
+pub async fn login<R, L, T, A, C>(
     jar: CookieJar,
-    State(state): State<Arc<AppState<R, L, T, A>>>,
+    State(state): State<Arc<AppState<R, L, T, A, C>>>,
     Json(req): Json<UserInputRequest>,
 ) -> Result<impl IntoResponse, ServerError>
 where
@@ -49,6 +50,7 @@ where
     L: LoginFeature + Clone + Send + Sync + 'static,
     T: TokenFeature + Clone + Send + Sync + 'static,
     A: AuthFeature + Clone + Send + Sync + 'static,
+    C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
 {
     let user: UserInput = UserInput::try_from(req)?;
     let auth_session = state

@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 use crate::{
     constants::{CSRF_HEADER, REDIS_POOL_SIZE},
     features::{
-        csrf::token::CsrfTokenFeature,
+        csrf::{token::CsrfTokenFeature, verify::StatefulCsrfVerifier},
         session::auth::UserAuthFeature,
         user::{login::UserLoginFeature, register::UserRegisterFeature},
     },
@@ -69,11 +69,14 @@ async fn main() -> anyhow::Result<()> {
         Arc::clone(&csrf_service),
     );
     let auth_feature = UserAuthFeature::new(Arc::clone(&session_repository));
+    let verify_csrf_feature =
+        StatefulCsrfVerifier::new(Arc::clone(&csrf_service), Arc::clone(&csrf_repository));
     let app_state = Arc::new(AppState {
         register_feature,
         login_feature,
         csrf_feature,
         auth_feature,
+        verify_csrf_feature,
     });
 
     let cors = CorsLayer::new()
