@@ -15,7 +15,13 @@ pub trait UserRepository {
 
 #[derive(Clone)]
 pub struct PgUserRepository {
-    pub db: PgPool,
+    db: PgPool,
+}
+
+impl PgUserRepository {
+    pub fn new(db: PgPool) -> Self {
+        Self { db }
+    }
 }
 
 impl UserRepository for PgUserRepository {

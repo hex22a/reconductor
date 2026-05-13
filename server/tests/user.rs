@@ -13,7 +13,7 @@ async fn test_add_user(db: PgPool) {
         username: expected_username,
         password_hash: expected_password_hash,
     };
-    let repo = PgUserRepository { db: db.clone() };
+    let repo = PgUserRepository::new(db);
     // Act
     let actual_result = repo.add_user(expected_user_insert).await.unwrap();
     // Assert
@@ -24,7 +24,7 @@ async fn test_add_user(db: PgPool) {
 async fn test_get_user_by_username_not_found(db: PgPool) {
     // Arrange
     let expected_username: String = "test".to_string();
-    let repo = PgUserRepository { db: db.clone() };
+    let repo = PgUserRepository::new(db);
     // Act
     let actual_result = repo.get_user_by_username(&expected_username).await;
     // Assert
@@ -40,7 +40,7 @@ async fn test_get_user_by_username_existing_username(db: PgPool) {
         username: expected_username.clone(),
         password_hash: expected_password_hash.clone(),
     };
-    let repo = PgUserRepository { db: db.clone() };
+    let repo = PgUserRepository::new(db);
     let _ = repo.add_user(expected_user_insert).await;
     // Act
     let actual_user = repo.get_user_by_username(&expected_username).await.unwrap();

@@ -44,7 +44,7 @@ async fn main() -> anyhow::Result<()> {
     let config = config::Config::from_env()?;
     let db = db::init_db(&config.database_url).await;
     let kv = Arc::new(FredKvProvider::new(config.redis_url, REDIS_POOL_SIZE).await?);
-    let user_repository = Arc::new(PgUserRepository { db });
+    let user_repository = Arc::new(PgUserRepository::new(db));
     let session_repository = Arc::new(SessionStore::new(Arc::clone(&kv)));
     let csrf_repository = Arc::new(CsrfStore::new(Arc::clone(&kv)));
     let password_service = Arc::new(Argon2Service);
