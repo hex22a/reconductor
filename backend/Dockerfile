@@ -17,6 +17,8 @@ RUN bun build --compile --outfile=migration ./db/migration.ts
 # Server
 FROM debian:13.4-slim
 
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+
 WORKDIR /shared
 COPY ./shared/schema.graphql .
 
@@ -26,6 +28,8 @@ COPY ./migrations .
 WORKDIR /app
 
 COPY --from=build /app/server /app/migration .
+RUN chown -R appuser:appgroup /app /migrations /shared
+USER appuser
 
 EXPOSE 4000
 
