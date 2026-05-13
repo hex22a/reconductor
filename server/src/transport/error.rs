@@ -6,8 +6,8 @@ use axum::{
 use serde::Serialize;
 
 use crate::{
+    application::error::{FieldErrors, ServerError},
     constants::{UNAUTHORIZED_ERROR_MESSAGE, UNEXPECTED_ERROR_MESSAGE},
-    domain::error::{FieldErrors, ServerError},
 };
 
 #[derive(Serialize)]

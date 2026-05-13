@@ -7,8 +7,8 @@ use axum_extra::extract::{
 };
 
 use crate::{
+    application::error::ServerError,
     constants::{CSRF_COOKIE_NAME, USER_SESSION_COOKIE_NAME},
-    domain::error::ServerError,
     features::{
         csrf::{dto::CsrfResponse, token::TokenFeature, verify::VerifyCsrfFeature},
         session::auth::AuthFeature,

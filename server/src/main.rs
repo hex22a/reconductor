@@ -24,9 +24,9 @@ use axum::{
 use rand::rngs::SysRng;
 use tower_http::cors::CorsLayer;
 
+mod application;
 mod config;
 mod constants;
-mod domain;
 mod features;
 mod infra;
 mod routes;

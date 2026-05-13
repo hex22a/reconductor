@@ -19,7 +19,9 @@ use axum_extra::extract::{
     cookie::{Cookie, SameSite},
 };
 
-use crate::{domain::error::ServerError, features::user::dto::UserInputRequest, state::AppState};
+use crate::{
+    application::error::ServerError, features::user::dto::UserInputRequest, state::AppState,
+};
 
 pub async fn register<R, L, T, A, C>(
     State(state): State<Arc<AppState<R, L, T, A, C>>>,

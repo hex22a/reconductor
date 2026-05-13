@@ -10,8 +10,8 @@ use axum::{
 use axum_extra::extract::CookieJar;
 
 use crate::{
+    application::error::ServerError,
     constants::{CSRF_COOKIE_NAME, CSRF_HEADER},
-    domain::error::ServerError,
     features::{
         csrf::{token::TokenFeature, verify::VerifyCsrfFeature},
         session::{auth::AuthFeature, model::UserSession},

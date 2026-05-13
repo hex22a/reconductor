@@ -8,8 +8,8 @@ use axum::{
 use axum_extra::extract::CookieJar;
 
 use crate::{
+    application::error::ServerError,
     constants::USER_SESSION_COOKIE_NAME,
-    domain::error::ServerError,
     features::{
         csrf::{token::TokenFeature, verify::VerifyCsrfFeature},
         session::auth::AuthFeature,

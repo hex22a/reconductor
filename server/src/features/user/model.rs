@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 use crate::{
+    application::error::ServerError,
     constants::{
         MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH, MIN_PASSWORD_LENGTH, MIN_USERNAME_LENGTH,
     },
-    domain::error::ServerError,
     features::user::dto::UserInputRequest,
 };
 
