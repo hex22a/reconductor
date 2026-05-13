@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
-use server::infra::persistence::kv::{
-    FredKvProvider,
-    csrf::{CsrfRepository, CsrfStore},
+use server::{
+    features::csrf::repository::{CsrfRepository, CsrfStore},
+    infra::persistence::kv::FredKvProvider,
 };
 
 async fn create_store() -> CsrfStore<FredKvProvider> {

@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 use crate::{
     constants::{CSRF_HEADER, REDIS_POOL_SIZE},
     features::{
-        csrf::{token::CsrfTokenFeature, verify::StatefulCsrfVerifier},
+        csrf::{repository::CsrfStore, token::CsrfTokenFeature, verify::StatefulCsrfVerifier},
         session::auth::UserAuthFeature,
         user::{
             login::UserLoginFeature, register::UserRegisterFeature, repository::PgUserRepository,
@@ -14,7 +14,7 @@ use crate::{
         password::Argon2Service,
         persistence::{
             db,
-            kv::{FredKvProvider, csrf::CsrfStore, session::SessionStore},
+            kv::{FredKvProvider, session::SessionStore},
         },
         random::OsRngService,
     },

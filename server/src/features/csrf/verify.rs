@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use subtle::ConstantTimeEq;
 
-use crate::infra::{csrf::CsrfService, persistence::kv::csrf::CsrfRepository};
+use crate::{features::csrf::repository::CsrfRepository, infra::csrf::CsrfService};
 
 pub trait VerifyCsrfFeature {
     fn verify_anonymous(
@@ -64,7 +64,7 @@ where
 mod tests {
     use std::sync::Mutex;
 
-    use crate::infra::{csrf::CsrfServiceError, persistence::kv::csrf::CsrfRepositoryError};
+    use crate::{features::csrf::repository::CsrfRepositoryError, infra::csrf::CsrfServiceError};
 
     use super::*;
 

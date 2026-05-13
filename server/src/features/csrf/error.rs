@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::infra::{csrf::CsrfServiceError, persistence::kv::csrf::CsrfRepositoryError};
+use crate::{features::csrf::repository::CsrfRepositoryError, infra::csrf::CsrfServiceError};
 
 #[derive(Debug)]
 pub enum CsrfError {

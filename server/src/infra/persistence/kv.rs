@@ -5,7 +5,6 @@ use fred::{
     types::Builder,
 };
 
-pub mod csrf;
 pub mod session;
 
 pub trait KvProvider {

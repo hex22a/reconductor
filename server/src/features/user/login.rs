@@ -3,13 +3,12 @@ use std::sync::Arc;
 use crate::{
     constants::USER_SESSION_TTL_SECONDS,
     features::{
+        csrf::repository::CsrfRepository,
         session::model::UserSession,
         user::{error::UserError, model::AuthSession, repository::UserRepository},
     },
     infra::{
-        csrf::CsrfService,
-        password::PasswordService,
-        persistence::kv::{csrf::CsrfRepository, session::SessionRepository},
+        csrf::CsrfService, password::PasswordService, persistence::kv::session::SessionRepository,
         random::RngService,
     },
 };
@@ -113,11 +112,14 @@ mod tests {
 
     use crate::{
         constants::NONCE_SIZE_BYTES,
-        features::user::model::{UserEntity, UserInsert},
+        features::{
+            csrf::repository::CsrfRepositoryError,
+            user::model::{UserEntity, UserInsert},
+        },
         infra::{
             csrf::CsrfServiceError,
             password::{PasswordService, PasswordServiceError},
-            persistence::kv::{csrf::CsrfRepositoryError, session::SessionRepositoryError},
+            persistence::kv::session::SessionRepositoryError,
             random::RngServiceError,
         },
     };

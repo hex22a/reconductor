@@ -2,13 +2,10 @@ use std::sync::Arc;
 
 use crate::{
     constants::ANONYMOUS_CSRF_TTL_SECONDS,
-    features::csrf::{error::CsrfError, model::CsrfTokenPair},
+    features::csrf::{error::CsrfError, model::CsrfTokenPair, repository::CsrfRepository},
     infra::{
         csrf::CsrfService,
-        persistence::kv::{
-            csrf::CsrfRepository,
-            session::{SessionRepository, SessionRepositoryError},
-        },
+        persistence::kv::session::{SessionRepository, SessionRepositoryError},
     },
 };
 
@@ -95,11 +92,8 @@ mod tests {
 
     use super::*;
     use crate::{
-        features::session::model::UserSession,
-        infra::{
-            csrf::{CsrfService, CsrfServiceError},
-            persistence::kv::csrf::CsrfRepositoryError,
-        },
+        features::{csrf::repository::CsrfRepositoryError, session::model::UserSession},
+        infra::csrf::{CsrfService, CsrfServiceError},
     };
 
     struct MockSessionRepository {
