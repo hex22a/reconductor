@@ -63,7 +63,7 @@ mod tests {
         }
     }
     impl LoginFeature for MockLoginFeature {
-        async fn login(&self, _: String, _: String) -> Result<AuthSession, UserError> {
+        async fn login(&self, _: String, _: String, _: String) -> Result<AuthSession, UserError> {
             todo!()
         }
     }

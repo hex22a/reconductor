@@ -55,9 +55,13 @@ where
     C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
 {
     let user: UserInput = UserInput::try_from(req)?;
+    let anonymous_csrf_token = jar
+        .get(CSRF_COOKIE_NAME)
+        .map(|c| c.to_string())
+        .ok_or(ServerError::Forbidden)?;
     let auth_session = state
         .login_feature
-        .login(user.username, user.password)
+        .login(user.username, user.password, anonymous_csrf_token)
         .await?;
     let jar = jar
         .add(
@@ -69,7 +73,7 @@ where
                 .build(),
         )
         .add(
-            Cookie::build((CSRF_COOKIE_NAME, auth_session.csrf_token.clone()))
+            Cookie::build((CSRF_COOKIE_NAME, auth_session.csrf_cookie))
                 .http_only(true)
                 .secure(true)
                 .same_site(SameSite::Lax)

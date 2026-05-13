@@ -10,6 +10,7 @@ pub struct UserInput {
 pub struct AuthSession {
     pub session_id: String,
     pub csrf_token: String,
+    pub csrf_cookie: String,
 }
 
 #[derive(Clone)]

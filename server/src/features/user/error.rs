@@ -1,7 +1,9 @@
 use core::fmt;
 
 use crate::{
-    features::session::repository::SessionRepositoryError,
+    features::{
+        csrf::repository::CsrfRepositoryError, session::repository::SessionRepositoryError,
+    },
     infra::{csrf::CsrfServiceError, password::PasswordServiceError, random::RngServiceError},
 };
 
@@ -42,6 +44,14 @@ impl From<SessionRepositoryError> for UserError {
         match value {
             SessionRepositoryError::StorageError(e) => UserError::StorageError(e.to_string()),
             _ => UserError::Interntal,
+        }
+    }
+}
+
+impl From<CsrfRepositoryError> for UserError {
+    fn from(value: CsrfRepositoryError) -> Self {
+        match value {
+            CsrfRepositoryError::StorageError(e) => UserError::StorageError(e.to_string()),
         }
     }
 }

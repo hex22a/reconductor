@@ -15,6 +15,7 @@ pub trait LoginFeature {
         &self,
         username: String,
         password: String,
+        anonymos_csrf_token: String,
     ) -> impl Future<Output = Result<AuthSession, UserError>> + Send;
 }
 
@@ -72,7 +73,12 @@ where
     PS: PasswordService + Send + Sync,
     R: RngService + Send + Sync,
 {
-    async fn login(&self, username: String, password: String) -> Result<AuthSession, UserError> {
+    async fn login(
+        &self,
+        username: String,
+        password: String,
+        anonymous_csrf_token: String,
+    ) -> Result<AuthSession, UserError> {
         let user = self.user_repository.get_user_by_username(&username).await?;
         let is_valid = self
             .password_service
@@ -84,14 +90,18 @@ where
                 .create_user_session(UserSession {
                     token: session_id.clone(),
                     csrf_token: csrf_token.clone(),
-                    csrf_cookie,
+                    csrf_cookie: csrf_cookie.clone(),
                     user_id: user.id,
                     username: user.username,
                 })
                 .await?;
+            self.csrf_repository
+                .delete_anonymous_csrf(anonymous_csrf_token)
+                .await?;
             Ok(AuthSession {
                 session_id,
                 csrf_token,
+                csrf_cookie,
             })
         } else {
             Err(UserError::PasswordMismatch)
@@ -209,6 +219,7 @@ mod tests {
     #[tokio::test]
     async fn test_login_password_matches() {
         // Arrange
+        let expected_anonymous_csrf = "anonymous_csrf".to_string();
         let expected_csrf_token = "csrf_token".to_string();
         let expected_csrf_cookie_value = "csrf_cookie".to_string();
         let expected_session_cookie = "session_cookie".to_string();
@@ -238,6 +249,7 @@ mod tests {
         let expected_auth_session = AuthSession {
             session_id: expected_session_cookie.clone(),
             csrf_token: expected_csrf_token.clone(),
+            csrf_cookie: expected_csrf_cookie_value.clone(),
         };
         let mock_password_service = Arc::new(MockPasswordService {
             error: Mutex::new(None),
@@ -265,7 +277,11 @@ mod tests {
         );
         // Act
         let actual_auth_session = feature
-            .login(expected_username, expected_password)
+            .login(
+                expected_username,
+                expected_password,
+                expected_anonymous_csrf,
+            )
             .await
             .unwrap();
         // Assert
@@ -275,6 +291,7 @@ mod tests {
     #[tokio::test]
     async fn test_login_password_does_not_match() {
         // Arrange
+        let expected_anonymous_csrf = "anonymous_csrf".to_string();
         let expected_csrf_token = "csrf_token".to_string();
         let expected_csrf_cookie_value = "csrf_cookie".to_string();
         let expected_user_id = Uuid::now_v7();
@@ -324,7 +341,13 @@ mod tests {
             mock_rng_service,
         );
         // Act
-        let actual_login_result = feature.login(expected_username, expected_password).await;
+        let actual_login_result = feature
+            .login(
+                expected_username,
+                expected_password,
+                expected_anonymous_csrf,
+            )
+            .await;
         // Assert
         assert!(matches!(
             actual_login_result,
