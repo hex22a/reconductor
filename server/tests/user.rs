@@ -1,4 +1,7 @@
-use server::infra::persistence::db::user::{PgUserRepository, UserInsert, UserRepository};
+use server::features::user::{
+    model::UserInsert,
+    repository::{PgUserRepository, UserRepository},
+};
 use sqlx::PgPool;
 
 #[sqlx::test(migrations = "../migrations")]

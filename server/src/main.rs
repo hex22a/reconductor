@@ -5,13 +5,15 @@ use crate::{
     features::{
         csrf::{token::CsrfTokenFeature, verify::StatefulCsrfVerifier},
         session::auth::UserAuthFeature,
-        user::{login::UserLoginFeature, register::UserRegisterFeature},
+        user::{
+            login::UserLoginFeature, register::UserRegisterFeature, repository::PgUserRepository,
+        },
     },
     infra::{
         csrf::AesGcmCsrfService,
         password::Argon2Service,
         persistence::{
-            db::{self, user::PgUserRepository},
+            db,
             kv::{FredKvProvider, csrf::CsrfStore, session::SessionStore},
         },
         random::OsRngService,

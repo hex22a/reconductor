@@ -1,24 +1,6 @@
-use sqlx::{
-    PgPool,
-    types::{Uuid, time::PrimitiveDateTime},
-};
+use sqlx::PgPool;
 
-#[derive(Clone)]
-pub struct UserEntity {
-    pub id: Uuid,
-    pub username: String,
-    pub password_hash: String,
-    pub password_version: i16,
-    pub created_at: PrimitiveDateTime,
-    pub updated_at: PrimitiveDateTime,
-    pub last_login_at: PrimitiveDateTime,
-    pub is_active: bool,
-}
-
-pub struct UserInsert {
-    pub username: String,
-    pub password_hash: String,
-}
+use crate::features::user::model::{UserEntity, UserInsert};
 
 pub trait UserRepository {
     fn add_user(

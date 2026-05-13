@@ -4,15 +4,12 @@ use crate::{
     constants::USER_SESSION_TTL_SECONDS,
     features::{
         session::model::UserSession,
-        user::{error::UserError, model::AuthSession},
+        user::{error::UserError, model::AuthSession, repository::UserRepository},
     },
     infra::{
         csrf::CsrfService,
         password::PasswordService,
-        persistence::{
-            db::user::UserRepository,
-            kv::{csrf::CsrfRepository, session::SessionRepository},
-        },
+        persistence::kv::{csrf::CsrfRepository, session::SessionRepository},
         random::RngService,
     },
 };
@@ -116,13 +113,11 @@ mod tests {
 
     use crate::{
         constants::NONCE_SIZE_BYTES,
+        features::user::model::{UserEntity, UserInsert},
         infra::{
             csrf::CsrfServiceError,
             password::{PasswordService, PasswordServiceError},
-            persistence::{
-                db::user::{UserEntity, UserInsert},
-                kv::{csrf::CsrfRepositoryError, session::SessionRepositoryError},
-            },
+            persistence::kv::{csrf::CsrfRepositoryError, session::SessionRepositoryError},
             random::RngServiceError,
         },
     };

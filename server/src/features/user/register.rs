@@ -1,8 +1,9 @@
 use std::sync::Arc;
 
 use crate::features::user::error::UserError;
+use crate::features::user::model::UserInsert;
+use crate::features::user::repository::UserRepository;
 use crate::infra::password::PasswordService;
-use crate::infra::persistence::db::user::{UserInsert, UserRepository};
 
 pub trait RegisterFeature {
     fn register(
@@ -48,13 +49,13 @@ where
 mod tests {
     use std::sync::Arc;
 
+    use crate::features::user::model::UserEntity;
+    use crate::features::user::model::UserInsert;
     use crate::features::user::register::RegisterFeature;
     use crate::features::user::register::UserRegisterFeature;
+    use crate::features::user::repository::UserRepository;
     use crate::infra::password::PasswordService;
     use crate::infra::password::PasswordServiceError;
-    use crate::infra::persistence::db::user::UserEntity;
-    use crate::infra::persistence::db::user::UserInsert;
-    use crate::infra::persistence::db::user::UserRepository;
 
     struct MockUserRepository;
     struct MockPasswordService;
