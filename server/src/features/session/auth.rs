@@ -1,8 +1,7 @@
 use std::sync::Arc;
 
-use crate::{
-    features::session::{error::SessionError, model::UserSession},
-    infra::persistence::kv::session::SessionRepository,
+use crate::features::session::{
+    error::SessionError, model::UserSession, repository::SessionRepository,
 };
 
 pub trait AuthFeature {
@@ -39,10 +38,7 @@ mod tests {
     use super::*;
     use std::sync::Mutex;
 
-    use crate::{
-        features::session::model::UserSession,
-        infra::persistence::kv::session::{SessionRepository, SessionRepositoryError},
-    };
+    use crate::features::session::{model::UserSession, repository::SessionRepositoryError};
 
     struct MockSessionRepository {
         error: Mutex<Option<SessionRepositoryError>>,

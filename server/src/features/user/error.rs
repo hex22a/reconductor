@@ -1,8 +1,8 @@
 use core::fmt;
 
-use crate::infra::{
-    csrf::CsrfServiceError, password::PasswordServiceError,
-    persistence::kv::session::SessionRepositoryError, random::RngServiceError,
+use crate::{
+    features::session::repository::SessionRepositoryError,
+    infra::{csrf::CsrfServiceError, password::PasswordServiceError, random::RngServiceError},
 };
 
 #[derive(Debug)]

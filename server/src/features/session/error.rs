@@ -1,4 +1,4 @@
-use crate::infra::persistence::kv::session::SessionRepositoryError;
+use crate::features::session::repository::SessionRepositoryError;
 
 #[derive(Debug)]
 pub enum SessionError {

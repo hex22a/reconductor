@@ -4,7 +4,7 @@ use crate::{
     constants::{CSRF_HEADER, REDIS_POOL_SIZE},
     features::{
         csrf::{repository::CsrfStore, token::CsrfTokenFeature, verify::StatefulCsrfVerifier},
-        session::auth::UserAuthFeature,
+        session::{auth::UserAuthFeature, repository::SessionStore},
         user::{
             login::UserLoginFeature, register::UserRegisterFeature, repository::PgUserRepository,
         },
@@ -12,10 +12,7 @@ use crate::{
     infra::{
         csrf::AesGcmCsrfService,
         password::Argon2Service,
-        persistence::{
-            db,
-            kv::{FredKvProvider, session::SessionStore},
-        },
+        persistence::{db, kv::FredKvProvider},
         random::OsRngService,
     },
 };

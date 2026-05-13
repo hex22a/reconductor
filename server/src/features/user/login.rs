@@ -4,13 +4,10 @@ use crate::{
     constants::USER_SESSION_TTL_SECONDS,
     features::{
         csrf::repository::CsrfRepository,
-        session::model::UserSession,
+        session::{model::UserSession, repository::SessionRepository},
         user::{error::UserError, model::AuthSession, repository::UserRepository},
     },
-    infra::{
-        csrf::CsrfService, password::PasswordService, persistence::kv::session::SessionRepository,
-        random::RngService,
-    },
+    infra::{csrf::CsrfService, password::PasswordService, random::RngService},
 };
 
 pub trait LoginFeature {
@@ -114,12 +111,12 @@ mod tests {
         constants::NONCE_SIZE_BYTES,
         features::{
             csrf::repository::CsrfRepositoryError,
+            session::repository::SessionRepositoryError,
             user::model::{UserEntity, UserInsert},
         },
         infra::{
             csrf::CsrfServiceError,
             password::{PasswordService, PasswordServiceError},
-            persistence::kv::session::SessionRepositoryError,
             random::RngServiceError,
         },
     };

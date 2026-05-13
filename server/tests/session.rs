@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
 use server::{
-    features::session::model::UserSession,
-    infra::persistence::kv::{
-        FredKvProvider,
-        session::{SessionRepository, SessionRepositoryError, SessionStore},
+    features::session::{
+        model::UserSession,
+        repository::{SessionRepository, SessionRepositoryError, SessionStore},
     },
+    infra::persistence::kv::FredKvProvider,
 };
 use uuid::Uuid;
 

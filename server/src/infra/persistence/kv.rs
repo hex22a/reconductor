@@ -5,8 +5,6 @@ use fred::{
     types::Builder,
 };
 
-pub mod session;
-
 pub trait KvProvider {
     fn get(
         &self,

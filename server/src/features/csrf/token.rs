@@ -2,11 +2,11 @@ use std::sync::Arc;
 
 use crate::{
     constants::ANONYMOUS_CSRF_TTL_SECONDS,
-    features::csrf::{error::CsrfError, model::CsrfTokenPair, repository::CsrfRepository},
-    infra::{
-        csrf::CsrfService,
-        persistence::kv::session::{SessionRepository, SessionRepositoryError},
+    features::{
+        csrf::{error::CsrfError, model::CsrfTokenPair, repository::CsrfRepository},
+        session::repository::{SessionRepository, SessionRepositoryError},
     },
+    infra::csrf::CsrfService,
 };
 
 pub trait TokenFeature {
