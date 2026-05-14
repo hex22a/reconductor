@@ -102,20 +102,20 @@ impl<K: KvProvider + Send + Sync> SessionRepository for SessionStore<K> {
     ) -> Result<(), SessionRepositoryError> {
         let key = format!("{}:{}", USER_SESSION_PREFIX, user_session.token);
         let ttl = Duration::from_secs(USER_SESSION_TTL_SECONDS);
-        self.kv.hset(key.clone(), user_session.into()).await?;
-        self.kv.expire(key, ttl).await?;
+        self.kv.hset(&key, user_session.into()).await?;
+        self.kv.expire(&key, &ttl).await?;
         Ok(())
     }
 
     async fn get_user_session(&self, token: String) -> Result<UserSession, SessionRepositoryError> {
         let key = format!("{}:{}", USER_SESSION_PREFIX, token);
-        let session = self.kv.hgetall(key).await?.try_into()?;
+        let session = self.kv.hgetall(&key).await?.try_into()?;
         Ok(session)
     }
 
     async fn delete_user_session(&self, token: String) -> Result<(), SessionRepositoryError> {
         let key = format!("{}:{}", USER_SESSION_PREFIX, token);
-        self.kv.del(key).await?;
+        self.kv.del(&key).await?;
         Ok(())
     }
 }

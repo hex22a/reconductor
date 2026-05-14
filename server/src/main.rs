@@ -13,7 +13,7 @@ use crate::{
     infra::{
         csrf::AesGcmCsrfService,
         password::Argon2Service,
-        persistence::{db, kv::FredKvProvider},
+        persistence::{db, kv},
         random::OsRngService,
     },
 };
@@ -43,7 +43,7 @@ async fn main() -> anyhow::Result<()> {
         .init();
     let config = config::Config::from_env()?;
     let db = db::init_db(&config.database_url).await;
-    let kv = Arc::new(FredKvProvider::new(config.redis_url, REDIS_POOL_SIZE).await?);
+    let kv = Arc::new(kv::init_kv(&config.redis_url, REDIS_POOL_SIZE).await);
     let user_repository = Arc::new(PgUserRepository::new(db));
     let session_repository = Arc::new(SessionStore::new(Arc::clone(&kv)));
     let csrf_repository = Arc::new(CsrfStore::new(Arc::clone(&kv)));

@@ -96,7 +96,7 @@ where
                 })
                 .await?;
             self.csrf_repository
-                .delete_anonymous_csrf(anonymous_csrf_token)
+                .delete_anonymous_csrf(&anonymous_csrf_token)
                 .await?;
             Ok(AuthSession {
                 session_id,
@@ -185,15 +185,15 @@ mod tests {
         }
     }
     impl CsrfRepository for MockCsrfRepository {
-        async fn create_anonymous_csrf(&self, _: String) -> Result<(), CsrfRepositoryError> {
+        async fn create_anonymous_csrf(&self, _: &str) -> Result<(), CsrfRepositoryError> {
             todo!()
         }
 
-        async fn verify_anonymous_csrf(&self, _: String) -> Result<bool, CsrfRepositoryError> {
+        async fn verify_anonymous_csrf(&self, _: &str) -> Result<bool, CsrfRepositoryError> {
             todo!()
         }
 
-        async fn delete_anonymous_csrf(&self, _: String) -> Result<(), CsrfRepositoryError> {
+        async fn delete_anonymous_csrf(&self, _: &str) -> Result<(), CsrfRepositoryError> {
             Ok(())
         }
     }

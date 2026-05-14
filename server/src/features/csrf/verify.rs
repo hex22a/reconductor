@@ -41,7 +41,7 @@ where
         self.csrf_service.verify(&csrf_token, &csrf_cookie)
             && self
                 .csrf_repository
-                .verify_anonymous_csrf(csrf_token)
+                .verify_anonymous_csrf(&csrf_token)
                 .await
                 .unwrap_or(false)
     }
@@ -76,18 +76,18 @@ mod tests {
         return_value: bool,
     }
     impl CsrfRepository for MockCsrfRepository {
-        async fn create_anonymous_csrf(&self, _: String) -> Result<(), CsrfRepositoryError> {
+        async fn create_anonymous_csrf(&self, _: &str) -> Result<(), CsrfRepositoryError> {
             todo!()
         }
 
-        async fn verify_anonymous_csrf(&self, _: String) -> Result<bool, CsrfRepositoryError> {
+        async fn verify_anonymous_csrf(&self, _: &str) -> Result<bool, CsrfRepositoryError> {
             match self.error.lock().unwrap().take() {
                 Some(e) => Err(e),
                 None => Ok(self.return_value.clone()),
             }
         }
 
-        async fn delete_anonymous_csrf(&self, _: String) -> Result<(), CsrfRepositoryError> {
+        async fn delete_anonymous_csrf(&self, _: &str) -> Result<(), CsrfRepositoryError> {
             todo!()
         }
     }

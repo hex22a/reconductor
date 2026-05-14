@@ -52,9 +52,7 @@ where
                         SessionRepositoryError::NotFound => {
                             let (token, cookie_value) =
                                 self.csrf_service.generate(ANONYMOUS_CSRF_TTL_SECONDS)?;
-                            self.csrf_repository
-                                .create_anonymous_csrf(token.clone())
-                                .await?;
+                            self.csrf_repository.create_anonymous_csrf(&token).await?;
                             Ok(CsrfTokenPair {
                                 token,
                                 cookie_value: cookie_value,
@@ -72,9 +70,7 @@ where
             None => {
                 let (token, cookie_value) =
                     self.csrf_service.generate(ANONYMOUS_CSRF_TTL_SECONDS)?;
-                self.csrf_repository
-                    .create_anonymous_csrf(token.clone())
-                    .await?;
+                self.csrf_repository.create_anonymous_csrf(&token).await?;
                 Ok(CsrfTokenPair {
                     token,
                     cookie_value: cookie_value,
@@ -122,15 +118,15 @@ mod tests {
         }
     }
     impl CsrfRepository for MockCsrfRepository {
-        async fn create_anonymous_csrf(&self, _: String) -> Result<(), CsrfRepositoryError> {
+        async fn create_anonymous_csrf(&self, _: &str) -> Result<(), CsrfRepositoryError> {
             Ok(())
         }
 
-        async fn verify_anonymous_csrf(&self, _: String) -> Result<bool, CsrfRepositoryError> {
+        async fn verify_anonymous_csrf(&self, _: &str) -> Result<bool, CsrfRepositoryError> {
             todo!()
         }
 
-        async fn delete_anonymous_csrf(&self, _: String) -> Result<(), CsrfRepositoryError> {
+        async fn delete_anonymous_csrf(&self, _: &str) -> Result<(), CsrfRepositoryError> {
             todo!()
         }
     }
