@@ -10,12 +10,12 @@ pub trait ProjectRepository {
     ) -> impl Future<Output = Result<(), sqlx::Error>> + Send;
     fn get_project(
         &self,
-        project_id: Uuid,
+        project_id: &Uuid,
     ) -> impl Future<Output = Result<ProjectEntity, sqlx::Error>> + Send;
     fn list_projects(
         &self,
-        owner_id: Uuid,
-        cursor_id: Option<Uuid>,
+        owner_id: &Uuid,
+        cursor_id: Option<&Uuid>,
         limit: i64,
     ) -> impl Future<Output = Result<Vec<ProjectEntity>, sqlx::Error>> + Send;
 }
@@ -47,7 +47,7 @@ impl ProjectRepository for PgProjectRepository {
         Ok(())
     }
 
-    async fn get_project(&self, project_id: Uuid) -> Result<ProjectEntity, sqlx::Error> {
+    async fn get_project(&self, project_id: &Uuid) -> Result<ProjectEntity, sqlx::Error> {
         let project = sqlx::query_as!(
             ProjectEntity,
             r#"
@@ -69,8 +69,8 @@ impl ProjectRepository for PgProjectRepository {
 
     async fn list_projects(
         &self,
-        owner_id: Uuid,
-        cursor_id: Option<Uuid>,
+        owner_id: &Uuid,
+        cursor_id: Option<&Uuid>,
         limit: i64,
     ) -> Result<Vec<ProjectEntity>, sqlx::Error> {
         match cursor_id {
