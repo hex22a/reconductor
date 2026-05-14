@@ -76,11 +76,11 @@ pub trait SessionRepository {
     ) -> impl Future<Output = Result<(), SessionRepositoryError>> + Send;
     fn get_user_session(
         &self,
-        token: String,
+        token: &str,
     ) -> impl Future<Output = Result<UserSession, SessionRepositoryError>> + Send;
     fn delete_user_session(
         &self,
-        token: String,
+        token: &str,
     ) -> impl Future<Output = Result<(), SessionRepositoryError>> + Send;
 }
 
@@ -107,13 +107,13 @@ impl<K: KvProvider + Send + Sync> SessionRepository for SessionStore<K> {
         Ok(())
     }
 
-    async fn get_user_session(&self, token: String) -> Result<UserSession, SessionRepositoryError> {
+    async fn get_user_session(&self, token: &str) -> Result<UserSession, SessionRepositoryError> {
         let key = format!("{}:{}", USER_SESSION_PREFIX, token);
         let session = self.kv.hgetall(&key).await?.try_into()?;
         Ok(session)
     }
 
-    async fn delete_user_session(&self, token: String) -> Result<(), SessionRepositoryError> {
+    async fn delete_user_session(&self, token: &str) -> Result<(), SessionRepositoryError> {
         let key = format!("{}:{}", USER_SESSION_PREFIX, token);
         self.kv.del(&key).await?;
         Ok(())

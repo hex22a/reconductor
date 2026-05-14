@@ -12,7 +12,7 @@ use crate::{
 pub trait TokenFeature {
     fn get_token(
         &self,
-        session_token: Option<String>,
+        session_token: Option<&str>,
     ) -> impl Future<Output = Result<CsrfTokenPair, CsrfError>> + Send;
 }
 
@@ -39,7 +39,7 @@ where
     C: CsrfRepository + Send + Sync,
     S: CsrfService + Send + Sync,
 {
-    async fn get_token(&self, session_cookie: Option<String>) -> Result<CsrfTokenPair, CsrfError> {
+    async fn get_token(&self, session_cookie: Option<&str>) -> Result<CsrfTokenPair, CsrfError> {
         match session_cookie {
             Some(token) => {
                 let user_session_result = self.session_repository.get_user_session(token).await;
@@ -106,14 +106,14 @@ mod tests {
             todo!()
         }
 
-        async fn get_user_session(&self, _: String) -> Result<UserSession, SessionRepositoryError> {
+        async fn get_user_session(&self, _: &str) -> Result<UserSession, SessionRepositoryError> {
             match self.error.lock().unwrap().take() {
                 Some(e) => Err(e),
                 None => Ok(self.return_value.clone()),
             }
         }
 
-        async fn delete_user_session(&self, _: String) -> Result<(), SessionRepositoryError> {
+        async fn delete_user_session(&self, _: &str) -> Result<(), SessionRepositoryError> {
             todo!()
         }
     }
@@ -178,7 +178,7 @@ mod tests {
         );
         // Act
         let actual_csrf_token_pair = feature
-            .get_token(Some(expected_session_token.clone()))
+            .get_token(Some(&expected_session_token))
             .await
             .unwrap();
         // Assert
@@ -221,7 +221,7 @@ mod tests {
         );
         // Act
         let actual_csrf_token_pair = feature
-            .get_token(Some(expected_session_token.clone()))
+            .get_token(Some(&expected_session_token))
             .await
             .unwrap();
         // Assert

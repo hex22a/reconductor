@@ -34,7 +34,7 @@ where
 {
     let session_token = jar
         .get(USER_SESSION_COOKIE_NAME)
-        .map(|c| c.value().to_string())
+        .map(|c| c.value())
         .ok_or(ServerError::Unauthorized)?;
     let user_session = state.auth_feature.auth(session_token).await?;
     req.extensions_mut().insert(user_session);

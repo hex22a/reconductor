@@ -74,17 +74,17 @@ mod tests {
         }
     }
     impl LogoutFeature for MockLogoutFeature {
-        async fn logout(&self, _: String) -> Result<(), UserError> {
+        async fn logout(&self, _: &str) -> Result<(), UserError> {
             todo!()
         }
     }
     impl TokenFeature for MockTokenFeature {
-        async fn get_token(&self, _: Option<String>) -> Result<CsrfTokenPair, CsrfError> {
+        async fn get_token(&self, _: Option<&str>) -> Result<CsrfTokenPair, CsrfError> {
             todo!()
         }
     }
     impl AuthFeature for MockAuthFeature {
-        async fn auth(&self, _: String) -> Result<UserSession, SessionError> {
+        async fn auth(&self, _: &str) -> Result<UserSession, SessionError> {
             todo!()
         }
     }

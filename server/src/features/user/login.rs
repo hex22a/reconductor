@@ -176,11 +176,11 @@ mod tests {
             Ok(())
         }
 
-        async fn get_user_session(&self, _: String) -> Result<UserSession, SessionRepositoryError> {
+        async fn get_user_session(&self, _: &str) -> Result<UserSession, SessionRepositoryError> {
             todo!()
         }
 
-        async fn delete_user_session(&self, _: String) -> Result<(), SessionRepositoryError> {
+        async fn delete_user_session(&self, _: &str) -> Result<(), SessionRepositoryError> {
             todo!()
         }
     }

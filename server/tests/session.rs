@@ -51,7 +51,7 @@ async fn stores_session_under_correct_key() {
 async fn returns_not_found_error_for_missing_session() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "does_not_exist".to_string();
+    let expected_token = "does_not_exist";
 
     // Act
     let actual_result = store.get_user_session(expected_token).await;
@@ -67,8 +67,8 @@ async fn returns_not_found_error_for_missing_session() {
 async fn gets_session_from_storage() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "get_session_from_storage".to_string();
-    let expected_user_session = create_user_session_fixture(expected_token.clone());
+    let expected_token = "get_session_from_storage";
+    let expected_user_session = create_user_session_fixture(expected_token.to_string());
     store
         .create_user_session(expected_user_session.clone())
         .await
@@ -85,18 +85,15 @@ async fn gets_session_from_storage() {
 async fn deletes_session_from_storage() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "token_to_delete".to_string();
-    let expected_user_session = create_user_session_fixture(expected_token.clone());
+    let expected_token = "token_to_delete";
+    let expected_user_session = create_user_session_fixture(expected_token.to_string());
     store
         .create_user_session(expected_user_session)
         .await
         .unwrap();
 
     // Act
-    store
-        .delete_user_session(expected_token.clone())
-        .await
-        .unwrap();
+    store.delete_user_session(expected_token).await.unwrap();
 
     // Assert
     let result = store.get_user_session(expected_token).await;

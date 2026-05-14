@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::features::{session::repository::SessionRepository, user::error::UserError};
 
 pub trait LogoutFeature {
-    fn logout(&self, session_id: String) -> impl Future<Output = Result<(), UserError>> + Send;
+    fn logout(&self, session_id: &str) -> impl Future<Output = Result<(), UserError>> + Send;
 }
 
 #[derive(Clone)]
@@ -21,7 +21,7 @@ impl<R> LogoutFeature for UserLogoutFeature<R>
 where
     R: SessionRepository + Send + Sync,
 {
-    async fn logout(&self, session_id: String) -> Result<(), UserError> {
+    async fn logout(&self, session_id: &str) -> Result<(), UserError> {
         self.session_repository
             .delete_user_session(session_id)
             .await?;
@@ -41,11 +41,11 @@ mod tests {
             todo!()
         }
 
-        async fn get_user_session(&self, _: String) -> Result<UserSession, SessionRepositoryError> {
+        async fn get_user_session(&self, _: &str) -> Result<UserSession, SessionRepositoryError> {
             todo!()
         }
 
-        async fn delete_user_session(&self, _: String) -> Result<(), SessionRepositoryError> {
+        async fn delete_user_session(&self, _: &str) -> Result<(), SessionRepositoryError> {
             Ok(())
         }
     }
@@ -53,7 +53,7 @@ mod tests {
     #[tokio::test]
     async fn test_logout() {
         // Arrange
-        let expected_session_id = "session_id".to_string();
+        let expected_session_id = "session_id";
         let mock_session_repository = MockSessionRepository;
         let feature = UserLogoutFeature::new(Arc::new(mock_session_repository));
         // Act

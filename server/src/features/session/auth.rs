@@ -7,7 +7,7 @@ use crate::features::session::{
 pub trait AuthFeature {
     fn auth(
         &self,
-        session_id: String,
+        session_id: &str,
     ) -> impl Future<Output = Result<UserSession, SessionError>> + Send;
 }
 
@@ -26,7 +26,7 @@ impl<S> AuthFeature for UserAuthFeature<S>
 where
     S: SessionRepository + Send + Sync,
 {
-    async fn auth(&self, session_id: String) -> Result<UserSession, SessionError> {
+    async fn auth(&self, session_id: &str) -> Result<UserSession, SessionError> {
         Ok(self.session_repository.get_user_session(session_id).await?)
     }
 }
@@ -49,14 +49,14 @@ mod tests {
             todo!()
         }
 
-        async fn get_user_session(&self, _: String) -> Result<UserSession, SessionRepositoryError> {
+        async fn get_user_session(&self, _: &str) -> Result<UserSession, SessionRepositoryError> {
             match self.error.lock().unwrap().take() {
                 Some(e) => Err(e),
                 None => Ok(self.return_value.clone()),
             }
         }
 
-        async fn delete_user_session(&self, _: String) -> Result<(), SessionRepositoryError> {
+        async fn delete_user_session(&self, _: &str) -> Result<(), SessionRepositoryError> {
             todo!()
         }
     }
@@ -64,13 +64,13 @@ mod tests {
     #[tokio::test]
     async fn test_auth_session_found() {
         // Arrange
-        let expected_session_token = "session_token".to_string();
+        let expected_session_token = "session_token";
         let expected_user_id: Uuid = Uuid::now_v7();
         let expected_username = "test".to_string();
         let expected_csrf_token = "csrf_token".to_string();
         let expected_csrf_cookie = "csrf_cookie".to_string();
         let expected_user_session = UserSession {
-            token: expected_session_token.clone(),
+            token: expected_session_token.to_string(),
             user_id: expected_user_id,
             username: expected_username,
             csrf_token: expected_csrf_token.clone(),
@@ -90,13 +90,13 @@ mod tests {
     #[tokio::test]
     async fn test_auth_session_not_found() {
         // Arrange
-        let expected_session_token = "session_token".to_string();
+        let expected_session_token = "session_token";
         let expected_user_id: Uuid = Uuid::now_v7();
         let expected_username = "test".to_string();
         let expected_csrf_token = "csrf_token".to_string();
         let expected_csrf_cookie = "csrf_cookie".to_string();
         let expected_user_session = UserSession {
-            token: expected_session_token.clone(),
+            token: expected_session_token.to_string(),
             user_id: expected_user_id,
             username: expected_username,
             csrf_token: expected_csrf_token.clone(),
