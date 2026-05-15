@@ -11,6 +11,7 @@ pub trait ProjectRepository {
     fn get_project(
         &self,
         project_id: &Uuid,
+        owner_id: &Uuid,
     ) -> impl Future<Output = Result<ProjectEntity, sqlx::Error>> + Send;
     fn list_projects(
         &self,
@@ -47,7 +48,11 @@ impl ProjectRepository for PgProjectRepository {
         Ok(())
     }
 
-    async fn get_project(&self, project_id: &Uuid) -> Result<ProjectEntity, sqlx::Error> {
+    async fn get_project(
+        &self,
+        project_id: &Uuid,
+        owner_id: &Uuid,
+    ) -> Result<ProjectEntity, sqlx::Error> {
         let project = sqlx::query_as!(
             ProjectEntity,
             r#"
@@ -57,10 +62,11 @@ impl ProjectRepository for PgProjectRepository {
                 name,
                 created_at
             FROM recon.projects
-            WHERE id=$1
+            WHERE id=$1 and owner_id=$2
             LIMIT 1;
             "#,
-            project_id
+            project_id,
+            owner_id,
         )
         .fetch_one(&self.db)
         .await?;
