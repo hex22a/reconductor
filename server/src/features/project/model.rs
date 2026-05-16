@@ -12,3 +12,8 @@ pub struct ProjectInsert {
     pub owner_id: Uuid,
     pub name: String,
 }
+
+#[derive(Debug, PartialEq)]
+pub struct CreateProjectInput {
+    pub name: String,
+}
