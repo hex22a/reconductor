@@ -4,8 +4,8 @@ use uuid::Uuid;
 
 use crate::{
     constants::PROJECTS_PAGE_SIZE_LIMIT,
+    domain::cursor::{decode_cursor, encode_cursor},
     features::project::{dto::ProjectDto, error::ProjectError, repository::ProjectRepository},
-    infra::cursor::{decode_cursor, encode_cursor},
     transport::pagination::{Page, PageInfo},
 };
 
@@ -81,12 +81,12 @@ mod tests {
 
     use crate::{
         constants::PROJECTS_PAGE_SIZE_LIMIT,
+        domain::cursor::encode_cursor,
         features::project::{
             dto::ProjectDto,
             model::{ProjectEntity, ProjectInsert},
             repository::ProjectRepository,
         },
-        infra::cursor::encode_cursor,
         transport::pagination::PageInfo,
     };
 

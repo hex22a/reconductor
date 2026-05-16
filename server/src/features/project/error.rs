@@ -1,4 +1,4 @@
-use crate::infra::cursor::CursorError;
+use crate::domain::cursor::CursorError;
 
 #[derive(Debug)]
 pub enum ProjectError {
