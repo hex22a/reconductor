@@ -55,6 +55,6 @@ impl RngService for OsRngService {
     fn generate_session_id(&self) -> Result<String, RngServiceError> {
         let mut key = [0u8; SESSION_ID_SIZE_BYTES];
         self.rng.lock().unwrap().try_fill_bytes(&mut key)?;
-        Ok(BASE64_URL_SAFE_NO_PAD.encode(&key))
+        Ok(BASE64_URL_SAFE_NO_PAD.encode(key))
     }
 }

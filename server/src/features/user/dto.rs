@@ -34,7 +34,7 @@ impl TryFrom<UserInputRequest> for UserInput {
         let password_len = value.password.len();
         let mut field_errors: HashMap<String, Vec<String>> = HashMap::new();
         let mut error = false;
-        if username_len < MIN_USERNAME_LENGTH || username_len > MAX_USERNAME_LENGTH {
+        if !(MIN_USERNAME_LENGTH..=MAX_USERNAME_LENGTH).contains(&username_len) {
             error = true;
             field_errors.insert(
                 "username".to_string(),
@@ -45,7 +45,7 @@ impl TryFrom<UserInputRequest> for UserInput {
                 )],
             );
         };
-        if password_len < MIN_PASSWORD_LENGTH || password_len > MAX_PASSWORD_LENGTH {
+        if !(MIN_PASSWORD_LENGTH..=MAX_PASSWORD_LENGTH).contains(&password_len) {
             error = true;
             field_errors.insert(
                 "password".to_string(),
@@ -56,13 +56,13 @@ impl TryFrom<UserInputRequest> for UserInput {
                 )],
             );
         };
-        return match error {
+        match error {
             true => Err(ServerError::ValidationError(field_errors)),
             false => Ok(UserInput {
                 username: value.username,
                 password: value.password,
             }),
-        };
+        }
     }
 }
 

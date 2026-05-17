@@ -155,7 +155,7 @@ mod tests {
         fn verify_password(&self, _: &str, _: &str) -> Result<bool, PasswordServiceError> {
             match self.error.lock().unwrap().take() {
                 Some(e) => Err(e),
-                None => Ok(self.is_valid.clone()),
+                None => Ok(self.is_valid),
             }
         }
     }

@@ -83,7 +83,7 @@ mod tests {
         async fn verify_anonymous_csrf(&self, _: &str) -> Result<bool, CsrfRepositoryError> {
             match self.error.lock().unwrap().take() {
                 Some(e) => Err(e),
-                None => Ok(self.return_value.clone()),
+                None => Ok(self.return_value),
             }
         }
 
@@ -97,7 +97,7 @@ mod tests {
         }
 
         fn verify(&self, _: &str, _: &str) -> bool {
-            self.return_value.clone()
+            self.return_value
         }
     }
 
@@ -117,7 +117,7 @@ mod tests {
             .verify_anonymous(expected_csrf_cookie, expected_csrf_token)
             .await;
         // Assert
-        assert_eq!(actual_is_valid, true);
+        assert!(actual_is_valid);
     }
 
     #[tokio::test]
@@ -136,7 +136,7 @@ mod tests {
             .verify_anonymous(expected_csrf_cookie, expected_csrf_token)
             .await;
         // Assert
-        assert_eq!(actual_is_valid, false);
+        assert!(!actual_is_valid);
     }
 
     #[tokio::test]
@@ -157,7 +157,7 @@ mod tests {
             .verify_anonymous(expected_csrf_cookie, expected_csrf_token)
             .await;
         // Assert
-        assert_eq!(actual_is_valid, false);
+        assert!(!actual_is_valid);
     }
 
     #[tokio::test]
@@ -178,7 +178,7 @@ mod tests {
             .verify_anonymous(expected_csrf_cookie, expected_csrf_token)
             .await;
         // Assert
-        assert_eq!(actual_is_valid, false);
+        assert!(!actual_is_valid);
     }
 
     #[tokio::test]
@@ -202,7 +202,7 @@ mod tests {
             )
             .await;
         // Assert
-        assert_eq!(actual_is_valid, true);
+        assert!(actual_is_valid);
     }
 
     #[tokio::test]
@@ -226,7 +226,7 @@ mod tests {
             )
             .await;
         // Assert
-        assert_eq!(actual_is_valid, false);
+        assert!(!actual_is_valid);
     }
 
     #[tokio::test]
@@ -252,6 +252,6 @@ mod tests {
             )
             .await;
         // Assert
-        assert_eq!(actual_is_valid, false);
+        assert!(!actual_is_valid);
     }
 }

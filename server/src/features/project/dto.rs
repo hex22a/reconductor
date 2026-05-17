@@ -25,7 +25,7 @@ impl TryFrom<CreateProjctRequest> for CreateProjectInput {
     type Error = ServerError;
 
     fn try_from(value: CreateProjctRequest) -> Result<Self, Self::Error> {
-        if value.name.len() == 0 {
+        if value.name.is_empty() {
             Err(ServerError::ValidationError(FieldErrors::from([(
                 "name".to_string(),
                 vec!["project name cannot be empty".to_string()],

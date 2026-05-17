@@ -22,7 +22,7 @@ impl From<UserSession> for HashMap<String, String> {
         map.insert("username".to_string(), value.username);
         map.insert("csrf_token".to_string(), value.csrf_token);
         map.insert("csrf_cookie".to_string(), value.csrf_cookie);
-        return map;
+        map
     }
 }
 

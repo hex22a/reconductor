@@ -61,7 +61,7 @@ impl<K: KvProvider + Send + Sync> CsrfRepository for CsrfStore<K> {
     async fn verify_anonymous_csrf(&self, token: &str) -> Result<bool, CsrfRepositoryError> {
         let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token);
         let csrf = self.kv.get(&key).await?;
-        Ok(csrf != None)
+        Ok(csrf.is_some())
     }
 
     async fn delete_anonymous_csrf(&self, token: &str) -> Result<(), CsrfRepositoryError> {

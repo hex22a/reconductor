@@ -159,7 +159,7 @@ mod tests {
         let feature = ListProjects::new(Arc::new(mock_project_repository));
         // Act
         let actual_page = feature
-            .list(&expected_owner_id, Some(&expected_cursor_id))
+            .list(&expected_owner_id, Some(expected_cursor_id))
             .await
             .unwrap();
         // Assert
@@ -204,7 +204,7 @@ mod tests {
         let feature = ListProjects::new(Arc::new(mock_project_repository));
         // Act
         let actual_page = feature
-            .list(&expected_owner_id, Some(&expected_cursor_id))
+            .list(&expected_owner_id, Some(expected_cursor_id))
             .await
             .unwrap();
         // Assert
@@ -275,7 +275,7 @@ mod tests {
         let feature = ListProjects::new(Arc::new(mock_project_repository));
         // Act
         let actual_result = feature
-            .list(&expected_owner_id, Some(&expected_cursor_id))
+            .list(&expected_owner_id, Some(expected_cursor_id))
             .await;
         // Assert
         assert!(matches!(actual_result, Err(ProjectError::NotFound)));

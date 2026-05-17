@@ -55,7 +55,7 @@ where
                             self.csrf_repository.create_anonymous_csrf(&token).await?;
                             Ok(CsrfTokenPair {
                                 token,
-                                cookie_value: cookie_value,
+                                cookie_value,
                             })
                         }
                         SessionRepositoryError::ParseError => Err(CsrfError::StorageError(
@@ -73,7 +73,7 @@ where
                 self.csrf_repository.create_anonymous_csrf(&token).await?;
                 Ok(CsrfTokenPair {
                     token,
-                    cookie_value: cookie_value,
+                    cookie_value,
                 })
             }
         }
