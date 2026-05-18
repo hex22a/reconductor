@@ -4,6 +4,7 @@ pub(crate) const API_LOGIN_ENDPOINT_V1: &str = "/api/v1/login";
 pub(crate) const API_LOGOUT_ENDPOINT_V1: &str = "/api/v1/logout";
 pub(crate) const API_CSRF_ENDPOINT_V1: &str = "/api/v1/csrf";
 pub(crate) const API_ME_ENDPOINT_V1: &str = "/api/v1/me";
+pub(crate) const API_PROJECTS_ENDPOINT_V1: &str = "/api/v1/projects";
 
 pub(crate) const CSRF_HEADER: &str = "X-CSRF-Token";
 

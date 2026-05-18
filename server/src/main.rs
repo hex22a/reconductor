@@ -4,6 +4,7 @@ use crate::{
     constants::{CSRF_HEADER, REDIS_POOL_SIZE},
     features::{
         csrf::{repository::CsrfStore, token::CsrfTokenFeature, verify::StatefulCsrfVerifier},
+        project::{create::CreateProject, list::ListProjects, repository::PgProjectRepository},
         session::{auth::UserAuthFeature, repository::SessionStore},
         user::{
             login::UserLoginFeature, logout::UserLogoutFeature, register::UserRegisterFeature,
@@ -43,11 +44,12 @@ async fn main() -> anyhow::Result<()> {
         .with_max_level(tracing::Level::INFO)
         .init();
     let config = config::Config::from_env()?;
-    let db = db::init_db(&config.database_url).await;
+    let db = Arc::new(db::init_db(&config.database_url).await);
     let kv = Arc::new(kv::init_kv(&config.redis_url, REDIS_POOL_SIZE).await);
-    let user_repository = Arc::new(PgUserRepository::new(db));
+    let user_repository = Arc::new(PgUserRepository::new(Arc::clone(&db)));
     let session_repository = Arc::new(SessionStore::new(Arc::clone(&kv)));
     let csrf_repository = Arc::new(CsrfStore::new(Arc::clone(&kv)));
+    let project_repository = Arc::new(PgProjectRepository::new(Arc::clone(&db)));
     let password_service = Arc::new(Argon2Service);
     let os_rng_serivce = Arc::new(OsRngService::new(Arc::new(Mutex::new(SysRng))));
     let csrf_service = Arc::new(AesGcmCsrfService::new(
@@ -77,6 +79,9 @@ async fn main() -> anyhow::Result<()> {
         Arc::clone(&csrf_service),
         Arc::clone(&csrf_repository),
     ));
+    let create_project_feature = Arc::new(CreateProject::new(Arc::clone(&project_repository)));
+    let list_projects_feature = Arc::new(ListProjects::new(Arc::clone(&project_repository)));
+
     let app_state = Arc::new(AppState {
         register_feature,
         login_feature,
@@ -84,6 +89,8 @@ async fn main() -> anyhow::Result<()> {
         csrf_feature,
         auth_feature,
         verify_csrf_feature,
+        create_project_feature,
+        list_projects_feature,
     });
 
     let cors = CorsLayer::new()
@@ -99,6 +106,7 @@ async fn main() -> anyhow::Result<()> {
         .merge(v1::auth::logout::routes(Arc::clone(&app_state)))
         .merge(v1::me::routes(Arc::clone(&app_state)))
         .merge(v1::csrf::routes(Arc::clone(&app_state)))
+        .merge(v1::projects::routes(Arc::clone(&app_state)))
         .layer(cors);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();

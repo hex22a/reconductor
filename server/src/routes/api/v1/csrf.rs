@@ -27,12 +27,17 @@ mod tests {
                 error::CsrfError, model::CsrfTokenPair, token::TokenFeature,
                 verify::VerifyCsrfFeature,
             },
+            project::{
+                create::CreateProjectFeature, dto::ProjectDto, error::ProjectError,
+                list::ListProjectsFeature,
+            },
             session::{auth::AuthFeature, error::SessionError, model::UserSession},
             user::{
                 error::UserError, login::LoginFeature, logout::LogoutFeature, model::AuthSession,
                 register::RegisterFeature,
             },
         },
+        transport::pagination::Page,
     };
 
     #[derive(Clone)]
@@ -49,6 +54,10 @@ mod tests {
     struct MockAuthFeature;
     #[derive(Clone)]
     struct MockVerifyCsrfFeature;
+    #[derive(Clone)]
+    struct MockCreateProject;
+    #[derive(Clone)]
+    struct MockListProjects;
 
     impl RegisterFeature for MockRegisterFeature {
         fn register(
@@ -114,6 +123,26 @@ mod tests {
             todo!()
         }
     }
+    impl CreateProjectFeature for MockCreateProject {
+        fn create(
+            &self,
+            _: uuid::Uuid,
+            _: String,
+        ) -> std::pin::Pin<Box<dyn Future<Output = Result<(), ProjectError>> + Send + '_>> {
+            todo!()
+        }
+    }
+    impl ListProjectsFeature for MockListProjects {
+        fn list<'a>(
+            &'a self,
+            _: &'a uuid::Uuid,
+            _: Option<&'a str>,
+        ) -> std::pin::Pin<
+            Box<dyn Future<Output = Result<Page<ProjectDto>, ProjectError>> + Send + 'a>,
+        > {
+            todo!()
+        }
+    }
 
     #[tokio::test]
     async fn test_csrf_get() {
@@ -135,6 +164,8 @@ mod tests {
             return_value: expected_csrf_token_pair,
         });
         let mock_verify_csrf_feature = Arc::new(MockVerifyCsrfFeature);
+        let mock_create_project = Arc::new(MockCreateProject);
+        let mock_list_projects = Arc::new(MockListProjects);
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,
@@ -142,6 +173,8 @@ mod tests {
             csrf_feature: mock_token_feature,
             auth_feature: mock_auth_feature,
             verify_csrf_feature: mock_verify_csrf_feature,
+            create_project_feature: mock_create_project,
+            list_projects_feature: mock_list_projects,
         });
         let app = routes(expected_app_state);
         // Act
@@ -180,6 +213,8 @@ mod tests {
             return_value: expected_csrf_token_pair,
         });
         let mock_verify_csrf_feature = Arc::new(MockVerifyCsrfFeature);
+        let mock_create_project = Arc::new(MockCreateProject);
+        let mock_list_projects = Arc::new(MockListProjects);
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,
@@ -187,6 +222,8 @@ mod tests {
             csrf_feature: mock_token_feature,
             auth_feature: mock_auth_feature,
             verify_csrf_feature: mock_verify_csrf_feature,
+            create_project_feature: mock_create_project,
+            list_projects_feature: mock_list_projects,
         });
         let app = routes(expected_app_state);
         // Act

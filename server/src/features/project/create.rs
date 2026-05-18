@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{pin::Pin, sync::Arc};
 
 use uuid::Uuid;
 
@@ -6,12 +6,12 @@ use crate::features::project::{
     error::ProjectError, model::ProjectInsert, repository::ProjectRepository,
 };
 
-pub(crate) trait CreateProjectFeture {
+pub(crate) trait CreateProjectFeature {
     fn create(
         &self,
         owner_id: Uuid,
         name: String,
-    ) -> impl Future<Output = Result<(), ProjectError>> + Send;
+    ) -> Pin<Box<dyn Future<Output = Result<(), ProjectError>> + Send + '_>>;
 }
 
 pub(crate) struct CreateProject<R: ProjectRepository> {
@@ -24,16 +24,22 @@ impl<R: ProjectRepository> CreateProject<R> {
     }
 }
 
-impl<R> CreateProjectFeture for CreateProject<R>
+impl<R> CreateProjectFeature for CreateProject<R>
 where
     R: ProjectRepository + Send + Sync,
 {
-    async fn create(&self, owner_id: Uuid, name: String) -> Result<(), ProjectError> {
-        let project_insert = ProjectInsert { owner_id, name };
-        self.project_repository
-            .create_project(project_insert)
-            .await?;
-        Ok(())
+    fn create(
+        &self,
+        owner_id: Uuid,
+        name: String,
+    ) -> Pin<Box<dyn Future<Output = Result<(), ProjectError>> + Send + '_>> {
+        Box::pin(async move {
+            let project_insert = ProjectInsert { owner_id, name };
+            self.project_repository
+                .create_project(project_insert)
+                .await?;
+            Ok(())
+        })
     }
 }
 

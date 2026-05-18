@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{pin::Pin, sync::Arc};
 
 use uuid::Uuid;
 
@@ -10,11 +10,11 @@ use crate::{
 };
 
 pub(crate) trait ListProjectsFeature {
-    fn list(
-        &self,
-        owner_id: &Uuid,
-        cursor_id: Option<&str>,
-    ) -> impl Future<Output = Result<Page<ProjectDto>, ProjectError>> + Send;
+    fn list<'a>(
+        &'a self,
+        owner_id: &'a Uuid,
+        cursor_id: Option<&'a str>,
+    ) -> Pin<Box<dyn Future<Output = Result<Page<ProjectDto>, ProjectError>> + Send + 'a>>;
 }
 
 #[derive(Clone)]
@@ -23,7 +23,7 @@ pub(crate) struct ListProjects<P: ProjectRepository> {
 }
 
 impl<P: ProjectRepository> ListProjects<P> {
-    fn new(project_repository: Arc<P>) -> Self {
+    pub(crate) fn new(project_repository: Arc<P>) -> Self {
         Self { project_repository }
     }
 }
@@ -32,42 +32,44 @@ impl<P> ListProjectsFeature for ListProjects<P>
 where
     P: ProjectRepository + Send + Sync,
 {
-    async fn list(
-        &self,
-        owner_id: &Uuid,
-        cursor_id: Option<&str>,
-    ) -> Result<Page<ProjectDto>, ProjectError> {
-        let mut has_next_page = false;
-        let maybe_cursor_id = cursor_id.map(decode_cursor).transpose()?;
-        let maybe_cursor_id_ref = maybe_cursor_id.as_ref();
-        let limit = PROJECTS_PAGE_SIZE_LIMIT + 1;
-        let mut projects = self
-            .project_repository
-            .list_projects(owner_id, maybe_cursor_id_ref, limit)
-            .await?;
-        if projects.len() == limit as usize {
-            has_next_page = true;
-            projects.pop();
-        }
-        let project_dtos = projects
-            .iter()
-            .map(|p| ProjectDto {
-                id: p.id,
-                name: p.name.clone(),
-                created_at: p.created_at,
-            })
-            .collect();
-        Ok(Page {
-            data: project_dtos,
-            page_info: PageInfo {
-                has_next_page,
-                end_cursor: match has_next_page {
-                    true => Some(encode_cursor(
-                        &projects.last().ok_or(ProjectError::NoLastCursor)?.id,
-                    )),
-                    false => None,
+    fn list<'a>(
+        &'a self,
+        owner_id: &'a Uuid,
+        cursor_id: Option<&'a str>,
+    ) -> Pin<Box<dyn Future<Output = Result<Page<ProjectDto>, ProjectError>> + Send + 'a>> {
+        Box::pin(async move {
+            let mut has_next_page = false;
+            let maybe_cursor_id = cursor_id.map(decode_cursor).transpose()?;
+            let maybe_cursor_id_ref = maybe_cursor_id.as_ref();
+            let limit = PROJECTS_PAGE_SIZE_LIMIT + 1;
+            let mut projects = self
+                .project_repository
+                .list_projects(owner_id, maybe_cursor_id_ref, limit)
+                .await?;
+            if projects.len() == limit as usize {
+                has_next_page = true;
+                projects.pop();
+            }
+            let project_dtos = projects
+                .iter()
+                .map(|p| ProjectDto {
+                    id: p.id,
+                    name: p.name.clone(),
+                    created_at: p.created_at,
+                })
+                .collect();
+            Ok(Page {
+                data: project_dtos,
+                page_info: PageInfo {
+                    has_next_page,
+                    end_cursor: match has_next_page {
+                        true => Some(encode_cursor(
+                            &projects.last().ok_or(ProjectError::NoLastCursor)?.id,
+                        )),
+                        false => None,
+                    },
                 },
-            },
+            })
         })
     }
 }

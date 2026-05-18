@@ -11,11 +11,17 @@ use crate::{
     state::AppState,
 };
 
+#[axum::debug_handler]
 pub(crate) async fn create(
     Extension(user_session): Extension<UserSession>,
     State(state): State<Arc<AppState>>,
     Json(req): Json<CreateProjctRequest>,
 ) -> Result<impl IntoResponse, ServerError> {
     let project: CreateProjectInput = CreateProjectInput::try_from(req)?;
+    let owner_id = user_session.user_id;
+    state
+        .create_project_feature
+        .create(owner_id, project.name)
+        .await?;
     Ok(StatusCode::CREATED)
 }

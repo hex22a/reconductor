@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::Deserialize;
 use time::PrimitiveDateTime;
 use uuid::Uuid;
 
@@ -14,7 +14,7 @@ pub(crate) struct ProjectDto {
     pub(crate) created_at: PrimitiveDateTime,
 }
 
-#[derive(Serialize)]
+#[derive(Deserialize)]
 pub(crate) struct CreateProjctRequest {
     pub(crate) name: String,
 }

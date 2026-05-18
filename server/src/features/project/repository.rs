@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use sqlx::PgPool;
 use sqlx::types::Uuid;
 
@@ -22,11 +24,11 @@ pub trait ProjectRepository {
 }
 
 pub struct PgProjectRepository {
-    db: PgPool,
+    db: Arc<PgPool>,
 }
 
 impl PgProjectRepository {
-    pub fn new(db: PgPool) -> Self {
+    pub fn new(db: Arc<PgPool>) -> Self {
         Self { db }
     }
 }
@@ -43,7 +45,7 @@ impl ProjectRepository for PgProjectRepository {
             project_insert.name,
             project_insert.owner_id,
         )
-        .execute(&self.db)
+        .execute(&*self.db)
         .await?;
         Ok(())
     }
@@ -68,7 +70,7 @@ impl ProjectRepository for PgProjectRepository {
             project_id,
             owner_id,
         )
-        .fetch_one(&self.db)
+        .fetch_one(&*self.db)
         .await?;
         Ok(project)
     }
@@ -98,7 +100,7 @@ impl ProjectRepository for PgProjectRepository {
                     cursor,
                     limit
                 )
-                .fetch_all(&self.db)
+                .fetch_all(&*self.db)
                 .await
             }
             None => {
@@ -118,7 +120,7 @@ impl ProjectRepository for PgProjectRepository {
                     owner_id,
                     limit
                 )
-                .fetch_all(&self.db)
+                .fetch_all(&*self.db)
                 .await
             }
         }

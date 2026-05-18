@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use sqlx::PgPool;
 
 use crate::features::user::model::{UserEntity, UserInsert};
@@ -15,11 +17,11 @@ pub trait UserRepository {
 
 #[derive(Clone)]
 pub struct PgUserRepository {
-    db: PgPool,
+    db: Arc<PgPool>,
 }
 
 impl PgUserRepository {
-    pub fn new(db: PgPool) -> Self {
+    pub fn new(db: Arc<PgPool>) -> Self {
         Self { db }
     }
 }
@@ -36,7 +38,7 @@ impl UserRepository for PgUserRepository {
             user_insert.username,
             user_insert.password_hash,
         )
-        .execute(&self.db)
+        .execute(&*self.db)
         .await?;
         Ok(())
     }
@@ -60,7 +62,7 @@ impl UserRepository for PgUserRepository {
             "#,
             username
         )
-        .fetch_one(&self.db)
+        .fetch_one(&*self.db)
         .await?;
         Ok(user)
     }

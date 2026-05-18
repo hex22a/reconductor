@@ -1,7 +1,10 @@
 use std::collections::HashMap;
 
 use crate::{
-    features::{csrf::error::CsrfError, session::error::SessionError, user::error::UserError},
+    features::{
+        csrf::error::CsrfError, project::error::ProjectError, session::error::SessionError,
+        user::error::UserError,
+    },
     infra::password::PasswordServiceError,
 };
 
@@ -39,5 +42,11 @@ impl From<SessionError> for ServerError {
             SessionError::NotFound => ServerError::Unauthorized,
             SessionError::Internal => ServerError::Internal,
         }
+    }
+}
+
+impl From<ProjectError> for ServerError {
+    fn from(_: ProjectError) -> Self {
+        ServerError::Internal
     }
 }

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use server::features::project::{
     model::ProjectInsert,
     repository::{PgProjectRepository, ProjectRepository},
@@ -56,7 +58,7 @@ async fn test_create_project(db: PgPool) {
         owner_id: expected_owner_id,
         name: expected_name,
     };
-    let repo = PgProjectRepository::new(db);
+    let repo = PgProjectRepository::new(Arc::new(db));
     // Act
     let actual_result = repo.create_project(expected_project_insert).await.unwrap();
     // Assert
@@ -67,7 +69,7 @@ async fn test_create_project(db: PgPool) {
 async fn test_get_project_by_id(db: PgPool) {
     // Arrange
     let (expected_project_id, expected_owner_id) = setup_project(&db).await;
-    let repo = PgProjectRepository::new(db);
+    let repo = PgProjectRepository::new(Arc::new(db));
     // Act
     let actual_project = repo
         .get_project(&expected_project_id, &expected_owner_id)
@@ -82,7 +84,7 @@ async fn test_get_project_by_id_wrong_owner(db: PgPool) {
     // Arrange
     let (expected_project_id, _) = setup_project(&db).await;
     let expected_owner_id = Uuid::now_v7();
-    let repo = PgProjectRepository::new(db);
+    let repo = PgProjectRepository::new(Arc::new(db));
     // Act
     let actual_result = repo
         .get_project(&expected_project_id, &expected_owner_id)
@@ -96,7 +98,7 @@ async fn test_get_project_by_id_not_found(db: PgPool) {
     // Arrange
     let expected_project_id = Uuid::now_v7();
     let expected_owner_id = Uuid::now_v7();
-    let repo = PgProjectRepository::new(db);
+    let repo = PgProjectRepository::new(Arc::new(db));
     // Act
     let actual_result = repo
         .get_project(&expected_project_id, &expected_owner_id)
@@ -115,7 +117,7 @@ async fn test_list_projects(db: PgPool) {
         owner_id: expected_owner_id,
         name: expected_name,
     };
-    let repo = PgProjectRepository::new(db);
+    let repo = PgProjectRepository::new(Arc::new(db));
     repo.create_project(expected_project_insert).await.unwrap();
     // Act
     let actual_projects = repo
