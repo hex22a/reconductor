@@ -41,7 +41,7 @@ mod tests {
         let expected_uuid: Uuid = Uuid::from_str("019d0634-b90c-7400-99d2-253d76dfb3ea").unwrap();
         let expected_cursor = "AZ0GNLkMdACZ0iU9dt-z6g";
         // Act
-        let actual_uuid = decode_cursor(&expected_cursor).unwrap();
+        let actual_uuid = decode_cursor(expected_cursor).unwrap();
         // Assert
         assert_eq!(actual_uuid, expected_uuid);
     }

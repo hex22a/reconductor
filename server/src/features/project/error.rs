@@ -14,7 +14,7 @@ impl From<CursorError> for ProjectError {
 }
 
 impl From<sqlx::Error> for ProjectError {
-    fn from(_: sqlx::Error) -> Self {
+    fn from(va: sqlx::Error) -> Self {
         ProjectError::NotFound
     }
 }

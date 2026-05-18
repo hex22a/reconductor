@@ -22,7 +22,7 @@ async fn create_store() -> SessionStore<FredKvProvider> {
 
 fn create_user_session_fixture(token: String) -> UserSession {
     UserSession {
-        token: token,
+        token,
         user_id: Uuid::now_v7(),
         username: "testuser".to_string(),
         csrf_token: "csrf_token".to_string(),
