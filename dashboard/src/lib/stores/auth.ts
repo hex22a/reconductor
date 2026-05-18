@@ -3,8 +3,13 @@ import { logout, fetchMe, login, register } from '@/lib/services/auth';
 import { csrf } from './csrf';
 import { isError, type ErrorResponse } from '../transport/ErrorResponse';
 
+type AuthState = {
+    user: string | null;
+    ready: boolean;
+};
+
 function createAuthStore() {
-    const { subscribe, set } = writable<string | null>(null);
+    const { subscribe, set } = writable<AuthState>({ user: null, ready: false });
 
     return {
         subscribe,
@@ -21,18 +26,19 @@ function createAuthStore() {
                 return signInResponse;
             }
             csrf.updateCsrf(signInResponse.csrf_token);
-            set(username);
+            set({ user: username, ready: true });
         },
         logout: async (): Promise<void | ErrorResponse> => {
             await logout();
-            set(null);
+            set({ user: null, ready: true });
         },
         fetchMe: async (): Promise<void | ErrorResponse> => {
             const meResponse = await fetchMe();
             if (isError(meResponse)) {
+                set({ user: null, ready: true });
                 return meResponse;
             }
-            set(meResponse.username);
+            set({ user: meResponse.username, ready: true });
         },
     };
 }

@@ -4,6 +4,7 @@
   import { isError, type ValidationError } from '@/lib/transport/ErrorResponse';
   import { VALIDATION_ERROR_CODE } from '@/constants';
   import FieldErrors from './FieldErrors.svelte';
+  import { goto } from '$app/navigation';
 
   let usernameErrors = $state<[string] | null>(null);
   let passwordErrors = $state<[string] | null>(null);
@@ -39,6 +40,8 @@
         default:
           genericError = 'Something went wrong';
       }
+    } else {
+      goto('/projects');
     }
   }
 </script>

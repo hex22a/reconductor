@@ -4,8 +4,8 @@
 
 <header class="sticky top-0 py-2">
   <nav>
-    {#if $auth}
-      <span>$: {$auth}</span>
+    {#if $auth.user}
+      <span>$: {$auth.user}</span>
       <span>
         <button class="cursor-pointer" type="button" onclick={auth.logout}> (Logout) </button>
       </span>
