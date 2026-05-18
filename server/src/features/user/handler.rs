@@ -24,18 +24,10 @@ use crate::{
     application::error::ServerError, features::user::dto::UserInputRequest, state::AppState,
 };
 
-pub(crate) async fn register<R, L, O, T, A, C>(
-    State(state): State<Arc<AppState<R, L, O, T, A, C>>>,
+pub(crate) async fn register(
+    State(state): State<Arc<AppState>>,
     Json(req): Json<UserInputRequest>,
-) -> Result<impl IntoResponse, ServerError>
-where
-    R: RegisterFeature + Clone + Send + Sync + 'static,
-    L: LoginFeature + Clone + Send + Sync + 'static,
-    O: LogoutFeature + Clone + Send + Sync + 'static,
-    T: TokenFeature + Clone + Send + Sync + 'static,
-    A: AuthFeature + Clone + Send + Sync + 'static,
-    C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
-{
+) -> Result<impl IntoResponse, ServerError> {
     let user: UserInput = UserInput::try_from(req)?;
     state
         .register_feature
@@ -44,19 +36,11 @@ where
     Ok((StatusCode::CREATED, ()))
 }
 
-pub(crate) async fn login<R, L, O, T, A, C>(
+pub(crate) async fn login(
     jar: CookieJar,
-    State(state): State<Arc<AppState<R, L, O, T, A, C>>>,
+    State(state): State<Arc<AppState>>,
     Json(req): Json<UserInputRequest>,
-) -> Result<impl IntoResponse, ServerError>
-where
-    R: RegisterFeature + Clone + Send + Sync + 'static,
-    L: LoginFeature + Clone + Send + Sync + 'static,
-    O: LogoutFeature + Clone + Send + Sync + 'static,
-    T: TokenFeature + Clone + Send + Sync + 'static,
-    A: AuthFeature + Clone + Send + Sync + 'static,
-    C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
-{
+) -> Result<impl IntoResponse, ServerError> {
     let user: UserInput = UserInput::try_from(req)?;
     let anonymous_csrf_token = jar
         .get(CSRF_COOKIE_NAME)
@@ -101,18 +85,10 @@ pub(crate) async fn me(Extension(user_session): Extension<UserSession>) -> impl 
     )
 }
 
-pub(crate) async fn logout<R, L, O, T, A, C>(
+pub(crate) async fn logout(
     jar: CookieJar,
-    State(state): State<Arc<AppState<R, L, O, T, A, C>>>,
-) -> Result<impl IntoResponse, ServerError>
-where
-    R: RegisterFeature + Clone + Send + Sync + 'static,
-    L: LoginFeature + Clone + Send + Sync + 'static,
-    O: LogoutFeature + Clone + Send + Sync + 'static,
-    T: TokenFeature + Clone + Send + Sync + 'static,
-    A: AuthFeature + Clone + Send + Sync + 'static,
-    C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
-{
+    State(state): State<Arc<AppState>>,
+) -> Result<impl IntoResponse, ServerError> {
     let session_id = jar
         .get(USER_SESSION_COOKIE_NAME)
         .map(|c| c.value())

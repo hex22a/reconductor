@@ -1,14 +1,14 @@
-use std::sync::Arc;
+use std::{pin::Pin, sync::Arc};
 
 use crate::features::session::{
     error::SessionError, model::UserSession, repository::SessionRepository,
 };
 
 pub(crate) trait AuthFeature {
-    fn auth(
-        &self,
-        session_id: &str,
-    ) -> impl Future<Output = Result<UserSession, SessionError>> + Send;
+    fn auth<'a>(
+        &'a self,
+        session_id: &'a str,
+    ) -> Pin<Box<dyn Future<Output = Result<UserSession, SessionError>> + Send + 'a>>;
 }
 
 #[derive(Clone)]
@@ -26,8 +26,11 @@ impl<S> AuthFeature for UserAuthFeature<S>
 where
     S: SessionRepository + Send + Sync,
 {
-    async fn auth(&self, session_id: &str) -> Result<UserSession, SessionError> {
-        Ok(self.session_repository.get_user_session(session_id).await?)
+    fn auth<'a>(
+        &'a self,
+        session_id: &'a str,
+    ) -> Pin<Box<dyn Future<Output = Result<UserSession, SessionError>> + Send + 'a>> {
+        Box::pin(async move { Ok(self.session_repository.get_user_session(session_id).await?) })
     }
 }
 

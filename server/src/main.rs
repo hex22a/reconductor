@@ -54,25 +54,29 @@ async fn main() -> anyhow::Result<()> {
         Arc::clone(&os_rng_serivce),
         config.csrf_key,
     ));
-    let register_feature =
-        UserRegisterFeature::new(Arc::clone(&password_service), Arc::clone(&user_repository));
-    let login_feature = UserLoginFeature::new(
+    let register_feature = Arc::new(UserRegisterFeature::new(
+        Arc::clone(&password_service),
+        Arc::clone(&user_repository),
+    ));
+    let login_feature = Arc::new(UserLoginFeature::new(
         Arc::clone(&user_repository),
         Arc::clone(&session_repository),
         Arc::clone(&csrf_repository),
         Arc::clone(&csrf_service),
         Arc::clone(&password_service),
         Arc::clone(&os_rng_serivce),
-    );
-    let logout_feature = UserLogoutFeature::new(Arc::clone(&session_repository));
-    let csrf_feature = CsrfTokenFeature::new(
+    ));
+    let logout_feature = Arc::new(UserLogoutFeature::new(Arc::clone(&session_repository)));
+    let csrf_feature = Arc::new(CsrfTokenFeature::new(
         Arc::clone(&session_repository),
         Arc::clone(&csrf_repository),
         Arc::clone(&csrf_service),
-    );
-    let auth_feature = UserAuthFeature::new(Arc::clone(&session_repository));
-    let verify_csrf_feature =
-        StatefulCsrfVerifier::new(Arc::clone(&csrf_service), Arc::clone(&csrf_repository));
+    ));
+    let auth_feature = Arc::new(UserAuthFeature::new(Arc::clone(&session_repository)));
+    let verify_csrf_feature = Arc::new(StatefulCsrfVerifier::new(
+        Arc::clone(&csrf_service),
+        Arc::clone(&csrf_repository),
+    ));
     let app_state = Arc::new(AppState {
         register_feature,
         login_feature,

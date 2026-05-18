@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{pin::Pin, sync::Arc};
 
 use crate::{
     constants::ANONYMOUS_CSRF_TTL_SECONDS,
@@ -10,10 +10,10 @@ use crate::{
 };
 
 pub(crate) trait TokenFeature {
-    fn get_token(
-        &self,
-        session_token: Option<&str>,
-    ) -> impl Future<Output = Result<CsrfTokenPair, CsrfError>> + Send;
+    fn get_token<'a>(
+        &'a self,
+        session_token: Option<&'a str>,
+    ) -> Pin<Box<dyn Future<Output = Result<CsrfTokenPair, CsrfError>> + Send + 'a>>;
 }
 
 #[derive(Clone)]
@@ -43,44 +43,49 @@ where
     C: CsrfRepository + Send + Sync,
     S: CsrfService + Send + Sync,
 {
-    async fn get_token(&self, session_cookie: Option<&str>) -> Result<CsrfTokenPair, CsrfError> {
-        match session_cookie {
-            Some(token) => {
-                let user_session_result = self.session_repository.get_user_session(token).await;
-                match user_session_result {
-                    Ok(user_session) => Ok(CsrfTokenPair {
-                        token: user_session.csrf_token,
-                        cookie_value: user_session.csrf_cookie,
-                    }),
-                    Err(error) => match error {
-                        SessionRepositoryError::NotFound => {
-                            let (token, cookie_value) =
-                                self.csrf_service.generate(ANONYMOUS_CSRF_TTL_SECONDS)?;
-                            self.csrf_repository.create_anonymous_csrf(&token).await?;
-                            Ok(CsrfTokenPair {
-                                token,
-                                cookie_value,
-                            })
-                        }
-                        SessionRepositoryError::ParseError => Err(CsrfError::StorageError(
-                            "error parsing user session".to_string(),
-                        )),
-                        SessionRepositoryError::StorageError(e) => {
-                            Err(CsrfError::StorageError(e.to_string()))
-                        }
-                    },
+    fn get_token<'a>(
+        &'a self,
+        session_cookie: Option<&'a str>,
+    ) -> Pin<Box<dyn Future<Output = Result<CsrfTokenPair, CsrfError>> + Send + 'a>> {
+        Box::pin(async move {
+            match session_cookie {
+                Some(token) => {
+                    let user_session_result = self.session_repository.get_user_session(token).await;
+                    match user_session_result {
+                        Ok(user_session) => Ok(CsrfTokenPair {
+                            token: user_session.csrf_token,
+                            cookie_value: user_session.csrf_cookie,
+                        }),
+                        Err(error) => match error {
+                            SessionRepositoryError::NotFound => {
+                                let (token, cookie_value) =
+                                    self.csrf_service.generate(ANONYMOUS_CSRF_TTL_SECONDS)?;
+                                self.csrf_repository.create_anonymous_csrf(&token).await?;
+                                Ok(CsrfTokenPair {
+                                    token,
+                                    cookie_value,
+                                })
+                            }
+                            SessionRepositoryError::ParseError => Err(CsrfError::StorageError(
+                                "error parsing user session".to_string(),
+                            )),
+                            SessionRepositoryError::StorageError(e) => {
+                                Err(CsrfError::StorageError(e.to_string()))
+                            }
+                        },
+                    }
+                }
+                None => {
+                    let (token, cookie_value) =
+                        self.csrf_service.generate(ANONYMOUS_CSRF_TTL_SECONDS)?;
+                    self.csrf_repository.create_anonymous_csrf(&token).await?;
+                    Ok(CsrfTokenPair {
+                        token,
+                        cookie_value,
+                    })
                 }
             }
-            None => {
-                let (token, cookie_value) =
-                    self.csrf_service.generate(ANONYMOUS_CSRF_TTL_SECONDS)?;
-                self.csrf_repository.create_anonymous_csrf(&token).await?;
-                Ok(CsrfTokenPair {
-                    token,
-                    cookie_value,
-                })
-            }
-        }
+        })
     }
 }
 

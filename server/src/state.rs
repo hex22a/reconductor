@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::features::{
     csrf::{token::TokenFeature, verify::VerifyCsrfFeature},
     session::auth::AuthFeature,
@@ -5,18 +7,11 @@ use crate::features::{
 };
 
 #[derive(Clone)]
-pub(crate) struct AppState<
-    R: RegisterFeature,
-    L: LoginFeature,
-    O: LogoutFeature,
-    T: TokenFeature,
-    A: AuthFeature,
-    C: VerifyCsrfFeature,
-> {
-    pub(crate) register_feature: R,
-    pub(crate) login_feature: L,
-    pub(crate) logout_feature: O,
-    pub(crate) csrf_feature: T,
-    pub(crate) auth_feature: A,
-    pub(crate) verify_csrf_feature: C,
+pub(crate) struct AppState {
+    pub(crate) register_feature: Arc<dyn RegisterFeature + Send + Sync>,
+    pub(crate) login_feature: Arc<dyn LoginFeature + Send + Sync>,
+    pub(crate) logout_feature: Arc<dyn LogoutFeature + Send + Sync>,
+    pub(crate) csrf_feature: Arc<dyn TokenFeature + Send + Sync>,
+    pub(crate) auth_feature: Arc<dyn AuthFeature + Send + Sync>,
+    pub(crate) verify_csrf_feature: Arc<dyn VerifyCsrfFeature + Send + Sync>,
 }

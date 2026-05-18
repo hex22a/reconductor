@@ -9,26 +9,14 @@ use axum_extra::extract::{
 use crate::{
     application::error::ServerError,
     constants::{CSRF_COOKIE_NAME, USER_SESSION_COOKIE_NAME},
-    features::{
-        csrf::{dto::CsrfResponse, token::TokenFeature, verify::VerifyCsrfFeature},
-        session::auth::AuthFeature,
-        user::{login::LoginFeature, logout::LogoutFeature, register::RegisterFeature},
-    },
+    features::csrf::dto::CsrfResponse,
     state::AppState,
 };
 
-pub(crate) async fn handle<R, L, O, T, A, C>(
-    State(state): State<Arc<AppState<R, L, O, T, A, C>>>,
+pub(crate) async fn handle(
+    State(state): State<Arc<AppState>>,
     jar: CookieJar,
-) -> Result<impl IntoResponse, ServerError>
-where
-    R: RegisterFeature + Clone + Send + Sync + 'static,
-    L: LoginFeature + Clone + Send + Sync + 'static,
-    O: LogoutFeature + Clone + Send + Sync + 'static,
-    T: TokenFeature + Clone + Send + Sync + 'static,
-    A: AuthFeature + Clone + Send + Sync + 'static,
-    C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
-{
+) -> Result<impl IntoResponse, ServerError> {
     let session_cookie = jar.get(USER_SESSION_COOKIE_NAME).map(|c| c.value());
     let csrf_token_pair = state.csrf_feature.get_token(session_cookie).await?;
     let jar = jar.add(

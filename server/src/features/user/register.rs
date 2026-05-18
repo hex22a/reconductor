@@ -1,3 +1,4 @@
+use std::pin::Pin;
 use std::sync::Arc;
 
 use crate::features::user::error::UserError;
@@ -10,7 +11,7 @@ pub(crate) trait RegisterFeature {
         &self,
         username: String,
         password: String,
-    ) -> impl Future<Output = Result<(), UserError>> + Send;
+    ) -> Pin<Box<dyn Future<Output = Result<(), UserError>> + Send + '_>>;
 }
 
 #[derive(Clone)]
@@ -33,15 +34,21 @@ where
     P: PasswordService + Send + Sync,
     R: UserRepository + Send + Sync,
 {
-    async fn register(&self, username: String, password: String) -> Result<(), UserError> {
-        let password_hash = self.password_service.hash_password(&password)?;
-        self.user_repository
-            .add_user(UserInsert {
-                username,
-                password_hash,
-            })
-            .await?;
-        Ok(())
+    fn register(
+        &self,
+        username: String,
+        password: String,
+    ) -> Pin<Box<dyn Future<Output = Result<(), UserError>> + Send + '_>> {
+        Box::pin(async move {
+            let password_hash = self.password_service.hash_password(&password)?;
+            self.user_repository
+                .add_user(UserInsert {
+                    username,
+                    password_hash,
+                })
+                .await?;
+            Ok(())
+        })
     }
 }
 

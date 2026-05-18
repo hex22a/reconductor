@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{pin::Pin, sync::Arc};
 
 use crate::{
     constants::USER_SESSION_TTL_SECONDS,
@@ -16,7 +16,7 @@ pub(crate) trait LoginFeature {
         username: String,
         password: String,
         anonymos_csrf_token: String,
-    ) -> impl Future<Output = Result<AuthSession, UserError>> + Send;
+    ) -> Pin<Box<dyn Future<Output = Result<AuthSession, UserError>> + Send + '_>>;
 }
 
 #[derive(Clone)]
@@ -73,39 +73,42 @@ where
     PS: PasswordService + Send + Sync,
     R: RngService + Send + Sync,
 {
-    async fn login(
+    fn login(
         &self,
         username: String,
         password: String,
         anonymous_csrf_token: String,
-    ) -> Result<AuthSession, UserError> {
-        let user = self.user_repository.get_user_by_username(&username).await?;
-        let is_valid = self
-            .password_service
-            .verify_password(&password, &user.password_hash)?;
-        if is_valid {
-            let session_id = self.rng_service.generate_session_id()?;
-            let (csrf_token, csrf_cookie) = self.csrf_service.generate(USER_SESSION_TTL_SECONDS)?;
-            self.session_repository
-                .create_user_session(UserSession {
-                    token: session_id.clone(),
-                    csrf_token: csrf_token.clone(),
-                    csrf_cookie: csrf_cookie.clone(),
-                    user_id: user.id,
-                    username: user.username,
+    ) -> Pin<Box<dyn Future<Output = Result<AuthSession, UserError>> + Send + '_>> {
+        Box::pin(async move {
+            let user = self.user_repository.get_user_by_username(&username).await?;
+            let is_valid = self
+                .password_service
+                .verify_password(&password, &user.password_hash)?;
+            if is_valid {
+                let session_id = self.rng_service.generate_session_id()?;
+                let (csrf_token, csrf_cookie) =
+                    self.csrf_service.generate(USER_SESSION_TTL_SECONDS)?;
+                self.session_repository
+                    .create_user_session(UserSession {
+                        token: session_id.clone(),
+                        csrf_token: csrf_token.clone(),
+                        csrf_cookie: csrf_cookie.clone(),
+                        user_id: user.id,
+                        username: user.username,
+                    })
+                    .await?;
+                self.csrf_repository
+                    .delete_anonymous_csrf(&anonymous_csrf_token)
+                    .await?;
+                Ok(AuthSession {
+                    session_id,
+                    csrf_token,
+                    csrf_cookie,
                 })
-                .await?;
-            self.csrf_repository
-                .delete_anonymous_csrf(&anonymous_csrf_token)
-                .await?;
-            Ok(AuthSession {
-                session_id,
-                csrf_token,
-                csrf_cookie,
-            })
-        } else {
-            Err(UserError::PasswordMismatch)
-        }
+            } else {
+                Err(UserError::PasswordMismatch)
+            }
+        })
     }
 }
 

@@ -1,9 +1,12 @@
-use std::sync::Arc;
+use std::{pin::Pin, sync::Arc};
 
 use crate::features::{session::repository::SessionRepository, user::error::UserError};
 
 pub(crate) trait LogoutFeature {
-    fn logout(&self, session_id: &str) -> impl Future<Output = Result<(), UserError>> + Send;
+    fn logout<'a>(
+        &'a self,
+        session_id: &'a str,
+    ) -> Pin<Box<dyn Future<Output = Result<(), UserError>> + Send + 'a>>;
 }
 
 #[derive(Clone)]
@@ -21,11 +24,16 @@ impl<R> LogoutFeature for UserLogoutFeature<R>
 where
     R: SessionRepository + Send + Sync,
 {
-    async fn logout(&self, session_id: &str) -> Result<(), UserError> {
-        self.session_repository
-            .delete_user_session(session_id)
-            .await?;
-        Ok(())
+    fn logout<'a>(
+        &'a self,
+        session_id: &'a str,
+    ) -> Pin<Box<dyn Future<Output = Result<(), UserError>> + Send + 'a>> {
+        Box::pin(async move {
+            self.session_repository
+                .delete_user_session(session_id)
+                .await?;
+            Ok(())
+        })
     }
 }
 

@@ -3,29 +3,12 @@ use std::sync::Arc;
 use axum::{Router, routing::post};
 
 use crate::{
-    constants::API_REGISTER_ENDPOINT_V1,
-    features::{
-        csrf::{token::TokenFeature, verify::VerifyCsrfFeature},
-        session::auth::AuthFeature,
-        user::{
-            handler::register, login::LoginFeature, logout::LogoutFeature,
-            register::RegisterFeature,
-        },
-    },
-    state::AppState,
+    constants::API_REGISTER_ENDPOINT_V1, features::user::handler::register, state::AppState,
 };
 
-pub(crate) fn routes<R, L, O, T, A, C>(state: Arc<AppState<R, L, O, T, A, C>>) -> Router
-where
-    R: RegisterFeature + Clone + Send + Sync + 'static,
-    L: LoginFeature + Clone + Send + Sync + 'static,
-    O: LogoutFeature + Clone + Send + Sync + 'static,
-    T: TokenFeature + Clone + Send + Sync + 'static,
-    A: AuthFeature + Clone + Send + Sync + 'static,
-    C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
-{
+pub(crate) fn routes(state: Arc<AppState>) -> Router {
     Router::new()
-        .route(API_REGISTER_ENDPOINT_V1, post(register::<R, L, O, T, A, C>))
+        .route(API_REGISTER_ENDPOINT_V1, post(register))
         .with_state(state)
 }
 
@@ -40,11 +23,14 @@ mod tests {
     use super::*;
     use crate::{
         features::{
-            csrf::{error::CsrfError, model::CsrfTokenPair},
-            session::{error::SessionError, model::UserSession},
+            csrf::{
+                error::CsrfError, model::CsrfTokenPair, token::TokenFeature,
+                verify::VerifyCsrfFeature,
+            },
+            session::{auth::AuthFeature, error::SessionError, model::UserSession},
             user::{
-                dto::UserInputRequest, error::UserError, logout::LogoutFeature, model::AuthSession,
-                register::RegisterFeature,
+                dto::UserInputRequest, error::UserError, login::LoginFeature,
+                logout::LogoutFeature, model::AuthSession, register::RegisterFeature,
             },
         },
         state::AppState,
@@ -64,36 +50,66 @@ mod tests {
     struct MockVerifyCsrfFeature;
 
     impl RegisterFeature for MockRegisterFeature {
-        async fn register(&self, _: String, _: String) -> Result<(), UserError> {
-            Ok(())
+        fn register(
+            &self,
+            _: String,
+            _: String,
+        ) -> std::pin::Pin<Box<dyn Future<Output = Result<(), UserError>> + Send + '_>> {
+            Box::pin(async { Ok(()) })
         }
     }
     impl LoginFeature for MockLoginFeature {
-        async fn login(&self, _: String, _: String, _: String) -> Result<AuthSession, UserError> {
+        fn login(
+            &self,
+            _: String,
+            _: String,
+            _: String,
+        ) -> std::pin::Pin<Box<dyn Future<Output = Result<AuthSession, UserError>> + Send + '_>>
+        {
             todo!()
         }
     }
     impl LogoutFeature for MockLogoutFeature {
-        async fn logout(&self, _: &str) -> Result<(), UserError> {
+        fn logout<'a>(
+            &'a self,
+            _: &'a str,
+        ) -> std::pin::Pin<Box<dyn Future<Output = Result<(), UserError>> + Send + 'a>> {
             todo!()
         }
     }
     impl TokenFeature for MockTokenFeature {
-        async fn get_token(&self, _: Option<&str>) -> Result<CsrfTokenPair, CsrfError> {
+        fn get_token<'a>(
+            &'a self,
+            _: Option<&'a str>,
+        ) -> std::pin::Pin<Box<dyn Future<Output = Result<CsrfTokenPair, CsrfError>> + Send + 'a>>
+        {
             todo!()
         }
     }
     impl AuthFeature for MockAuthFeature {
-        async fn auth(&self, _: &str) -> Result<UserSession, SessionError> {
+        fn auth<'a>(
+            &'a self,
+            _: &'a str,
+        ) -> std::pin::Pin<Box<dyn Future<Output = Result<UserSession, SessionError>> + Send + 'a>>
+        {
             todo!()
         }
     }
     impl VerifyCsrfFeature for MockVerifyCsrfFeature {
-        async fn verify_anonymous(&self, _: String, _: String) -> bool {
+        fn verify_anonymous(
+            &self,
+            _: String,
+            _: String,
+        ) -> std::pin::Pin<Box<dyn Future<Output = bool> + Send + '_>> {
             todo!()
         }
 
-        async fn verify_authorized(&self, _: String, _: String, _: String) -> bool {
+        fn verify_authorized(
+            &self,
+            _: String,
+            _: String,
+            _: String,
+        ) -> std::pin::Pin<Box<dyn Future<Output = bool> + Send + '_>> {
             todo!()
         }
     }
@@ -103,12 +119,12 @@ mod tests {
         // Arrange
         let expected_username = "test".to_string();
         let expected_password = "password".to_string();
-        let mock_register_feature = MockRegisterFeature;
-        let mock_token_feature = MockTokenFeature;
-        let mock_login_feature = MockLoginFeature;
-        let mock_logout_feature = MockLogoutFeature;
-        let mock_auth_feature = MockAuthFeature;
-        let mock_verify_csrf_feature = MockVerifyCsrfFeature;
+        let mock_register_feature = Arc::new(MockRegisterFeature);
+        let mock_token_feature = Arc::new(MockTokenFeature);
+        let mock_login_feature = Arc::new(MockLoginFeature);
+        let mock_logout_feature = Arc::new(MockLogoutFeature);
+        let mock_auth_feature = Arc::new(MockAuthFeature);
+        let mock_verify_csrf_feature = Arc::new(MockVerifyCsrfFeature);
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,
@@ -144,12 +160,12 @@ mod tests {
         // Arrange
         let expected_username = "test".to_string();
         let expected_password = "password".to_string();
-        let mock_register_feature = MockRegisterFeature;
-        let mock_token_feature = MockTokenFeature;
-        let mock_login_feature = MockLoginFeature;
-        let mock_logout_feature = MockLogoutFeature;
-        let mock_auth_feature = MockAuthFeature;
-        let mock_verify_csrf_feature = MockVerifyCsrfFeature;
+        let mock_register_feature = Arc::new(MockRegisterFeature);
+        let mock_token_feature = Arc::new(MockTokenFeature);
+        let mock_login_feature = Arc::new(MockLoginFeature);
+        let mock_logout_feature = Arc::new(MockLogoutFeature);
+        let mock_auth_feature = Arc::new(MockAuthFeature);
+        let mock_verify_csrf_feature = Arc::new(MockVerifyCsrfFeature);
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,

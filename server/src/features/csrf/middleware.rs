@@ -12,29 +12,17 @@ use axum_extra::extract::CookieJar;
 use crate::{
     application::error::ServerError,
     constants::{CSRF_COOKIE_NAME, CSRF_HEADER},
-    features::{
-        csrf::{token::TokenFeature, verify::VerifyCsrfFeature},
-        session::{auth::AuthFeature, model::UserSession},
-        user::{login::LoginFeature, logout::LogoutFeature, register::RegisterFeature},
-    },
+    features::session::model::UserSession,
     state::AppState,
 };
 
-pub(crate) async fn double_submit<R, L, O, T, A, C>(
-    State(state): State<Arc<AppState<R, L, O, T, A, C>>>,
+pub(crate) async fn double_submit(
+    State(state): State<Arc<AppState>>,
     headers: HeaderMap,
     jar: CookieJar,
     req: Request,
     next: Next,
-) -> Result<impl IntoResponse, ServerError>
-where
-    R: RegisterFeature + Clone + Send + Sync + 'static,
-    L: LoginFeature + Clone + Send + Sync + 'static,
-    O: LogoutFeature + Clone + Send + Sync + 'static,
-    T: TokenFeature + Clone + Send + Sync + 'static,
-    A: AuthFeature + Clone + Send + Sync + 'static,
-    C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
-{
+) -> Result<impl IntoResponse, ServerError> {
     let header_csrf_token = headers
         .get(CSRF_HEADER)
         .and_then(|h| h.to_str().ok())
@@ -54,22 +42,14 @@ where
     }
 }
 
-pub(crate) async fn session_based<R, L, O, T, A, C>(
-    State(state): State<Arc<AppState<R, L, O, T, A, C>>>,
+pub(crate) async fn session_based(
+    State(state): State<Arc<AppState>>,
     headers: HeaderMap,
     jar: CookieJar,
     Extension(session): Extension<UserSession>,
     req: Request,
     next: Next,
-) -> Result<impl IntoResponse, ServerError>
-where
-    R: RegisterFeature + Clone + Send + Sync + 'static,
-    L: LoginFeature + Clone + Send + Sync + 'static,
-    O: LogoutFeature + Clone + Send + Sync + 'static,
-    T: TokenFeature + Clone + Send + Sync + 'static,
-    A: AuthFeature + Clone + Send + Sync + 'static,
-    C: VerifyCsrfFeature + Clone + Send + Sync + 'static,
-{
+) -> Result<impl IntoResponse, ServerError> {
     let header_csrf_token = headers
         .get(CSRF_HEADER)
         .and_then(|h| h.to_str().ok())

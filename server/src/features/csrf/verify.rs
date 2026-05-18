@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{pin::Pin, sync::Arc};
 use subtle::ConstantTimeEq;
 
 use crate::{features::csrf::repository::CsrfRepository, infra::csrf::CsrfService};
@@ -8,13 +8,13 @@ pub(crate) trait VerifyCsrfFeature {
         &self,
         csrf_cookie: String,
         csrf_token: String,
-    ) -> impl Future<Output = bool> + Send;
+    ) -> Pin<Box<dyn Future<Output = bool> + Send + '_>>;
     fn verify_authorized(
         &self,
         csrf_cookie: String,
         header_csrf_token: String,
         session_csrf_token: String,
-    ) -> impl Future<Output = bool> + Send;
+    ) -> Pin<Box<dyn Future<Output = bool> + Send + '_>>;
 }
 
 #[derive(Clone)]
@@ -37,26 +37,34 @@ where
     C: CsrfService + Send + Sync,
     R: CsrfRepository + Send + Sync,
 {
-    async fn verify_anonymous(&self, csrf_cookie: String, csrf_token: String) -> bool {
-        self.csrf_service.verify(&csrf_token, &csrf_cookie)
-            && self
-                .csrf_repository
-                .verify_anonymous_csrf(&csrf_token)
-                .await
-                .unwrap_or(false)
+    fn verify_anonymous(
+        &self,
+        csrf_cookie: String,
+        csrf_token: String,
+    ) -> Pin<Box<dyn Future<Output = bool> + Send + '_>> {
+        Box::pin(async move {
+            self.csrf_service.verify(&csrf_token, &csrf_cookie)
+                && self
+                    .csrf_repository
+                    .verify_anonymous_csrf(&csrf_token)
+                    .await
+                    .unwrap_or(false)
+        })
     }
 
-    async fn verify_authorized(
+    fn verify_authorized(
         &self,
         csrf_cookie: String,
         header_csrf_token: String,
         session_csrf_token: String,
-    ) -> bool {
-        self.csrf_service.verify(&header_csrf_token, &csrf_cookie)
-            && header_csrf_token
-                .as_bytes()
-                .ct_eq(session_csrf_token.as_bytes())
-                .into()
+    ) -> Pin<Box<dyn Future<Output = bool> + Send + '_>> {
+        Box::pin(async move {
+            self.csrf_service.verify(&header_csrf_token, &csrf_cookie)
+                && header_csrf_token
+                    .as_bytes()
+                    .ct_eq(session_csrf_token.as_bytes())
+                    .into()
+        })
     }
 }
 
