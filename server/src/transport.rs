@@ -1,2 +1,2 @@
-pub mod error;
-pub mod pagination;
+pub(crate) mod error;
+pub(crate) mod pagination;

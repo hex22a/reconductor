@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use serde::Serialize;
 use time::PrimitiveDateTime;
 use uuid::Uuid;
@@ -10,15 +8,15 @@ use crate::{
 };
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct ProjectDto {
-    pub id: Uuid,
-    pub name: String,
-    pub created_at: PrimitiveDateTime,
+pub(crate) struct ProjectDto {
+    pub(crate) id: Uuid,
+    pub(crate) name: String,
+    pub(crate) created_at: PrimitiveDateTime,
 }
 
 #[derive(Serialize)]
-pub struct CreateProjctRequest {
-    pub name: String,
+pub(crate) struct CreateProjctRequest {
+    pub(crate) name: String,
 }
 
 impl TryFrom<CreateProjctRequest> for CreateProjectInput {

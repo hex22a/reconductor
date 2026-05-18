@@ -2,7 +2,7 @@ use axum::{Json, http::StatusCode};
 
 use crate::features::health::dto::HealthResponse;
 
-pub async fn handle() -> (StatusCode, Json<HealthResponse>) {
+pub(crate) async fn handle() -> (StatusCode, Json<HealthResponse>) {
     (StatusCode::OK, Json(HealthResponse { healthy: true }))
 }
 

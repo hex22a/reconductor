@@ -1,4 +1,4 @@
-pub mod csrf;
-pub mod password;
+pub(crate) mod csrf;
+pub(crate) mod password;
 pub mod persistence;
-pub mod random;
+pub(crate) mod random;

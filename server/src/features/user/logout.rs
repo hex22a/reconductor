@@ -2,17 +2,17 @@ use std::sync::Arc;
 
 use crate::features::{session::repository::SessionRepository, user::error::UserError};
 
-pub trait LogoutFeature {
+pub(crate) trait LogoutFeature {
     fn logout(&self, session_id: &str) -> impl Future<Output = Result<(), UserError>> + Send;
 }
 
 #[derive(Clone)]
-pub struct UserLogoutFeature<R: SessionRepository> {
+pub(crate) struct UserLogoutFeature<R: SessionRepository> {
     session_repository: Arc<R>,
 }
 
 impl<R: SessionRepository> UserLogoutFeature<R> {
-    pub fn new(session_repository: Arc<R>) -> Self {
+    pub(crate) fn new(session_repository: Arc<R>) -> Self {
         Self { session_repository }
     }
 }

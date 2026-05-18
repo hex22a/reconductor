@@ -5,7 +5,7 @@ use crate::features::{
 };
 
 #[derive(Clone)]
-pub struct AppState<
+pub(crate) struct AppState<
     R: RegisterFeature,
     L: LoginFeature,
     O: LogoutFeature,
@@ -13,10 +13,10 @@ pub struct AppState<
     A: AuthFeature,
     C: VerifyCsrfFeature,
 > {
-    pub register_feature: R,
-    pub login_feature: L,
-    pub logout_feature: O,
-    pub csrf_feature: T,
-    pub auth_feature: A,
-    pub verify_csrf_feature: C,
+    pub(crate) register_feature: R,
+    pub(crate) login_feature: L,
+    pub(crate) logout_feature: O,
+    pub(crate) csrf_feature: T,
+    pub(crate) auth_feature: A,
+    pub(crate) verify_csrf_feature: C,
 }

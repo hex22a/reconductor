@@ -1,2 +1,2 @@
-pub mod db;
+pub(crate) mod db;
 pub mod kv;

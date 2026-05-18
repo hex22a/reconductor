@@ -18,7 +18,7 @@ use crate::{
     state::AppState,
 };
 
-pub async fn session_middleware<R, L, O, T, A, C>(
+pub(crate) async fn session_middleware<R, L, O, T, A, C>(
     State(state): State<Arc<AppState<R, L, O, T, A, C>>>,
     jar: CookieJar,
     mut req: Request,

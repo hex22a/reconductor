@@ -4,7 +4,7 @@ use std::{fmt, sync::Arc};
 
 use crate::infra::random::{OsRngService, RngService, RngServiceError};
 
-pub enum CsrfServiceError {
+pub(crate) enum CsrfServiceError {
     NotGenerated(String),
     RngError(RngServiceError),
     CsrfInternalError,
@@ -36,19 +36,19 @@ impl fmt::Display for CsrfServiceError {
     }
 }
 
-pub trait CsrfService {
+pub(crate) trait CsrfService {
     fn generate(&self, ttl: u64) -> Result<(String, String), CsrfServiceError>;
     fn verify(&self, token: &str, cookie: &str) -> bool;
 }
 
 #[derive(Clone)]
-pub struct AesGcmCsrfService {
+pub(crate) struct AesGcmCsrfService {
     protect: AesGcmCsrfProtection,
     rng: Arc<OsRngService>,
 }
 
 impl AesGcmCsrfService {
-    pub fn new(rng: Arc<OsRngService>, key: [u8; 32]) -> Self {
+    pub(crate) fn new(rng: Arc<OsRngService>, key: [u8; 32]) -> Self {
         Self {
             protect: AesGcmCsrfProtection::from_key(key),
             rng,

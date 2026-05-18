@@ -12,7 +12,7 @@ use crate::{
     state::AppState,
 };
 
-pub fn routes<R, L, O, T, A, C>(state: Arc<AppState<R, L, O, T, A, C>>) -> Router
+pub(crate) fn routes<R, L, O, T, A, C>(state: Arc<AppState<R, L, O, T, A, C>>) -> Router
 where
     R: RegisterFeature + Clone + Send + Sync + 'static,
     L: LoginFeature + Clone + Send + Sync + 'static,

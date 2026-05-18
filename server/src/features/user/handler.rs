@@ -24,7 +24,7 @@ use crate::{
     application::error::ServerError, features::user::dto::UserInputRequest, state::AppState,
 };
 
-pub async fn register<R, L, O, T, A, C>(
+pub(crate) async fn register<R, L, O, T, A, C>(
     State(state): State<Arc<AppState<R, L, O, T, A, C>>>,
     Json(req): Json<UserInputRequest>,
 ) -> Result<impl IntoResponse, ServerError>
@@ -44,7 +44,7 @@ where
     Ok((StatusCode::CREATED, ()))
 }
 
-pub async fn login<R, L, O, T, A, C>(
+pub(crate) async fn login<R, L, O, T, A, C>(
     jar: CookieJar,
     State(state): State<Arc<AppState<R, L, O, T, A, C>>>,
     Json(req): Json<UserInputRequest>,
@@ -92,7 +92,7 @@ where
     ))
 }
 
-pub async fn me(Extension(user_session): Extension<UserSession>) -> impl IntoResponse {
+pub(crate) async fn me(Extension(user_session): Extension<UserSession>) -> impl IntoResponse {
     (
         StatusCode::OK,
         Json(MeResponse {
@@ -101,7 +101,7 @@ pub async fn me(Extension(user_session): Extension<UserSession>) -> impl IntoRes
     )
 }
 
-pub async fn logout<R, L, O, T, A, C>(
+pub(crate) async fn logout<R, L, O, T, A, C>(
     jar: CookieJar,
     State(state): State<Arc<AppState<R, L, O, T, A, C>>>,
 ) -> Result<impl IntoResponse, ServerError>

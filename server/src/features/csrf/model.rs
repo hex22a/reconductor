@@ -1,5 +1,5 @@
 #[derive(Clone, Debug, PartialEq)]
-pub struct CsrfTokenPair {
-    pub token: String,
-    pub cookie_value: String,
+pub(crate) struct CsrfTokenPair {
+    pub(crate) token: String,
+    pub(crate) cookie_value: String,
 }

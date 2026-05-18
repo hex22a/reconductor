@@ -9,7 +9,7 @@ use crate::{
     infra::csrf::CsrfService,
 };
 
-pub trait TokenFeature {
+pub(crate) trait TokenFeature {
     fn get_token(
         &self,
         session_token: Option<&str>,
@@ -17,14 +17,18 @@ pub trait TokenFeature {
 }
 
 #[derive(Clone)]
-pub struct CsrfTokenFeature<R: SessionRepository, C: CsrfRepository, S: CsrfService> {
+pub(crate) struct CsrfTokenFeature<R: SessionRepository, C: CsrfRepository, S: CsrfService> {
     session_repository: Arc<R>,
     csrf_repository: Arc<C>,
     csrf_service: Arc<S>,
 }
 
 impl<R: SessionRepository, C: CsrfRepository, S: CsrfService> CsrfTokenFeature<R, C, S> {
-    pub fn new(session_repository: Arc<R>, csrf_repository: Arc<C>, csrf_service: Arc<S>) -> Self {
+    pub(crate) fn new(
+        session_repository: Arc<R>,
+        csrf_repository: Arc<C>,
+        csrf_service: Arc<S>,
+    ) -> Self {
         Self {
             session_repository,
             csrf_repository,

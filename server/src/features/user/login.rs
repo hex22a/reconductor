@@ -10,7 +10,7 @@ use crate::{
     infra::{csrf::CsrfService, password::PasswordService, random::RngService},
 };
 
-pub trait LoginFeature {
+pub(crate) trait LoginFeature {
     fn login(
         &self,
         username: String,
@@ -20,7 +20,7 @@ pub trait LoginFeature {
 }
 
 #[derive(Clone)]
-pub struct UserLoginFeature<
+pub(crate) struct UserLoginFeature<
     UR: UserRepository,
     SR: SessionRepository,
     CR: CsrfRepository,
@@ -45,7 +45,7 @@ where
     PS: PasswordService + Send + Sync,
     R: RngService + Send + Sync,
 {
-    pub fn new(
+    pub(crate) fn new(
         user_repository: Arc<UR>,
         session_repository: Arc<SR>,
         csrf_repository: Arc<CR>,

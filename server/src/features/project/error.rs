@@ -1,7 +1,7 @@
 use crate::domain::cursor::CursorError;
 
 #[derive(Debug)]
-pub enum ProjectError {
+pub(crate) enum ProjectError {
     NotFound,
     NoLastCursor,
     DecodeError,

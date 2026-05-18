@@ -4,7 +4,7 @@ use crate::features::session::{
     error::SessionError, model::UserSession, repository::SessionRepository,
 };
 
-pub trait AuthFeature {
+pub(crate) trait AuthFeature {
     fn auth(
         &self,
         session_id: &str,
@@ -12,12 +12,12 @@ pub trait AuthFeature {
 }
 
 #[derive(Clone)]
-pub struct UserAuthFeature<S: SessionRepository> {
+pub(crate) struct UserAuthFeature<S: SessionRepository> {
     session_repository: Arc<S>,
 }
 
 impl<S: SessionRepository> UserAuthFeature<S> {
-    pub fn new(session_repository: Arc<S>) -> Self {
+    pub(crate) fn new(session_repository: Arc<S>) -> Self {
         UserAuthFeature { session_repository }
     }
 }

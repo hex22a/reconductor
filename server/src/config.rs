@@ -1,15 +1,15 @@
 use axum::http::HeaderValue;
 
-pub struct Config {
-    pub database_url: String,
-    pub redis_url: String,
-    pub rabbitmq_url: String,
-    pub csrf_key: [u8; 32],
-    pub dashboard_url: HeaderValue,
+pub(crate) struct Config {
+    pub(crate) database_url: String,
+    pub(crate) redis_url: String,
+    pub(crate) rabbitmq_url: String,
+    pub(crate) csrf_key: [u8; 32],
+    pub(crate) dashboard_url: HeaderValue,
 }
 
 impl Config {
-    pub fn from_env() -> anyhow::Result<Self> {
+    pub(crate) fn from_env() -> anyhow::Result<Self> {
         Ok(Self {
             database_url: std::env::var("DATABASE_URL")?,
             redis_url: std::env::var("REDIS_URL")?,
