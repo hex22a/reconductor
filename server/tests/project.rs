@@ -56,7 +56,7 @@ async fn test_create_project(db: PgPool) {
     let expected_project_id = Uuid::now_v7();
     let expected_owner_id = setup_user(&db).await;
     let expected_name = "test".to_string();
-    let expected_created_at = datetime!(2019-01-01 0:00);
+    let expected_created_at = datetime!(2019-01-01 0:00 UTC);
     let expected_project_entity = ProjectEntity {
         id: expected_project_id,
         owner_id: expected_owner_id,
