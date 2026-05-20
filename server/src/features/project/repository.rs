@@ -9,7 +9,7 @@ pub trait ProjectRepository {
     fn create_project(
         &self,
         project_insert: ProjectInsert,
-    ) -> impl Future<Output = Result<(), sqlx::Error>> + Send;
+    ) -> impl Future<Output = Result<ProjectEntity, sqlx::Error>> + Send;
     fn get_project(
         &self,
         project_id: &Uuid,
@@ -34,20 +34,25 @@ impl PgProjectRepository {
 }
 
 impl ProjectRepository for PgProjectRepository {
-    async fn create_project(&self, project_insert: ProjectInsert) -> Result<(), sqlx::Error> {
-        sqlx::query!(
+    async fn create_project(
+        &self,
+        project_insert: ProjectInsert,
+    ) -> Result<ProjectEntity, sqlx::Error> {
+        let project = sqlx::query_as!(
+            ProjectEntity,
             r#"
             INSERT INTO recon.projects
                 (name, owner_id)
             VALUES
                 ($1, $2)
+            RETURNING *;
             "#,
             project_insert.name,
             project_insert.owner_id,
         )
-        .execute(&*self.db)
+        .fetch_one(&*self.db)
         .await?;
-        Ok(())
+        Ok(project)
     }
 
     async fn get_project(

@@ -99,7 +99,7 @@ mod tests {
     }
 
     impl ProjectRepository for MockProjectRepository {
-        async fn create_project(&self, _: ProjectInsert) -> Result<(), sqlx::Error> {
+        async fn create_project(&self, _: ProjectInsert) -> Result<ProjectEntity, sqlx::Error> {
             todo!()
         }
 

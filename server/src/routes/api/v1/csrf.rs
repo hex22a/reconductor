@@ -128,7 +128,8 @@ mod tests {
             &self,
             _: uuid::Uuid,
             _: String,
-        ) -> std::pin::Pin<Box<dyn Future<Output = Result<(), ProjectError>> + Send + '_>> {
+        ) -> std::pin::Pin<Box<dyn Future<Output = Result<ProjectDto, ProjectError>> + Send + '_>>
+        {
             todo!()
         }
     }

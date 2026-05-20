@@ -1,6 +1,6 @@
 use sqlx::types::{Uuid, time::PrimitiveDateTime};
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct ProjectEntity {
     pub id: Uuid,
     pub owner_id: Uuid,

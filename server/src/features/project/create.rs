@@ -3,7 +3,10 @@ use std::{pin::Pin, sync::Arc};
 use uuid::Uuid;
 
 use crate::features::project::{
-    error::ProjectError, model::ProjectInsert, repository::ProjectRepository,
+    dto::ProjectDto,
+    error::ProjectError,
+    model::{ProjectEntity, ProjectInsert},
+    repository::ProjectRepository,
 };
 
 pub(crate) trait CreateProjectFeature {
@@ -11,7 +14,7 @@ pub(crate) trait CreateProjectFeature {
         &self,
         owner_id: Uuid,
         name: String,
-    ) -> Pin<Box<dyn Future<Output = Result<(), ProjectError>> + Send + '_>>;
+    ) -> Pin<Box<dyn Future<Output = Result<ProjectDto, ProjectError>> + Send + '_>>;
 }
 
 pub(crate) struct CreateProject<R: ProjectRepository> {
@@ -32,13 +35,18 @@ where
         &self,
         owner_id: Uuid,
         name: String,
-    ) -> Pin<Box<dyn Future<Output = Result<(), ProjectError>> + Send + '_>> {
+    ) -> Pin<Box<dyn Future<Output = Result<ProjectDto, ProjectError>> + Send + '_>> {
         Box::pin(async move {
             let project_insert = ProjectInsert { owner_id, name };
-            self.project_repository
+            let project = self
+                .project_repository
                 .create_project(project_insert)
                 .await?;
-            Ok(())
+            Ok(ProjectDto {
+                id: project.id,
+                name: project.name,
+                created_at: project.created_at,
+            })
         })
     }
 }
@@ -47,6 +55,7 @@ where
 mod tests {
     use std::sync::Mutex;
 
+    use time::macros::datetime;
     use uuid::Uuid;
 
     use crate::features::project::model::ProjectEntity;
@@ -54,13 +63,14 @@ mod tests {
     use super::*;
     struct MockProjectRepository {
         error: Mutex<Option<sqlx::Error>>,
+        return_value: ProjectEntity,
     }
 
     impl ProjectRepository for MockProjectRepository {
-        async fn create_project(&self, _: ProjectInsert) -> Result<(), sqlx::Error> {
+        async fn create_project(&self, _: ProjectInsert) -> Result<ProjectEntity, sqlx::Error> {
             match self.error.lock().unwrap().take() {
                 Some(e) => Err(e),
-                None => Ok(()),
+                None => Ok(self.return_value.clone()),
             }
         }
 
@@ -85,18 +95,32 @@ mod tests {
     #[tokio::test]
     async fn test_create_project() {
         // Arrange
+        let expected_project_id = Uuid::now_v7();
         let expected_owner_id = Uuid::now_v7();
         let expected_project_name = "test".to_string();
+        let expected_created_at = datetime!(2019-01-01 0:00);
+        let expected_project_entity = ProjectEntity {
+            id: expected_project_id,
+            owner_id: expected_owner_id,
+            name: expected_project_name.clone(),
+            created_at: expected_created_at,
+        };
+        let expected_project = ProjectDto {
+            id: expected_project_id,
+            name: expected_project_name.clone(),
+            created_at: expected_created_at,
+        };
         let mock_project_repository = MockProjectRepository {
             error: Mutex::new(None),
+            return_value: expected_project_entity,
         };
         let feature = CreateProject::new(Arc::new(mock_project_repository));
         // Act
-        let actual_create_project_result = feature
+        let actual_project = feature
             .create(expected_owner_id, expected_project_name)
             .await
             .unwrap();
         // Assert
-        assert_eq!(actual_create_project_result, ());
+        assert_eq!(actual_project, expected_project);
     }
 }
