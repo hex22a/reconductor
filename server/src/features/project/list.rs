@@ -131,7 +131,7 @@ mod tests {
         let expected_project_id = Uuid::now_v7();
         let expected_owner_id = Uuid::now_v7();
         let expected_name = "test".to_string();
-        let expected_created_at = datetime!(2019-01-01 0:00);
+        let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_project_entities_size = PROJECTS_PAGE_SIZE_LIMIT as usize;
         let expected_project = ProjectEntity {
             id: expected_project_id,
@@ -176,7 +176,7 @@ mod tests {
         let expected_end_cursor = encode_cursor(&expected_project_id);
         let expected_owner_id = Uuid::now_v7();
         let expected_name = "test".to_string();
-        let expected_created_at = datetime!(2019-01-01 0:00);
+        let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_project_entities_size = PROJECTS_PAGE_SIZE_LIMIT as usize;
         let expected_project = ProjectEntity {
             id: expected_project_id,
@@ -220,7 +220,7 @@ mod tests {
         let expected_end_cursor = encode_cursor(&expected_project_id);
         let expected_owner_id = Uuid::now_v7();
         let expected_name = "test".to_string();
-        let expected_created_at = datetime!(2019-01-01 0:00);
+        let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_project_entities_size = PROJECTS_PAGE_SIZE_LIMIT as usize;
         let expected_project = ProjectEntity {
             id: expected_project_id,
@@ -261,7 +261,7 @@ mod tests {
         let expected_project_id = Uuid::now_v7();
         let expected_owner_id = Uuid::now_v7();
         let expected_name = "test".to_string();
-        let expected_created_at = datetime!(2019-01-01 0:00);
+        let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_project_entities_size = PROJECTS_PAGE_SIZE_LIMIT as usize;
         let expected_project = ProjectEntity {
             id: expected_project_id,

@@ -3,10 +3,7 @@ use std::{pin::Pin, sync::Arc};
 use uuid::Uuid;
 
 use crate::features::project::{
-    dto::ProjectDto,
-    error::ProjectError,
-    model::{ProjectEntity, ProjectInsert},
-    repository::ProjectRepository,
+    dto::ProjectDto, error::ProjectError, model::ProjectInsert, repository::ProjectRepository,
 };
 
 pub(crate) trait CreateProjectFeature {
@@ -98,7 +95,7 @@ mod tests {
         let expected_project_id = Uuid::now_v7();
         let expected_owner_id = Uuid::now_v7();
         let expected_project_name = "test".to_string();
-        let expected_created_at = datetime!(2019-01-01 0:00);
+        let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_project_entity = ProjectEntity {
             id: expected_project_id,
             owner_id: expected_owner_id,

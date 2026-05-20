@@ -1,11 +1,12 @@
-use sqlx::types::{Uuid, time::PrimitiveDateTime};
+use sqlx::types::Uuid;
+use time::OffsetDateTime;
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct ProjectEntity {
     pub id: Uuid,
     pub owner_id: Uuid,
     pub name: String,
-    pub created_at: PrimitiveDateTime,
+    pub created_at: OffsetDateTime,
 }
 
 pub struct ProjectInsert {

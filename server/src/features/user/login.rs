@@ -231,9 +231,9 @@ mod tests {
         let expected_password = "password".to_string();
         let expected_password_hash = "password_hash".to_string();
         let expected_password_version: i16 = 1;
-        let expected_created_at = datetime!(2019-01-01 0:00);
-        let expected_updated_at = datetime!(2019-01-01 0:00);
-        let expected_last_login_at = datetime!(2019-01-01 0:00);
+        let expected_created_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_updated_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_last_login_at = datetime!(2019-01-01 0:00 UTC);
         let expected_is_active = true;
         let expected_user_entity = UserEntity {
             id: expected_user_id,
@@ -303,9 +303,9 @@ mod tests {
         let expected_password = "password".to_string();
         let expected_password_hash = "password_hash".to_string();
         let expected_password_version: i16 = 1;
-        let expected_created_at = datetime!(2019-01-01 0:00);
-        let expected_updated_at = datetime!(2019-01-01 0:00);
-        let expected_last_login_at = datetime!(2019-01-01 0:00);
+        let expected_created_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_updated_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_last_login_at = datetime!(2019-01-01 0:00 UTC);
         let expected_is_active = true;
         let expected_user_entity = UserEntity {
             id: expected_user_id,

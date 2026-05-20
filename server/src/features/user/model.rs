@@ -1,4 +1,5 @@
-use sqlx::types::{Uuid, time::PrimitiveDateTime};
+use sqlx::types::Uuid;
+use time::OffsetDateTime;
 
 #[derive(Debug, PartialEq)]
 pub struct UserInput {
@@ -19,9 +20,9 @@ pub struct UserEntity {
     pub username: String,
     pub password_hash: String,
     pub password_version: i16,
-    pub created_at: PrimitiveDateTime,
-    pub updated_at: PrimitiveDateTime,
-    pub last_login_at: PrimitiveDateTime,
+    pub created_at: OffsetDateTime,
+    pub updated_at: OffsetDateTime,
+    pub last_login_at: OffsetDateTime,
     pub is_active: bool,
 }
 

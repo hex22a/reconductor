@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use time::PrimitiveDateTime;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::{
@@ -11,7 +11,8 @@ use crate::{
 pub(crate) struct ProjectDto {
     pub(crate) id: Uuid,
     pub(crate) name: String,
-    pub(crate) created_at: PrimitiveDateTime,
+    #[serde(with = "time::serde::rfc3339")]
+    pub(crate) created_at: OffsetDateTime,
 }
 
 #[derive(Deserialize)]
