@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use time::PrimitiveDateTime;
 use uuid::Uuid;
 
@@ -7,7 +7,7 @@ use crate::{
     features::project::model::CreateProjectInput,
 };
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize)]
 pub(crate) struct ProjectDto {
     pub(crate) id: Uuid,
     pub(crate) name: String,

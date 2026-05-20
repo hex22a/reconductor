@@ -11,7 +11,6 @@ use crate::{
     state::AppState,
 };
 
-#[axum::debug_handler]
 pub(crate) async fn create(
     Extension(user_session): Extension<UserSession>,
     State(state): State<Arc<AppState>>,
@@ -24,4 +23,13 @@ pub(crate) async fn create(
         .create(owner_id, project.name)
         .await?;
     Ok(StatusCode::CREATED)
+}
+
+pub(crate) async fn list(
+    Extension(user_session): Extension<UserSession>,
+    State(state): State<Arc<AppState>>,
+) -> Result<impl IntoResponse, ServerError> {
+    let owner_id = user_session.user_id;
+    let projects = state.list_projects_feature.list(&owner_id, None).await?;
+    Ok((StatusCode::OK, Json(projects)))
 }
