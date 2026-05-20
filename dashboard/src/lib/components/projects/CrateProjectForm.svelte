@@ -1,11 +1,12 @@
 <script lang="ts">
+  import { projectsStore } from './projects.svelte';
+
   let name = $state<string>('');
   let isInFlight = $state<boolean>(false);
   async function handleSubmit(e: Event) {
     e.preventDefault();
     isInFlight = true;
-    console.log(name);
-    name = '';
+    await projectsStore.add(name);
     isInFlight = false;
   }
 </script>

@@ -18,11 +18,11 @@ pub(crate) async fn create(
 ) -> Result<impl IntoResponse, ServerError> {
     let project: CreateProjectInput = CreateProjectInput::try_from(req)?;
     let owner_id = user_session.user_id;
-    state
+    let project = state
         .create_project_feature
         .create(owner_id, project.name)
         .await?;
-    Ok(StatusCode::CREATED)
+    Ok((StatusCode::CREATED, Json(project)))
 }
 
 pub(crate) async fn list(

@@ -9,7 +9,7 @@
 
   type Props = {
     columns: Array<Column>;
-    rows: ReadonlyArray<{ node: T }>;
+    rows: ReadonlyArray<T>;
   };
 
   let { columns, rows }: Props = $props();
@@ -29,9 +29,9 @@
         {#each columns as column}
           <td class="p-1">
             {#if column.render}
-              {@render column.render(row.node[column.key], row.node.id)}
+              {@render column.render(row[column.key], row.id)}
             {:else}
-              {row.node[column.key] ?? '---'}
+              {row[column.key] ?? '---'}
             {/if}
           </td>
         {/each}
