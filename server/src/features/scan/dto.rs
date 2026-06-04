@@ -23,13 +23,12 @@ impl TryFrom<CreateScanRequest> for CreateScanInput {
             error = true;
             field_errors.insert("target".to_string(), vec!["invalid ip address".to_string()]);
         }
-        let schedule = value.schedule.map(|s| {
+        let schedule = value.schedule.inspect(|s| {
             let cron_regex = Regex::new(r"^(\*|([0-5]?\d)) (\*|([01]?\d|2[0-3])) (\*|([12]?\d|3[01])) (\*|(1[0-2]|[1-9])) (\*|([0-7]))$").unwrap();
-            if !cron_regex.is_match(&s) {
+            if !cron_regex.is_match(s) {
                 error = true;
                 field_errors.insert("schedule".to_string(), vec!["invalid cron expression".to_string()]);
             }
-            s
         });
         if error {
             return Err(ServerError::ValidationError(field_errors));
