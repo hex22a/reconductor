@@ -2,13 +2,14 @@
 name = "scanner"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
 
 [dependencies]
 anyhow = "1.0.102"
 dotenvy = "0.15.7"
 futures-lite = "2.6.1"
 lapin = "4.4.0"
-quick-xml = { version = "0.39.2", features = ["serde", "serialize"] }
+quick-xml = { version = "0.41.0", features = ["serde", "serialize"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 sqlx = { version = "0.8.6", features = ["ipnetwork", "mac_address", "migrate", "postgres", "runtime-tokio", "time", "uuid"] }
