@@ -1,6 +1,9 @@
 pub mod csrf;
 pub(crate) mod health;
+pub mod host;
+pub mod port;
 pub mod project;
 pub mod scan;
+pub mod scan_run;
 pub mod session;
 pub mod user;
