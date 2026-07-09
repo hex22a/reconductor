@@ -9,16 +9,17 @@ use crate::{
     constants::API_PROJECTS_ENDPOINT_V1,
     features::{
         csrf::middleware::session_based,
-        project::handler::{create, list},
+        project::handler::{create, get_project, list},
         session::middleware::session_middleware,
     },
     state::AppState,
 };
 
 pub(crate) fn routes(state: Arc<AppState>) -> Router {
-    Router::new()
-        .route(API_PROJECTS_ENDPOINT_V1, post(create))
-        .route(API_PROJECTS_ENDPOINT_V1, get(list))
+    let inner_routes = Router::new()
+        .route("/", post(create))
+        .route("/", get(list))
+        .route("/{id}", get(get_project))
         .route_layer(middleware::from_fn_with_state(
             Arc::clone(&state),
             session_based,
@@ -26,6 +27,9 @@ pub(crate) fn routes(state: Arc<AppState>) -> Router {
         .route_layer(middleware::from_fn_with_state(
             Arc::clone(&state),
             session_middleware,
-        ))
+        ));
+
+    Router::new()
+        .nest(API_PROJECTS_ENDPOINT_V1, inner_routes)
         .with_state(state)
 }

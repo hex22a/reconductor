@@ -4,7 +4,10 @@ use crate::{
     constants::{CSRF_HEADER, REDIS_POOL_SIZE},
     features::{
         csrf::{repository::CsrfStore, token::CsrfTokenFeature, verify::StatefulCsrfVerifier},
-        project::{create::CreateProject, list::ListProjects, repository::PgProjectRepository},
+        project::{
+            create::CreateProject, get::GetProject, list::ListProjects,
+            repository::PgProjectRepository,
+        },
         session::{auth::UserAuthFeature, repository::SessionStore},
         user::{
             login::UserLoginFeature, logout::UserLogoutFeature, register::UserRegisterFeature,
@@ -80,6 +83,7 @@ async fn main() -> anyhow::Result<()> {
         Arc::clone(&csrf_repository),
     ));
     let create_project_feature = Arc::new(CreateProject::new(Arc::clone(&project_repository)));
+    let get_project_feature = Arc::new(GetProject::new(Arc::clone(&project_repository)));
     let list_projects_feature = Arc::new(ListProjects::new(Arc::clone(&project_repository)));
 
     let app_state = Arc::new(AppState {
@@ -90,6 +94,7 @@ async fn main() -> anyhow::Result<()> {
         auth_feature,
         verify_csrf_feature,
         create_project_feature,
+        get_project_feature,
         list_projects_feature,
     });
 

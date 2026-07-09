@@ -29,7 +29,7 @@ mod tests {
             },
             project::{
                 create::CreateProjectFeature, dto::ProjectDto, error::ProjectError,
-                list::ListProjectsFeature,
+                get::GetProjectFeature, list::ListProjectsFeature,
             },
             session::{auth::AuthFeature, error::SessionError, model::UserSession},
             user::{
@@ -56,6 +56,8 @@ mod tests {
     struct MockVerifyCsrfFeature;
     #[derive(Clone)]
     struct MockCreateProject;
+    #[derive(Clone)]
+    struct MockGetProject;
     #[derive(Clone)]
     struct MockListProjects;
 
@@ -133,6 +135,16 @@ mod tests {
             todo!()
         }
     }
+    impl GetProjectFeature for MockGetProject {
+        fn get(
+            &self,
+            _: uuid::Uuid,
+            _: uuid::Uuid,
+        ) -> std::pin::Pin<Box<dyn Future<Output = Result<ProjectDto, ProjectError>> + Send + '_>>
+        {
+            todo!()
+        }
+    }
     impl ListProjectsFeature for MockListProjects {
         fn list<'a>(
             &'a self,
@@ -166,6 +178,7 @@ mod tests {
         });
         let mock_verify_csrf_feature = Arc::new(MockVerifyCsrfFeature);
         let mock_create_project = Arc::new(MockCreateProject);
+        let mock_get_project = Arc::new(MockGetProject);
         let mock_list_projects = Arc::new(MockListProjects);
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
@@ -175,6 +188,7 @@ mod tests {
             auth_feature: mock_auth_feature,
             verify_csrf_feature: mock_verify_csrf_feature,
             create_project_feature: mock_create_project,
+            get_project_feature: mock_get_project,
             list_projects_feature: mock_list_projects,
         });
         let app = routes(expected_app_state);
@@ -215,6 +229,7 @@ mod tests {
         });
         let mock_verify_csrf_feature = Arc::new(MockVerifyCsrfFeature);
         let mock_create_project = Arc::new(MockCreateProject);
+        let mock_get_project = Arc::new(MockGetProject);
         let mock_list_projects = Arc::new(MockListProjects);
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
@@ -224,6 +239,7 @@ mod tests {
             auth_feature: mock_auth_feature,
             verify_csrf_feature: mock_verify_csrf_feature,
             create_project_feature: mock_create_project,
+            get_project_feature: mock_get_project,
             list_projects_feature: mock_list_projects,
         });
         let app = routes(expected_app_state);
