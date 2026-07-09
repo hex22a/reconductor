@@ -1,10 +1,21 @@
 use std::collections::HashMap;
 
 use regex::Regex;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sqlx::types::ipnetwork::IpNetwork;
+use time::OffsetDateTime;
+use uuid::Uuid;
 
 use crate::{application::error::ServerError, features::scan::model::CreateScanInput};
+
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub(crate) struct ScanDto {
+    pub(crate) id: Uuid,
+    pub(crate) target: IpNetwork,
+    pub(crate) schedule: Option<String>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub(crate) created_at: OffsetDateTime,
+}
 
 #[derive(Deserialize)]
 pub(crate) struct CreateScanRequest {

@@ -1,20 +1,20 @@
 use crate::domain::cursor::CursorError;
 
 #[derive(Debug)]
-pub(crate) enum ProjectError {
+pub(crate) enum ScanError {
     NotFound,
     NoLastCursor,
     DecodeError,
 }
 
-impl From<CursorError> for ProjectError {
+impl From<CursorError> for ScanError {
     fn from(_: CursorError) -> Self {
-        ProjectError::DecodeError
+        ScanError::DecodeError
     }
 }
 
-impl From<sqlx::Error> for ProjectError {
+impl From<sqlx::Error> for ScanError {
     fn from(_: sqlx::Error) -> Self {
-        ProjectError::NotFound
+        ScanError::NotFound
     }
 }
