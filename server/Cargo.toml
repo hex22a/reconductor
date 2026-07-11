@@ -10,13 +10,14 @@ argon2 = "0.5.3"
 axum = { version = "0.8.9", features = ["macros"] }
 axum-extra = { version = "0.12.6", features = ["cookie", "cookie-private"] }
 base64 = "0.22.1"
+chrono = { version = "0.4.45", features = ["serde"] }
+cron = "0.17.0"
 csrf = "0.5.0"
 dotenvy = "0.15.7"
 fred = "10.1.0"
 hex = "0.4.3"
 lapin = "4.6.0"
 rand = "0.10.1"
-regex = "1.12.3"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 sqlx = { version = "0.8.6", features = ["ipnetwork", "mac_address", "migrate", "postgres", "runtime-tokio", "time", "uuid"] }

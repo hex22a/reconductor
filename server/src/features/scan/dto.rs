@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
-use regex::Regex;
+use cron::Schedule;
 use serde::{Deserialize, Serialize};
 use sqlx::types::ipnetwork::IpNetwork;
 use time::OffsetDateTime;
@@ -34,13 +34,19 @@ impl TryFrom<CreateScanRequest> for CreateScanInput {
             error = true;
             field_errors.insert("target".to_string(), vec!["invalid ip address".to_string()]);
         }
-        let schedule = value.schedule.inspect(|s| {
-            let cron_regex = Regex::new(r"^(\*|([0-5]?\d)) (\*|([01]?\d|2[0-3])) (\*|([12]?\d|3[01])) (\*|(1[0-2]|[1-9])) (\*|([0-7]))$").unwrap();
-            if !cron_regex.is_match(s) {
-                error = true;
-                field_errors.insert("schedule".to_string(), vec!["invalid cron expression".to_string()]);
+        let mut schedule: Option<Schedule> = None;
+        if let Some(s) = value.schedule {
+            match Schedule::from_str(&s) {
+                Ok(parsed) => schedule = Some(parsed),
+                Err(_) => {
+                    error = true;
+                    field_errors.insert(
+                        "schedule".to_string(),
+                        vec!["invalid cron expression".to_string()],
+                    );
+                }
             }
-        });
+        }
         if error {
             return Err(ServerError::ValidationError(field_errors));
         }
@@ -53,6 +59,10 @@ impl TryFrom<CreateScanRequest> for CreateScanInput {
 
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
+
+    use cron::Schedule;
+
     use crate::{
         application::error::ServerError,
         features::scan::{dto::CreateScanRequest, model::CreateScanInput},
@@ -62,10 +72,11 @@ mod tests {
     fn test_valid_target_valid_schedule() {
         // Arrange
         let expected_target = "192.168.0.1";
-        let expected_schedule = "* * * * *".to_string();
+        let expected_schedule_string = "* * * * * *".to_string();
+        let expected_schedule = Schedule::from_str(&expected_schedule_string).unwrap();
         let expected_create_scan_request = CreateScanRequest {
             target: expected_target.to_string(),
-            schedule: Some(expected_schedule.clone()),
+            schedule: Some(expected_schedule_string.clone()),
         };
         let expected_create_scan_input = CreateScanInput {
             target: expected_target.try_into().unwrap(),

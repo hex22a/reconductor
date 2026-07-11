@@ -745,6 +745,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "cron"
+version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a5dcd6f69605c2956916ce24e8af637b754964c9a83f4662d3a2361654cdba09"
+dependencies = [
+ "chrono",
+ "once_cell",
+ "phf",
+ "winnow",
+]
+
+[[package]]
 name = "crossbeam-channel"
 version = "0.5.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2474,18 +2486,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "regex"
-version = "1.12.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1292b7759ae1cb9ec195452d1390a074f0cd8541ab7a5a8c31cd6db45d4a6ba"
-dependencies = [
- "aho-corasick",
- "memchr",
- "regex-automata",
- "regex-syntax",
-]
-
-[[package]]
 name = "regex-automata"
 version = "0.4.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2712,7 +2712,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "chrono",
- "cron",
+ "cron 0.16.0",
  "dotenvy",
  "lapin",
  "serde",
@@ -2845,13 +2845,14 @@ dependencies = [
  "axum",
  "axum-extra",
  "base64",
+ "chrono",
+ "cron 0.17.0",
  "csrf",
  "dotenvy",
  "fred",
  "hex",
  "lapin",
  "rand 0.10.1",
- "regex",
  "serde",
  "serde_json",
  "sqlx",
