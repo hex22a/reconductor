@@ -85,7 +85,7 @@ async fn test_create_scan(db: PgPool) {
         project_id: expected_project_id,
         target: expected_target,
         schedule: Some(expected_schedule),
-        next_run_at: expected_next_run_at,
+        next_run_at: Some(expected_next_run_at),
     };
     let repo = PgScanRespository::new(Arc::new(db));
     // Act
@@ -129,7 +129,7 @@ async fn test_list_scans(db: PgPool) {
         project_id: expected_project_id,
         target: expected_target,
         schedule: Some(expected_schedule),
-        next_run_at: expected_next_run_at,
+        next_run_at: Some(expected_next_run_at),
     };
     let repo = PgScanRespository::new(Arc::new(db));
     repo.create_scan(expected_scan_insert).await.unwrap();
