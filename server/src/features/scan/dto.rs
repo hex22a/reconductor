@@ -36,7 +36,8 @@ impl TryFrom<CreateScanRequest> for CreateScanInput {
         }
         let mut schedule: Option<Schedule> = None;
         if let Some(s) = value.schedule {
-            match Schedule::from_str(&s) {
+            let with_seconds = format!("0 {}", s);
+            match Schedule::from_str(&with_seconds) {
                 Ok(parsed) => schedule = Some(parsed),
                 Err(_) => {
                     error = true;
@@ -72,8 +73,9 @@ mod tests {
     fn test_valid_target_valid_schedule() {
         // Arrange
         let expected_target = "192.168.0.1";
-        let expected_schedule_string = "* * * * * *".to_string();
-        let expected_schedule = Schedule::from_str(&expected_schedule_string).unwrap();
+        let expected_schedule_string = "* * * * *".to_string();
+        let expected_schedule_with_seconds_string = "0 * * * * *".to_string();
+        let expected_schedule = Schedule::from_str(&expected_schedule_with_seconds_string).unwrap();
         let expected_create_scan_request = CreateScanRequest {
             target: expected_target.to_string(),
             schedule: Some(expected_schedule_string.clone()),
