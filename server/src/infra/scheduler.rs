@@ -33,7 +33,7 @@ impl SchedulerService for Scheduler {
         let next = Schedule::from_str(&schedule_with_seconds)?
             .upcoming(Utc)
             .next()
-            .ok_or_else(|| ScheduleError::NoNextRun)?;
+            .ok_or(ScheduleError::NoNextRun)?;
 
         Ok(OffsetDateTime::from_unix_timestamp(next.timestamp())?)
     }
