@@ -2,7 +2,7 @@ use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 use uuid::Uuid;
 
 #[derive(Debug)]
-pub(crate) enum CursorError {
+pub enum CursorError {
     DecodeError,
     ParsingError,
 }
