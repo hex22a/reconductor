@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { page } from '$app/state';
   import { scansStore } from './scans.svelte';
 
   let target = $state<string>('');
@@ -7,7 +8,7 @@
   async function handleSubmit(e: Event) {
     e.preventDefault();
     isInFlight = true;
-    await scansStore.add(target, schedule);
+    await scansStore.add(page.params.id!, target, schedule);
     isInFlight = false;
   }
 </script>

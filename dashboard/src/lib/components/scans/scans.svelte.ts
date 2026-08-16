@@ -10,9 +10,9 @@ export const scansStore = {
     get scans() {
         return scans;
     },
-    async add(target: string, schedule: string): Promise<void | ErrorResponse> {
+    async add(project_id: string, target: string, schedule: string): Promise<void | ErrorResponse> {
         const csrfToken = get(csrf);
-        const response = await create(csrfToken, target, schedule);
+        const response = await create(csrfToken, project_id, target, schedule);
         if (isError(response)) {
             return response;
         }

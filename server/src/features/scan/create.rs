@@ -1,5 +1,6 @@
 use std::{pin::Pin, sync::Arc};
 
+use cron::Schedule;
 use sqlx::types::ipnetwork::IpNetwork;
 use time::OffsetDateTime;
 use uuid::Uuid;
@@ -16,7 +17,7 @@ pub(crate) trait CreateScanFeature {
         &self,
         project_id: Uuid,
         target: IpNetwork,
-        schedule: Option<String>,
+        schedule: Option<Schedule>,
     ) -> Pin<Box<dyn Future<Output = Result<ScanDto, ScanError>> + Send + '_>>;
 }
 
@@ -43,7 +44,7 @@ where
         &self,
         project_id: Uuid,
         target: IpNetwork,
-        schedule: Option<String>,
+        schedule: Option<Schedule>,
     ) -> Pin<Box<dyn Future<Output = Result<ScanDto, ScanError>> + Send + '_>> {
         Box::pin(async move {
             let next_run_at: Option<OffsetDateTime> = if let Some(s) = &schedule {
@@ -54,7 +55,7 @@ where
             let scan_insert = ScanInsert {
                 project_id,
                 target,
-                schedule,
+                schedule: schedule.map(|s| s.to_string()),
                 next_run_at,
             };
             let scan = self.scan_repository.create_scan(scan_insert).await?;
@@ -70,7 +71,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Mutex;
+    use std::{str::FromStr, sync::Mutex};
 
     use time::{OffsetDateTime, macros::datetime};
 
@@ -114,7 +115,7 @@ mod tests {
     }
 
     impl SchedulerService for MockScheduler {
-        fn calculate_next_run(&self, _: &str) -> Result<OffsetDateTime, ScheduleError> {
+        fn calculate_next_run(&self, _: &Schedule) -> Result<OffsetDateTime, ScheduleError> {
             match self.error.lock().unwrap().take() {
                 Some(e) => Err(e),
                 None => Ok(self.return_value),
@@ -129,7 +130,7 @@ mod tests {
         let expected_project_id = Uuid::now_v7();
         let expected_target = "192.168.0.1".parse().unwrap();
         let expected_scan_status = ScanStatus::Scheduled;
-        let expected_schedule = "* * * * *".to_string();
+        let expected_schedule = Schedule::from_str("* * * * * *").unwrap();
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_next_run_at = datetime!(2019-01-02 0:00 UTC);
         let expected_scan_entity = ScanEntity {
@@ -137,14 +138,14 @@ mod tests {
             project_id: expected_project_id,
             target: expected_target,
             status: expected_scan_status,
-            schedule: Some(expected_schedule.clone()),
+            schedule: Some(expected_schedule.to_string()),
             created_at: expected_created_at,
             next_run_at: Some(expected_next_run_at),
         };
         let expected_scan = ScanDto {
             id: expected_scan_id,
             target: expected_target,
-            schedule: Some(expected_schedule.clone()),
+            schedule: Some(expected_schedule.to_string()),
             created_at: expected_created_at,
         };
         let mock_scan_repository = MockScanReposotry {

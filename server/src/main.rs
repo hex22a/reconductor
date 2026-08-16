@@ -8,6 +8,7 @@ use crate::{
             create::CreateProject, get::GetProject, list::ListProjects,
             repository::PgProjectRepository,
         },
+        scan::{create::CreateScan, repository::PgScanRespository},
         session::{auth::UserAuthFeature, repository::SessionStore},
         user::{
             login::UserLoginFeature, logout::UserLogoutFeature, register::UserRegisterFeature,
@@ -19,6 +20,7 @@ use crate::{
         password::Argon2Service,
         persistence::{db, kv},
         random::OsRngService,
+        scheduler::Scheduler,
     },
 };
 use axum::{
@@ -53,6 +55,8 @@ async fn main() -> anyhow::Result<()> {
     let session_repository = Arc::new(SessionStore::new(Arc::clone(&kv)));
     let csrf_repository = Arc::new(CsrfStore::new(Arc::clone(&kv)));
     let project_repository = Arc::new(PgProjectRepository::new(Arc::clone(&db)));
+    let scan_repository = Arc::new(PgScanRespository::new(Arc::clone(&db)));
+    let scheduler_service = Arc::new(Scheduler);
     let password_service = Arc::new(Argon2Service);
     let os_rng_serivce = Arc::new(OsRngService::new(Arc::new(Mutex::new(SysRng))));
     let csrf_service = Arc::new(AesGcmCsrfService::new(
@@ -85,6 +89,10 @@ async fn main() -> anyhow::Result<()> {
     let create_project_feature = Arc::new(CreateProject::new(Arc::clone(&project_repository)));
     let get_project_feature = Arc::new(GetProject::new(Arc::clone(&project_repository)));
     let list_projects_feature = Arc::new(ListProjects::new(Arc::clone(&project_repository)));
+    let create_scan_feature = Arc::new(CreateScan::new(
+        Arc::clone(&scan_repository),
+        Arc::clone(&scheduler_service),
+    ));
 
     let app_state = Arc::new(AppState {
         register_feature,
@@ -96,6 +104,7 @@ async fn main() -> anyhow::Result<()> {
         create_project_feature,
         get_project_feature,
         list_projects_feature,
+        create_scan_feature,
     });
 
     let cors = CorsLayer::new()
@@ -112,6 +121,7 @@ async fn main() -> anyhow::Result<()> {
         .merge(v1::me::routes(Arc::clone(&app_state)))
         .merge(v1::csrf::routes(Arc::clone(&app_state)))
         .merge(v1::projects::routes(Arc::clone(&app_state)))
+        .merge(v1::scans::routes(Arc::clone(&app_state)))
         .layer(cors);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();

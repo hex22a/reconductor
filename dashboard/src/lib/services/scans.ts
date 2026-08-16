@@ -5,6 +5,7 @@ import type { Page } from '../transport/Pagination';
 
 export async function create(
     csrfToken: string | null,
+    project_id: string,
     target: string,
     schedule: string,
 ): Promise<Scan | ErrorResponse> {
@@ -16,7 +17,7 @@ export async function create(
                 'Content-Type': 'application/json',
                 'X-CSRF-Token': csrfToken ?? '',
             },
-            body: JSON.stringify({ target, schedule }),
+            body: JSON.stringify({ project_id, target, schedule }),
         });
         if (!res.ok) {
             return (await res.json()) as ErrorResponse;

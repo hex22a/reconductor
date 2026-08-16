@@ -11,7 +11,7 @@ use uuid::Uuid;
 use crate::{
     application::error::ServerError,
     features::{
-        project::{self, dto::CreateProjctRequest, model::CreateProjectInput},
+        project::{dto::CreateProjctRequest, model::CreateProjectInput},
         session::model::UserSession,
     },
     state::AppState,
