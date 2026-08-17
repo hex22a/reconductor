@@ -32,7 +32,7 @@ async fn setup_project(db: &PgPool) -> (Uuid, Uuid) {
     .fetch_one(db)
     .await
     .unwrap();
-    return (expected_project_id, expected_user_id);
+    (expected_project_id, expected_user_id)
 }
 
 async fn setup_scan(db: &PgPool) -> (Uuid, Uuid) {
@@ -71,7 +71,7 @@ async fn setup_scan(db: &PgPool) -> (Uuid, Uuid) {
     .fetch_one(db)
     .await
     .unwrap();
-    return (expected_scan_id, expected_project_id);
+    (expected_scan_id, expected_project_id)
 }
 
 #[sqlx::test(migrations = "../migrations")]

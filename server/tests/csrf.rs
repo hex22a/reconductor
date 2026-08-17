@@ -36,10 +36,10 @@ async fn returns_false_for_missing_csrf() {
     let expected_token = "csrf_does_not_exist";
 
     // Act
-    let actual_result = store.verify_anonymous_csrf(expected_token).await.unwrap();
+    let actual_valid = store.verify_anonymous_csrf(expected_token).await.unwrap();
 
     // Assert
-    assert_eq!(actual_result, false);
+    assert!(!actual_valid);
 }
 
 #[tokio::test]
@@ -50,10 +50,10 @@ async fn gets_session_from_storage() {
     store.create_anonymous_csrf(expected_token).await.unwrap();
 
     // Act
-    let actual_user_session = store.verify_anonymous_csrf(expected_token).await.unwrap();
+    let actual_valid = store.verify_anonymous_csrf(expected_token).await.unwrap();
 
     // Assert
-    assert_eq!(actual_user_session, true);
+    assert!(actual_valid);
 }
 
 #[tokio::test]
@@ -67,6 +67,6 @@ async fn deletes_session_from_storage() {
     store.delete_anonymous_csrf(expected_token).await.unwrap();
 
     // Assert
-    let result = store.verify_anonymous_csrf(expected_token).await.unwrap();
-    assert_eq!(result, false);
+    let actual_valid = store.verify_anonymous_csrf(expected_token).await.unwrap();
+    assert!(!actual_valid);
 }

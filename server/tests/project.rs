@@ -9,7 +9,7 @@ use time::macros::datetime;
 use uuid::Uuid;
 
 async fn setup_user(db: &PgPool) -> Uuid {
-    let expected_user_id: Uuid = sqlx::query_scalar(
+    sqlx::query_scalar(
         r#"
         INSERT INTO recon.users
             (username, password_hash)
@@ -19,8 +19,7 @@ async fn setup_user(db: &PgPool) -> Uuid {
     )
     .fetch_one(db)
     .await
-    .unwrap();
-    return expected_user_id;
+    .unwrap()
 }
 
 async fn setup_project(db: &PgPool) -> (Uuid, Uuid) {
@@ -47,7 +46,7 @@ async fn setup_project(db: &PgPool) -> (Uuid, Uuid) {
     .fetch_one(db)
     .await
     .unwrap();
-    return (expected_project_id, expected_user_id);
+    (expected_project_id, expected_user_id)
 }
 
 #[sqlx::test(migrations = "../migrations")]
