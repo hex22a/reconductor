@@ -81,7 +81,7 @@ mod tests {
         let expected_schedule_with_seconds_string = "0 * * * * *".to_string();
         let expected_schedule = Schedule::from_str(&expected_schedule_with_seconds_string).unwrap();
         let expected_create_scan_request = CreateScanRequest {
-            project_id: expected_project_id.clone(),
+            project_id: expected_project_id,
             target: expected_target.to_string(),
             schedule: Some(expected_schedule_string.clone()),
         };
@@ -103,7 +103,7 @@ mod tests {
         let expected_project_id = Uuid::now_v7();
         let expected_target = "192.168.0.1";
         let expected_create_scan_request = CreateScanRequest {
-            project_id: expected_project_id.clone(),
+            project_id: expected_project_id,
             target: expected_target.to_string(),
             schedule: None,
         };
