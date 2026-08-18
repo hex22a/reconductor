@@ -16,7 +16,7 @@ use crate::{
     state::AppState,
 };
 
-pub(crate) async fn double_submit(
+pub async fn double_submit(
     State(state): State<Arc<AppState>>,
     headers: HeaderMap,
     jar: CookieJar,
@@ -42,7 +42,7 @@ pub(crate) async fn double_submit(
     }
 }
 
-pub(crate) async fn session_based(
+pub async fn session_based(
     State(state): State<Arc<AppState>>,
     headers: HeaderMap,
     jar: CookieJar,

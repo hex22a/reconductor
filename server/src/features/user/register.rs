@@ -6,7 +6,7 @@ use crate::features::user::model::UserInsert;
 use crate::features::user::repository::UserRepository;
 use crate::infra::password::PasswordService;
 
-pub(crate) trait RegisterFeature {
+pub trait RegisterFeature {
     fn register(
         &self,
         username: String,
@@ -15,13 +15,13 @@ pub(crate) trait RegisterFeature {
 }
 
 #[derive(Clone)]
-pub(crate) struct UserRegisterFeature<P: PasswordService, R: UserRepository> {
+pub struct UserRegisterFeature<P: PasswordService, R: UserRepository> {
     password_service: Arc<P>,
     user_repository: Arc<R>,
 }
 
 impl<P: PasswordService, R: UserRepository> UserRegisterFeature<P, R> {
-    pub(crate) fn new(password_service: Arc<P>, user_repository: Arc<R>) -> Self {
+    pub fn new(password_service: Arc<P>, user_repository: Arc<R>) -> Self {
         Self {
             password_service,
             user_repository,

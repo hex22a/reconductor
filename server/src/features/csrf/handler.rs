@@ -13,7 +13,7 @@ use crate::{
     state::AppState,
 };
 
-pub(crate) async fn handle(
+pub async fn handle(
     State(state): State<Arc<AppState>>,
     jar: CookieJar,
 ) -> Result<impl IntoResponse, ServerError> {

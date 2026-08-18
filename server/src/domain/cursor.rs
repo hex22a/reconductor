@@ -7,11 +7,11 @@ pub enum CursorError {
     ParsingError,
 }
 
-pub(crate) fn encode_cursor(uuid: &Uuid) -> String {
+pub fn encode_cursor(uuid: &Uuid) -> String {
     URL_SAFE_NO_PAD.encode(uuid.as_bytes())
 }
 
-pub(crate) fn decode_cursor(cursor: &str) -> Result<Uuid, CursorError> {
+pub fn decode_cursor(cursor: &str) -> Result<Uuid, CursorError> {
     let bytes = URL_SAFE_NO_PAD
         .decode(cursor)
         .map_err(|_| CursorError::DecodeError)?;

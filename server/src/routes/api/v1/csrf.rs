@@ -4,7 +4,7 @@ use axum::{Router, routing::get};
 
 use crate::{constants::API_CSRF_ENDPOINT_V1, features::csrf::handler::handle, state::AppState};
 
-pub(crate) fn routes(state: Arc<AppState>) -> Router {
+pub fn routes(state: Arc<AppState>) -> Router {
     Router::new()
         .route(API_CSRF_ENDPOINT_V1, get(handle))
         .with_state(state)

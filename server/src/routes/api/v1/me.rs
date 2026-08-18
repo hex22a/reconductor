@@ -8,7 +8,7 @@ use crate::{
     state::AppState,
 };
 
-pub(crate) fn routes(state: Arc<AppState>) -> Router {
+pub fn routes(state: Arc<AppState>) -> Router {
     Router::new()
         .route(API_ME_ENDPOINT_V1, get(me))
         .route_layer(middleware::from_fn_with_state(state, session_middleware))

@@ -52,10 +52,10 @@ impl ScanInsert {
 }
 
 #[derive(Debug, PartialEq)]
-pub(crate) struct CreateScanInput {
-    pub(crate) project_id: Uuid,
-    pub(crate) target: IpNetwork,
-    pub(crate) schedule: Option<Schedule>,
+pub struct CreateScanInput {
+    pub project_id: Uuid,
+    pub target: IpNetwork,
+    pub schedule: Option<Schedule>,
 }
 
 #[cfg(test)]

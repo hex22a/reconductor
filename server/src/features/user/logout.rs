@@ -2,7 +2,7 @@ use std::{pin::Pin, sync::Arc};
 
 use crate::features::{session::repository::SessionRepository, user::error::UserError};
 
-pub(crate) trait LogoutFeature {
+pub trait LogoutFeature {
     fn logout<'a>(
         &'a self,
         session_id: &'a str,
@@ -10,12 +10,12 @@ pub(crate) trait LogoutFeature {
 }
 
 #[derive(Clone)]
-pub(crate) struct UserLogoutFeature<R: SessionRepository> {
+pub struct UserLogoutFeature<R: SessionRepository> {
     session_repository: Arc<R>,
 }
 
 impl<R: SessionRepository> UserLogoutFeature<R> {
-    pub(crate) fn new(session_repository: Arc<R>) -> Self {
+    pub fn new(session_repository: Arc<R>) -> Self {
         Self { session_repository }
     }
 }

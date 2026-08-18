@@ -6,7 +6,7 @@ use crate::{
     constants::API_REGISTER_ENDPOINT_V1, features::user::handler::register, state::AppState,
 };
 
-pub(crate) fn routes(state: Arc<AppState>) -> Router {
+pub fn routes(state: Arc<AppState>) -> Router {
     Router::new()
         .route(API_REGISTER_ENDPOINT_V1, post(register))
         .with_state(state)

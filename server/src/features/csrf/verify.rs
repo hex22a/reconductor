@@ -3,7 +3,7 @@ use subtle::ConstantTimeEq;
 
 use crate::{features::csrf::repository::CsrfRepository, infra::csrf::CsrfService};
 
-pub(crate) trait VerifyCsrfFeature {
+pub trait VerifyCsrfFeature {
     fn verify_anonymous(
         &self,
         csrf_cookie: String,
@@ -18,13 +18,13 @@ pub(crate) trait VerifyCsrfFeature {
 }
 
 #[derive(Clone)]
-pub(crate) struct StatefulCsrfVerifier<C: CsrfService, R: CsrfRepository> {
+pub struct StatefulCsrfVerifier<C: CsrfService, R: CsrfRepository> {
     csrf_service: Arc<C>,
     csrf_repository: Arc<R>,
 }
 
 impl<C: CsrfService, R: CsrfRepository> StatefulCsrfVerifier<C, R> {
-    pub(crate) fn new(csrf_service: Arc<C>, csrf_repository: Arc<R>) -> Self {
+    pub fn new(csrf_service: Arc<C>, csrf_repository: Arc<R>) -> Self {
         Self {
             csrf_service,
             csrf_repository,

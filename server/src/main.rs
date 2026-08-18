@@ -1,46 +1,10 @@
-use std::sync::{Arc, Mutex};
+use server::{Config, Reconductor};
 
-use crate::{
-    constants::{CSRF_HEADER, REDIS_POOL_SIZE},
-    features::{
-        csrf::{repository::CsrfStore, token::CsrfTokenFeature, verify::StatefulCsrfVerifier},
-        project::{
-            create::CreateProject, get::GetProject, list::ListProjects,
-            repository::PgProjectRepository,
-        },
-        scan::{create::CreateScan, repository::PgScanRespository},
-        session::{auth::UserAuthFeature, repository::SessionStore},
-        user::{
-            login::UserLoginFeature, logout::UserLogoutFeature, register::UserRegisterFeature,
-            repository::PgUserRepository,
-        },
-    },
-    infra::{
-        csrf::AesGcmCsrfService,
-        password::Argon2Service,
-        persistence::{db, kv},
-        random::OsRngService,
-        scheduler::Scheduler,
-    },
-};
-use axum::{
-    Router,
-    http::{HeaderName, Method, header::CONTENT_TYPE},
-};
-use rand::rngs::SysRng;
-use tower_http::cors::CorsLayer;
+use server::infra::persistence::{db, kv};
 
-mod application;
-mod config;
+use constants::REDIS_POOL_SIZE;
+
 mod constants;
-mod domain;
-mod features;
-mod infra;
-mod routes;
-mod state;
-mod transport;
-
-use crate::{routes::api::v1, state::AppState};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -48,81 +12,11 @@ async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)
         .init();
-    let config = config::Config::from_env()?;
-    let db = Arc::new(db::init_db(&config.database_url).await);
-    let kv = Arc::new(kv::init_kv(&config.redis_url, REDIS_POOL_SIZE).await);
-    let user_repository = Arc::new(PgUserRepository::new(Arc::clone(&db)));
-    let session_repository = Arc::new(SessionStore::new(Arc::clone(&kv)));
-    let csrf_repository = Arc::new(CsrfStore::new(Arc::clone(&kv)));
-    let project_repository = Arc::new(PgProjectRepository::new(Arc::clone(&db)));
-    let scan_repository = Arc::new(PgScanRespository::new(Arc::clone(&db)));
-    let scheduler_service = Arc::new(Scheduler);
-    let password_service = Arc::new(Argon2Service);
-    let os_rng_serivce = Arc::new(OsRngService::new(Arc::new(Mutex::new(SysRng))));
-    let csrf_service = Arc::new(AesGcmCsrfService::new(
-        Arc::clone(&os_rng_serivce),
-        config.csrf_key,
-    ));
-    let register_feature = Arc::new(UserRegisterFeature::new(
-        Arc::clone(&password_service),
-        Arc::clone(&user_repository),
-    ));
-    let login_feature = Arc::new(UserLoginFeature::new(
-        Arc::clone(&user_repository),
-        Arc::clone(&session_repository),
-        Arc::clone(&csrf_repository),
-        Arc::clone(&csrf_service),
-        Arc::clone(&password_service),
-        Arc::clone(&os_rng_serivce),
-    ));
-    let logout_feature = Arc::new(UserLogoutFeature::new(Arc::clone(&session_repository)));
-    let csrf_feature = Arc::new(CsrfTokenFeature::new(
-        Arc::clone(&session_repository),
-        Arc::clone(&csrf_repository),
-        Arc::clone(&csrf_service),
-    ));
-    let auth_feature = Arc::new(UserAuthFeature::new(Arc::clone(&session_repository)));
-    let verify_csrf_feature = Arc::new(StatefulCsrfVerifier::new(
-        Arc::clone(&csrf_service),
-        Arc::clone(&csrf_repository),
-    ));
-    let create_project_feature = Arc::new(CreateProject::new(Arc::clone(&project_repository)));
-    let get_project_feature = Arc::new(GetProject::new(Arc::clone(&project_repository)));
-    let list_projects_feature = Arc::new(ListProjects::new(Arc::clone(&project_repository)));
-    let create_scan_feature = Arc::new(CreateScan::new(
-        Arc::clone(&scan_repository),
-        Arc::clone(&scheduler_service),
-    ));
+    let config = Config::from_env()?;
+    let db = db::init_db(&config.database_url).await;
+    let kv = kv::init_kv(&config.redis_url, REDIS_POOL_SIZE).await;
 
-    let app_state = Arc::new(AppState {
-        register_feature,
-        login_feature,
-        logout_feature,
-        csrf_feature,
-        auth_feature,
-        verify_csrf_feature,
-        create_project_feature,
-        get_project_feature,
-        list_projects_feature,
-        create_scan_feature,
-    });
-
-    let cors = CorsLayer::new()
-        .allow_origin(config.dashboard_url)
-        .allow_methods([Method::GET, Method::POST])
-        .allow_headers([CONTENT_TYPE, CSRF_HEADER.parse::<HeaderName>().unwrap()])
-        .allow_credentials(true);
-
-    let app = Router::new()
-        .merge(v1::health::routes())
-        .merge(v1::auth::register::routes(Arc::clone(&app_state)))
-        .merge(v1::auth::login::routes(Arc::clone(&app_state)))
-        .merge(v1::auth::logout::routes(Arc::clone(&app_state)))
-        .merge(v1::me::routes(Arc::clone(&app_state)))
-        .merge(v1::csrf::routes(Arc::clone(&app_state)))
-        .merge(v1::projects::routes(Arc::clone(&app_state)))
-        .merge(v1::scans::routes(Arc::clone(&app_state)))
-        .layer(cors);
+    let app = Reconductor::build(db, kv, config);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();

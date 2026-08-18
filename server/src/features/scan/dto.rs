@@ -9,19 +9,19 @@ use uuid::Uuid;
 use crate::{application::error::ServerError, features::scan::model::CreateScanInput};
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
-pub(crate) struct ScanDto {
-    pub(crate) id: Uuid,
-    pub(crate) target: IpNetwork,
-    pub(crate) schedule: Option<String>,
+pub struct ScanDto {
+    pub id: Uuid,
+    pub target: IpNetwork,
+    pub schedule: Option<String>,
     #[serde(with = "time::serde::rfc3339")]
-    pub(crate) created_at: OffsetDateTime,
+    pub created_at: OffsetDateTime,
 }
 
 #[derive(Deserialize)]
-pub(crate) struct CreateScanRequest {
+pub struct CreateScanRequest {
     pub project_id: Uuid,
-    pub(crate) target: String,
-    pub(crate) schedule: Option<String>,
+    pub target: String,
+    pub schedule: Option<String>,
 }
 
 impl TryFrom<CreateScanRequest> for CreateScanInput {

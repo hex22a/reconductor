@@ -8,7 +8,7 @@ use crate::{
 };
 
 #[derive(Debug)]
-pub(crate) enum UserError {
+pub enum UserError {
     PasswordMismatch,
     PasswordError,
     Interntal,

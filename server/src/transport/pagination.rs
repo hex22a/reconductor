@@ -1,13 +1,13 @@
 use serde::Serialize;
 
 #[derive(Debug, PartialEq, Serialize)]
-pub(crate) struct PageInfo {
-    pub(crate) has_next_page: bool,
-    pub(crate) end_cursor: Option<String>,
+pub struct PageInfo {
+    pub has_next_page: bool,
+    pub end_cursor: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Serialize)]
-pub(crate) struct Page<T> {
-    pub(crate) data: Vec<T>,
-    pub(crate) page_info: PageInfo,
+pub struct Page<T> {
+    pub data: Vec<T>,
+    pub page_info: PageInfo,
 }

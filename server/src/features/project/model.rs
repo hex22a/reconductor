@@ -15,6 +15,6 @@ pub struct ProjectInsert {
 }
 
 #[derive(Debug, PartialEq)]
-pub(crate) struct CreateProjectInput {
-    pub(crate) name: String,
+pub struct CreateProjectInput {
+    pub name: String,
 }

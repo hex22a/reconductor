@@ -9,7 +9,7 @@ use crate::{
     transport::pagination::{Page, PageInfo},
 };
 
-pub(crate) trait ListProjectsFeature {
+pub trait ListProjectsFeature {
     fn list<'a>(
         &'a self,
         owner_id: &'a Uuid,
@@ -18,12 +18,12 @@ pub(crate) trait ListProjectsFeature {
 }
 
 #[derive(Clone)]
-pub(crate) struct ListProjects<P: ProjectRepository> {
+pub struct ListProjects<P: ProjectRepository> {
     project_repository: Arc<P>,
 }
 
 impl<P: ProjectRepository> ListProjects<P> {
-    pub(crate) fn new(project_repository: Arc<P>) -> Self {
+    pub fn new(project_repository: Arc<P>) -> Self {
         Self { project_repository }
     }
 }

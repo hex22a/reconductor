@@ -1,3 +1,3 @@
-pub(crate) mod login;
-pub(crate) mod logout;
-pub(crate) mod register;
+pub mod login;
+pub mod logout;
+pub mod register;

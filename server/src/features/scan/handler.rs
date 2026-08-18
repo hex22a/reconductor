@@ -8,7 +8,7 @@ use crate::{
     state::AppState,
 };
 
-pub(crate) async fn create(
+pub async fn create(
     State(state): State<Arc<AppState>>,
     Json(req): Json<CreateScanRequest>,
 ) -> Result<impl IntoResponse, ServerError> {

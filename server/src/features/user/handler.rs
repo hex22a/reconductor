@@ -24,7 +24,7 @@ use crate::{
     application::error::ServerError, features::user::dto::UserInputRequest, state::AppState,
 };
 
-pub(crate) async fn register(
+pub async fn register(
     State(state): State<Arc<AppState>>,
     Json(req): Json<UserInputRequest>,
 ) -> Result<impl IntoResponse, ServerError> {
@@ -36,7 +36,7 @@ pub(crate) async fn register(
     Ok((StatusCode::CREATED, ()))
 }
 
-pub(crate) async fn login(
+pub async fn login(
     jar: CookieJar,
     State(state): State<Arc<AppState>>,
     Json(req): Json<UserInputRequest>,
@@ -76,7 +76,7 @@ pub(crate) async fn login(
     ))
 }
 
-pub(crate) async fn me(Extension(user_session): Extension<UserSession>) -> impl IntoResponse {
+pub async fn me(Extension(user_session): Extension<UserSession>) -> impl IntoResponse {
     (
         StatusCode::OK,
         Json(MeResponse {
@@ -85,7 +85,7 @@ pub(crate) async fn me(Extension(user_session): Extension<UserSession>) -> impl 
     )
 }
 
-pub(crate) async fn logout(
+pub async fn logout(
     jar: CookieJar,
     State(state): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, ServerError> {

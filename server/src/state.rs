@@ -9,15 +9,15 @@ use crate::features::{
 };
 
 #[derive(Clone)]
-pub(crate) struct AppState {
-    pub(crate) register_feature: Arc<dyn RegisterFeature + Send + Sync>,
-    pub(crate) login_feature: Arc<dyn LoginFeature + Send + Sync>,
-    pub(crate) logout_feature: Arc<dyn LogoutFeature + Send + Sync>,
-    pub(crate) csrf_feature: Arc<dyn TokenFeature + Send + Sync>,
-    pub(crate) auth_feature: Arc<dyn AuthFeature + Send + Sync>,
-    pub(crate) verify_csrf_feature: Arc<dyn VerifyCsrfFeature + Send + Sync>,
-    pub(crate) create_project_feature: Arc<dyn CreateProjectFeature + Send + Sync>,
-    pub(crate) get_project_feature: Arc<dyn GetProjectFeature + Send + Sync>,
-    pub(crate) list_projects_feature: Arc<dyn ListProjectsFeature + Send + Sync>,
-    pub(crate) create_scan_feature: Arc<dyn CreateScanFeature + Send + Sync>,
+pub struct AppState {
+    pub register_feature: Arc<dyn RegisterFeature + Send + Sync>,
+    pub login_feature: Arc<dyn LoginFeature + Send + Sync>,
+    pub logout_feature: Arc<dyn LogoutFeature + Send + Sync>,
+    pub csrf_feature: Arc<dyn TokenFeature + Send + Sync>,
+    pub auth_feature: Arc<dyn AuthFeature + Send + Sync>,
+    pub verify_csrf_feature: Arc<dyn VerifyCsrfFeature + Send + Sync>,
+    pub create_project_feature: Arc<dyn CreateProjectFeature + Send + Sync>,
+    pub get_project_feature: Arc<dyn GetProjectFeature + Send + Sync>,
+    pub list_projects_feature: Arc<dyn ListProjectsFeature + Send + Sync>,
+    pub create_scan_feature: Arc<dyn CreateScanFeature + Send + Sync>,
 }

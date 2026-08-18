@@ -1,5 +1,5 @@
 pub mod csrf;
-pub(crate) mod health;
+pub mod health;
 pub mod host;
 pub mod port;
 pub mod project;

@@ -1,7 +1,7 @@
 use crate::{domain::cursor::CursorError, infra::scheduler::ScheduleError};
 
 #[derive(Debug)]
-pub(crate) enum ScanError {
+pub enum ScanError {
     NotFound,
     NoLastCursor,
     DecodeError,

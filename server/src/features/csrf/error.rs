@@ -3,7 +3,7 @@ use std::fmt;
 use crate::{features::csrf::repository::CsrfRepositoryError, infra::csrf::CsrfServiceError};
 
 #[derive(Debug)]
-pub(crate) enum CsrfError {
+pub enum CsrfError {
     AnonymousNotCreated,
     StorageError(String),
 }

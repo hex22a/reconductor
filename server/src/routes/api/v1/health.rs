@@ -3,7 +3,7 @@ use crate::features::health::handler::handle;
 use axum::Router;
 use axum::routing::get;
 
-pub(crate) fn routes() -> Router {
+pub fn routes() -> Router {
     Router::new().route(API_HEALTH_ENDPOINT_V1, get(handle))
 }
 

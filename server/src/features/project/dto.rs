@@ -8,16 +8,16 @@ use crate::{
 };
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
-pub(crate) struct ProjectDto {
-    pub(crate) id: Uuid,
-    pub(crate) name: String,
+pub struct ProjectDto {
+    pub id: Uuid,
+    pub name: String,
     #[serde(with = "time::serde::rfc3339")]
-    pub(crate) created_at: OffsetDateTime,
+    pub created_at: OffsetDateTime,
 }
 
 #[derive(Deserialize)]
-pub(crate) struct CreateProjctRequest {
-    pub(crate) name: String,
+pub struct CreateProjctRequest {
+    pub name: String,
 }
 
 impl TryFrom<CreateProjctRequest> for CreateProjectInput {

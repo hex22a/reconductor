@@ -6,7 +6,7 @@ use crate::features::project::{
     dto::ProjectDto, error::ProjectError, repository::ProjectRepository,
 };
 
-pub(crate) trait GetProjectFeature {
+pub trait GetProjectFeature {
     fn get(
         &self,
         project_id: Uuid,
@@ -14,12 +14,12 @@ pub(crate) trait GetProjectFeature {
     ) -> Pin<Box<dyn Future<Output = Result<ProjectDto, ProjectError>> + Send + '_>>;
 }
 
-pub(crate) struct GetProject<R: ProjectRepository> {
+pub struct GetProject<R: ProjectRepository> {
     project_repository: Arc<R>,
 }
 
 impl<R: ProjectRepository> GetProject<R> {
-    pub(crate) fn new(project_repository: Arc<R>) -> Self {
+    pub fn new(project_repository: Arc<R>) -> Self {
         Self { project_repository }
     }
 }

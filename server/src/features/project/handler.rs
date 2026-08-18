@@ -17,7 +17,7 @@ use crate::{
     state::AppState,
 };
 
-pub(crate) async fn create(
+pub async fn create(
     Extension(user_session): Extension<UserSession>,
     State(state): State<Arc<AppState>>,
     Json(req): Json<CreateProjctRequest>,
@@ -31,7 +31,7 @@ pub(crate) async fn create(
     Ok((StatusCode::CREATED, Json(project)))
 }
 
-pub(crate) async fn get_project(
+pub async fn get_project(
     Extension(user_session): Extension<UserSession>,
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
@@ -41,7 +41,7 @@ pub(crate) async fn get_project(
     Ok((StatusCode::OK, Json(project)))
 }
 
-pub(crate) async fn list(
+pub async fn list(
     Extension(user_session): Extension<UserSession>,
     State(state): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, ServerError> {

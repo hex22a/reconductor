@@ -11,7 +11,7 @@ use rand::{
 
 use crate::constants::{NONCE_SIZE_BYTES, SESSION_ID_SIZE_BYTES};
 
-pub(crate) enum RngServiceError {
+pub enum RngServiceError {
     OsError(SysError),
 }
 
@@ -29,18 +29,18 @@ impl fmt::Display for RngServiceError {
     }
 }
 
-pub(crate) trait RngService {
+pub trait RngService {
     fn generate_nonce(&self) -> Result<[u8; NONCE_SIZE_BYTES], RngServiceError>;
     fn generate_session_id(&self) -> Result<String, RngServiceError>;
 }
 
 #[derive(Clone)]
-pub(crate) struct OsRngService {
+pub struct OsRngService {
     rng: Arc<Mutex<SysRng>>,
 }
 
 impl OsRngService {
-    pub(crate) fn new(rng: Arc<Mutex<SysRng>>) -> Self {
+    pub fn new(rng: Arc<Mutex<SysRng>>) -> Self {
         Self { rng }
     }
 }

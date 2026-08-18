@@ -1,1 +1,1 @@
-pub(crate) mod model;
+pub mod model;

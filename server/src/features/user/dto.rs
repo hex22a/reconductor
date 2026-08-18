@@ -11,19 +11,19 @@ use crate::{
 };
 
 #[derive(Deserialize, Serialize)]
-pub(crate) struct UserInputRequest {
-    pub(crate) username: String,
-    pub(crate) password: String,
+pub struct UserInputRequest {
+    pub username: String,
+    pub password: String,
 }
 
 #[derive(Serialize)]
-pub(crate) struct LoginResponse {
-    pub(crate) csrf_token: String,
+pub struct LoginResponse {
+    pub csrf_token: String,
 }
 
 #[derive(Serialize)]
-pub(crate) struct MeResponse {
-    pub(crate) username: String,
+pub struct MeResponse {
+    pub username: String,
 }
 
 impl TryFrom<UserInputRequest> for UserInput {

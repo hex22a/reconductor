@@ -15,7 +15,7 @@ use crate::{
     state::AppState,
 };
 
-pub(crate) fn routes(state: Arc<AppState>) -> Router {
+pub fn routes(state: Arc<AppState>) -> Router {
     let inner_routes = Router::new()
         .route("/", post(create))
         .route("/", get(list))

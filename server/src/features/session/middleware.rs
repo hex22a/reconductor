@@ -11,7 +11,7 @@ use crate::{
     application::error::ServerError, constants::USER_SESSION_COOKIE_NAME, state::AppState,
 };
 
-pub(crate) async fn session_middleware(
+pub async fn session_middleware(
     State(state): State<Arc<AppState>>,
     jar: CookieJar,
     mut req: Request,

@@ -8,7 +8,7 @@ use crate::{
     infra::password::PasswordServiceError,
 };
 
-pub(crate) type FieldErrors = HashMap<String, Vec<String>>;
+pub type FieldErrors = HashMap<String, Vec<String>>;
 
 #[derive(Debug)]
 pub enum ServerError {

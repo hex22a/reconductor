@@ -1,1 +1,1 @@
-pub(crate) mod cursor;
+pub mod cursor;

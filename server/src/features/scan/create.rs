@@ -12,7 +12,7 @@ use crate::{
     infra::scheduler::SchedulerService,
 };
 
-pub(crate) trait CreateScanFeature {
+pub trait CreateScanFeature {
     fn create(
         &self,
         project_id: Uuid,
@@ -21,13 +21,13 @@ pub(crate) trait CreateScanFeature {
     ) -> Pin<Box<dyn Future<Output = Result<ScanDto, ScanError>> + Send + '_>>;
 }
 
-pub(crate) struct CreateScan<R: ScanRepository, S: SchedulerService> {
+pub struct CreateScan<R: ScanRepository, S: SchedulerService> {
     scan_repository: Arc<R>,
     scheduler: Arc<S>,
 }
 
 impl<R: ScanRepository, S: SchedulerService> CreateScan<R, S> {
-    pub(crate) fn new(scan_repository: Arc<R>, scheduler: Arc<S>) -> Self {
+    pub fn new(scan_repository: Arc<R>, scheduler: Arc<S>) -> Self {
         Self {
             scan_repository,
             scheduler,

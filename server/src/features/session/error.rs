@@ -1,7 +1,7 @@
 use crate::features::session::repository::SessionRepositoryError;
 
 #[derive(Debug)]
-pub(crate) enum SessionError {
+pub enum SessionError {
     NotFound,
     Internal,
 }
