@@ -31,7 +31,9 @@ mod tests {
                 create::CreateProjectFeature, dto::ProjectDto, error::ProjectError,
                 get::GetProjectFeature, list::ListProjectsFeature,
             },
-            scan::{create::CreateScanFeature, dto::ScanDto, error::ScanError},
+            scan::{
+                create::CreateScanFeature, dto::ScanDto, error::ScanError, list::ListScansFeature,
+            },
             session::{auth::AuthFeature, error::SessionError, model::UserSession},
             user::{
                 error::UserError, login::LoginFeature, logout::LogoutFeature, model::AuthSession,
@@ -63,6 +65,8 @@ mod tests {
     struct MockListProjects;
     #[derive(Clone)]
     struct MockCreateScan;
+    #[derive(Clone)]
+    struct MockListScans;
 
     impl RegisterFeature for MockRegisterFeature {
         fn register(
@@ -171,6 +175,16 @@ mod tests {
             todo!()
         }
     }
+    impl ListScansFeature for MockListScans {
+        fn list<'a>(
+            &'a self,
+            _: &'a uuid::Uuid,
+            _: Option<&'a str>,
+        ) -> std::pin::Pin<Box<dyn Future<Output = Result<Page<ScanDto>, ScanError>> + Send + 'a>>
+        {
+            todo!()
+        }
+    }
 
     #[tokio::test]
     async fn test_csrf_get() {
@@ -196,6 +210,7 @@ mod tests {
         let mock_get_project = Arc::new(MockGetProject);
         let mock_list_projects = Arc::new(MockListProjects);
         let mock_create_scan = Arc::new(MockCreateScan);
+        let mock_list_scans = Arc::new(MockListScans);
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,
@@ -207,6 +222,7 @@ mod tests {
             get_project_feature: mock_get_project,
             list_projects_feature: mock_list_projects,
             create_scan_feature: mock_create_scan,
+            list_scans_feature: mock_list_scans,
         });
         let app = routes(expected_app_state);
         // Act
@@ -249,6 +265,7 @@ mod tests {
         let mock_get_project = Arc::new(MockGetProject);
         let mock_list_projects = Arc::new(MockListProjects);
         let mock_create_scan = Arc::new(MockCreateScan);
+        let mock_list_scans = Arc::new(MockListScans);
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,
@@ -260,6 +277,7 @@ mod tests {
             get_project_feature: mock_get_project,
             list_projects_feature: mock_list_projects,
             create_scan_feature: mock_create_scan,
+            list_scans_feature: mock_list_scans,
         });
         let app = routes(expected_app_state);
         // Act

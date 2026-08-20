@@ -34,10 +34,10 @@ pub async fn create(
 pub async fn get_project(
     Extension(user_session): Extension<UserSession>,
     State(state): State<Arc<AppState>>,
-    Path(id): Path<Uuid>,
+    Path(project_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, ServerError> {
     let owner_id = user_session.user_id;
-    let project = state.get_project_feature.get(id, owner_id).await?;
+    let project = state.get_project_feature.get(project_id, owner_id).await?;
     Ok((StatusCode::OK, Json(project)))
 }
 

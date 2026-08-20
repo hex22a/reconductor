@@ -53,7 +53,6 @@ impl ScanInsert {
 
 #[derive(Debug, PartialEq)]
 pub struct CreateScanInput {
-    pub project_id: Uuid,
     pub target: IpNetwork,
     pub schedule: Option<Schedule>,
 }

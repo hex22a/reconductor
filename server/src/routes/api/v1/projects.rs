@@ -15,11 +15,17 @@ use crate::{
     state::AppState,
 };
 
+mod scans;
+
 pub fn routes(state: Arc<AppState>) -> Router {
+    let scan_routes = scans::routes();
+    let project_routes = Router::new()
+        .route("/{project_id}", get(get_project))
+        .nest("/{project_id}", scan_routes);
     let inner_routes = Router::new()
         .route("/", post(create))
         .route("/", get(list))
-        .route("/{id}", get(get_project))
+        .merge(project_routes)
         .route_layer(middleware::from_fn_with_state(
             Arc::clone(&state),
             session_based,

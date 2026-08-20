@@ -35,6 +35,8 @@ use state::AppState;
 use features::project::create::CreateProject;
 use features::project::list::ListProjects;
 
+use features::scan::list::ListScans;
+
 mod application;
 mod config;
 mod constants;
@@ -94,6 +96,7 @@ impl Reconductor {
             Arc::clone(&scan_repository),
             Arc::clone(&scheduler_service),
         ));
+        let list_scans_feature = Arc::new(ListScans::new(Arc::clone(&scan_repository)));
 
         let app_state = Arc::new(AppState {
             register_feature,
@@ -106,6 +109,7 @@ impl Reconductor {
             get_project_feature,
             list_projects_feature,
             create_scan_feature,
+            list_scans_feature,
         });
 
         let cors = CorsLayer::new()
@@ -122,7 +126,6 @@ impl Reconductor {
             .merge(v1::me::routes(Arc::clone(&app_state)))
             .merge(v1::csrf::routes(Arc::clone(&app_state)))
             .merge(v1::projects::routes(Arc::clone(&app_state)))
-            .merge(v1::scans::routes(Arc::clone(&app_state)))
             .layer(cors)
     }
 }

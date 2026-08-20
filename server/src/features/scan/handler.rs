@@ -1,6 +1,12 @@
 use std::sync::Arc;
 
-use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
+use axum::{
+    Json,
+    extract::{Path, State},
+    http::StatusCode,
+    response::IntoResponse,
+};
+use uuid::Uuid;
 
 use crate::{
     application::error::ServerError,
@@ -10,14 +16,11 @@ use crate::{
 
 pub async fn create(
     State(state): State<Arc<AppState>>,
+    Path(project_id): Path<Uuid>,
     Json(req): Json<CreateScanRequest>,
 ) -> Result<impl IntoResponse, ServerError> {
     let scan: CreateScanInput = CreateScanInput::try_from(req)?;
-    let CreateScanInput {
-        project_id,
-        target,
-        schedule,
-    } = scan;
+    let CreateScanInput { target, schedule } = scan;
     let scan = state
         .create_scan_feature
         .create(project_id, target, schedule)
