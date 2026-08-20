@@ -9,10 +9,10 @@ export const load: PageLoad = async ({ parent, params }) => {
     await parent();
 
     const csrfToken = get(csrf);
-    const project_details = await get_project_details(csrfToken, params.id);
+    const project_details = await get_project_details(csrfToken, params.project_id);
     if (isError(project_details)) {
         console.error(project_details);
     }
-    await scansStore.list(params.id);
+    await scansStore.list(params.project_id);
     return project_details;
 };

@@ -36,7 +36,7 @@ export async function create(
     }
 }
 
-export async function get_project_details(
+export async function get_scan_details(
     csrfToken: string | null,
     projectId: string,
     scanId: string,

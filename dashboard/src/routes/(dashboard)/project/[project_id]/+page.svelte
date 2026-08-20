@@ -8,7 +8,7 @@
 </script>
 
 {#snippet linkCell(value: string | Date, id: string)}
-  <a href="/scan/{id}">{value}</a>
+  <a href="/project/{data.id}/scan/{id}">{value}</a>
 {/snippet}
 
 {#snippet dateCell(value: string | Date)}

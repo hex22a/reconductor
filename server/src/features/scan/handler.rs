@@ -30,7 +30,7 @@ pub async fn create(
 
 pub async fn get_scan(
     State(state): State<Arc<AppState>>,
-    Path(scan_id): Path<Uuid>,
+    Path((_, scan_id)): Path<(Uuid, Uuid)>,
 ) -> Result<impl IntoResponse, ServerError> {
     let scan = state.get_scan_feature.get(scan_id).await?;
     Ok((StatusCode::OK, Json(scan)))
