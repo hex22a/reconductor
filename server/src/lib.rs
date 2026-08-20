@@ -37,6 +37,8 @@ use features::project::list::ListProjects;
 
 use features::scan::list::ListScans;
 
+use crate::features::scan::get::GetScan;
+
 mod application;
 mod config;
 mod constants;
@@ -96,6 +98,7 @@ impl Reconductor {
             Arc::clone(&scan_repository),
             Arc::clone(&scheduler_service),
         ));
+        let get_scan_feature = Arc::new(GetScan::new(Arc::clone(&scan_repository)));
         let list_scans_feature = Arc::new(ListScans::new(Arc::clone(&scan_repository)));
 
         let app_state = Arc::new(AppState {
@@ -109,6 +112,7 @@ impl Reconductor {
             get_project_feature,
             list_projects_feature,
             create_scan_feature,
+            get_scan_feature,
             list_scans_feature,
         });
 
