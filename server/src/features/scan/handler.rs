@@ -28,6 +28,14 @@ pub async fn create(
     Ok((StatusCode::CREATED, Json(scan)))
 }
 
+pub async fn get_scan(
+    State(state): State<Arc<AppState>>,
+    Path(scan_id): Path<Uuid>,
+) -> Result<impl IntoResponse, ServerError> {
+    let scan = state.get_scan_feature.get(scan_id).await?;
+    Ok((StatusCode::OK, Json(scan)))
+}
+
 pub async fn list(
     State(state): State<Arc<AppState>>,
     Path(project_id): Path<Uuid>,
