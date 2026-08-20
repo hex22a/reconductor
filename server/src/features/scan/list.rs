@@ -89,13 +89,13 @@ mod tests {
 
     use super::*;
 
-    struct MockScanRespository {
+    struct MockScanRepository {
         error: Mutex<Option<sqlx::Error>>,
         scan_entity: ScanEntity,
         size: usize,
     }
 
-    impl ScanRepository for MockScanRespository {
+    impl ScanRepository for MockScanRepository {
         async fn create_scan(
             &self,
             _: crate::features::scan::model::ScanInsert,
@@ -156,7 +156,7 @@ mod tests {
             data: expected_scans,
             page_info: expected_page_info,
         };
-        let mock_scan_repository = MockScanRespository {
+        let mock_scan_repository = MockScanRepository {
             error: Mutex::new(None),
             scan_entity: expected_scan,
             size: expected_scan_entities_size,
@@ -210,7 +210,7 @@ mod tests {
             data: expected_scans,
             page_info: expected_page_info,
         };
-        let mock_scan_repository = MockScanRespository {
+        let mock_scan_repository = MockScanRepository {
             error: Mutex::new(None),
             scan_entity: expected_scan,
             size: expected_scan_entities_size + 1,
@@ -263,7 +263,7 @@ mod tests {
             data: expected_scans,
             page_info: expected_page_info,
         };
-        let mock_scan_repository = MockScanRespository {
+        let mock_scan_repository = MockScanRepository {
             error: Mutex::new(None),
             scan_entity: expected_scan,
             size: expected_scan_entities_size + 1,
@@ -298,7 +298,7 @@ mod tests {
             created_at: expected_created_at,
             next_run_at: expected_next_run_at,
         };
-        let mock_scan_repository = MockScanRespository {
+        let mock_scan_repository = MockScanRepository {
             error: Mutex::new(Some(sqlx::Error::RowNotFound)),
             scan_entity: expected_scan,
             size: expected_scan_entities_size,
