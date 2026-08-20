@@ -10,17 +10,17 @@ export const scansStore = {
     get scans() {
         return scans;
     },
-    async add(project_id: string, target: string, schedule: string): Promise<void | ErrorResponse> {
+    async add(projectId: string, target: string, schedule: string): Promise<void | ErrorResponse> {
         const csrfToken = get(csrf);
-        const response = await create(csrfToken, project_id, target, schedule);
+        const response = await create(csrfToken, projectId, target, schedule);
         if (isError(response)) {
             return response;
         }
         scans.push(response);
     },
-    async list(after?: string): Promise<void | ErrorResponse> {
+    async list(projectId: string, after?: string): Promise<void | ErrorResponse> {
         const csrfToken = get(csrf);
-        const response = await list(csrfToken, after);
+        const response = await list(csrfToken, projectId, after);
         if (isError(response)) {
             return response;
         }
