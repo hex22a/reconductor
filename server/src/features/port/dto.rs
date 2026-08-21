@@ -1,9 +1,9 @@
+use serde::Serialize;
 use uuid::Uuid;
 
-#[derive(Clone)]
-pub struct PortEntity {
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub struct PortDto {
     pub id: Uuid,
-    pub host_id: Uuid,
     pub port: i32,
     pub protocol: Option<String>,
     pub state: Option<String>,
