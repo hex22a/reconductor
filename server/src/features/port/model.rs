@@ -1,5 +1,6 @@
 use uuid::Uuid;
 
+#[derive(Clone)]
 pub struct PortEntity {
     id: Uuid,
     host_id: Uuid,
