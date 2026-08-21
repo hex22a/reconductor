@@ -27,6 +27,7 @@ mod tests {
                 error::CsrfError, model::CsrfTokenPair, token::TokenFeature,
                 verify::VerifyCsrfFeature,
             },
+            host::{dto::HostDto, error::HostError, get::GetHostFeature, list::ListHostsFeature},
             project::{
                 create::CreateProjectFeature, dto::ProjectDto, error::ProjectError,
                 get::GetProjectFeature, list::ListProjectsFeature,
@@ -78,6 +79,10 @@ mod tests {
     struct MockGetScanRun;
     #[derive(Clone)]
     struct MockListScanRuns;
+    #[derive(Clone)]
+    struct MockGetHost;
+    #[derive(Clone)]
+    struct MockListHosts;
 
     impl RegisterFeature for MockRegisterFeature {
         fn register(
@@ -225,6 +230,25 @@ mod tests {
             todo!()
         }
     }
+    impl GetHostFeature for MockGetHost {
+        fn get(
+            &self,
+            _: uuid::Uuid,
+        ) -> std::pin::Pin<Box<dyn Future<Output = Result<HostDto, HostError>> + Send + '_>>
+        {
+            todo!()
+        }
+    }
+    impl ListHostsFeature for MockListHosts {
+        fn list<'a>(
+            &'a self,
+            _: &'a uuid::Uuid,
+            _: Option<&'a str>,
+        ) -> std::pin::Pin<Box<dyn Future<Output = Result<Page<HostDto>, HostError>> + Send + 'a>>
+        {
+            todo!()
+        }
+    }
 
     #[tokio::test]
     async fn test_csrf_get() {
@@ -254,6 +278,8 @@ mod tests {
         let mock_list_scans = Arc::new(MockListScans);
         let mock_get_scan_run = Arc::new(MockGetScanRun);
         let mock_list_scan_runs = Arc::new(MockListScanRuns);
+        let mock_get_host = Arc::new(MockGetHost);
+        let mock_list_hosts = Arc::new(MockListHosts);
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,
@@ -269,6 +295,8 @@ mod tests {
             list_scans_feature: mock_list_scans,
             get_scan_run_feature: mock_get_scan_run,
             list_scan_runs_feature: mock_list_scan_runs,
+            get_host_feature: mock_get_host,
+            list_hosts_feature: mock_list_hosts,
         });
         let app = routes(expected_app_state);
         // Act
@@ -315,6 +343,8 @@ mod tests {
         let mock_list_scans = Arc::new(MockListScans);
         let mock_get_scan_run = Arc::new(MockGetScanRun);
         let mock_list_scan_runs = Arc::new(MockListScanRuns);
+        let mock_get_host = Arc::new(MockGetHost);
+        let mock_list_hosts = Arc::new(MockListHosts);
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,
@@ -330,6 +360,8 @@ mod tests {
             list_scans_feature: mock_list_scans,
             get_scan_run_feature: mock_get_scan_run,
             list_scan_runs_feature: mock_list_scan_runs,
+            get_host_feature: mock_get_host,
+            list_hosts_feature: mock_list_hosts,
         });
         let app = routes(expected_app_state);
         // Act

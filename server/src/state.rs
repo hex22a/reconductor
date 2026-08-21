@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::features::{
     csrf::{token::TokenFeature, verify::VerifyCsrfFeature},
+    host::{get::GetHostFeature, list::ListHostsFeature},
     project::{create::CreateProjectFeature, get::GetProjectFeature, list::ListProjectsFeature},
     scan::{create::CreateScanFeature, get::GetScanFeature, list::ListScansFeature},
     scan_run::{get::GetScanRunFeature, list::ListScanRunsFeature},
@@ -25,4 +26,6 @@ pub struct AppState {
     pub list_scans_feature: Arc<dyn ListScansFeature + Send + Sync>,
     pub get_scan_run_feature: Arc<dyn GetScanRunFeature + Send + Sync>,
     pub list_scan_runs_feature: Arc<dyn ListScanRunsFeature + Send + Sync>,
+    pub get_host_feature: Arc<dyn GetHostFeature + Send + Sync>,
+    pub list_hosts_feature: Arc<dyn ListHostsFeature + Send + Sync>,
 }
