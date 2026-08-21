@@ -7,6 +7,7 @@ pub const API_ME_ENDPOINT_V1: &str = "/api/v1/me";
 pub const API_PROJECTS_ENDPOINT_V1: &str = "/api/v1/projects";
 pub const API_PROJECT_SCANS_ENDPOINT_V1: &str = "/scans";
 pub const API_SCAN_RUNS_ENDPOINT_V1: &str = "/runs";
+pub const API_HOSTS_ENDPOINT_V1: &str = "/hosts";
 
 pub const CSRF_HEADER: &str = "X-CSRF-Token";
 

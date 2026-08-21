@@ -2,8 +2,9 @@ use std::collections::HashMap;
 
 use crate::{
     features::{
-        csrf::error::CsrfError, project::error::ProjectError, scan::error::ScanError,
-        scan_run::error::ScanRunError, session::error::SessionError, user::error::UserError,
+        csrf::error::CsrfError, host::error::HostError, project::error::ProjectError,
+        scan::error::ScanError, scan_run::error::ScanRunError, session::error::SessionError,
+        user::error::UserError,
     },
     infra::password::PasswordServiceError,
 };
@@ -59,6 +60,12 @@ impl From<ScanError> for ServerError {
 
 impl From<ScanRunError> for ServerError {
     fn from(_: ScanRunError) -> Self {
+        Self::Internal
+    }
+}
+
+impl From<HostError> for ServerError {
+    fn from(_: HostError) -> Self {
         Self::Internal
     }
 }
