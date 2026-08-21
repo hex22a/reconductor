@@ -35,6 +35,10 @@ mod tests {
                 create::CreateScanFeature, dto::ScanDto, error::ScanError, get::GetScanFeature,
                 list::ListScansFeature,
             },
+            scan_run::{
+                dto::ScanRunDto, error::ScanRunError, get::GetScanRunFeature,
+                list::ListScanRunsFeature,
+            },
             session::{auth::AuthFeature, error::SessionError, model::UserSession},
             user::{
                 dto::UserInputRequest, error::UserError, login::LoginFeature,
@@ -69,6 +73,10 @@ mod tests {
     struct MockGetScan;
     #[derive(Clone)]
     struct MockListScans;
+    #[derive(Clone)]
+    struct MockGetScanRun;
+    #[derive(Clone)]
+    struct MockListScanRuns;
 
     impl RegisterFeature for MockRegisterFeature {
         fn register(
@@ -195,6 +203,26 @@ mod tests {
             todo!()
         }
     }
+    impl GetScanRunFeature for MockGetScanRun {
+        fn get(
+            &self,
+            _: uuid::Uuid,
+        ) -> std::pin::Pin<Box<dyn Future<Output = Result<ScanRunDto, ScanRunError>> + Send + '_>>
+        {
+            todo!()
+        }
+    }
+    impl ListScanRunsFeature for MockListScanRuns {
+        fn list<'a>(
+            &'a self,
+            _: &'a uuid::Uuid,
+            _: Option<&'a str>,
+        ) -> std::pin::Pin<
+            Box<dyn Future<Output = Result<Page<ScanRunDto>, ScanRunError>> + Send + 'a>,
+        > {
+            todo!()
+        }
+    }
 
     #[tokio::test]
     async fn test_register_post() {
@@ -213,6 +241,8 @@ mod tests {
         let mock_create_scan = Arc::new(MockCreateScan);
         let mock_get_scan = Arc::new(MockGetScan);
         let mock_list_scans = Arc::new(MockListScans);
+        let mock_get_scan_run = Arc::new(MockGetScanRun);
+        let mock_list_scan_runs = Arc::new(MockListScanRuns);
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,
@@ -226,6 +256,8 @@ mod tests {
             create_scan_feature: mock_create_scan,
             get_scan_feature: mock_get_scan,
             list_scans_feature: mock_list_scans,
+            get_scan_run_feature: mock_get_scan_run,
+            list_scan_runs_feature: mock_list_scan_runs,
         });
         let expected_register_request = UserInputRequest {
             username: expected_username,
@@ -266,6 +298,8 @@ mod tests {
         let mock_create_scan = Arc::new(MockCreateScan);
         let mock_get_scan = Arc::new(MockGetScan);
         let mock_list_scans = Arc::new(MockListScans);
+        let mock_get_scan_run = Arc::new(MockGetScanRun);
+        let mock_list_scan_runs = Arc::new(MockListScanRuns);
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,
@@ -279,6 +313,8 @@ mod tests {
             create_scan_feature: mock_create_scan,
             get_scan_feature: mock_get_scan,
             list_scans_feature: mock_list_scans,
+            get_scan_run_feature: mock_get_scan_run,
+            list_scan_runs_feature: mock_list_scan_runs,
         });
         let expected_register_request = UserInputRequest {
             username: expected_username,

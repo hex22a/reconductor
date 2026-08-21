@@ -4,6 +4,7 @@ use crate::features::{
     csrf::{token::TokenFeature, verify::VerifyCsrfFeature},
     project::{create::CreateProjectFeature, get::GetProjectFeature, list::ListProjectsFeature},
     scan::{create::CreateScanFeature, get::GetScanFeature, list::ListScansFeature},
+    scan_run::{get::GetScanRunFeature, list::ListScanRunsFeature},
     session::auth::AuthFeature,
     user::{login::LoginFeature, logout::LogoutFeature, register::RegisterFeature},
 };
@@ -22,4 +23,6 @@ pub struct AppState {
     pub create_scan_feature: Arc<dyn CreateScanFeature + Send + Sync>,
     pub get_scan_feature: Arc<dyn GetScanFeature + Send + Sync>,
     pub list_scans_feature: Arc<dyn ListScansFeature + Send + Sync>,
+    pub get_scan_run_feature: Arc<dyn GetScanRunFeature + Send + Sync>,
+    pub list_scan_runs_feature: Arc<dyn ListScanRunsFeature + Send + Sync>,
 }
