@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::{
     features::{
         csrf::error::CsrfError, project::error::ProjectError, scan::error::ScanError,
-        session::error::SessionError, user::error::UserError,
+        scan_run::error::ScanRunError, session::error::SessionError, user::error::UserError,
     },
     infra::password::PasswordServiceError,
 };
@@ -53,6 +53,12 @@ impl From<ProjectError> for ServerError {
 
 impl From<ScanError> for ServerError {
     fn from(_: ScanError) -> Self {
+        Self::Internal
+    }
+}
+
+impl From<ScanRunError> for ServerError {
+    fn from(_: ScanRunError) -> Self {
         Self::Internal
     }
 }
