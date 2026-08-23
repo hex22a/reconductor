@@ -29,6 +29,7 @@ pub const PROJECTS_PAGE_SIZE_LIMIT: i64 = 15;
 pub const SCANS_PAGE_SIZE_LIMIT: i64 = 15;
 pub const SCAN_RUNS_PAGE_SIZE_LIMIT: i64 = 15;
 pub const HOSTS_PAGE_SIZE_LIMIT: i64 = 15;
+pub const PORTS_PAGE_SIZE_LIMIT: i64 = 15;
 
 // Password setting https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#argon2id
 pub const PASSWORD_MEMORY_COST_BYTES: u32 = 46 * 1024;
