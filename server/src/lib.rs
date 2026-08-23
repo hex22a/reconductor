@@ -40,6 +40,9 @@ use features::scan::list::ListScans;
 use crate::features::host::get::GetHost;
 use crate::features::host::list::ListHosts;
 use crate::features::host::repository::PgHostRepository;
+use crate::features::port::get::GetPort;
+use crate::features::port::list::ListPorts;
+use crate::features::port::repository::PgPortRepository;
 use crate::features::scan::get::GetScan;
 use crate::features::scan_run::get::GetScanRun;
 use crate::features::scan_run::list::ListScanRuns;
@@ -69,6 +72,7 @@ impl Reconductor {
         let scan_repository = Arc::new(PgScanRespository::new(Arc::clone(&db)));
         let scan_run_repository = Arc::new(PgScanRunRepository::new(Arc::clone(&db)));
         let host_repository = Arc::new(PgHostRepository::new(Arc::clone(&db)));
+        let post_repository = Arc::new(PgPortRepository::new(Arc::clone(&db)));
         let scheduler_service = Arc::new(Scheduler);
         let password_service = Arc::new(Argon2Service);
         let os_rng_serivce = Arc::new(OsRngService::new(Arc::new(Mutex::new(SysRng))));
@@ -112,6 +116,8 @@ impl Reconductor {
         let list_scan_runs_feature = Arc::new(ListScanRuns::new(Arc::clone(&scan_run_repository)));
         let get_host_feature = Arc::new(GetHost::new(Arc::clone(&host_repository)));
         let list_hosts_feature = Arc::new(ListHosts::new(Arc::clone(&host_repository)));
+        let get_port_feature = Arc::new(GetPort::new(Arc::clone(&post_repository)));
+        let list_ports_feature = Arc::new(ListPorts::new(Arc::clone(&post_repository)));
 
         let app_state = Arc::new(AppState {
             register_feature,
@@ -130,6 +136,8 @@ impl Reconductor {
             list_scan_runs_feature,
             get_host_feature,
             list_hosts_feature,
+            get_port_feature,
+            list_ports_feature,
         });
 
         let cors = CorsLayer::new()
