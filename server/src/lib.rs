@@ -3,6 +3,7 @@ use std::sync::{Arc, Mutex};
 use axum::Router;
 use axum::http::header::CONTENT_TYPE;
 use axum::http::{HeaderName, Method};
+use lapin::Channel;
 use rand::rngs::SysRng;
 use sqlx::PgPool;
 
@@ -47,6 +48,8 @@ use crate::features::scan::get::GetScan;
 use crate::features::scan_run::get::GetScanRun;
 use crate::features::scan_run::list::ListScanRuns;
 use crate::features::scan_run::repository::PgScanRunRepository;
+use crate::infra::message_queue::RabbitMqProvider;
+use crate::infra::message_queue::publisher::MqPublisher;
 
 mod application;
 mod config;
@@ -61,9 +64,15 @@ mod transport;
 pub struct Reconductor;
 
 impl Reconductor {
-    pub fn build(db: PgPool, kv: FredKvProvider, config: Config) -> Router {
+    pub fn build(
+        db: PgPool,
+        kv: FredKvProvider,
+        publish_channel: Channel,
+        config: Config,
+    ) -> Router {
         let db = Arc::new(db);
         let kv = Arc::new(kv);
+        let mq_provider = RabbitMqProvider::new(publish_channel);
 
         let user_repository = Arc::new(PgUserRepository::new(Arc::clone(&db)));
         let session_repository = Arc::new(SessionStore::new(Arc::clone(&kv)));
@@ -80,6 +89,7 @@ impl Reconductor {
             Arc::clone(&os_rng_serivce),
             config.csrf_key,
         ));
+        let mq_publisher = Arc::new(MqPublisher::new(mq_provider));
         let register_feature = Arc::new(UserRegisterFeature::new(
             Arc::clone(&password_service),
             Arc::clone(&user_repository),
@@ -108,6 +118,7 @@ impl Reconductor {
         let list_projects_feature = Arc::new(ListProjects::new(Arc::clone(&project_repository)));
         let create_scan_feature = Arc::new(CreateScan::new(
             Arc::clone(&scan_repository),
+            Arc::clone(&mq_publisher),
             Arc::clone(&scheduler_service),
         ));
         let get_scan_feature = Arc::new(GetScan::new(Arc::clone(&scan_repository)));

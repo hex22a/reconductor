@@ -3,8 +3,8 @@ use serde_json::Value;
 
 use crate::infra::message_queue::error::MqError;
 
-mod error;
-mod publisher;
+pub mod error;
+pub mod publisher;
 
 pub trait MqProvider {
     fn publish(

@@ -1,4 +1,7 @@
-use crate::{domain::cursor::CursorError, infra::scheduler::ScheduleError};
+use crate::{
+    domain::cursor::CursorError,
+    infra::{message_queue::error::MqError, scheduler::ScheduleError},
+};
 
 #[derive(Debug)]
 pub enum ScanError {
@@ -6,6 +9,7 @@ pub enum ScanError {
     NoLastCursor,
     DecodeError,
     ScheduleError,
+    PublishError,
 }
 
 impl From<CursorError> for ScanError {
@@ -23,5 +27,11 @@ impl From<sqlx::Error> for ScanError {
 impl From<ScheduleError> for ScanError {
     fn from(_: ScheduleError) -> Self {
         Self::ScheduleError
+    }
+}
+
+impl From<MqError> for ScanError {
+    fn from(_: MqError) -> Self {
+        Self::PublishError
     }
 }

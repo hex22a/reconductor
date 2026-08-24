@@ -6,7 +6,7 @@ use crate::infra::message_queue::{MqProvider, error::MqError};
 pub trait Publisher {
     fn publish_scan(
         &self,
-        scan_id: Uuid,
+        scan_id: &Uuid,
         target: &IpNetwork,
     ) -> impl Future<Output = Result<(), MqError>> + Send;
 }
@@ -21,8 +21,11 @@ impl<T: MqProvider> MqPublisher<T> {
     }
 }
 
-impl<T: MqProvider + Send + Sync> Publisher for MqPublisher<T> {
-    async fn publish_scan(&self, scan_id: Uuid, target: &IpNetwork) -> Result<(), MqError> {
+impl<T> Publisher for MqPublisher<T>
+where
+    T: MqProvider + Send + Sync,
+{
+    async fn publish_scan(&self, scan_id: &Uuid, target: &IpNetwork) -> Result<(), MqError> {
         let message = serde_json::json!({ "id": scan_id, "target": target });
         self.provider.publish("scans".into(), message).await?;
         Ok(())
@@ -73,7 +76,7 @@ mod tests {
 
         // Act
         publisher
-            .publish_scan(expected_scan_id, &expected_target)
+            .publish_scan(&expected_scan_id, &expected_target)
             .await
             .unwrap();
 

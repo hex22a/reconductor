@@ -7,9 +7,12 @@ use uuid::Uuid;
 
 use crate::{
     features::scan::{
-        dto::ScanDto, error::ScanError, model::ScanInsert, repository::ScanRepository,
+        dto::ScanDto,
+        error::ScanError,
+        model::{ScanEntity, ScanInsert},
+        repository::ScanRepository,
     },
-    infra::scheduler::SchedulerService,
+    infra::{message_queue::publisher::Publisher, scheduler::SchedulerService},
 };
 
 pub trait CreateScanFeature {
@@ -21,23 +24,26 @@ pub trait CreateScanFeature {
     ) -> Pin<Box<dyn Future<Output = Result<ScanDto, ScanError>> + Send + '_>>;
 }
 
-pub struct CreateScan<R: ScanRepository, S: SchedulerService> {
+pub struct CreateScan<R: ScanRepository, P: Publisher, S: SchedulerService> {
     scan_repository: Arc<R>,
+    publisher: Arc<P>,
     scheduler: Arc<S>,
 }
 
-impl<R: ScanRepository, S: SchedulerService> CreateScan<R, S> {
-    pub fn new(scan_repository: Arc<R>, scheduler: Arc<S>) -> Self {
+impl<R: ScanRepository, P: Publisher, S: SchedulerService> CreateScan<R, P, S> {
+    pub fn new(scan_repository: Arc<R>, publisher: Arc<P>, scheduler: Arc<S>) -> Self {
         Self {
             scan_repository,
+            publisher,
             scheduler,
         }
     }
 }
 
-impl<R, S> CreateScanFeature for CreateScan<R, S>
+impl<R, P, S> CreateScanFeature for CreateScan<R, P, S>
 where
     R: ScanRepository + Send + Sync,
+    P: Publisher + Send + Sync,
     S: SchedulerService + Send + Sync,
 {
     fn create(
@@ -58,12 +64,19 @@ where
                 schedule: schedule.map(|s| s.to_string()),
                 next_run_at,
             };
-            let scan = self.scan_repository.create_scan(scan_insert).await?;
-            Ok(ScanDto {
-                id: scan.id,
+            let ScanEntity {
+                id,
                 target,
-                schedule: scan.schedule,
-                created_at: scan.created_at,
+                schedule,
+                created_at,
+                ..
+            } = self.scan_repository.create_scan(scan_insert).await?;
+            self.publisher.publish_scan(&id, &target).await?;
+            Ok(ScanDto {
+                id,
+                target,
+                schedule,
+                created_at,
             })
         })
     }
@@ -77,7 +90,7 @@ mod tests {
 
     use crate::{
         features::scan::model::{ScanEntity, ScanInsert, ScanStatus},
-        infra::scheduler::ScheduleError,
+        infra::{message_queue::error::MqError, scheduler::ScheduleError},
     };
 
     use super::*;
@@ -90,6 +103,10 @@ mod tests {
     struct MockScheduler {
         error: Mutex<Option<ScheduleError>>,
         return_value: OffsetDateTime,
+    }
+
+    struct MockMqPublisher {
+        publish_calls: Arc<Mutex<Vec<(Uuid, IpNetwork)>>>,
     }
 
     impl ScanRepository for MockScanReposotry {
@@ -123,6 +140,16 @@ mod tests {
         }
     }
 
+    impl Publisher for MockMqPublisher {
+        async fn publish_scan(&self, scan_id: &Uuid, target: &IpNetwork) -> Result<(), MqError> {
+            self.publish_calls
+                .lock()
+                .unwrap()
+                .push((scan_id.to_owned(), target.to_owned()));
+            Ok(())
+        }
+    }
+
     #[tokio::test]
     async fn test_create_scan() {
         // Arrange
@@ -148,6 +175,10 @@ mod tests {
             schedule: Some(expected_schedule.to_string()),
             created_at: expected_created_at,
         };
+        let publish_calls = Arc::new(Mutex::new(vec![]));
+        let mock_mq_publisher = MockMqPublisher {
+            publish_calls: publish_calls.clone(),
+        };
         let mock_scan_repository = MockScanReposotry {
             error: Mutex::new(None),
             return_value: expected_scan_entity,
@@ -158,6 +189,7 @@ mod tests {
         };
         let feature = CreateScan::new(
             Arc::new(mock_scan_repository),
+            Arc::new(mock_mq_publisher),
             Arc::new(mock_scheduler_service),
         );
         // Act
@@ -171,5 +203,10 @@ mod tests {
             .unwrap();
         // Assert
         assert_eq!(actual_scan, expected_scan);
+        assert_eq!(publish_calls.lock().unwrap().len(), 1);
+        assert_eq!(
+            publish_calls.lock().unwrap()[0],
+            (expected_scan_id, expected_target)
+        )
     }
 }
