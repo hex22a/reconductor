@@ -1,7 +1,10 @@
 use sqlx::types::ipnetwork::IpNetwork;
 use uuid::Uuid;
 
-use crate::infra::message_queue::{MqProvider, error::MqError};
+use crate::{
+    constants::SCANS_QUEUE,
+    infra::message_queue::{MqProvider, error::MqError},
+};
 
 pub trait Publisher {
     fn publish_scan(
@@ -27,7 +30,7 @@ where
 {
     async fn publish_scan(&self, scan_id: &Uuid, target: &IpNetwork) -> Result<(), MqError> {
         let message = serde_json::json!({ "id": scan_id, "target": target });
-        self.provider.publish("scans".into(), message).await?;
+        self.provider.publish(SCANS_QUEUE.into(), message).await?;
         Ok(())
     }
 }

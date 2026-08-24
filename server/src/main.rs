@@ -1,4 +1,3 @@
-use server::infra::message_queue::RabbitMqProvider;
 use server::{Config, Reconductor};
 
 use server::infra::persistence::{db, kv};
