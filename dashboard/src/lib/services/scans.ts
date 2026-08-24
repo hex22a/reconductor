@@ -10,12 +10,12 @@ import type { Page } from '../transport/Pagination';
 
 export async function create(
     csrfToken: string | null,
-    project_id: string,
+    projectId: string,
     target: string,
     schedule: string,
 ): Promise<Scan | ErrorResponse> {
     try {
-        const res = await fetch(`${API_PROJECTS_URL}/${project_id}/${API_SCANS_URL}`, {
+        const res = await fetch(`${API_PROJECTS_URL}/${projectId}/${API_SCANS_URL}`, {
             method: 'POST',
             credentials: 'include',
             headers: {

@@ -8,7 +8,7 @@
   async function handleSubmit(e: Event) {
     e.preventDefault();
     isInFlight = true;
-    await scansStore.add(page.params.id!, target, schedule);
+    await scansStore.add(page.params.project_id!, target, schedule);
     isInFlight = false;
   }
 </script>
