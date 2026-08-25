@@ -1,6 +1,7 @@
 #[derive(Debug)]
 pub enum MqError {
     PublishError,
+    BuildError,
 }
 
 impl From<lapin::Error> for MqError {

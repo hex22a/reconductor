@@ -1,7 +1,11 @@
-use lapin::{BasicProperties, Channel, options::BasicPublishOptions, types::ShortString};
+use lapin::{
+    BasicProperties, Channel,
+    options::{BasicPublishOptions, QueueDeclareOptions},
+    types::{FieldTable, ShortString},
+};
 use serde_json::Value;
 
-use crate::infra::message_queue::error::MqError;
+use crate::{constants::SCANS_QUEUE, infra::message_queue::error::MqError};
 
 pub mod error;
 pub mod publisher;
@@ -19,8 +23,16 @@ pub struct RabbitMqProvider {
 }
 
 impl RabbitMqProvider {
-    pub fn new(channel: Channel) -> Self {
-        Self { channel }
+    pub async fn build(channel: Channel) -> Result<Self, MqError> {
+        channel
+            .queue_declare(
+                SCANS_QUEUE.into(),
+                QueueDeclareOptions::default(),
+                FieldTable::default(),
+            )
+            .await
+            .or(Err(MqError::BuildError));
+        Ok(Self { channel })
     }
 }
 

@@ -64,15 +64,9 @@ mod transport;
 pub struct Reconductor;
 
 impl Reconductor {
-    pub fn build(
-        db: PgPool,
-        kv: FredKvProvider,
-        publish_channel: Channel,
-        config: Config,
-    ) -> Router {
+    pub fn build(db: PgPool, kv: FredKvProvider, mq: RabbitMqProvider, config: Config) -> Router {
         let db = Arc::new(db);
         let kv = Arc::new(kv);
-        let mq_provider = RabbitMqProvider::new(publish_channel);
 
         let user_repository = Arc::new(PgUserRepository::new(Arc::clone(&db)));
         let session_repository = Arc::new(SessionStore::new(Arc::clone(&kv)));
@@ -89,7 +83,7 @@ impl Reconductor {
             Arc::clone(&os_rng_serivce),
             config.csrf_key,
         ));
-        let mq_publisher = Arc::new(MqPublisher::new(mq_provider));
+        let mq_publisher = Arc::new(MqPublisher::new(mq));
         let register_feature = Arc::new(UserRegisterFeature::new(
             Arc::clone(&password_service),
             Arc::clone(&user_repository),

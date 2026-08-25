@@ -1,3 +1,4 @@
+use server::infra::message_queue::RabbitMqProvider;
 use server::{Config, Reconductor};
 
 use server::infra::persistence::{db, kv};
@@ -21,8 +22,11 @@ async fn main() -> anyhow::Result<()> {
             .await?;
     info!("Connected to RabbitMQ");
     let publish_channel = conn.create_channel().await?;
+    let mq_provider = RabbitMqProvider::build(publish_channel)
+        .await
+        .expect("Can't declare a message queue");
 
-    let app = Reconductor::build(db, kv, publish_channel, config);
+    let app = Reconductor::build(db, kv, mq_provider, config);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
