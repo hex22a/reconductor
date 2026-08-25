@@ -32,7 +32,9 @@ body {
     );
   background-repeat: no-repeat;
 }
-
+.font-special {
+  transform: translateZ(0);
+}
 input:focus {
   outline: none;
 }
