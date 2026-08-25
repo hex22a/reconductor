@@ -1,12 +1,17 @@
 <script lang="ts">
-  import { projectsStore } from './projects.svelte';
+  import type { ErrorResponse } from '@/lib/transport/ErrorResponse';
 
+  let {
+    onCreate,
+  }: {
+    onCreate: (name: string) => Promise<ErrorResponse | undefined>;
+  } = $props();
   let name = $state<string>('');
   let isInFlight = $state<boolean>(false);
   async function handleSubmit(e: Event) {
     e.preventDefault();
     isInFlight = true;
-    await projectsStore.add(name);
+    await onCreate(name);
     isInFlight = false;
   }
 </script>

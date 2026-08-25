@@ -1,11 +1,15 @@
-import { projectsStore } from '@/lib/components/projects/projects.svelte';
+import { csrf } from '@/lib/stores/csrf';
 import { isError } from '@/lib/transport/ErrorResponse';
+import type { PageLoad } from './$types';
+import { list } from '@/lib/services/projects';
+import { get } from 'svelte/store';
 
-export async function load({ parent }: { parent: () => Promise<void> }) {
+export const load: PageLoad = async ({ parent, fetch }) => {
     await parent();
-    const res = await projectsStore.list();
+    const csrfToken = get(csrf);
+    const res = await list(fetch, csrfToken);
     if (isError(res)) {
         console.error(res);
     }
     return res;
-}
+};

@@ -1,7 +1,24 @@
 <script lang="ts">
+  import { csrf } from '@/lib/stores/csrf';
+  import { get } from 'svelte/store';
   import CrateProjectForm from '@/lib/components/projects/CrateProjectForm.svelte';
-  import { projectsStore } from '@/lib/components/projects/projects.svelte';
   import Table from '@/lib/components/Table.svelte';
+  import { create } from '@/lib/services/projects';
+  import { isError } from '@/lib/transport/ErrorResponse.js';
+
+  let { data } = $props();
+  let projects = $state(data.data || []);
+
+  async function createProject(name: string) {
+    const csrfToken = get(csrf);
+    const project = await create(csrfToken, name);
+
+    if (isError(project)) {
+      return project;
+    }
+
+    projects = [project, ...projects];
+  }
 </script>
 
 {#snippet linkCell(value: string | Date, id: string)}
@@ -12,7 +29,7 @@
   {new Date(value).toUTCString()}
 {/snippet}
 
-<CrateProjectForm />
+<CrateProjectForm onCreate={createProject} />
 <h1 class="font-special">Projects</h1>
 <Table
   columns={[
@@ -27,5 +44,5 @@
       render: dateCell,
     },
   ]}
-  rows={projectsStore.projects}
+  rows={projects}
 />

@@ -2,6 +2,7 @@ import { API_PROJECTS_URL, NETWORK_ERROR_CODE, NETWORK_ERROR_MESSAGE } from '@/c
 import type { ErrorResponse } from '../transport/ErrorResponse';
 import type { Page } from '../transport/Pagination';
 import type { Project } from '../transport/Project';
+import type { SvelteKitFetch } from './svelte';
 
 export async function create(
     csrfToken: string | null,
@@ -30,6 +31,7 @@ export async function create(
 }
 
 export async function get_project_details(
+    fetch: SvelteKitFetch,
     csrfToken: string | null,
     projectId: string,
 ): Promise<Project | ErrorResponse> {
@@ -55,6 +57,7 @@ export async function get_project_details(
 }
 
 export async function list(
+    fetch: SvelteKitFetch,
     csrfToken: string | null,
     after?: string,
 ): Promise<Page<Project> | ErrorResponse> {

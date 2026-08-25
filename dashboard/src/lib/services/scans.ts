@@ -7,6 +7,7 @@ import {
 import type { Scan } from '../transport/Scan';
 import type { ErrorResponse } from '../transport/ErrorResponse';
 import type { Page } from '../transport/Pagination';
+import type { SvelteKitFetch } from './svelte';
 
 export async function create(
     csrfToken: string | null,
@@ -63,6 +64,7 @@ export async function get_scan_details(
 }
 
 export async function list(
+    fetch: SvelteKitFetch,
     csrfToken: string | null,
     projectId: string,
     after?: string,

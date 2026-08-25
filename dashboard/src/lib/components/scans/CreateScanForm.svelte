@@ -1,14 +1,22 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { scansStore } from './scans.svelte';
-
+  import type { ErrorResponse } from '@/lib/transport/ErrorResponse';
+  let {
+    onCreate,
+  }: {
+    onCreate: (
+      projectId: string,
+      target: string,
+      schedule: string,
+    ) => Promise<ErrorResponse | undefined>;
+  } = $props();
   let target = $state<string>('');
   let schedule = $state<string>('');
   let isInFlight = $state<boolean>(false);
   async function handleSubmit(e: Event) {
     e.preventDefault();
     isInFlight = true;
-    await scansStore.add(page.params.project_id!, target, schedule);
+    await onCreate(page.params.project_id!, target, schedule);
     isInFlight = false;
   }
 </script>
