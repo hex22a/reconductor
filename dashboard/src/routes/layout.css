@@ -1,6 +1,22 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 
+@font-face {
+  font-family: 'Fira Code';
+  src: url('/fonts/FiraCode-VF.woff2') format('woff2');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('/fonts/press-start-2p.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --font-special: 'Press Start 2P', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Fira Code', ui-sans-serif, system-ui, sans-serif;
@@ -35,6 +51,7 @@ body {
 .font-special {
   transform: translateZ(0);
 }
+
 input:focus {
   outline: none;
 }

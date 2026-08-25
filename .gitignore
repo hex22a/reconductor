@@ -5,3 +5,4 @@
 !.env.test.example
 
 target
+.DS_Store
