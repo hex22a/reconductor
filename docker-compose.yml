@@ -45,16 +45,31 @@ services:
       timeout: 5s
       retries: 5
 
+  migrations:
+    profiles:
+      - backend
+    build:
+      context: .
+      dockerfile: ./migrations/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+    volumes:
+      - ./migrations:/migrations
+    command: migrate run --source /migrations
+
   backend:
     profiles:
       - backend
     build:
       context: .
-      dockerfile: ./backend/Dockerfile
+      dockerfile: ./server/Dockerfile
     depends_on:
+      migrations:
+        condition: service_completed_successfully
       redis:
-        condition: service_healthy
-      db:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -64,12 +79,11 @@ services:
       DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
-      NODE_ENV: production
     ports:
-      - 4000:4000
-    command: sh -c "./migration && ./server"
+      - 3000:3000
+    command: sh -c "./server"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/api/v1/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/health"]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -114,7 +128,7 @@ services:
       backend:
         condition: service_healthy
     environment:
-      VITE_API_URL: http://backend:4000
+      VITE_API_URL: http://backend:3000
     ports:
       - 8080:80
 

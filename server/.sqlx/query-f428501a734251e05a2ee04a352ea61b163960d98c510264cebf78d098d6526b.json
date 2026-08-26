@@ -1,0 +1,66 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                    SELECT\n                        id,\n                        scan_run_id,\n                        ip,\n                        mac,\n                        vendor,\n                        hostname,\n                        os_match,\n                        os_accuracy\n                    FROM recon.scan_hosts\n                    WHERE scan_run_id=$1 and id < $2\n                    ORDER BY id DESC\n                    LIMIT $3;\n                    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "scan_run_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "ip",
+        "type_info": "Inet"
+      },
+      {
+        "ordinal": 3,
+        "name": "mac",
+        "type_info": "Macaddr"
+      },
+      {
+        "ordinal": 4,
+        "name": "vendor",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "hostname",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "os_match",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "os_accuracy",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "f428501a734251e05a2ee04a352ea61b163960d98c510264cebf78d098d6526b"
+}

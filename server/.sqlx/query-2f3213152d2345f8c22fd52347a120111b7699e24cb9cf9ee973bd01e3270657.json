@@ -1,0 +1,66 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                    SELECT\n                        id,\n                        host_id,\n                        port,\n                        protocol,\n                        state,\n                        service,\n                        product,\n                        version\n                    FROM recon.scan_ports\n                    WHERE host_id=$1 AND id < $2\n                    ORDER BY id DESC\n                    LIMIT $3;\n                    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "host_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "port",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "protocol",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "state",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "service",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "product",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "version",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "2f3213152d2345f8c22fd52347a120111b7699e24cb9cf9ee973bd01e3270657"
+}

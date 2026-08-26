@@ -1,0 +1,69 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                id,\n                project_id,\n                created_at,\n                target,\n                status as \"status: ScanStatus\",\n                schedule,\n                next_run_at\n            FROM recon.scans\n            WHERE id=$1\n            LIMIT 1;\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "project_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "target",
+        "type_info": "Inet"
+      },
+      {
+        "ordinal": 4,
+        "name": "status: ScanStatus",
+        "type_info": {
+          "Custom": {
+            "name": "scan_status",
+            "kind": {
+              "Enum": [
+                "scheduled",
+                "in progress",
+                "done"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "schedule",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "next_run_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "023ddbc4ca33efb4139e5cac085be752e92fe20237ab2437f2115bb0d635d725"
+}

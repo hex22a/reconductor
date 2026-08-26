@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO recon.users\n                (username, password_hash)\n            VALUES\n                ($1, $2)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "717c3ddc7aa7dc8b35f869baacd949834e0e0bb9018a1ab552cf2a02d9ee0e31"
+}
