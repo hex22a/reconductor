@@ -11,11 +11,11 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          package_json_file: ./dashboard-react/package.json
+          package_json_file: ./dashboard/package.json
       - name: Install Dependencies
         run: pnpm install
-        working-directory: ./dashboard-react
+        working-directory: ./dashboard
       - name: Run ESLint
         run: pnpm lint
-        working-directory: ./dashboard-react
+        working-directory: ./dashboard
 
