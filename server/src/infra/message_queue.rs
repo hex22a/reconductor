@@ -27,7 +27,10 @@ impl RabbitMqProvider {
         channel
             .queue_declare(
                 SCANS_QUEUE.into(),
-                QueueDeclareOptions::default(),
+                QueueDeclareOptions {
+                    durable: true,
+                    ..QueueDeclareOptions::default()
+                },
                 FieldTable::default(),
             )
             .await

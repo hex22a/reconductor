@@ -38,6 +38,7 @@ export async function create(
 }
 
 export async function get_scan_details(
+    fetch: SvelteKitFetch,
     csrfToken: string | null,
     projectId: string,
     scanId: string,

@@ -9,7 +9,10 @@ export const API_ME_URL = `${API_URL}/api/v1/me`;
 export const API_LOGOUT_URL = `${API_URL}/api/v1/logout`;
 export const API_CSRF_URL = `${API_URL}/api/v1/csrf`;
 export const API_PROJECTS_URL = `${API_URL}/api/v1/projects`;
-export const API_SCANS_URL = `scans`;
+export const API_SCANS_URL = 'scans';
+export const API_RUNS_URL = 'runs';
+export const API_HOSTS_URL = 'hosts';
+export const API_PORTS_URL = 'ports';
 
 export const VALIDATION_ERROR_CODE = 'VALIDATION_ERROR';
 export const SYNTAX_ERROR_CODE = 'SYNTAX_ERROR';
