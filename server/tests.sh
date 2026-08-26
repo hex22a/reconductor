@@ -14,8 +14,8 @@ if [[ -z "${ENGINE}" ]]; then
   fi
 fi
 
-trap "${ENGINE} compose -f ../../docker-compose.test.yml down -v;" EXIT;
+trap "${ENGINE} compose -f ../docker-compose.test.yml down -v;" EXIT;
 
-${ENGINE} compose -f ../../docker-compose.test.yml up -d;
-cargo sqlx migrate run --source ../../migrations
+${ENGINE} compose -f ../docker-compose.test.yml up -d;
+cargo sqlx migrate run --source ../migrations
 cargo test
