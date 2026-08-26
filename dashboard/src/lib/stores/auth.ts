@@ -20,8 +20,8 @@ function createAuthStore() {
             }
         },
         signIn: async (username: string, password: string): Promise<void | ErrorResponse> => {
-            let csrfToken = get(csrf);
-            let signInResponse = await login(csrfToken, username, password);
+            const csrfToken = get(csrf);
+            const signInResponse = await login(csrfToken, username, password);
             if (isError(signInResponse)) {
                 return signInResponse;
             }
