@@ -1,8 +1,7 @@
 # Build
 FROM node:24-alpine AS build
 
-WORKDIR /shared
-COPY ./shared .
+ENV CI=true
 
 WORKDIR /app
 RUN corepack enable
@@ -16,11 +15,8 @@ RUN pnpm build
 # Server
 FROM nginx:alpine
 
-WORKDIR /shared
-COPY ./shared .
-
 RUN rm -rf /usr/share/nginx/html/*
-COPY --from=build /app/build/client /usr/share/nginx/html
+COPY --from=build /app/build /usr/share/nginx/html
 COPY dashboard/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80

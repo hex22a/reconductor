@@ -7,7 +7,11 @@ const config = {
         runes: ({ filename }) =>
             filename.split(/[/\\]/).includes('node_modules') ? undefined : true,
     },
-    kit: { adapter: adapter() },
+    kit: {
+        adapter: adapter({
+            fallback: 'index.html',
+        }),
+    },
     alias: {
         '@': './src',
     },

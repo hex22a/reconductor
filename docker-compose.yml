@@ -123,12 +123,12 @@ services:
       - frontend
     build:
       context: .
-      dockerfile: ./dashboard-react/Dockerfile
+      dockerfile: ./dashboard/Dockerfile
     depends_on:
       backend:
         condition: service_healthy
     environment:
-      VITE_API_URL: http://backend:3000
+      PUBLIC_API_URL: http://backend:3000
     ports:
       - 8080:80
 
