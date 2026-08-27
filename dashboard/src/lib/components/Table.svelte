@@ -18,15 +18,15 @@
 <table class="my-2 w-full">
   <thead class="py-2">
     <tr>
-      {#each columns as column}
+      {#each columns as column (column.key)}
         <th class="p-1 text-left">{column.label}</th>
       {/each}
     </tr>
   </thead>
   <tbody>
-    {#each rows as row}
+    {#each rows as row (row.id)}
       <tr>
-        {#each columns as column}
+        {#each columns as column (column.key)}
           <td class="p-1">
             {#if column.render}
               {@render column.render(row[column.key], row.id)}

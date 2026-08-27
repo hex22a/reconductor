@@ -1,10 +1,11 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { auth } from '@/lib/stores/auth';
   console.log('authis', $auth, $auth != null);
   $effect(() => {
     if ($auth.ready && !$auth.user) {
-      goto('/signin');
+      goto(resolve('/signin'));
     }
   });
   let { children } = $props();

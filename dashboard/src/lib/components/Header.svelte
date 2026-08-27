@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
   import { auth } from '@/lib/stores/auth';
 </script>
 
@@ -10,7 +11,7 @@
         <button class="cursor-pointer" type="button" onclick={auth.logout}> (Logout) </button>
       </span>
     {:else}
-      <a href="/signup">Sign up</a>/<a href="/signin">Sign in</a>
+      <a href={resolve('/signup')}>Sign up</a>/<a href={resolve('/signin')}>Sign in</a>
     {/if}
   </nav>
 </header>

@@ -6,6 +6,7 @@
   import { csrf } from '@/lib/stores/csrf';
   import { get } from 'svelte/store';
   import { isError } from '@/lib/transport/ErrorResponse';
+  import { resolve } from '$app/paths';
 
   let { data }: PageProps = $props();
   let date = new Date(data.project!.created_at!).toUTCString();
@@ -24,7 +25,7 @@
 </script>
 
 {#snippet linkCell(value: string | Date, id: string)}
-  <a href="/project/{data.project.id}/scan/{id}">{value}</a>
+  <a href={resolve(`/project/${data.project.id}/scan/${id}`)}>{value}</a>
 {/snippet}
 
 {#snippet dateCell(value: string | Date)}

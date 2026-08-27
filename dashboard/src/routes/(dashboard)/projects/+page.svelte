@@ -5,6 +5,7 @@
   import Table from '@/lib/components/Table.svelte';
   import { create } from '@/lib/services/projects';
   import { isError } from '@/lib/transport/ErrorResponse.js';
+  import { resolve } from '$app/paths';
 
   let { data } = $props();
   let projects = $state(data.data || []);
@@ -22,7 +23,7 @@
 </script>
 
 {#snippet linkCell(value: string | Date, id: string)}
-  <a href="/project/{id}">{value}</a>
+  <a href={resolve(`/project/${id}`)}>{value}</a>
 {/snippet}
 
 {#snippet dateCell(value: string | Date)}

@@ -2,14 +2,18 @@
   import Table from '@/lib/components/Table.svelte';
   import type { PageProps } from './$types';
   import { page } from '$app/state';
+  import { resolve } from '$app/paths';
   let { data }: PageProps = $props();
   let date = new Date(data.run_details.created_at!).toUTCString();
 </script>
 
 {#snippet linkCell(value: string | number | undefined, id: string)}
   <a
-    href="/project/{page.params.project_id}/scan/{page.params.scan_id}/run/{data.run_details
-      .id}/host/{id}">{value}</a
+    href={resolve(
+      `/project/${page.params.project_id}/scan/${page.params.scan_id}/run/${
+        data.run_details.id
+      }/host/${id}`,
+    )}>{value}</a
   >
 {/snippet}
 

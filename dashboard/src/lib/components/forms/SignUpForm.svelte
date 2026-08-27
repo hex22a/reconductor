@@ -5,6 +5,7 @@
   import { VALIDATION_ERROR_CODE } from '@/constants';
   import FieldErrors from './FieldErrors.svelte';
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
 
   let usernameErrors = $state<[string] | null>(null);
   let passwordErrors = $state<[string] | null>(null);
@@ -31,17 +32,17 @@
     const signUpResponse = await auth.signUp(username, password);
     if (isError(signUpResponse)) {
       switch (signUpResponse.code) {
-        case VALIDATION_ERROR_CODE:
+        case VALIDATION_ERROR_CODE: {
           const error = signUpResponse.error as ValidationError;
-          console.log(typeof error.field_errors);
           usernameErrors = error.field_errors.username ?? null;
           passwordErrors = error.field_errors.password ?? null;
           break;
+        }
         default:
           genericError = 'Something went wrong';
       }
     } else {
-      goto('/signin');
+      goto(resolve('/signin'));
     }
   }
 </script>
