@@ -138,5 +138,5 @@ services:
     environment:
       PUBLIC_API_URL: http://backend:3000
     ports:
-      - 8080:80
+      - 5173:80
 
