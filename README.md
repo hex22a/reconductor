@@ -6,7 +6,6 @@ Reconductor is a deployable network scanner.
 ## Installation
 
 1. Install container manager. [Podman](https://podman.io/docs/installation) is recommended
-1. Install [Bun](https://bun.com/docs/installation)
 1. [Node](https://github.com/nvm-sh/nvm) and [pnpm](https://pnpm.io/)
 
 Local [postgres](https://www.postgresql.org/download/) and [redis](https://redis.io/docs/latest/operate/oss_and_stack/install/archive/install-redis/) installations are also recommended for local development, though You can absolutely use containerized versions 
@@ -30,26 +29,26 @@ cp .env.test.example .env.test
 **Backend** spins database, redis, rabbitmq and backend server (useful for workers and frontend development)
 
 ```shell
-podman compose -f docker-compose.yml --profile=backend up
+podman compose -f docker-compose.yml --profile=backend up -d
 ```
 
 **Backend + Workers** adds rust workers (useful for frontend development and debugging)
 
 ```shell
-podman compose -f docker-compose.yml --profile=backend --profile=workers up
+podman compose -f docker-compose.yml --profile=backend --profile=workers up -d
 ```
 
 **Backend + Workers + Frontend** spins a production-like environment if You want to play around with the app
 
 ```shell
-podman compose -f docker-compose.yml --profile=backend --profile=workers --profile=frontend up
+podman compose -f docker-compose.yml --profile=backend --profile=workers --profile=frontend up -d
 ```
 
 ### Development
 
 Each component has a corresponging README.md file with more details for local development:
 
-* [./backend/README.md](./backend/README.md)
+* [./server/README.md](./server/README.md)
 * [./dashboard/README.md](./dashboard/README.md)
 * [./workers/scanner/README.md](./workers/scanner/README.md)
 * [./workers/scheduler/README.md](./workers/scheduler/README.md)

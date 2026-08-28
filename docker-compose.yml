@@ -83,10 +83,10 @@ services:
       - 3000:3000
     command: sh -c "./server"
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/v1/health"]
+      test: ["CMD-SHELL", "wget -qO- http://backend:3000/api/v1/health | grep -q healthy"]
       interval: 10s
       timeout: 3s
-      retries: 5
+      retries: 15
 
   scheduler:
     profiles:
@@ -96,8 +96,6 @@ services:
       dockerfile: ./workers/scheduler/Dockerfile
     depends_on:
       backend:
-        condition: service_healthy
-      redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -116,8 +114,6 @@ services:
       - NET_RAW
     depends_on:
       backend:
-        condition: service_healthy
-      redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
