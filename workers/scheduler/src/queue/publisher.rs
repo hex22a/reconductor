@@ -65,12 +65,11 @@ mod tests {
             provider: mock_mq_provider,
         };
         // Act
-        let actual_result = publisher
+        publisher
             .publish_scan(expected_scan_id, &expected_target)
             .await
             .unwrap();
         // Assert
-        assert_eq!(actual_result, ());
         assert_eq!(publish_calls.lock().unwrap().len(), 1);
         assert_eq!(
             publish_calls.lock().unwrap()[0],
