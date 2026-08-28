@@ -83,7 +83,7 @@ services:
       - 3000:3000
     command: sh -c "./server"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/v1/health"]
       interval: 10s
       timeout: 3s
       retries: 5
