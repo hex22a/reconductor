@@ -16,4 +16,6 @@ jobs:
         working-directory: ./workers/scheduler
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
 
