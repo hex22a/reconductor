@@ -18,4 +18,6 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           REDIS_URL: ${{ secrets.REDIS_URL }}
           REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          DASHBOARD_URL: ${{ secrets.DASHBOARD_URL }}
+          CSRF_SECRET: ${{ secrets.CSRF_SECRET }}
 
