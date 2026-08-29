@@ -1,7 +1,7 @@
 services:
   db:
     profiles:
-      - backend
+      - infra
     image: postgres:18-alpine
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -16,7 +16,7 @@ services:
       retries: 5
   redis:
     profiles:
-      - backend
+      - infra
     image: redis:8.6.0-alpine
     command: redis-server --requirepass ${REDIS_PASSWORD}
     ports:
@@ -28,7 +28,7 @@ services:
       retries: 5
   rabbitmq:
     profiles:
-      - backend
+      - infra
     image: rabbitmq:4.2.5-management
     userns_mode: keep-id
     environment:
@@ -47,7 +47,7 @@ services:
 
   migrations:
     profiles:
-      - backend
+      - infra
     build:
       context: .
       dockerfile: ./migrations/Dockerfile
@@ -90,7 +90,7 @@ services:
 
   scheduler:
     profiles:
-      - workers
+      - backend
     build:
       context: .
       dockerfile: ./workers/scheduler/Dockerfile
@@ -106,7 +106,7 @@ services:
 
   scanner:
     profiles:
-      - workers
+      - backend
     build:
       context: .
       dockerfile: ./workers/scanner/Dockerfile
