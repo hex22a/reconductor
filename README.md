@@ -6,17 +6,21 @@ Reconductor is a deployable network scanner.
 ## Installation
 
 1. Install container manager. [Podman](https://podman.io/docs/installation) is recommended
+1. Install [Rust](https://rust-lang.org/tools/install/)
 1. [Node](https://github.com/nvm-sh/nvm) and [pnpm](https://pnpm.io/)
 
-Local [postgres](https://www.postgresql.org/download/) and [redis](https://redis.io/docs/latest/operate/oss_and_stack/install/archive/install-redis/) installations are also recommended for local development, though You can absolutely use containerized versions 
+Local [postgres](https://www.postgresql.org/download/)
+and [redis](https://redis.io/docs/latest/operate/oss_and_stack/install/archive/install-redis/)
+installations are also recommended for local development,
+though You can absolutely use containerized versions
 
 Copy and fill **.env** files
 
-```shell
+```bash
 cp .env.example .env
 ```
 
-```shell
+```bash
 cp .env.test.example .env.test
 ```
 
@@ -26,22 +30,29 @@ cp .env.test.example .env.test
 
 [docker-complse.yml](docker-compose.yml) has several profiles for different scenarios
 
-**Backend** spins database, redis, rabbitmq and backend server (useful for workers and frontend development)
+**Infra** spins database, redis and rabbitmq (useful for development)
 
-```shell
-podman compose -f docker-compose.yml --profile=backend up -d
+```bash
+podman compose -f docker-compose.yml --profile=infra up -d
 ```
 
-**Backend + Workers** adds rust workers (useful for frontend development and debugging)
+**Infra + Backend** spins infrastructure, API and backgorund workers (useful for frontend development and debugging)
 
-```shell
-podman compose -f docker-compose.yml --profile=backend --profile=workers up -d
+```bash
+podman compose -f docker-compose.yml --profile=infra --profile=backend up -d
 ```
 
-**Backend + Workers + Frontend** spins a production-like environment if You want to play around with the app
+**Infra + Backend + Frontend** spins a production-like environment if You want to play around with the app
 
-```shell
+```bash
 podman compose -f docker-compose.yml --profile=backend --profile=workers --profile=frontend up -d
+```
+
+Running podman-compose in foreground (without `-d`) may cause unexpected bahavior. It's recommended to always run it detached (with `-d`).
+If You want to access logs use
+
+```bash
+podman compose --profile backend logs -f
 ```
 
 ### Development
