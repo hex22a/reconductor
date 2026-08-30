@@ -1,9 +1,6 @@
 use std::fmt;
 
-use argon2::{
-    Argon2, Params, PasswordHash, PasswordHasher, PasswordVerifier,
-    password_hash::{SaltString, rand_core::OsRng},
-};
+use argon2::{Argon2, Params, PasswordHash, PasswordHasher, PasswordVerifier};
 
 use crate::constants::{
     PASSWORD_MEMORY_COST_BYTES, PASSWORD_PARALLELISM, PASSWORD_TIME_COST_PASSES,
@@ -37,7 +34,6 @@ pub struct Argon2Service;
 
 impl PasswordService for Argon2Service {
     fn hash_password(&self, password: &str) -> Result<String, PasswordServiceError> {
-        let salt = SaltString::generate(&mut OsRng);
         let params = Params::new(
             PASSWORD_MEMORY_COST_BYTES,
             PASSWORD_TIME_COST_PASSES,
@@ -47,7 +43,7 @@ impl PasswordService for Argon2Service {
         .unwrap();
         let argon2 = Argon2::new(argon2::Algorithm::Argon2id, argon2::Version::V0x13, params);
         argon2
-            .hash_password(password.as_bytes(), &salt)
+            .hash_password(password.as_bytes())
             .map(|h| h.to_string())
             .map_err(|e| PasswordServiceError::HashError(e.to_string()))
     }
