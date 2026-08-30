@@ -5,15 +5,15 @@ edition = "2024"
 license = "MIT"
 
 [dependencies]
-anyhow = "1.0.102"
+anyhow = "1.0.104"
 dotenvy = "0.15.7"
 futures-lite = "2.6.1"
-lapin = "4.4.0"
+lapin = "4.10.0"
 quick-xml = { version = "0.41.0", features = ["serde", "serialize"] }
-serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.149"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
 sqlx = { version = "0.8.6", features = ["ipnetwork", "mac_address", "migrate", "postgres", "runtime-tokio", "time", "uuid"] }
-tokio = { version = "1.51.0", features = ["full"] }
+tokio = { version = "1.53.1", features = ["full"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
-uuid = { version = "1.23.0", features = ["serde"] }
+uuid = { version = "1.26.0", features = ["serde"] }
