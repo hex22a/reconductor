@@ -16,6 +16,10 @@ fi
 
 trap "${ENGINE} compose -f ../docker-compose.test.yml down -v;" EXIT;
 
+export REDIS_PASSWORD
+export DATABASE_URL
+export REDIS_URL
+
 ${ENGINE} compose -f ../docker-compose.test.yml up -d;
 cargo sqlx migrate run --source ../migrations
 cargo test
