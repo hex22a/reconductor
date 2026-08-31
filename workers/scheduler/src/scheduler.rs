@@ -131,10 +131,7 @@ mod tests {
 
     impl Publisher for MockScanPublisher {
         async fn publish_scan(&self, scan_id: Uuid, target: &IpNetwork) -> anyhow::Result<()> {
-            self.publish_calls
-                .lock()
-                .unwrap()
-                .push((scan_id, target.clone()));
+            self.publish_calls.lock().unwrap().push((scan_id, *target));
             Ok(())
         }
     }
@@ -179,10 +176,9 @@ mod tests {
             expected_poll_interval_secs,
         );
         // Act
-        let actual_result = scheduler.poll().await.unwrap();
+        scheduler.poll().await.unwrap();
 
         // Assert
-        assert_eq!(actual_result, ());
         assert_eq!(fetch_due_scans_calls.lock().unwrap().len(), 1);
         assert_eq!(update_next_run_calls.lock().unwrap().len(), 0);
         assert_eq!(calculate_next_run_calls.lock().unwrap().len(), 0);
@@ -227,10 +223,9 @@ mod tests {
             expected_poll_interval_secs,
         );
         // Act
-        let actual_result = scheduler.poll().await.unwrap();
+        scheduler.poll().await.unwrap();
 
         // Assert
-        assert_eq!(actual_result, ());
         assert_eq!(fetch_due_scans_calls.lock().unwrap().len(), 1);
         assert_eq!(update_next_run_calls.lock().unwrap().len(), 1);
         assert_eq!(

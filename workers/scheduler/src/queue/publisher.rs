@@ -64,11 +64,13 @@ mod tests {
         let publisher = MqPublisher {
             provider: mock_mq_provider,
         };
+
         // Act
         publisher
             .publish_scan(expected_scan_id, &expected_target)
             .await
             .unwrap();
+
         // Assert
         assert_eq!(publish_calls.lock().unwrap().len(), 1);
         assert_eq!(

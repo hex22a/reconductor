@@ -11,7 +11,7 @@ pub struct SchedulerUtils;
 
 impl Utils for SchedulerUtils {
     fn calculate_next_run(&self, schedule: &str) -> anyhow::Result<OffsetDateTime> {
-        let next = Schedule::from_str(&schedule)
+        let next = Schedule::from_str(schedule)
             .expect("Error parsing schedule")
             .upcoming(Utc)
             .next()
