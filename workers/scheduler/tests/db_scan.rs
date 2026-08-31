@@ -1,6 +1,6 @@
-use uuid::Uuid;
 use scheduler::db::scan::{PgScanRepository, ScanRepository};
 use sqlx::{PgPool, types::ipnetwork::IpNetwork};
+use uuid::Uuid;
 
 async fn setup_project(db: &PgPool) -> Uuid {
     let expected_user_id: Uuid = sqlx::query_scalar(
@@ -9,7 +9,7 @@ async fn setup_project(db: &PgPool) -> Uuid {
             (username, password_hash)
         VALUES ('test_user', 'password_hash')
         RETURNING id
-        "#
+        "#,
     )
     .fetch_one(db)
     .await
@@ -20,13 +20,13 @@ async fn setup_project(db: &PgPool) -> Uuid {
             (name, owner_id)
         VALUES ('test_project', $1)
         RETURNING id
-        "#
+        "#,
     )
     .bind(expected_user_id)
     .fetch_one(db)
     .await
     .unwrap();
-    return expected_project_id;
+    expected_project_id
 }
 
 #[sqlx::test(migrations = "../../migrations/")]
@@ -40,7 +40,7 @@ async fn test_fetch_due_scans_return_due_scans(db: PgPool) {
         INSERT INTO recon.scans
             (project_id, target, next_run_at, schedule)
         VALUES ($1, $2, NOW() - INTERVAL '1 minute', '5 * * * *')
-        "#
+        "#,
     )
     .bind(expected_project_id)
     .bind(expected_target)
@@ -65,7 +65,7 @@ async fn test_fetch_due_scans_no_schedule(db: PgPool) {
         INSERT INTO recon.scans
             (project_id, target, next_run_at)
         VALUES ($1, $2, NOW() - INTERVAL '1 minute')
-        "#
+        "#,
     )
     .bind(expected_project_id)
     .bind(expected_target)
@@ -89,7 +89,7 @@ async fn test_fetch_due_scans_next_run_in_future(db: PgPool) {
         INSERT INTO recon.scans
             (project_id, target, next_run_at, schedule)
         VALUES ($1, $2, NOW() + INTERVAL '1 minute', '5 * * * *')
-        "#
+        "#,
     )
     .bind(expected_project_id)
     .bind(expected_target)
