@@ -1,19 +1,26 @@
 pub mod utils;
 
-use crate::db::scan::ScanRepository;
-use crate::queue::publisher::Publisher;
-use crate::scheduler::utils::Utils;
 use tokio::time::{Duration, interval};
 use tracing::{error, info};
 
-pub struct Scheduler<R: ScanRepository, P: Publisher, U: Utils> {
+use crate::{
+    features::scan::repository::ScanRepository,
+    infra::{message_queue::publisher::Publisher, scheduler::utils::Utils},
+};
+
+pub trait Scheduler {
+    fn run(&self) -> impl Future<Output = anyhow::Result<()>>;
+    fn poll(&self) -> impl Future<Output = anyhow::Result<()>>;
+}
+
+pub struct ReconductorScheduler<R: ScanRepository, P: Publisher, U: Utils> {
     repository: R,
     publisher: P,
     utils: U,
     poll_interval: Duration,
 }
 
-impl<R: ScanRepository, P: Publisher, U: Utils> Scheduler<R, P, U> {
+impl<R: ScanRepository, P: Publisher, U: Utils> ReconductorScheduler<R, P, U> {
     pub fn new(repository: R, publisher: P, utils: U, poll_interval_secs: u64) -> Self {
         Self {
             repository,
@@ -22,8 +29,10 @@ impl<R: ScanRepository, P: Publisher, U: Utils> Scheduler<R, P, U> {
             poll_interval: Duration::from_secs(poll_interval_secs),
         }
     }
+}
 
-    pub async fn run(&self) -> anyhow::Result<()> {
+impl<R: ScanRepository, P: Publisher, U: Utils> Scheduler for ReconductorScheduler<R, P, U> {
+    async fn run(&self) -> anyhow::Result<()> {
         info!(
             "Scheduler started, polling every {}s",
             self.poll_interval.as_secs()
@@ -37,7 +46,7 @@ impl<R: ScanRepository, P: Publisher, U: Utils> Scheduler<R, P, U> {
         }
     }
 
-    pub async fn poll(&self) -> anyhow::Result<()> {
+    async fn poll(&self) -> anyhow::Result<()> {
         let due_scans = self.repository.fetch_due_scans().await?;
 
         if due_scans.is_empty() {
@@ -84,7 +93,6 @@ mod tests {
         sync::{Arc, Mutex},
     };
 
-    use crate::db::scan::{DueScan, ScanRepository};
     use anyhow::Ok;
     use sqlx::types::{
         ipnetwork::{IpNetwork, Ipv4Network},
@@ -92,9 +100,9 @@ mod tests {
     };
     use uuid::Uuid;
 
-    use crate::{queue::publisher::Publisher, scheduler::utils::Utils};
+    use crate::features::scan::model::DueScan;
 
-    use super::Scheduler;
+    use super::*;
 
     struct MockScanRepository {
         due_scans: Vec<DueScan>,
@@ -169,7 +177,7 @@ mod tests {
             return_value: expected_next_run,
             calculate_next_run_calls: calculate_next_run_calls.clone(),
         };
-        let scheduler = Scheduler::new(
+        let scheduler = ReconductorScheduler::new(
             mock_scan_repository,
             mock_scan_publisher,
             mock_utils,
@@ -216,7 +224,7 @@ mod tests {
             return_value: expected_next_run,
             calculate_next_run_calls: calculate_next_run_calls.clone(),
         };
-        let scheduler = Scheduler::new(
+        let scheduler = ReconductorScheduler::new(
             mock_scan_repository,
             mock_scan_publisher,
             mock_utils,

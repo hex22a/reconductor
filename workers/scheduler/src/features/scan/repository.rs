@@ -1,15 +1,7 @@
-use sqlx::{
-    PgPool,
-    types::{ipnetwork::IpNetwork, time::OffsetDateTime},
-};
+use sqlx::{PgPool, types::time::OffsetDateTime};
 use uuid::Uuid;
 
-#[derive(Debug, Clone, sqlx::FromRow)]
-pub struct DueScan {
-    pub id: Uuid,
-    pub target: IpNetwork,
-    pub schedule: Option<String>,
-}
+use crate::features::scan::model::DueScan;
 
 pub trait ScanRepository {
     fn fetch_due_scans(&self) -> impl Future<Output = anyhow::Result<Vec<DueScan>>> + Send;

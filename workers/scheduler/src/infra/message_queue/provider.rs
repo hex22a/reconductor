@@ -3,7 +3,11 @@ use lapin::{BasicProperties, Channel, options::BasicPublishOptions, types::Short
 use serde_json::Value;
 
 pub trait MqProvider {
-    async fn publish(&self, channel: ShortString, message: Value) -> anyhow::Result<()>;
+    fn publish(
+        &self,
+        channel: ShortString,
+        message: Value,
+    ) -> impl Future<Output = anyhow::Result<()>>;
 }
 
 pub struct RabbitMqProvider {

@@ -1,17 +1,14 @@
 mod config;
-mod db;
-mod queue;
-mod scheduler;
 
-use db::scan::PgScanRepository;
-use queue::provider::RabbitMqProvider;
-use queue::publisher::MqPublisher;
-use scheduler::Scheduler;
-use scheduler::utils::SchedulerUtils;
+use scheduler::{
+    ScanScheduler,
+    application::error::AppError,
+    infra::{db, message_queue::provider::RabbitMqProvider, scheduler::Scheduler},
+};
 use tracing::info;
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> Result<(), AppError> {
     dotenvy::dotenv().ok();
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)
@@ -25,17 +22,11 @@ async fn main() -> anyhow::Result<()> {
     info!("Connected to RabbitMQ");
 
     let publish_channel = conn.create_channel().await?;
+    let mq_provider = RabbitMqProvider {
+        channel: publish_channel,
+    };
 
-    let scheduler = Scheduler::new(
-        PgScanRepository { db },
-        MqPublisher {
-            provider: RabbitMqProvider {
-                channel: publish_channel,
-            },
-        },
-        SchedulerUtils,
-        config.poll_interval_secs,
-    );
+    let scheduler = ScanScheduler::build(db, mq_provider, config.poll_interval_secs);
 
     scheduler.run().await?;
 

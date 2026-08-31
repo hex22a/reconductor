@@ -1,10 +1,14 @@
 use sqlx::types::ipnetwork::IpNetwork;
 use uuid::Uuid;
 
-use crate::queue::provider::MqProvider;
+use crate::infra::message_queue::provider::MqProvider;
 
 pub trait Publisher {
-    async fn publish_scan(&self, scan_id: Uuid, target: &IpNetwork) -> anyhow::Result<()>;
+    fn publish_scan(
+        &self,
+        scan_id: Uuid,
+        target: &IpNetwork,
+    ) -> impl Future<Output = anyhow::Result<()>>;
 }
 
 pub struct MqPublisher<T: MqProvider> {
@@ -21,6 +25,8 @@ impl<T: MqProvider> Publisher for MqPublisher<T> {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     use std::{
         str::FromStr,
         sync::{Arc, Mutex},
@@ -32,10 +38,7 @@ mod tests {
     use sqlx::types::ipnetwork::{IpNetwork, Ipv4Network};
     use uuid::Uuid;
 
-    use crate::queue::{
-        provider::MqProvider,
-        publisher::{MqPublisher, Publisher},
-    };
+    use crate::infra::message_queue::provider::MqProvider;
 
     struct MockMqProvider {
         publish_calls: Arc<Mutex<Vec<(ShortString, Value)>>>,

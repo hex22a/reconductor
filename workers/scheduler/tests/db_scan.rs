@@ -1,4 +1,4 @@
-use scheduler::db::scan::{PgScanRepository, ScanRepository};
+use scheduler::features::scan::repository::{PgScanRepository, ScanRepository};
 use sqlx::{PgPool, types::ipnetwork::IpNetwork};
 use uuid::Uuid;
 
