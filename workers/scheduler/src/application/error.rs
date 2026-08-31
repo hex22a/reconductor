@@ -1,5 +1,7 @@
 use std::{env::VarError, num::ParseIntError};
 
+use crate::{features::scan::error::ScanError, infra::message_queue::error::MqError};
+
 #[derive(Debug)]
 pub enum AppError {
     EnvironmentError(String),
@@ -26,8 +28,14 @@ impl From<ParseIntError> for AppError {
     }
 }
 
-impl From<anyhow::Error> for AppError {
-    fn from(_: anyhow::Error) -> Self {
+impl From<ScanError> for AppError {
+    fn from(_: ScanError) -> Self {
+        Self::InternalError
+    }
+}
+
+impl From<MqError> for AppError {
+    fn from(_: MqError) -> Self {
         Self::InternalError
     }
 }

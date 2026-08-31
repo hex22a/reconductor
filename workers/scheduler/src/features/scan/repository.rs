@@ -1,15 +1,15 @@
 use sqlx::{PgPool, types::time::OffsetDateTime};
 use uuid::Uuid;
 
-use crate::features::scan::model::DueScan;
+use crate::features::scan::{error::ScanError, model::DueScan};
 
 pub trait ScanRepository {
-    fn fetch_due_scans(&self) -> impl Future<Output = anyhow::Result<Vec<DueScan>>> + Send;
+    fn fetch_due_scans(&self) -> impl Future<Output = Result<Vec<DueScan>, ScanError>> + Send;
     fn update_next_run(
         &self,
         scan_id: Uuid,
         next_run_at: OffsetDateTime,
-    ) -> impl Future<Output = anyhow::Result<()>> + Send;
+    ) -> impl Future<Output = Result<(), ScanError>> + Send;
 }
 
 pub struct PgScanRepository {
@@ -17,7 +17,7 @@ pub struct PgScanRepository {
 }
 
 impl ScanRepository for PgScanRepository {
-    async fn fetch_due_scans(&self) -> anyhow::Result<Vec<DueScan>> {
+    async fn fetch_due_scans(&self) -> Result<Vec<DueScan>, ScanError> {
         let scans = sqlx::query_as!(
             DueScan,
             r#"
@@ -38,7 +38,7 @@ impl ScanRepository for PgScanRepository {
         &self,
         scan_id: Uuid,
         next_run_at: OffsetDateTime,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), ScanError> {
         sqlx::query!(
             r#"
             UPDATE recon.scans

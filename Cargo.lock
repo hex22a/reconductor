@@ -2607,7 +2607,6 @@ dependencies = [
 name = "scheduler"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "chrono",
  "cron",
  "dotenvy",
@@ -2615,6 +2614,7 @@ dependencies = [
  "lapin",
  "serde_json",
  "sqlx",
+ "time",
  "tokio",
  "tracing",
  "tracing-subscriber",

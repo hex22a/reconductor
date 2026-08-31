@@ -1,14 +1,14 @@
 use sqlx::types::ipnetwork::IpNetwork;
 use uuid::Uuid;
 
-use crate::infra::message_queue::provider::MqProvider;
+use crate::infra::message_queue::{MqProvider, error::MqError};
 
 pub trait Publisher {
     fn publish_scan(
         &self,
         scan_id: Uuid,
         target: &IpNetwork,
-    ) -> impl Future<Output = anyhow::Result<()>>;
+    ) -> impl Future<Output = Result<(), MqError>>;
 }
 
 pub struct MqPublisher<T: MqProvider> {
@@ -16,7 +16,7 @@ pub struct MqPublisher<T: MqProvider> {
 }
 
 impl<T: MqProvider> Publisher for MqPublisher<T> {
-    async fn publish_scan(&self, scan_id: Uuid, target: &IpNetwork) -> anyhow::Result<()> {
+    async fn publish_scan(&self, scan_id: Uuid, target: &IpNetwork) -> Result<(), MqError> {
         let message = serde_json::json!({ "id": scan_id, "target": target });
         self.provider.publish("scans".into(), message).await?;
         Ok(())
@@ -32,20 +32,17 @@ mod tests {
         sync::{Arc, Mutex},
     };
 
-    use anyhow::Ok;
     use lapin::types::ShortString;
     use serde_json::Value;
     use sqlx::types::ipnetwork::{IpNetwork, Ipv4Network};
     use uuid::Uuid;
-
-    use crate::infra::message_queue::provider::MqProvider;
 
     struct MockMqProvider {
         publish_calls: Arc<Mutex<Vec<(ShortString, Value)>>>,
     }
 
     impl MqProvider for MockMqProvider {
-        async fn publish(&self, channel: ShortString, message: Value) -> anyhow::Result<()> {
+        async fn publish(&self, channel: ShortString, message: Value) -> Result<(), MqError> {
             self.publish_calls.lock().unwrap().push((channel, message));
             Ok(())
         }

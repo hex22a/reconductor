@@ -1,0 +1,252 @@
+use std::str::FromStr;
+
+use cron::Schedule;
+use tokio::time::{Duration, interval};
+use tracing::{error, info};
+
+use crate::{
+    features::scan::{error::ScanError, repository::ScanRepository},
+    infra::{message_queue::publisher::Publisher, scheduler::SchedulerService},
+};
+
+pub trait PollerFeature {
+    fn run(&self) -> impl Future<Output = Result<(), ScanError>>;
+    fn poll(&self) -> impl Future<Output = Result<(), ScanError>>;
+}
+
+pub struct ScanPoller<R: ScanRepository, P: Publisher, S: SchedulerService> {
+    repository: R,
+    publisher: P,
+    scheduler: S,
+    poll_interval: Duration,
+}
+
+impl<R: ScanRepository, P: Publisher, S: SchedulerService> ScanPoller<R, P, S> {
+    pub fn new(repository: R, publisher: P, scheduler: S, poll_interval_secs: u64) -> Self {
+        Self {
+            repository,
+            publisher,
+            scheduler,
+            poll_interval: Duration::from_secs(poll_interval_secs),
+        }
+    }
+}
+
+impl<R: ScanRepository, P: Publisher, S: SchedulerService> PollerFeature for ScanPoller<R, P, S> {
+    async fn run(&self) -> Result<(), ScanError> {
+        info!(
+            "Scheduler started, polling every {}s",
+            self.poll_interval.as_secs()
+        );
+        let mut ticker = interval(self.poll_interval);
+        loop {
+            ticker.tick().await;
+            if let Err(e) = self.poll().await {
+                error!("Poller error: {}", e);
+            }
+        }
+    }
+
+    async fn poll(&self) -> Result<(), ScanError> {
+        let due_scans = self.repository.fetch_due_scans().await?;
+
+        if due_scans.is_empty() {
+            info!("No due scans");
+            return Ok(());
+        }
+
+        info!("Found {} due scan(s)", due_scans.len());
+
+        for scan in due_scans {
+            let Some(schedule) = &scan.schedule else {
+                continue;
+            };
+
+            match self.publisher.publish_scan(scan.id, &scan.target).await {
+                Ok(_) => {
+                    info!("Published scan {} for target {}", scan.id, scan.target);
+                    let schedule = Schedule::from_str(schedule)?;
+                    match self.scheduler.calculate_next_run(&schedule) {
+                        Ok(next_run) => {
+                            if let Err(e) = self.repository.update_next_run(scan.id, next_run).await
+                            {
+                                error!("Failed to update next_run for scan {}: {}", scan.id, e);
+                            }
+                        }
+                        Err(e) => {
+                            error!("Failed to calculate next run for scan {}: {}", scan.id, e);
+                        }
+                    }
+                }
+                Err(e) => {
+                    error!("Failed to publish scan {}: {}", scan.id, e);
+                }
+            }
+        }
+
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{
+        str::FromStr,
+        sync::{Arc, Mutex},
+    };
+
+    use cron::Schedule;
+    use sqlx::types::{
+        ipnetwork::{IpNetwork, Ipv4Network},
+        time::OffsetDateTime,
+    };
+    use uuid::Uuid;
+
+    use crate::{
+        features::scan::model::DueScan,
+        infra::{message_queue::error::MqError, scheduler::ScheduleError},
+    };
+
+    use super::*;
+
+    struct MockScanRepository {
+        due_scans: Vec<DueScan>,
+        fetch_due_scans_calls: Arc<Mutex<Vec<()>>>,
+        update_next_run_calls: Arc<Mutex<Vec<(Uuid, OffsetDateTime)>>>,
+    }
+
+    struct MockScanPublisher {
+        publish_calls: Arc<Mutex<Vec<(Uuid, IpNetwork)>>>,
+    }
+
+    struct MockScheduler {
+        error: Mutex<Option<ScheduleError>>,
+        return_value: OffsetDateTime,
+    }
+
+    impl ScanRepository for MockScanRepository {
+        async fn fetch_due_scans(&self) -> Result<Vec<DueScan>, ScanError> {
+            self.fetch_due_scans_calls.lock().unwrap().push(());
+            Ok(self.due_scans.clone())
+        }
+        async fn update_next_run(
+            &self,
+            scan_id: Uuid,
+            next_run_at: sqlx::types::time::OffsetDateTime,
+        ) -> Result<(), ScanError> {
+            self.update_next_run_calls
+                .lock()
+                .unwrap()
+                .push((scan_id, next_run_at));
+            Ok(())
+        }
+    }
+
+    impl Publisher for MockScanPublisher {
+        async fn publish_scan(&self, scan_id: Uuid, target: &IpNetwork) -> Result<(), MqError> {
+            self.publish_calls.lock().unwrap().push((scan_id, *target));
+            Ok(())
+        }
+    }
+
+    impl SchedulerService for MockScheduler {
+        fn calculate_next_run(&self, _: &Schedule) -> Result<OffsetDateTime, ScheduleError> {
+            match self.error.lock().unwrap().take() {
+                Some(e) => Err(e),
+                None => Ok(self.return_value),
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_poll_no_due_scans() {
+        // Arrange
+        let expected_poll_interval_secs: u64 = 30;
+        let expected_next_run: OffsetDateTime = OffsetDateTime::now_utc();
+        let expected_due_scans: Vec<DueScan> = vec![];
+        let fetch_due_scans_calls: Arc<Mutex<Vec<()>>> = Arc::new(Mutex::new(vec![]));
+        let update_next_run_calls: Arc<Mutex<Vec<(Uuid, OffsetDateTime)>>> =
+            Arc::new(Mutex::new(vec![]));
+        let publish_calls: Arc<Mutex<Vec<(Uuid, IpNetwork)>>> = Arc::new(Mutex::new(vec![]));
+        let calculate_next_run_calls: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(vec![]));
+        let mock_scan_repository = MockScanRepository {
+            due_scans: expected_due_scans,
+            fetch_due_scans_calls: fetch_due_scans_calls.clone(),
+            update_next_run_calls: update_next_run_calls.clone(),
+        };
+        let mock_scan_publisher = MockScanPublisher {
+            publish_calls: publish_calls.clone(),
+        };
+        let mock_scheduler_service = MockScheduler {
+            error: Mutex::new(None),
+            return_value: expected_next_run,
+        };
+        let scheduler = ScanPoller::new(
+            mock_scan_repository,
+            mock_scan_publisher,
+            mock_scheduler_service,
+            expected_poll_interval_secs,
+        );
+        // Act
+        scheduler.poll().await.unwrap();
+
+        // Assert
+        assert_eq!(fetch_due_scans_calls.lock().unwrap().len(), 1);
+        assert_eq!(update_next_run_calls.lock().unwrap().len(), 0);
+        assert_eq!(calculate_next_run_calls.lock().unwrap().len(), 0);
+        assert_eq!(publish_calls.lock().unwrap().len(), 0);
+    }
+
+    #[tokio::test]
+    async fn test_poll_happy_path() {
+        // Arrange
+        let expected_scan_id: Uuid = Uuid::now_v7();
+        let expected_target: IpNetwork =
+            IpNetwork::V4(Ipv4Network::from_str("192.168.0.0/16").unwrap());
+        let expected_schedule: String = String::from_str("0 5 * * * *").unwrap();
+        let expected_poll_interval_secs: u64 = 30;
+        let expected_next_run: OffsetDateTime = OffsetDateTime::now_utc();
+        let expected_due_scans: Vec<DueScan> = vec![DueScan {
+            id: expected_scan_id,
+            target: expected_target,
+            schedule: Some(expected_schedule),
+        }];
+        let fetch_due_scans_calls: Arc<Mutex<Vec<()>>> = Arc::new(Mutex::new(vec![]));
+        let update_next_run_calls: Arc<Mutex<Vec<(Uuid, OffsetDateTime)>>> =
+            Arc::new(Mutex::new(vec![]));
+        let publish_calls: Arc<Mutex<Vec<(Uuid, IpNetwork)>>> = Arc::new(Mutex::new(vec![]));
+        let mock_scan_repository = MockScanRepository {
+            due_scans: expected_due_scans,
+            fetch_due_scans_calls: fetch_due_scans_calls.clone(),
+            update_next_run_calls: update_next_run_calls.clone(),
+        };
+        let mock_scan_publisher = MockScanPublisher {
+            publish_calls: publish_calls.clone(),
+        };
+        let mock_scheduler_service = MockScheduler {
+            error: Mutex::new(None),
+            return_value: expected_next_run,
+        };
+        let scheduler = ScanPoller::new(
+            mock_scan_repository,
+            mock_scan_publisher,
+            mock_scheduler_service,
+            expected_poll_interval_secs,
+        );
+        // Act
+        scheduler.poll().await.unwrap();
+
+        // Assert
+        assert_eq!(fetch_due_scans_calls.lock().unwrap().len(), 1);
+        assert_eq!(update_next_run_calls.lock().unwrap().len(), 1);
+        assert_eq!(
+            update_next_run_calls.lock().unwrap()[0],
+            (expected_scan_id, expected_next_run)
+        );
+        assert_eq!(publish_calls.lock().unwrap().len(), 1);
+        assert_eq!(
+            publish_calls.lock().unwrap()[0],
+            (expected_scan_id, expected_target)
+        );
+    }
+}

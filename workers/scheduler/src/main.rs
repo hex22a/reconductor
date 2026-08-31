@@ -3,7 +3,8 @@ mod config;
 use scheduler::{
     ScanScheduler,
     application::error::AppError,
-    infra::{db, message_queue::provider::RabbitMqProvider, scheduler::Scheduler},
+    features::scan::poller::PollerFeature,
+    infra::{db, message_queue::RabbitMqProvider},
 };
 use tracing::info;
 
@@ -22,9 +23,7 @@ async fn main() -> Result<(), AppError> {
     info!("Connected to RabbitMQ");
 
     let publish_channel = conn.create_channel().await?;
-    let mq_provider = RabbitMqProvider {
-        channel: publish_channel,
-    };
+    let mq_provider = RabbitMqProvider::build(publish_channel).await?;
 
     let scheduler = ScanScheduler::build(db, mq_provider, config.poll_interval_secs);
 
