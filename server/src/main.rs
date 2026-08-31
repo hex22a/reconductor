@@ -1,5 +1,5 @@
 use server::infra::message_queue::RabbitMqProvider;
-use server::{Config, Reconductor};
+use server::{AppError, Config, Reconductor};
 
 use server::infra::persistence::{db, kv};
 
@@ -9,7 +9,7 @@ use tracing::info;
 mod constants;
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> Result<(), AppError> {
     dotenvy::dotenv().ok();
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)

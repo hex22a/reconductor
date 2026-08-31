@@ -3,7 +3,6 @@ use std::sync::{Arc, Mutex};
 use axum::Router;
 use axum::http::header::CONTENT_TYPE;
 use axum::http::{HeaderName, Method};
-use lapin::Channel;
 use rand::rngs::SysRng;
 use sqlx::PgPool;
 
@@ -50,6 +49,8 @@ use crate::features::scan_run::list::ListScanRuns;
 use crate::features::scan_run::repository::PgScanRunRepository;
 use crate::infra::message_queue::RabbitMqProvider;
 use crate::infra::message_queue::publisher::MqPublisher;
+
+pub use application::error::AppError;
 
 mod application;
 mod config;

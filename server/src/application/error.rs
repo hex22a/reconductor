@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, env::VarError};
+
+use axum::http::header::InvalidHeaderValue;
+use hex::FromHexError;
 
 use crate::{
     features::{
@@ -8,6 +11,39 @@ use crate::{
     },
     infra::password::PasswordServiceError,
 };
+
+#[derive(Debug)]
+pub enum AppError {
+    EnvironmentError(String),
+    HexDecodeError(String),
+    CsrfLengthError,
+    HeaderError,
+    InitializationError,
+}
+
+impl From<VarError> for AppError {
+    fn from(value: VarError) -> Self {
+        Self::EnvironmentError(value.to_string())
+    }
+}
+
+impl From<FromHexError> for AppError {
+    fn from(value: FromHexError) -> Self {
+        Self::HexDecodeError(value.to_string())
+    }
+}
+
+impl From<InvalidHeaderValue> for AppError {
+    fn from(_: InvalidHeaderValue) -> Self {
+        Self::HeaderError
+    }
+}
+
+impl From<lapin::Error> for AppError {
+    fn from(_: lapin::Error) -> Self {
+        Self::InitializationError
+    }
+}
 
 pub type FieldErrors = HashMap<String, Vec<String>>;
 
