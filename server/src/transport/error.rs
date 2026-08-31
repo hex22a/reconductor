@@ -13,11 +13,9 @@ use crate::{
 #[derive(Serialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 enum ErrorCode {
-    DatabaseError,
     ValidationError,
     UnexpectedError,
     Unauthorized,
-    SyntaxError,
 }
 
 #[derive(Serialize)]

@@ -3,14 +3,10 @@ use std::sync::Arc;
 use crate::{
     constants::{CSRF_COOKIE_NAME, USER_SESSION_COOKIE_NAME},
     features::{
-        csrf::{token::TokenFeature, verify::VerifyCsrfFeature},
-        session::{auth::AuthFeature, model::UserSession},
+        session::model::UserSession,
         user::{
             dto::{LoginResponse, MeResponse},
-            login::LoginFeature,
-            logout::LogoutFeature,
             model::UserInput,
-            register::RegisterFeature,
         },
     },
 };

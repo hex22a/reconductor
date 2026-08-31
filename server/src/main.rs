@@ -1,12 +1,10 @@
+use server::constants::REDIS_POOL_SIZE;
 use server::infra::message_queue::RabbitMqProvider;
 use server::{AppError, Config, Reconductor};
 
 use server::infra::persistence::{db, kv};
 
-use constants::REDIS_POOL_SIZE;
 use tracing::info;
-
-mod constants;
 
 #[tokio::main]
 async fn main() -> Result<(), AppError> {

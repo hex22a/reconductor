@@ -34,7 +34,7 @@ impl RabbitMqProvider {
                 FieldTable::default(),
             )
             .await
-            .or(Err(MqError::BuildError));
+            .or(Err(MqError::BuildError))?;
         Ok(Self { channel })
     }
 }

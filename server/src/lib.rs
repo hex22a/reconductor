@@ -54,7 +54,7 @@ pub use application::error::AppError;
 
 mod application;
 mod config;
-mod constants;
+pub mod constants;
 mod domain;
 pub mod features;
 pub mod infra;
