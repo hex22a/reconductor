@@ -2613,7 +2613,6 @@ dependencies = [
  "dotenvy",
  "ipnetwork",
  "lapin",
- "serde",
  "serde_json",
  "sqlx",
  "tokio",
