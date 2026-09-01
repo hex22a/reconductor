@@ -1,7 +1,12 @@
 use std::str::FromStr;
 
-use scanner::db::scan::{PgScanRepository, ScanHostInsert, ScanPortInsert, ScanRepository, ScanStatus};
-use sqlx::{PgPool, types::{ipnetwork::IpNetwork, mac_address::MacAddress}};
+use scanner::db::scan::{
+    PgScanRepository, ScanHostInsert, ScanPortInsert, ScanRepository, ScanStatus,
+};
+use sqlx::{
+    PgPool,
+    types::{ipnetwork::IpNetwork, mac_address::MacAddress},
+};
 use uuid::Uuid;
 
 async fn setup_scans(db: &PgPool) -> Uuid {
@@ -12,7 +17,7 @@ async fn setup_scans(db: &PgPool) -> Uuid {
             (username, password_hash)
         VALUES ('test_user', 'password_hash')
         RETURNING id
-        "#
+        "#,
     )
     .fetch_one(db)
     .await
@@ -23,7 +28,7 @@ async fn setup_scans(db: &PgPool) -> Uuid {
             (name, owner_id)
         VALUES ('test_project', $1)
         RETURNING id
-        "#
+        "#,
     )
     .bind(expected_user_id)
     .fetch_one(db)
@@ -35,14 +40,14 @@ async fn setup_scans(db: &PgPool) -> Uuid {
             (project_id, target, next_run_at, schedule)
         VALUES ($1, $2, NOW() - INTERVAL '1 minute', '5 * * * *')
         RETURNING id
-        "#
+        "#,
     )
     .bind(expected_project_id)
     .bind(expected_target)
     .fetch_one(db)
     .await
     .unwrap();
-    return expected_scan_id;
+    expected_scan_id
 }
 
 #[sqlx::test(migrations = "../../migrations/")]
@@ -52,7 +57,9 @@ async fn test_update_scan_status_done(db: PgPool) {
     let repo = PgScanRepository { db: db.clone() };
     let expected_scan_id: Uuid = setup_scans(&db).await;
     // Act
-    let actual_result = repo.update_scan_status(expected_scan_id, expected_status).await;
+    let actual_result = repo
+        .update_scan_status(expected_scan_id, expected_status)
+        .await;
     // Assert
     assert_eq!(actual_result.unwrap(), ());
 }
@@ -64,7 +71,9 @@ async fn test_update_scan_status_in_progress(db: PgPool) {
     let repo = PgScanRepository { db: db.clone() };
     let expected_scan_id: Uuid = setup_scans(&db).await;
     // Act
-    let actual_result = repo.update_scan_status(expected_scan_id, expected_status).await;
+    let actual_result = repo
+        .update_scan_status(expected_scan_id, expected_status)
+        .await;
     // Assert
     assert_eq!(actual_result.unwrap(), ());
 }
@@ -90,23 +99,23 @@ async fn test_store_scan_results(db: PgPool) {
             service: Some("server".to_string()),
             product: Some("bun".to_string()),
             version: Some("1.0.1".to_string()),
-        }
+        },
     ];
-    let expected_hosts: Vec<ScanHostInsert> = vec![
-        ScanHostInsert {
-            ip: Some(expected_host_ip),
-            mac: Some(expected_host_mac_address),
-            vendor: Some("linux".to_string()),
-            hostname: Some("durandal".to_string()),
-            os_match: Some("debian".to_string()),
-            os_accuracy: Some(90),
-            ports: expected_ports,
-        }
-    ];
+    let expected_hosts: Vec<ScanHostInsert> = vec![ScanHostInsert {
+        ip: Some(expected_host_ip),
+        mac: Some(expected_host_mac_address),
+        vendor: Some("linux".to_string()),
+        hostname: Some("durandal".to_string()),
+        os_match: Some("debian".to_string()),
+        os_accuracy: Some(90),
+        ports: expected_ports,
+    }];
     let repo = PgScanRepository { db: db.clone() };
     let expected_scan_id: Uuid = setup_scans(&db).await;
     // Act
-    let actual_result = repo.store_scan_results(expected_scan_id, expected_hosts).await;
+    let actual_result = repo
+        .store_scan_results(expected_scan_id, expected_hosts)
+        .await;
     // Assert
     assert_eq!(actual_result.unwrap(), ());
 }

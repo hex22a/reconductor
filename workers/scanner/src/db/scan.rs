@@ -46,12 +46,16 @@ pub struct ScanPortInsert {
 }
 
 pub trait ScanRepository {
-    async fn update_scan_status(&self, scan_id: Uuid, status: ScanStatus) -> anyhow::Result<()>;
-    async fn store_scan_results(
+    fn update_scan_status(
+        &self,
+        scan_id: Uuid,
+        status: ScanStatus,
+    ) -> impl Future<Output = anyhow::Result<()>>;
+    fn store_scan_results(
         &self,
         scan_id: Uuid,
         hosts: Vec<ScanHostInsert>,
-    ) -> anyhow::Result<()>;
+    ) -> impl Future<Output = anyhow::Result<()>>;
 }
 
 pub struct PgScanRepository {
