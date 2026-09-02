@@ -1,4 +1,6 @@
 name: Test Dashboard
+permissions:
+  contents: read
 on:
   push:
   pull_request:
