@@ -15,7 +15,7 @@ Please follow the guidelines to ensure smooth experience during the process.
 ## Code of Conduct
 
 Please note that this project is governed by [Code of Conduct](CODE_OF_CONDUCT.md)
-to ensure it's a sage and welocming space for everyone to contribute.
+to ensure it's a safe and welocming space for everyone to contribute.
 By participating in this project, you agree to abide by these terms.
 
 ## Issues
