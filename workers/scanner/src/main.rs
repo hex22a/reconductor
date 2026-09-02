@@ -1,9 +1,6 @@
-mod nmap;
-mod queue;
-mod db;
 mod config;
 
-use crate::db::scan::PgScanRepository;
+use scanner::{RabbitMqProvider, Runner, Scanner, db};
 use tracing::info;
 
 #[tokio::main]
@@ -14,18 +11,19 @@ async fn main() -> anyhow::Result<()> {
         .init();
 
     let config = config::Config::from_env()?;
-    let conn = lapin::Connection::connect(
-        &config.rabbitmq_url,
-        lapin::ConnectionProperties::default(),
-    )
-    .await?;
+    let conn =
+        lapin::Connection::connect(&config.rabbitmq_url, lapin::ConnectionProperties::default())
+            .await?;
     info!("Connected to RabbitMQ");
 
     let consume_channel = conn.create_channel().await?;
     let db = db::init_db(&config.database_url).await;
-    let repository = PgScanRepository { db };
+    let mq_provider = RabbitMqProvider::build(consume_channel)
+        .await
+        .expect("Can't declare a message queue");
 
-    queue::consumer::run(repository, consume_channel).await?;
+    let app = Scanner::build(db, mq_provider);
+    let _ = app.run().await;
 
     Ok(())
 }

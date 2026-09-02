@@ -1,4 +1,3 @@
-use quick_xml::de::from_str;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -90,8 +89,4 @@ pub struct OsMatch {
     pub name: String,
     #[serde(rename = "@accuracy")]
     pub accuracy: String,
-}
-
-pub fn parse(xml: &str) -> anyhow::Result<NmapRun> {
-    Ok(from_str(xml)?)
 }

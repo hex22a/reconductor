@@ -1,88 +1,34 @@
-use std::fmt::Display;
+use std::sync::Arc;
 
-use sqlx::{
-    PgPool,
-    types::{ipnetwork::IpNetwork, mac_address::MacAddress},
-};
+use sqlx::PgPool;
 use uuid::Uuid;
 
-pub enum ScanStatus {
-    InProgress,
-    Done,
-}
+use crate::features::scan_result::{error::ScanResultError, model::ScanHostInsert};
 
-impl ScanStatus {
-    fn as_str(&self) -> &str {
-        match self {
-            ScanStatus::InProgress => "in progress",
-            ScanStatus::Done => "done",
-        }
-    }
-}
-
-impl Display for ScanStatus {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.as_str())
-    }
-}
-
-pub struct ScanHostInsert {
-    pub ip: Option<IpNetwork>,
-    pub mac: Option<MacAddress>,
-    pub vendor: Option<String>,
-    pub hostname: Option<String>,
-    pub os_match: Option<String>,
-    pub os_accuracy: Option<i32>,
-    pub ports: Vec<ScanPortInsert>,
-}
-
-pub struct ScanPortInsert {
-    pub port: i32,
-    pub protocol: Option<String>,
-    pub state: Option<String>,
-    pub service: Option<String>,
-    pub product: Option<String>,
-    pub version: Option<String>,
-}
-
-pub trait ScanRepository {
-    fn update_scan_status(
-        &self,
-        scan_id: Uuid,
-        status: ScanStatus,
-    ) -> impl Future<Output = anyhow::Result<()>>;
+pub trait ScanResultRepository {
     fn store_scan_results(
         &self,
         scan_id: Uuid,
         hosts: Vec<ScanHostInsert>,
-    ) -> impl Future<Output = anyhow::Result<()>>;
+    ) -> impl Future<Output = Result<(), ScanResultError>>;
 }
 
-pub struct PgScanRepository {
-    pub db: PgPool,
+pub struct PgScanResultRepository {
+    db: Arc<PgPool>,
 }
 
-impl ScanRepository for PgScanRepository {
-    async fn update_scan_status(&self, scan_id: Uuid, status: ScanStatus) -> anyhow::Result<()> {
-        sqlx::query!(
-            r#"
-            UPDATE recon.scans
-            SET status = $1::scan_status
-            WHERE id = $2
-            "#,
-            status.as_str() as &str,
-            scan_id,
-        )
-        .execute(&self.db)
-        .await?;
-        Ok(())
+impl PgScanResultRepository {
+    pub fn new(db: Arc<PgPool>) -> Self {
+        Self { db }
     }
+}
 
+impl ScanResultRepository for PgScanResultRepository {
     async fn store_scan_results(
         &self,
         scan_id: Uuid,
         hosts: Vec<ScanHostInsert>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), ScanResultError> {
         let mut tx = self.db.begin().await?;
 
         let scan_run_id: Uuid = sqlx::query_scalar!(

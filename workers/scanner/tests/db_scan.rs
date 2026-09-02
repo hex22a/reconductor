@@ -1,7 +1,14 @@
-use std::str::FromStr;
+use std::{str::FromStr, sync::Arc};
 
-use scanner::db::scan::{
-    PgScanRepository, ScanHostInsert, ScanPortInsert, ScanRepository, ScanStatus,
+use scanner::features::{
+    scan::{
+        model::ScanStatus,
+        repository::{PgScanRepository, ScanRepository},
+    },
+    scan_result::{
+        model::{ScanHostInsert, ScanPortInsert},
+        repository::{PgScanResultRepository, ScanResultRepository},
+    },
 };
 use sqlx::{
     PgPool,
@@ -54,8 +61,8 @@ async fn setup_scans(db: &PgPool) -> Uuid {
 async fn test_update_scan_status_done(db: PgPool) {
     // Arrange
     let expected_status = ScanStatus::Done;
-    let repo = PgScanRepository { db: db.clone() };
     let expected_scan_id: Uuid = setup_scans(&db).await;
+    let repo = PgScanRepository::new(Arc::new(db));
     // Act
     let actual_result = repo
         .update_scan_status(expected_scan_id, expected_status)
@@ -68,8 +75,8 @@ async fn test_update_scan_status_done(db: PgPool) {
 async fn test_update_scan_status_in_progress(db: PgPool) {
     // Arrange
     let expected_status = ScanStatus::InProgress;
-    let repo = PgScanRepository { db: db.clone() };
     let expected_scan_id: Uuid = setup_scans(&db).await;
+    let repo = PgScanRepository::new(Arc::new(db));
     // Act
     let actual_result = repo
         .update_scan_status(expected_scan_id, expected_status)
@@ -110,8 +117,8 @@ async fn test_store_scan_results(db: PgPool) {
         os_accuracy: Some(90),
         ports: expected_ports,
     }];
-    let repo = PgScanRepository { db: db.clone() };
     let expected_scan_id: Uuid = setup_scans(&db).await;
+    let repo = PgScanResultRepository::new(Arc::new(db));
     // Act
     let actual_result = repo
         .store_scan_results(expected_scan_id, expected_hosts)
