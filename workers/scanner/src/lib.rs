@@ -17,6 +17,7 @@ mod domain;
 pub mod features;
 mod infra;
 
+pub use application::error::AppError;
 pub use application::run::Runner;
 pub use infra::db;
 pub use infra::message_queue::RabbitMqProvider;

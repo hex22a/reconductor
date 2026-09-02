@@ -1,10 +1,10 @@
 mod config;
 
-use scanner::{RabbitMqProvider, Runner, Scanner, db};
+use scanner::{AppError, RabbitMqProvider, Runner, Scanner, db};
 use tracing::info;
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> Result<(), AppError> {
     dotenvy::dotenv().ok();
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)
