@@ -1,15 +1,6 @@
 use lapin::message::Delivery;
-use serde::Deserialize;
-use uuid::Uuid;
 
 use crate::infra::message_queue::{MqProvider, error::MqError};
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct ScanMessage {
-    id: Uuid,
-    target: String,
-}
 
 pub trait Consumer {
     fn consume_scan(&self) -> impl Future<Output = Result<lapin::Consumer, MqError>>;
