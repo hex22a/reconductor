@@ -1,6 +1,6 @@
 # Contributor Guidelines
 
-Welcome! Thank You for the intest in contributing to Reconductor project!
+Welcome! Thank You for the interest in contributing to Reconductor project!
 All types of contributions are encouraged and valued.
 Please follow the guidelines to ensure smooth experience during the process.
 
