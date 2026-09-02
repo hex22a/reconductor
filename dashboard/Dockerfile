@@ -1,5 +1,5 @@
 # Build
-FROM node:24-alpine AS build
+FROM node:26-alpine3.24 AS build
 
 ENV CI=true
 
@@ -13,7 +13,7 @@ COPY dashboard .
 RUN pnpm build
 
 # Server
-FROM nginx:alpine
+FROM nginx:1.31.4-alpine3.24-slim
 
 RUN rm -rf /usr/share/nginx/html/*
 COPY --from=build /app/build /usr/share/nginx/html
