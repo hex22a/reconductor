@@ -1,4 +1,4 @@
-# reconductor
+# Reconductor
 
 This is a Reconductor monorepo.
 Reconductor is a deployable network scanner.
@@ -28,7 +28,7 @@ cp .env.test.example .env.test
 
 ## Spin up the local environment
 
-[docker-complse.yml](docker-compose.yml) has several profiles for different scenarios
+[docker-compose.yml](docker-compose.yml) has several profiles for different scenarios
 
 **Infra** spins database, redis and rabbitmq (useful for development)
 
@@ -36,7 +36,7 @@ cp .env.test.example .env.test
 podman compose -f docker-compose.yml --profile=infra up -d
 ```
 
-**Infra + Backend** spins infrastructure, API and backgorund workers (useful for frontend development and debugging)
+**Infra + Backend** spins infrastructure, API and background workers (useful for frontend development and debugging)
 
 ```bash
 podman compose -f docker-compose.yml --profile=infra --profile=backend up -d
@@ -48,7 +48,7 @@ podman compose -f docker-compose.yml --profile=infra --profile=backend up -d
 podman compose -f docker-compose.yml --profile=backend --profile=workers --profile=frontend up -d
 ```
 
-Running podman-compose in foreground (without `-d`) may cause unexpected bahavior. It's recommended to always run it detached (with `-d`).
+Running podman-compose in foreground (without `-d`) may cause unexpected behavior. It's recommended to always run it detached (with `-d`).
 If You want to access logs use
 
 ```bash
@@ -57,17 +57,17 @@ podman compose --profile backend logs -f
 
 ### Development
 
-Each component has a corresponging README.md file with more details for local development:
+Each component has a corresponding README.md file with more details for local development:
 
 * [./server/README.md](./server/README.md)
 * [./dashboard/README.md](./dashboard/README.md)
 * [./workers/scanner/README.md](./workers/scanner/README.md)
 * [./workers/scheduler/README.md](./workers/scheduler/README.md)
 
-### Deplyment
+### Deployment
 
-This project is in early stage and it doesn't have installation scripts for different environemts.
+This project is in early stage and it doesn't have installation scripts for different environments.
 Moreover each environment is unique and only You know better how deploy it such it fits Your needs.
 You may have different database or prefer a different message broker.
-To deploy it properly I recommend forking this project and use it as a template for your perfect deplyment. Each component has it's own dockerfile and can be deployed in a containrized environment.
+To deploy it properly I recommend forking this project and use it as a template for your perfect deployment. Each component has it's own dockerfile and can be deployed in a containerized environment.
 Good luck!

@@ -1,13 +1,13 @@
-# Recondictor API backend
+# Reconductor API backend
 
 This is an API backend. It provides HTTP API endpoints to be called from
-a frontend app and/or any other clinet apps
+a frontend app and/or any other client apps
 
 ## Installation
 
 Install [Rust](https://rust-lang.org/tools/install/)
 
-Install dependenies
+Install dependencies
 
 ```bash
 cargo install
@@ -21,7 +21,7 @@ cargo install sqlx-cli
 
 This project uses [sqlx](https://docs.rs/sqlx_wasi/latest/sqlx/).
 **SQLx** requires having a live database for project to compile.
-This may feel inconvenient at fisrt
+This may feel inconvenient at first
 but it's actually very useful in development because it allows You to identify
 issues with SQL queries early.
 To use this feature `DATABASE_URL` env variable must be set.
@@ -35,7 +35,7 @@ podman compose -f docker-compose.yml --profile=infra up -d
 export DATABASE_URL=some_url
 ```
 
-### Running localy
+### Running locally
 
 ```bash
 cargo run
@@ -57,10 +57,10 @@ Run this command every time You make a change to the database:
 cargo sqlx prepare
 ```
 
-Whis will create (update) `.sqlx` directory with database metadata.
-`.sqlx` direcotory must me checked in version control
+This will create (update) `.sqlx` directory with database metadata.
+`.sqlx` directory must me checked in version control
 
-Now You can build for broduction:
+Now You can build for production:
 
 ```bash
 cargo build --release
@@ -68,7 +68,7 @@ cargo build --release
 
 Optionally You can make build work offline
 by setting `SQLX_OFFLINE` environment variable
-but it's not recommended for local developent
+but it's not recommended for local development
 
 ```bash
 export SQLX_OFFLINE=true
