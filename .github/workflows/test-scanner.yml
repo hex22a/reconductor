@@ -6,6 +6,8 @@ on:
   pull_request:
 
 jobs:
+  deny:
+    uses: ./.github/workflows/deny.yml
   tests:
     runs-on: ubuntu-latest
     environment: test
