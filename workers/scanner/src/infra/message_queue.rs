@@ -18,8 +18,9 @@ pub mod error;
 
 pub trait MqProvider {
     fn consume(&self) -> impl Future<Output = Result<Consumer, MqError>> + Send;
-    fn ack(delivery: &Delivery) -> impl Future<Output = Result<(), MqError>>;
-    fn nack(delivery: &Delivery, requeue: bool) -> impl Future<Output = Result<(), MqError>>;
+    fn ack(delivery: &Delivery) -> impl Future<Output = Result<(), MqError>> + Send;
+    fn nack(delivery: &Delivery, requeue: bool)
+    -> impl Future<Output = Result<(), MqError>> + Send;
 }
 
 pub struct RabbitMqProvider {
@@ -40,7 +41,7 @@ impl RabbitMqProvider {
             .await
             .or(Err(MqError::BuildError))?;
 
-        channel.basic_qos(1, BasicQosOptions::default()).await?;
+        channel.basic_qos(10, BasicQosOptions::default()).await?;
         Ok(Self { channel })
     }
 }

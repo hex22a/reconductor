@@ -3,10 +3,13 @@ use lapin::message::Delivery;
 use crate::infra::message_queue::{MqProvider, error::MqError};
 
 pub trait Consumer {
-    fn consume_scan(&self) -> impl Future<Output = Result<lapin::Consumer, MqError>>;
-    fn ack(&self, delivery: &Delivery) -> impl Future<Output = Result<(), MqError>>;
-    fn nack(&self, delivery: &Delivery, requeue: bool)
-    -> impl Future<Output = Result<(), MqError>>;
+    fn consume_scan(&self) -> impl Future<Output = Result<lapin::Consumer, MqError>> + Send;
+    fn ack(&self, delivery: &Delivery) -> impl Future<Output = Result<(), MqError>> + Send;
+    fn nack(
+        &self,
+        delivery: &Delivery,
+        requeue: bool,
+    ) -> impl Future<Output = Result<(), MqError>> + Send;
 }
 
 pub struct MqConsumer<T: MqProvider> {
@@ -19,7 +22,7 @@ impl<T: MqProvider> MqConsumer<T> {
     }
 }
 
-impl<T: MqProvider> Consumer for MqConsumer<T> {
+impl<T: MqProvider + Sync + Send> Consumer for MqConsumer<T> {
     async fn consume_scan(&self) -> Result<lapin::Consumer, MqError> {
         self.provider.consume().await
     }

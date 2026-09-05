@@ -5,7 +5,7 @@ use tokio::process::Command;
 use crate::infra::nmap::error::NmapError;
 
 pub trait ScanRunner {
-    fn run(target: &str) -> impl Future<Output = Result<String, NmapError>>;
+    fn run(target: &str) -> impl Future<Output = Result<String, NmapError>> + Send;
 }
 
 pub struct NmapRunner;

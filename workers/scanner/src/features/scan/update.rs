@@ -7,7 +7,7 @@ pub trait UpdateScanFeature {
         &self,
         scan_id: Uuid,
         status: ScanStatus,
-    ) -> impl Future<Output = Result<(), ScanError>>;
+    ) -> impl Future<Output = Result<(), ScanError>> + Send;
 }
 
 pub struct UpdateScan<R: ScanRepository> {
@@ -20,7 +20,7 @@ impl<R: ScanRepository> UpdateScan<R> {
     }
 }
 
-impl<R: ScanRepository> UpdateScanFeature for UpdateScan<R> {
+impl<R: ScanRepository + Send + Sync> UpdateScanFeature for UpdateScan<R> {
     async fn update_scan_status(&self, scan_id: Uuid, status: ScanStatus) -> Result<(), ScanError> {
         self.scan_repository
             .update_scan_status(scan_id, status)

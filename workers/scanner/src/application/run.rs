@@ -1,61 +1,41 @@
+use std::sync::Arc;
+
 use crate::{
-    application::{error::AppError, parser},
-    domain::{result::Host, scan_message::ScanMessage},
-    features::{
-        scan::{model::ScanStatus, update::UpdateScanFeature},
-        scan_result::add::AddScanResultFeature,
-    },
-    infra::{message_queue::consumer::Consumer, nmap::ScanRunner},
+    application::{error::AppError, processor::Processor},
+    domain::scan_message::ScanMessage,
+    infra::message_queue::consumer::Consumer,
 };
 use futures_lite::StreamExt;
+use lapin::message::Delivery;
 use tracing::{error, info};
-use uuid::Uuid;
 
 pub trait Runner {
     fn run(&self) -> impl Future<Output = Result<(), AppError>>;
-    fn process(&self, scan_id: Uuid, target: &str) -> impl Future<Output = Result<(), AppError>>;
+    fn spawn_scan(&self, delivery: Delivery, msg: ScanMessage);
 }
 
-pub struct ApplicationRunner<
-    C: Consumer,
-    S: ScanRunner,
-    U: UpdateScanFeature,
-    A: AddScanResultFeature,
-> {
-    consumer: C,
-    scan_runner: S,
-    update_scan_feature: U,
-    add_scan_result_feature: A,
+pub struct ApplicationRunner<P: Processor, C: Consumer> {
+    processor: Arc<P>,
+    consumer: Arc<C>,
 }
 
-impl<C, S, U, A> ApplicationRunner<C, S, U, A>
+impl<P, C> ApplicationRunner<P, C>
 where
+    P: Processor,
     C: Consumer,
-    S: ScanRunner,
-    U: UpdateScanFeature,
-    A: AddScanResultFeature,
 {
-    pub fn new(
-        consumer: C,
-        scan_runner: S,
-        update_scan_feature: U,
-        add_scan_result_feature: A,
-    ) -> Self {
+    pub fn new(processor: Arc<P>, consumer: Arc<C>) -> Self {
         Self {
+            processor,
             consumer,
-            scan_runner,
-            update_scan_feature,
-            add_scan_result_feature,
         }
     }
 }
 
-impl<C, S, U, A> Runner for ApplicationRunner<C, S, U, A>
+impl<P, C> Runner for ApplicationRunner<P, C>
 where
-    C: Consumer,
-    S: ScanRunner,
-    U: UpdateScanFeature,
-    A: AddScanResultFeature,
+    P: Processor + Send + Sync + 'static,
+    C: Consumer + Send + Sync + 'static,
 {
     async fn run(&self) -> Result<(), AppError> {
         let mut consumer = self.consumer.consume_scan().await?;
@@ -73,42 +53,30 @@ where
 
             info!("Received scan job {} for target {}", msg.id, msg.target);
 
-            match self.process(msg.id, &msg.target).await {
-                Ok(_) => {
-                    info!("Scan {} completed", msg.id);
-                    self.consumer.ack(&delivery).await?;
-                }
-                Err(e) => {
-                    error!("Scan {} failed: {}", msg.id, e);
-                    self.consumer.nack(&delivery, true).await?;
-                }
-            }
+            self.spawn_scan(delivery, msg);
         }
 
         Ok(())
     }
 
-    async fn process(&self, scan_id: Uuid, target: &str) -> Result<(), AppError> {
-        self.update_scan_feature
-            .update_scan_status(scan_id, ScanStatus::InProgress)
-            .await?;
-
-        let xml = S::run(target).await?;
-        let result = parser::parse(&xml)?;
-
-        let hosts: Vec<Host> = result
-            .hosts
-            .into_iter()
-            .filter(|h| h.status.state == "up")
-            .collect();
-
-        self.add_scan_result_feature
-            .add_scan_results(scan_id, hosts)
-            .await?;
-
-        self.update_scan_feature
-            .update_scan_status(scan_id, ScanStatus::Done)
-            .await?;
-        Ok(())
+    fn spawn_scan(&self, delivery: Delivery, msg: ScanMessage) {
+        let consumer = Arc::clone(&self.consumer);
+        let processor = Arc::clone(&self.processor);
+        tokio::spawn(async move {
+            match processor.process(msg.id, &msg.target).await {
+                Ok(_) => {
+                    info!("Scan {} completed", msg.id);
+                    if let Err(e) = consumer.ack(&delivery).await {
+                        error!("Failed to acknowledge {}", e)
+                    };
+                }
+                Err(e) => {
+                    error!("Scan {} failed: {}", msg.id, e);
+                    if let Err(ne) = consumer.nack(&delivery, true).await {
+                        error!("Failed to negative acknowledge {} on {}", ne, e)
+                    };
+                }
+            }
+        });
     }
 }

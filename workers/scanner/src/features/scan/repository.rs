@@ -10,7 +10,7 @@ pub trait ScanRepository {
         &self,
         scan_id: Uuid,
         status: ScanStatus,
-    ) -> impl Future<Output = Result<(), ScanError>>;
+    ) -> impl Future<Output = Result<(), ScanError>> + Send;
 }
 
 pub struct PgScanRepository {

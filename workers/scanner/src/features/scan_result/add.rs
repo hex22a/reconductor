@@ -15,7 +15,7 @@ pub trait AddScanResultFeature {
         &self,
         scan_id: Uuid,
         hosts: Vec<Host>,
-    ) -> impl Future<Output = Result<(), ScanResultError>>;
+    ) -> impl Future<Output = Result<(), ScanResultError>> + Send;
 }
 
 pub struct AddScanResult<R: ScanResultRepository> {
@@ -85,7 +85,7 @@ impl<R: ScanResultRepository> AddScanResult<R> {
     }
 }
 
-impl<R: ScanResultRepository> AddScanResultFeature for AddScanResult<R> {
+impl<R: ScanResultRepository + Send + Sync> AddScanResultFeature for AddScanResult<R> {
     async fn add_scan_results(
         &self,
         scan_id: Uuid,

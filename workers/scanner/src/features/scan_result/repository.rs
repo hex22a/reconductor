@@ -10,7 +10,7 @@ pub trait ScanResultRepository {
         &self,
         scan_id: Uuid,
         hosts: Vec<ScanHostInsert>,
-    ) -> impl Future<Output = Result<(), ScanResultError>>;
+    ) -> impl Future<Output = Result<(), ScanResultError>> + Send;
 }
 
 pub struct PgScanResultRepository {
