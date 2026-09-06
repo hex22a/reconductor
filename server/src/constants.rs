@@ -26,7 +26,8 @@ pub const ANONYMOUS_CSRF_TTL_SECONDS: u64 = 5 * 60;
 pub const NONCE_SIZE_BYTES: usize = 64;
 pub const SESSION_ID_SIZE_BYTES: usize = 32;
 
-pub const REDIS_POOL_SIZE: usize = 2;
+pub const KV_POOL_SIZE: usize = 2;
+pub const KV_FAIL_FAST: bool = true;
 
 pub const PROJECTS_PAGE_SIZE_LIMIT: i64 = 15;
 pub const SCANS_PAGE_SIZE_LIMIT: i64 = 15;

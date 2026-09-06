@@ -14,6 +14,6 @@ services:
       retries: 5
   redis:
     image: valkey/valkey:9.1.2-alpine3.24
-    command: redis-server --requirepass ${REDIS_PASSWORD}
+    command: redis-server --requirepass ${KV_PASSWORD}
     ports:
       - "6380:6379"

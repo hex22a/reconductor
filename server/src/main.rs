@@ -1,5 +1,5 @@
-use server::constants::REDIS_POOL_SIZE;
 use server::infra::message_queue::RabbitMqProvider;
+use server::infra::persistence::kv::KvConfig;
 use server::{AppError, Config, Reconductor};
 
 use server::infra::persistence::{db, kv};
@@ -14,7 +14,14 @@ async fn main() -> Result<(), AppError> {
         .init();
     let config = Config::from_env()?;
     let db = db::init_db(&config.database_url).await;
-    let kv = kv::init_kv(&config.redis_url, REDIS_POOL_SIZE).await;
+    let kv = kv::init_kv(KvConfig {
+        username: config.kv_username.clone(),
+        password: config.kv_password.clone(),
+        host: config.kv_host.clone(),
+        port: config.kv_port,
+        database: config.kv_db,
+    })
+    .await;
     let conn =
         lapin::Connection::connect(&config.rabbitmq_url, lapin::ConnectionProperties::default())
             .await?;

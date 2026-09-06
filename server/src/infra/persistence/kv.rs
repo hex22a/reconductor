@@ -1,9 +1,23 @@
 use std::{collections::HashMap, time::Duration};
 
 use fred::{
+    bytes_utils::Str,
     prelude::{ClientLike, Config, HashesInterface, KeysInterface, Pool, TcpConfig},
-    types::Builder,
+    types::{
+        Builder, RespVersion,
+        config::{Blocking, Server, ServerConfig},
+    },
 };
+
+use crate::constants::{KV_FAIL_FAST, KV_POOL_SIZE};
+
+pub struct KvConfig {
+    pub username: String,
+    pub password: String,
+    pub host: String,
+    pub port: u16,
+    pub database: u8,
+}
 
 pub trait KvProvider {
     fn get(
@@ -39,18 +53,30 @@ pub struct FredKvProvider {
     client: Pool,
 }
 
-pub async fn init_kv(url: &str, pool_size: usize) -> FredKvProvider {
-    let config = Config::from_url(url).expect("unable to get config from URL");
-    let client = Builder::from_config(config)
-        .with_connection_config(|config| {
-            config.connection_timeout = Duration::from_secs(5);
-            config.tcp = TcpConfig {
-                nodelay: Some(true),
-                ..Default::default()
-            };
-        })
-        .build_pool(pool_size)
-        .expect("unable to build KV clinet");
+pub async fn init_kv(config: KvConfig) -> FredKvProvider {
+    let client = Builder::from_config(Config {
+        fail_fast: KV_FAIL_FAST,
+        blocking: Blocking::Block,
+        username: Some(config.username),
+        password: Some(config.password),
+        server: ServerConfig::Centralized {
+            server: Server {
+                host: Str::from(config.host),
+                port: config.port,
+            },
+        },
+        version: RespVersion::RESP3,
+        database: Some(config.database),
+    })
+    .with_connection_config(|config| {
+        config.connection_timeout = Duration::from_secs(5);
+        config.tcp = TcpConfig {
+            nodelay: Some(true),
+            ..Default::default()
+        };
+    })
+    .build_pool(KV_POOL_SIZE)
+    .expect("unable to build KV clinet");
     client.init().await.expect("unable to init KV store");
     FredKvProvider { client }
 }

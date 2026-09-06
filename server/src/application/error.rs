@@ -1,4 +1,4 @@
-use std::{collections::HashMap, env::VarError};
+use std::{collections::HashMap, env::VarError, num::ParseIntError};
 
 use axum::http::header::InvalidHeaderValue;
 use hex::FromHexError;
@@ -18,6 +18,7 @@ pub enum AppError {
     HexDecodeError(String),
     CsrfLengthError,
     HeaderError,
+    ParseIntError,
     InitializationError,
 }
 
@@ -36,6 +37,12 @@ impl From<FromHexError> for AppError {
 impl From<InvalidHeaderValue> for AppError {
     fn from(_: InvalidHeaderValue) -> Self {
         Self::HeaderError
+    }
+}
+
+impl From<ParseIntError> for AppError {
+    fn from(_: ParseIntError) -> Self {
+        Self::ParseIntError
     }
 }
 

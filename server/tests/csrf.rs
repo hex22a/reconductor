@@ -1,16 +1,22 @@
 use std::sync::Arc;
 
 use server::{
+    Config,
     features::csrf::repository::{CsrfRepository, CsrfStore},
-    infra::persistence::kv::{self, FredKvProvider},
+    infra::persistence::kv::{self, FredKvProvider, KvConfig},
 };
 
 async fn create_store() -> CsrfStore<FredKvProvider> {
+    dotenvy::dotenv().ok();
+    let config = Config::from_env().expect("Unable to read environment variables");
     let kv = Arc::new(
-        kv::init_kv(
-            &std::env::var("REDIS_URL").unwrap_or("redis://localhost:6379".to_string()),
-            2,
-        )
+        kv::init_kv(KvConfig {
+            username: config.kv_username,
+            password: config.kv_password,
+            host: config.kv_host,
+            port: config.kv_port,
+            database: config.kv_db,
+        })
         .await,
     );
     CsrfStore::new(kv)
