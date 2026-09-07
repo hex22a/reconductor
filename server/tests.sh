@@ -16,13 +16,6 @@ fi
 
 trap "${ENGINE} compose -f ../docker-compose.test.yml down -v;" EXIT;
 
-export KV_HOST
-export KV_PORT
-export KV_DB
-export KV_USERNAME
-export KV_PASSWORD
-export DATABASE_URL
-
 ${ENGINE} compose -f ../docker-compose.test.yml up -d;
 cargo sqlx migrate run --source ../migrations
 cargo test
