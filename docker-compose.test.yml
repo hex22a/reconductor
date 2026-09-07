@@ -16,4 +16,4 @@ services:
     image: valkey/valkey:9.1.2-alpine3.24
     command: valkey-server --requirepass ${KV_PASSWORD}
     ports:
-      - "6380:6379"
+      - "6379:6379"
