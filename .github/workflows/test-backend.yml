@@ -20,8 +20,11 @@ jobs:
         working-directory: ./server
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          REDIS_URL: ${{ secrets.REDIS_URL }}
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          KV_HOST: ${{ vars.KV_HOST }}
+          KV_PORT: ${{ vars.KV_PORT }}
+          KV_DB: ${{ vars.KV_DB }}
+          KV_USERNAME: ${{ secrets.KV_USERNAME }}
+          KV_PASSWORD: ${{ secrets.KV_PASSWORD }}
           DASHBOARD_URL: ${{ secrets.DASHBOARD_URL }}
           CSRF_SECRET: ${{ secrets.CSRF_SECRET }}
 
