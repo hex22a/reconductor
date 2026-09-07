@@ -27,4 +27,5 @@ jobs:
           KV_PASSWORD: ${{ secrets.KV_PASSWORD }}
           DASHBOARD_URL: ${{ secrets.DASHBOARD_URL }}
           CSRF_SECRET: ${{ secrets.CSRF_SECRET }}
+          RABBITMQ_URL: ${{ secrets.RABBITMQ_URL }}
 
