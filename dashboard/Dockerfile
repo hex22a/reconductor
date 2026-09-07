@@ -4,7 +4,10 @@ FROM node:26-alpine3.24 AS build
 ENV CI=true
 
 WORKDIR /app
-RUN corepack enable
+RUN wget -qO- https://get.pnpm.io/install.sh | env ENV="$HOME/.shrc" SHELL="$(which sh)" sh -
+
+ENV PNPM_HOME=/root/.local/share/pnpm
+ENV PATH=${PNPM_HOME}/bin:${PATH}
 
 COPY dashboard/package.json dashboard/pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile

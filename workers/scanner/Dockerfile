@@ -4,8 +4,10 @@ FROM rust:1.98.0-alpine3.24 as build
 ENV SQLX_OFFLINE=true
 
 WORKDIR /app
-COPY ./workers/scanner .
-RUN cargo build --release
+COPY Cargo.toml Cargo.lock .
+COPY server server
+COPY workers workers
+RUN cargo build -p scanner --release
 
 # Scheduler
 FROM alpine:3.24.1

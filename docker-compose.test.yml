@@ -12,7 +12,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-  redis:
+  kv:
     image: valkey/valkey:9.1.2-alpine3.24
     command: valkey-server --requirepass ${KV_PASSWORD}
     ports:

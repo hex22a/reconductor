@@ -5,8 +5,10 @@ ENV SQLX_OFFLINE=true
 
 WORKDIR /app
 
-COPY server .
-RUN cargo build --release
+COPY Cargo.toml Cargo.lock .
+COPY server server
+COPY workers workers
+RUN cargo build -p server --release
 
 # Server
 FROM alpine:3.24.1

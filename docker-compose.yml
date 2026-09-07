@@ -14,15 +14,15 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-  redis:
+  kv:
     profiles:
       - infra
     image: valkey/valkey:9.1.2-alpine3.24
-    command: valkey-server --requirepass ${REDIS_PASSWORD}
+    command: valkey-server --requirepass ${KV_PASSWORD}
     ports:
       - "6379:6379"
     healthcheck:
-      test: ["CMD", "valkey-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      test: ["CMD", "valkey-cli", "-a", "${KV_PASSWORD}", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -69,7 +69,7 @@ services:
     depends_on:
       migrations:
         condition: service_completed_successfully
-      redis:
+      kv:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -78,7 +78,11 @@ services:
       CSRF_SECRET: ${CSRF_SECRET}
       DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      KV_HOST: kv
+      KV_PORT: ${KV_PORT}
+      KV_DB: ${KV_DB}
+      KV_USERNAME: ${KV_USERNAME}
+      KV_PASSWORD: ${KV_PASSWORD}
     ports:
       - 3000:3000
     command: sh -c "./server"
