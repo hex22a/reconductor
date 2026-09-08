@@ -18,6 +18,7 @@ trap "${ENGINE} compose -f ../docker-compose.test.yml down -v;" EXIT;
 
 ${ENGINE} compose -f ../docker-compose.test.yml up -d;
 echo "running migrations"
+echo $DATABASE_URL
 cargo sqlx migrate run --source ../migrations
 echo "migrations complete"
 cargo test
