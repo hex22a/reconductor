@@ -13,6 +13,28 @@ jobs:
     environment: test
     steps:
       - uses: actions/checkout@v6
+      - name: Debug DB config
+        run: |
+          echo "DB_HOST=$DB_HOST"
+          echo "DB_PORT=$DB_PORT"
+          echo "DB_NAME=$DB_NAME"
+          echo "DB_USERNAME length=${#DB_USERNAME}"
+          echo "DB_PASSWORD length=${#DB_PASSWORD}"
+
+          python3 - <<'PY'
+          from urllib.parse import urlsplit
+          import os
+
+          url = os.environ["DATABASE_URL"]
+          p = urlsplit(url)
+
+          print("scheme:", p.scheme)
+          print("hostname:", p.hostname)
+          print("port:", p.port)
+          print("database:", p.path)
+          print("username:", p.username)
+          print("password present:", p.password is not None)
+          PY
       - name: Install sqlx-cli
         run: cargo install sqlx-cli
       - name: Run tests
