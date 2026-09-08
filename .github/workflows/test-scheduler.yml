@@ -25,4 +25,5 @@ jobs:
           DB_NAME: ${{ vars.DB_NAME }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          KV_PASSWORD: ${{ secrets.KV_PASSWORD }}
 
