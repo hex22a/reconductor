@@ -20,6 +20,7 @@ mod infra;
 pub use application::error::AppError;
 pub use application::run::Runner;
 pub use infra::db;
+pub use infra::db::DbConfig;
 pub use infra::message_queue::RabbitMqConfig;
 pub use infra::message_queue::RabbitMqProvider;
 

@@ -1,4 +1,5 @@
 use server::infra::message_queue::{RabbitMqConfig, RabbitMqProvider};
+use server::infra::persistence::db::DbConfig;
 use server::infra::persistence::kv::KvConfig;
 use server::{AppError, Config, Reconductor};
 
@@ -13,7 +14,14 @@ async fn main() -> Result<(), AppError> {
         .with_max_level(tracing::Level::INFO)
         .init();
     let config = Config::from_env()?;
-    let db = db::init_db(&config.database_url).await;
+    let db = db::init_db(DbConfig {
+        username: config.db_username,
+        password: config.db_password,
+        host: config.db_host,
+        port: config.db_port,
+        db_name: config.db_name,
+    })
+    .await;
     let kv = kv::init_kv(KvConfig {
         username: config.kv_username,
         password: config.kv_password,

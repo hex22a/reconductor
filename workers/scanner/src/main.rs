@@ -1,6 +1,6 @@
 mod config;
 
-use scanner::{AppError, RabbitMqConfig, RabbitMqProvider, Runner, Scanner, db};
+use scanner::{AppError, DbConfig, RabbitMqConfig, RabbitMqProvider, Runner, Scanner, db};
 use tracing::info;
 
 #[tokio::main]
@@ -24,7 +24,14 @@ async fn main() -> Result<(), AppError> {
     info!("Connected to RabbitMQ");
 
     let consume_channel = conn.create_channel().await?;
-    let db = db::init_db(&config.database_url).await;
+    let db = db::init_db(DbConfig {
+        username: config.db_username,
+        password: config.db_password,
+        host: config.db_host,
+        port: config.db_port,
+        db_name: config.db_name,
+    })
+    .await;
     let mq_provider = RabbitMqProvider::build(consume_channel)
         .await
         .expect("Can't declare a message queue");

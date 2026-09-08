@@ -3,7 +3,11 @@ use axum::http::HeaderValue;
 use crate::AppError;
 
 pub struct Config {
-    pub database_url: String,
+    pub db_host: String,
+    pub db_port: u16,
+    pub db_name: String,
+    pub db_username: String,
+    pub db_password: String,
     pub kv_host: String,
     pub kv_port: u16,
     pub kv_username: String,
@@ -21,7 +25,11 @@ pub struct Config {
 impl Config {
     pub fn from_env() -> Result<Self, AppError> {
         Ok(Self {
-            database_url: std::env::var("DATABASE_URL")?,
+            db_host: std::env::var("DB_HOST")?,
+            db_port: std::env::var("DB_PORT")?.parse()?,
+            db_name: std::env::var("DB_NAME")?,
+            db_username: std::env::var("DB_USERNAME")?,
+            db_password: std::env::var("DB_PASSWORD")?,
             kv_host: std::env::var("KV_HOST")?,
             kv_port: std::env::var("KV_PORT")?.parse()?,
             kv_username: std::env::var("KV_USERNAME")?,
