@@ -10,6 +10,27 @@ use crate::{constants::SCANS_QUEUE, infra::message_queue::error::MqError};
 pub mod error;
 pub mod publisher;
 
+pub struct RabbitMqConfig {
+    pub username: String,
+    pub password: String,
+    pub host: String,
+    pub port: u16,
+    pub vhost: String,
+}
+
+impl RabbitMqConfig {
+    pub fn uri(&self) -> String {
+        format!(
+            "amqp://{username}:{password}@{host}:{port}/{vhost}",
+            username = urlencoding::encode(&self.username),
+            password = urlencoding::encode(&self.password),
+            host = self.host,
+            port = self.port,
+            vhost = urlencoding::encode(&self.vhost),
+        )
+    }
+}
+
 pub trait MqProvider {
     fn publish(
         &self,

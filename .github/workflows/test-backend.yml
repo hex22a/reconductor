@@ -27,5 +27,8 @@ jobs:
           KV_PASSWORD: ${{ secrets.KV_PASSWORD }}
           DASHBOARD_URL: ${{ secrets.DASHBOARD_URL }}
           CSRF_SECRET: ${{ secrets.CSRF_SECRET }}
-          RABBITMQ_URL: ${{ secrets.RABBITMQ_URL }}
-
+          RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
+          RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
+          RABBITMQ_HOST: ${{ vars.RABBITMQ_HOST }}
+          RABBITMQ_PORT: ${{ vars.RABBITMQ_PORT }}
+          RABBITMQ_VHOST: ${{ vars.RABBITMQ_VHOST }}

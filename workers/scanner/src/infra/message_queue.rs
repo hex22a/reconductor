@@ -16,6 +16,27 @@ use crate::{
 pub mod consumer;
 pub mod error;
 
+pub struct RabbitMqConfig {
+    pub username: String,
+    pub password: String,
+    pub host: String,
+    pub port: u16,
+    pub vhost: String,
+}
+
+impl RabbitMqConfig {
+    pub fn uri(&self) -> String {
+        format!(
+            "amqp://{username}:{password}@{host}:{port}/{vhost}",
+            username = urlencoding::encode(&self.username),
+            password = urlencoding::encode(&self.password),
+            host = self.host,
+            port = self.port,
+            vhost = urlencoding::encode(&self.vhost),
+        )
+    }
+}
+
 pub trait MqProvider {
     fn consume(&self) -> impl Future<Output = Result<Consumer, MqError>> + Send;
     fn ack(delivery: &Delivery) -> impl Future<Output = Result<(), MqError>> + Send;

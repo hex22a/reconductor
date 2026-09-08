@@ -9,7 +9,11 @@ pub struct Config {
     pub kv_username: String,
     pub kv_password: String,
     pub kv_db: u8,
-    pub rabbitmq_url: String,
+    pub rabbitmq_host: String,
+    pub rabbitmq_port: u16,
+    pub rabbitmq_vhost: String,
+    pub rabbitmq_username: String,
+    pub rabbitmq_password: String,
     pub csrf_key: [u8; 32],
     pub dashboard_url: HeaderValue,
 }
@@ -23,7 +27,11 @@ impl Config {
             kv_username: std::env::var("KV_USERNAME")?,
             kv_password: std::env::var("KV_PASSWORD")?,
             kv_db: std::env::var("KV_DB")?.parse()?,
-            rabbitmq_url: std::env::var("RABBITMQ_URL")?,
+            rabbitmq_host: std::env::var("RABBITMQ_HOST")?,
+            rabbitmq_port: std::env::var("RABBITMQ_PORT")?.parse()?,
+            rabbitmq_vhost: std::env::var("RABBITMQ_VHOST")?,
+            rabbitmq_username: std::env::var("RABBITMQ_USERNAME")?,
+            rabbitmq_password: std::env::var("RABBITMQ_PASSWORD")?,
             csrf_key: hex::decode(std::env::var("CSRF_SECRET")?)?
                 .try_into()
                 .map_err(|_| AppError::CsrfLengthError)?,

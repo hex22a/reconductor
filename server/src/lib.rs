@@ -2,7 +2,7 @@ use std::sync::{Arc, Mutex};
 
 use axum::Router;
 use axum::http::header::CONTENT_TYPE;
-use axum::http::{HeaderName, Method};
+use axum::http::{HeaderName, HeaderValue, Method};
 use rand::rngs::SysRng;
 use sqlx::PgPool;
 
@@ -65,7 +65,13 @@ mod transport;
 pub struct Reconductor;
 
 impl Reconductor {
-    pub fn build(db: PgPool, kv: FredKvProvider, mq: RabbitMqProvider, config: Config) -> Router {
+    pub fn build(
+        db: PgPool,
+        kv: FredKvProvider,
+        mq: RabbitMqProvider,
+        csrf_key: [u8; 32],
+        dashboard_url: HeaderValue,
+    ) -> Router {
         let db = Arc::new(db);
         let kv = Arc::new(kv);
 
@@ -82,7 +88,7 @@ impl Reconductor {
         let os_rng_serivce = Arc::new(OsRngService::new(Arc::new(Mutex::new(SysRng))));
         let csrf_service = Arc::new(AesGcmCsrfService::new(
             Arc::clone(&os_rng_serivce),
-            config.csrf_key,
+            csrf_key,
         ));
         let mq_publisher = Arc::new(MqPublisher::new(mq));
         let register_feature = Arc::new(UserRegisterFeature::new(
@@ -147,7 +153,7 @@ impl Reconductor {
         });
 
         let cors = CorsLayer::new()
-            .allow_origin(config.dashboard_url)
+            .allow_origin(dashboard_url)
             .allow_methods([Method::GET, Method::POST])
             .allow_headers([CONTENT_TYPE, CSRF_HEADER.parse::<HeaderName>().unwrap()])
             .allow_credentials(true);
