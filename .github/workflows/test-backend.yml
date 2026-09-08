@@ -11,51 +11,29 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     environment: test
-    env:
-      DATABASE_URL: postgres://${{ secrets.DB_USERNAME }}:${{ secrets.DB_PASSWORD }}@${{ vars.DB_HOST }}:${{ vars.DB_PORT }}/${{ vars.DB_NAME }}?sslmode=disable
-      DB_HOST: ${{ vars.DB_HOST }}
-      DB_PORT: ${{ vars.DB_PORT }}
-      DB_NAME: ${{ vars.DB_NAME }}
-      DB_USERNAME: ${{ secrets.DB_USERNAME }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      KV_HOST: ${{ vars.KV_HOST }}
-      KV_PORT: ${{ vars.KV_PORT }}
-      KV_DB: ${{ vars.KV_DB }}
-      KV_USERNAME: ${{ secrets.KV_USERNAME }}
-      KV_PASSWORD: ${{ secrets.KV_PASSWORD }}
-      DASHBOARD_URL: ${{ secrets.DASHBOARD_URL }}
-      CSRF_SECRET: ${{ secrets.CSRF_SECRET }}
-      RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
-      RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
-      RABBITMQ_HOST: ${{ vars.RABBITMQ_HOST }}
-      RABBITMQ_PORT: ${{ vars.RABBITMQ_PORT }}
-      RABBITMQ_VHOST: ${{ vars.RABBITMQ_VHOST }}
     steps:
       - uses: actions/checkout@v6
-      - name: Debug DB config
-        run: |
-          echo "DB_HOST=$DB_HOST"
-          echo "DB_PORT=$DB_PORT"
-          echo "DB_NAME=$DB_NAME"
-          echo "DB_USERNAME length=${#DB_USERNAME}"
-          echo "DB_PASSWORD length=${#DB_PASSWORD}"
-
-          python3 - <<'PY'
-          from urllib.parse import urlsplit
-          import os
-
-          url = os.environ["DATABASE_URL"]
-          p = urlsplit(url)
-
-          print("scheme:", p.scheme)
-          print("hostname:", p.hostname)
-          print("port:", p.port)
-          print("database:", p.path)
-          print("username:", p.username)
-          print("password present:", p.password is not None)
-          PY
       - name: Install sqlx-cli
         run: cargo install sqlx-cli
       - name: Run tests
         run: ./tests.sh
         working-directory: ./server
+        env:
+          DATABASE_URL: postgres://${{ secrets.DB_USERNAME }}:${{ secrets.DB_PASSWORD }}@${{ vars.DB_HOST }}:${{ vars.DB_PORT }}/${{ vars.DB_NAME }}
+          DB_HOST: ${{ vars.DB_HOST }}
+          DB_PORT: ${{ vars.DB_PORT }}
+          DB_NAME: ${{ vars.DB_NAME }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          KV_HOST: ${{ vars.KV_HOST }}
+          KV_PORT: ${{ vars.KV_PORT }}
+          KV_DB: ${{ vars.KV_DB }}
+          KV_USERNAME: ${{ secrets.KV_USERNAME }}
+          KV_PASSWORD: ${{ secrets.KV_PASSWORD }}
+          DASHBOARD_URL: ${{ secrets.DASHBOARD_URL }}
+          CSRF_SECRET: ${{ secrets.CSRF_SECRET }}
+          RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
+          RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
+          RABBITMQ_HOST: ${{ vars.RABBITMQ_HOST }}
+          RABBITMQ_PORT: ${{ vars.RABBITMQ_PORT }}
+          RABBITMQ_VHOST: ${{ vars.RABBITMQ_VHOST }}
