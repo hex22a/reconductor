@@ -1,9 +1,12 @@
 use std::sync::Arc;
 
+#[cfg(test)]
+use mockall::automock;
 use sqlx::PgPool;
 
 use crate::features::user::model::{UserEntity, UserInsert};
 
+#[cfg_attr(test, automock)]
 pub trait UserRepository {
     fn add_user(
         &self,

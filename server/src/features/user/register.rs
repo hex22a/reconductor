@@ -1,17 +1,21 @@
 use std::pin::Pin;
 use std::sync::Arc;
 
+#[cfg(test)]
+use mockall::automock;
+
 use crate::features::user::error::UserError;
 use crate::features::user::model::UserInsert;
 use crate::features::user::repository::UserRepository;
 use crate::infra::password::PasswordService;
 
+#[cfg_attr(test, automock)]
 pub trait RegisterFeature {
-    fn register(
-        &self,
+    fn register<'a>(
+        &'a self,
         username: String,
         password: String,
-    ) -> Pin<Box<dyn Future<Output = Result<(), UserError>> + Send + '_>>;
+    ) -> Pin<Box<dyn Future<Output = Result<(), UserError>> + Send + 'a>>;
 }
 
 #[derive(Clone)]
@@ -56,49 +60,33 @@ where
 mod tests {
     use std::sync::Arc;
 
-    use crate::features::user::model::UserEntity;
-    use crate::features::user::model::UserInsert;
     use crate::features::user::register::RegisterFeature;
     use crate::features::user::register::UserRegisterFeature;
-    use crate::features::user::repository::UserRepository;
-    use crate::infra::password::PasswordService;
-    use crate::infra::password::PasswordServiceError;
-
-    struct MockUserRepository;
-    struct MockPasswordService;
-    impl UserRepository for MockUserRepository {
-        async fn add_user(&self, _: UserInsert) -> Result<(), sqlx::Error> {
-            Ok(())
-        }
-
-        async fn get_user_by_username(&self, _: &str) -> Result<UserEntity, sqlx::Error> {
-            todo!()
-        }
-    }
-    impl PasswordService for MockPasswordService {
-        fn hash_password(&self, _: &str) -> Result<String, PasswordServiceError> {
-            Ok("hashed_password".to_string())
-        }
-
-        fn verify_password(&self, _: &str, _: &str) -> Result<bool, PasswordServiceError> {
-            Ok(true)
-        }
-    }
+    use crate::features::user::repository::MockUserRepository;
+    use crate::infra::password::MockPasswordService;
 
     #[tokio::test]
     async fn test_register_feature() {
         // Arrange
         let expected_username = "test".to_string();
         let expected_password = "password".to_string();
-        let mock_password_service = Arc::new(MockPasswordService);
-        let mock_user_repository = Arc::new(MockUserRepository);
-        let feature = UserRegisterFeature::new(mock_password_service, mock_user_repository);
+        let mut mock_password_service = MockPasswordService::new();
+        mock_password_service
+            .expect_hash_password()
+            .return_const(Ok(String::from("hashed_password")));
+        let mut mock_user_repository = MockUserRepository::new();
+        mock_user_repository
+            .expect_add_user()
+            .returning(|_| Box::pin(async { Ok(()) }));
+        let feature = UserRegisterFeature::new(
+            Arc::new(mock_password_service),
+            Arc::new(mock_user_repository),
+        );
+
         // Act
-        let actual_result = feature
-            .register(expected_username, expected_password)
-            .await
-            .unwrap();
+        let actual_result = feature.register(expected_username, expected_password).await;
+
         // Assert
-        assert_eq!(actual_result, ());
+        assert!(actual_result.is_ok());
     }
 }

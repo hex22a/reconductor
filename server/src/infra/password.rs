@@ -2,10 +2,14 @@ use std::fmt;
 
 use argon2::{Argon2, Params, PasswordHash, PasswordHasher, PasswordVerifier};
 
+#[cfg(test)]
+use mockall::automock;
+
 use crate::constants::{
     PASSWORD_MEMORY_COST_BYTES, PASSWORD_PARALLELISM, PASSWORD_TIME_COST_PASSES,
 };
 
+#[derive(Clone)]
 pub enum PasswordServiceError {
     HashError(String),
     ParseError(String),
@@ -20,6 +24,7 @@ impl fmt::Display for PasswordServiceError {
     }
 }
 
+#[cfg_attr(test, automock)]
 pub trait PasswordService {
     fn hash_password(&self, password: &str) -> Result<String, PasswordServiceError>;
     fn verify_password(
