@@ -39,34 +39,25 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::features::session::{model::UserSession, repository::SessionRepositoryError};
+    use crate::features::session::repository::MockSessionRepository;
 
     use super::*;
-
-    struct MockSessionRepository;
-    impl SessionRepository for MockSessionRepository {
-        async fn create_user_session(&self, _: UserSession) -> Result<(), SessionRepositoryError> {
-            todo!()
-        }
-
-        async fn get_user_session(&self, _: &str) -> Result<UserSession, SessionRepositoryError> {
-            todo!()
-        }
-
-        async fn delete_user_session(&self, _: &str) -> Result<(), SessionRepositoryError> {
-            Ok(())
-        }
-    }
 
     #[tokio::test]
     async fn test_logout() {
         // Arrange
         let expected_session_id = "session_id";
-        let mock_session_repository = MockSessionRepository;
+        let mut mock_session_repository = MockSessionRepository::new();
+        mock_session_repository
+            .expect_delete_user_session()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
         let feature = UserLogoutFeature::new(Arc::new(mock_session_repository));
+
         // Act
-        let actual_logout_result = feature.logout(expected_session_id).await.unwrap();
+        let actual_logout_result = feature.logout(expected_session_id).await;
+
         // Assert
-        assert_eq!(actual_logout_result, ());
+        assert!(actual_logout_result.is_ok());
     }
 }

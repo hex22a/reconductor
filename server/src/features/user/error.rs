@@ -1,4 +1,4 @@
-use core::fmt;
+use thiserror::Error;
 
 use crate::{
     features::{
@@ -7,11 +7,18 @@ use crate::{
     infra::{csrf::CsrfServiceError, password::PasswordServiceError, random::RngServiceError},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum UserError {
+    #[error("passwords don't match")]
     PasswordMismatch,
+
+    #[error("password service error")]
     PasswordError,
+
+    #[error("internal error")]
     Interntal,
+
+    #[error("error storing user: {0}")]
     StorageError(String),
 }
 
@@ -52,17 +59,6 @@ impl From<CsrfRepositoryError> for UserError {
     fn from(value: CsrfRepositoryError) -> Self {
         match value {
             CsrfRepositoryError::StorageError(e) => UserError::StorageError(e.to_string()),
-        }
-    }
-}
-
-impl fmt::Display for UserError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            UserError::StorageError(e) => write!(f, "error storing user: {}", e),
-            UserError::PasswordError => write!(f, "password service error"),
-            UserError::PasswordMismatch => write!(f, "password mismatch"),
-            UserError::Interntal => write!(f, "internal error"),
         }
     }
 }

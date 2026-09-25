@@ -8,3 +8,4 @@ edition = "2024"
 
 [workspace.dependencies]
 mockall = "0.15.0"
+thiserror = "2.0.21"

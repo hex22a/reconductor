@@ -1,5 +1,8 @@
-use core::fmt;
 use std::{collections::HashMap, sync::Arc, time::Duration};
+
+#[cfg(test)]
+use mockall::automock;
+use thiserror::Error;
 
 use crate::{
     constants::{USER_SESSION_PREFIX, USER_SESSION_TTL_SECONDS},
@@ -7,10 +10,15 @@ use crate::{
     infra::persistence::kv::KvProvider,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum SessionRepositoryError {
+    #[error("session not found")]
     NotFound,
-    StorageError(fred::error::Error),
+
+    #[error("storage error: {0}")]
+    StorageError(#[source] fred::error::Error),
+
+    #[error("error parsing uuid")]
     ParseError,
 }
 
@@ -53,22 +61,13 @@ impl TryFrom<HashMap<String, String>> for UserSession {
     }
 }
 
-impl fmt::Display for SessionRepositoryError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            SessionRepositoryError::NotFound => write!(f, "session not found"),
-            SessionRepositoryError::ParseError => write!(f, "error parsing uuid"),
-            SessionRepositoryError::StorageError(e) => write!(f, "storage error: {}", e),
-        }
-    }
-}
-
 impl From<fred::error::Error> for SessionRepositoryError {
     fn from(value: fred::error::Error) -> Self {
         SessionRepositoryError::StorageError(value)
     }
 }
 
+#[cfg_attr(test, automock)]
 pub trait SessionRepository {
     fn create_user_session(
         &self,
