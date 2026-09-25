@@ -118,106 +118,15 @@ mod tests {
     use uuid::Uuid;
 
     use super::*;
-    use std::sync::Mutex;
 
     use crate::{
-        constants::NONCE_SIZE_BYTES,
         features::{
-            csrf::repository::CsrfRepositoryError,
-            session::repository::SessionRepositoryError,
-            user::model::{UserEntity, UserInsert},
+            csrf::repository::MockCsrfRepository,
+            session::repository::MockSessionRepository,
+            user::{model::UserEntity, repository::MockUserRepository},
         },
-        infra::{
-            csrf::CsrfServiceError,
-            password::{PasswordService, PasswordServiceError},
-            random::RngServiceError,
-        },
+        infra::{csrf::MockCsrfService, password::MockPasswordService, random::MockRngService},
     };
-
-    struct MockPasswordService {
-        error: Mutex<Option<PasswordServiceError>>,
-        is_valid: bool,
-    }
-    struct MockCsrfRepository;
-    struct MockUserRepository {
-        error: Mutex<Option<sqlx::Error>>,
-        return_value: UserEntity,
-    }
-    struct MockSessionRepository;
-    struct MockCsrfService {
-        return_value: (String, String),
-    }
-    struct MockRngService {
-        return_value: String,
-    }
-    impl PasswordService for MockPasswordService {
-        fn hash_password(&self, _: &str) -> Result<String, PasswordServiceError> {
-            todo!()
-        }
-
-        fn verify_password(&self, _: &str, _: &str) -> Result<bool, PasswordServiceError> {
-            match self.error.lock().unwrap().take() {
-                Some(e) => Err(e),
-                None => Ok(self.is_valid),
-            }
-        }
-    }
-    impl UserRepository for MockUserRepository {
-        async fn add_user(&self, _: UserInsert) -> Result<(), sqlx::Error> {
-            todo!()
-        }
-
-        async fn get_user_by_username(&self, _: &str) -> Result<UserEntity, sqlx::Error> {
-            match self.error.lock().unwrap().take() {
-                Some(e) => Err(e),
-                None => Ok(self.return_value.clone()),
-            }
-        }
-    }
-    impl SessionRepository for MockSessionRepository {
-        async fn create_user_session(&self, _: UserSession) -> Result<(), SessionRepositoryError> {
-            Ok(())
-        }
-
-        async fn get_user_session(&self, _: &str) -> Result<UserSession, SessionRepositoryError> {
-            todo!()
-        }
-
-        async fn delete_user_session(&self, _: &str) -> Result<(), SessionRepositoryError> {
-            todo!()
-        }
-    }
-    impl CsrfRepository for MockCsrfRepository {
-        async fn create_anonymous_csrf(&self, _: &str) -> Result<(), CsrfRepositoryError> {
-            todo!()
-        }
-
-        async fn verify_anonymous_csrf(&self, _: &str) -> Result<bool, CsrfRepositoryError> {
-            todo!()
-        }
-
-        async fn delete_anonymous_csrf(&self, _: &str) -> Result<(), CsrfRepositoryError> {
-            Ok(())
-        }
-    }
-    impl CsrfService for MockCsrfService {
-        fn generate(&self, _: u64) -> Result<(String, String), CsrfServiceError> {
-            Ok(self.return_value.clone())
-        }
-
-        fn verify(&self, _: &str, _: &str) -> bool {
-            todo!()
-        }
-    }
-    impl RngService for MockRngService {
-        fn generate_nonce(&self) -> Result<[u8; NONCE_SIZE_BYTES], RngServiceError> {
-            todo!()
-        }
-
-        fn generate_session_id(&self) -> Result<String, RngServiceError> {
-            Ok(self.return_value.clone())
-        }
-    }
 
     #[tokio::test]
     async fn test_login_password_matches() {
@@ -254,30 +163,49 @@ mod tests {
             csrf_token: expected_csrf_token.clone(),
             csrf_cookie: expected_csrf_cookie_value.clone(),
         };
-        let mock_password_service = Arc::new(MockPasswordService {
-            error: Mutex::new(None),
-            is_valid: true,
-        });
-        let mock_user_repository = Arc::new(MockUserRepository {
-            error: Mutex::new(None),
-            return_value: expected_user_entity,
-        });
-        let mock_session_repository = Arc::new(MockSessionRepository);
-        let mock_csrf_repository = Arc::new(MockCsrfRepository);
-        let mock_csrf_service = Arc::new(MockCsrfService {
-            return_value: expected_csrf_service_generated_value,
-        });
-        let mock_rng_service = Arc::new(MockRngService {
-            return_value: expected_session_cookie.clone(),
-        });
+
+        let mut mock_password_service = MockPasswordService::new();
+        mock_password_service
+            .expect_verify_password()
+            .return_const(Ok(true));
+
+        let mut mock_user_repository = MockUserRepository::new();
+        mock_user_repository
+            .expect_get_user_by_username()
+            .returning(move |_| {
+                let user = expected_user_entity.clone();
+                Box::pin(async { Ok(user) })
+            });
+
+        let mut mock_session_repository = MockSessionRepository::new();
+        mock_session_repository
+            .expect_create_user_session()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
+        let mut mock_csrf_repository = MockCsrfRepository::new();
+        mock_csrf_repository
+            .expect_delete_anonymous_csrf()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service
+            .expect_generate()
+            .return_const(Ok(expected_csrf_service_generated_value));
+
+        let mut mock_rng_service = MockRngService::new();
+        mock_rng_service
+            .expect_generate_session_id()
+            .return_const(Ok(expected_session_cookie));
+
         let feature = UserLoginFeature::new(
-            mock_user_repository,
-            mock_session_repository,
-            mock_csrf_repository,
-            mock_csrf_service,
-            mock_password_service,
-            mock_rng_service,
+            Arc::new(mock_user_repository),
+            Arc::new(mock_session_repository),
+            Arc::new(mock_csrf_repository),
+            Arc::new(mock_csrf_service),
+            Arc::new(mock_password_service),
+            Arc::new(mock_rng_service),
         );
+
         // Act
         let actual_auth_session = feature
             .login(
@@ -287,6 +215,7 @@ mod tests {
             )
             .await
             .unwrap();
+
         // Assert
         assert_eq!(actual_auth_session, expected_auth_session);
     }
@@ -319,30 +248,49 @@ mod tests {
         };
         let expected_csrf_service_generated_value =
             (expected_csrf_token, expected_csrf_cookie_value);
-        let mock_password_service = Arc::new(MockPasswordService {
-            error: Mutex::new(None),
-            is_valid: false,
-        });
-        let mock_user_repository = Arc::new(MockUserRepository {
-            error: Mutex::new(None),
-            return_value: expected_user_entity,
-        });
-        let mock_session_repository = Arc::new(MockSessionRepository);
-        let mock_csrf_repository = Arc::new(MockCsrfRepository);
-        let mock_csrf_service = Arc::new(MockCsrfService {
-            return_value: expected_csrf_service_generated_value,
-        });
-        let mock_rng_service = Arc::new(MockRngService {
-            return_value: expected_session_cookie.clone(),
-        });
+
+        let mut mock_password_service = MockPasswordService::new();
+        mock_password_service
+            .expect_verify_password()
+            .return_const(Ok(false));
+
+        let mut mock_user_repository = MockUserRepository::new();
+        mock_user_repository
+            .expect_get_user_by_username()
+            .returning(move |_| {
+                let user = expected_user_entity.clone();
+                Box::pin(async { Ok(user) })
+            });
+
+        let mut mock_session_repository = MockSessionRepository::new();
+        mock_session_repository
+            .expect_create_user_session()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
+        let mut mock_csrf_repository = MockCsrfRepository::new();
+        mock_csrf_repository
+            .expect_delete_anonymous_csrf()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service
+            .expect_generate()
+            .return_const(Ok(expected_csrf_service_generated_value));
+
+        let mut mock_rng_service = MockRngService::new();
+        mock_rng_service
+            .expect_generate_session_id()
+            .return_const(Ok(expected_session_cookie));
+
         let feature = UserLoginFeature::new(
-            mock_user_repository,
-            mock_session_repository,
-            mock_csrf_repository,
-            mock_csrf_service,
-            mock_password_service,
-            mock_rng_service,
+            Arc::new(mock_user_repository),
+            Arc::new(mock_session_repository),
+            Arc::new(mock_csrf_repository),
+            Arc::new(mock_csrf_service),
+            Arc::new(mock_password_service),
+            Arc::new(mock_rng_service),
         );
+
         // Act
         let actual_login_result = feature
             .login(
@@ -351,6 +299,7 @@ mod tests {
                 expected_anonymous_csrf,
             )
             .await;
+
         // Assert
         assert!(matches!(
             actual_login_result,

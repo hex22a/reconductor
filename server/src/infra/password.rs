@@ -1,27 +1,20 @@
-use std::fmt;
-
 use argon2::{Argon2, Params, PasswordHash, PasswordHasher, PasswordVerifier};
 
 #[cfg(test)]
 use mockall::automock;
+use thiserror::Error;
 
 use crate::constants::{
     PASSWORD_MEMORY_COST_BYTES, PASSWORD_PARALLELISM, PASSWORD_TIME_COST_PASSES,
 };
 
-#[derive(Clone)]
+#[derive(Debug, Clone, Error)]
 pub enum PasswordServiceError {
+    #[error("error hasing password: {0}")]
     HashError(String),
-    ParseError(String),
-}
 
-impl fmt::Display for PasswordServiceError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            PasswordServiceError::HashError(e) => write!(f, "error hasing password: {}", e),
-            PasswordServiceError::ParseError(e) => write!(f, "error parsing hash: {}", e),
-        }
-    }
+    #[error("error parsing hash: {0}")]
+    ParseError(String),
 }
 
 #[cfg_attr(test, automock)]

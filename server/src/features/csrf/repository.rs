@@ -1,21 +1,18 @@
-use std::{fmt, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
+
+#[cfg(test)]
+use mockall::automock;
+use thiserror::Error;
 
 use crate::{
     constants::{ANONYMOUS_CSRF_PREFIX, ANONYMOUS_CSRF_TTL_SECONDS},
     infra::persistence::kv::KvProvider,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum CsrfRepositoryError {
-    StorageError(fred::error::Error),
-}
-
-impl fmt::Display for CsrfRepositoryError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            CsrfRepositoryError::StorageError(e) => write!(f, "storage error: {}", e),
-        }
-    }
+    #[error("storage error: {0}")]
+    StorageError(#[source] fred::error::Error),
 }
 
 impl From<fred::error::Error> for CsrfRepositoryError {
@@ -24,6 +21,7 @@ impl From<fred::error::Error> for CsrfRepositoryError {
     }
 }
 
+#[cfg_attr(test, automock)]
 pub trait CsrfRepository {
     fn create_anonymous_csrf(
         &self,

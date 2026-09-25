@@ -83,9 +83,11 @@ mod tests {
             username: expected_username.clone(),
             password: expected_password.clone(),
         };
+
         // Act
         let actual_register_user: UserInput =
             UserInput::try_from(expected_register_user_request).unwrap();
+
         // Assert
         assert_eq!(actual_register_user, expected_register_user);
     }

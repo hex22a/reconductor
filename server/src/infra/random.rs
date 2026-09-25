@@ -1,18 +1,21 @@
-use std::{
-    fmt,
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc, Mutex};
 
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
 use rand::{
     TryRng,
     rngs::{SysError, SysRng},
 };
+use thiserror::Error;
+
+#[cfg(test)]
+use mockall::automock;
 
 use crate::constants::{NONCE_SIZE_BYTES, SESSION_ID_SIZE_BYTES};
 
+#[derive(Debug, Clone, Error)]
 pub enum RngServiceError {
-    OsError(SysError),
+    #[error("system error: {0}")]
+    OsError(#[source] SysError),
 }
 
 impl From<SysError> for RngServiceError {
@@ -21,14 +24,7 @@ impl From<SysError> for RngServiceError {
     }
 }
 
-impl fmt::Display for RngServiceError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            RngServiceError::OsError(e) => write!(f, "system error: {}", e),
-        }
-    }
-}
-
+#[cfg_attr(test, automock)]
 pub trait RngService {
     fn generate_nonce(&self) -> Result<[u8; NONCE_SIZE_BYTES], RngServiceError>;
     fn generate_session_id(&self) -> Result<String, RngServiceError>;

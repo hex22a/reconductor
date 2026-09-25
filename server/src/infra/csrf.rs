@@ -1,12 +1,22 @@
 use base64::{Engine, engine::general_purpose};
 use csrf::{AesGcmCsrfProtection, CsrfError, CsrfProtection};
-use std::{fmt, sync::Arc};
+use std::sync::Arc;
+use thiserror::Error;
+
+#[cfg(test)]
+use mockall::automock;
 
 use crate::infra::random::{OsRngService, RngService, RngServiceError};
 
+#[derive(Debug, Clone, Error)]
 pub enum CsrfServiceError {
+    #[error("csrf token not generated: {0}")]
     NotGenerated(String),
-    RngError(RngServiceError),
+
+    #[error("error generating random value: {0}")]
+    RngError(#[source] RngServiceError),
+
+    #[error("csrf internal error")]
     CsrfInternalError,
 }
 
@@ -26,16 +36,7 @@ impl From<RngServiceError> for CsrfServiceError {
     }
 }
 
-impl fmt::Display for CsrfServiceError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            CsrfServiceError::NotGenerated(e) => write!(f, "csrf token not generated: {}", e),
-            CsrfServiceError::RngError(e) => write!(f, "error generating random value: {}", e),
-            CsrfServiceError::CsrfInternalError => write!(f, "csrf internal error"),
-        }
-    }
-}
-
+#[cfg_attr(test, automock)]
 pub trait CsrfService {
     fn generate(&self, ttl: u64) -> Result<(String, String), CsrfServiceError>;
     fn verify(&self, token: &str, cookie: &str) -> bool;
