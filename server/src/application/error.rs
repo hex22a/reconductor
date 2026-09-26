@@ -2,6 +2,7 @@ use std::{collections::HashMap, env::VarError, num::ParseIntError};
 
 use axum::http::header::InvalidHeaderValue;
 use hex::FromHexError;
+use thiserror::Error;
 
 use crate::{
     features::{
@@ -12,13 +13,24 @@ use crate::{
     infra::password::PasswordServiceError,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum AppError {
+    #[error("environment variable error: {0}")]
     EnvironmentError(String),
+
+    #[error("error decoding hex value: {0}")]
     HexDecodeError(String),
+
+    #[error("csrf length error")]
     CsrfLengthError,
+
+    #[error("wrong header")]
     HeaderError,
+
+    #[error("error parsing int value")]
     ParseIntError,
+
+    #[error("initialization error")]
     InitializationError,
 }
 
