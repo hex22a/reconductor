@@ -1,14 +1,25 @@
+use thiserror::Error;
+
 use crate::{
     domain::cursor::CursorError,
     infra::{message_queue::error::MqError, scheduler::ScheduleError},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum ScanError {
+    #[error("scan not found")]
     NotFound,
+
+    #[error("last cursor not provided")]
     NoLastCursor,
+
+    #[error("error decoding cursor")]
     DecodeError,
+
+    #[error("unable to caluclate schedule")]
     ScheduleError,
+
+    #[error("unable to publish job")]
     PublishError,
 }
 

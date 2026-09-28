@@ -1,9 +1,16 @@
+use thiserror::Error;
+
 use crate::domain::cursor::CursorError;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum ScanRunError {
+    #[error("scan run not found")]
     NotFound,
+
+    #[error("last cursor not provided")]
     NoLastCursor,
+
+    #[error("error decoding cursor")]
     DecodeError,
 }
 

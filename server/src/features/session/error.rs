@@ -1,8 +1,13 @@
+use thiserror::Error;
+
 use crate::features::session::repository::SessionRepositoryError;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum SessionError {
+    #[error("session not found")]
     NotFound,
+
+    #[error("internal error")]
     Internal,
 }
 
