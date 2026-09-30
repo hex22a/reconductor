@@ -1,5 +1,8 @@
 use std::{pin::Pin, sync::Arc};
 
+#[cfg(test)]
+use mockall::automock;
+
 use crate::{
     constants::ANONYMOUS_CSRF_TTL_SECONDS,
     features::{
@@ -9,10 +12,11 @@ use crate::{
     infra::csrf::CsrfService,
 };
 
+#[cfg_attr(test, automock)]
 pub trait TokenFeature {
     fn get_token<'a>(
         &'a self,
-        session_token: Option<&'a str>,
+        session_token: Option<String>,
     ) -> Pin<Box<dyn Future<Output = Result<CsrfTokenPair, CsrfError>> + Send + 'a>>;
 }
 
@@ -41,12 +45,13 @@ where
 {
     fn get_token<'a>(
         &'a self,
-        session_cookie: Option<&'a str>,
+        session_cookie: Option<String>,
     ) -> Pin<Box<dyn Future<Output = Result<CsrfTokenPair, CsrfError>> + Send + 'a>> {
         Box::pin(async move {
             match session_cookie {
                 Some(token) => {
-                    let user_session_result = self.session_repository.get_user_session(token).await;
+                    let user_session_result =
+                        self.session_repository.get_user_session(&token).await;
                     match user_session_result {
                         Ok(user_session) => Ok(CsrfTokenPair {
                             token: user_session.csrf_token,
@@ -87,75 +92,25 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Mutex;
-
     use uuid::Uuid;
 
     use super::*;
     use crate::{
-        features::{csrf::repository::CsrfRepositoryError, session::model::UserSession},
-        infra::csrf::{CsrfService, CsrfServiceError},
+        features::{
+            csrf::repository::MockCsrfRepository,
+            session::{model::UserSession, repository::MockSessionRepository},
+        },
+        infra::csrf::MockCsrfService,
     };
-
-    struct MockSessionRepository {
-        error: Mutex<Option<SessionRepositoryError>>,
-        return_value: UserSession,
-    }
-    struct MockCsrfRepository;
-    struct MockCsrfService {
-        error: Mutex<Option<CsrfServiceError>>,
-        return_value: (String, String),
-    }
-    impl SessionRepository for MockSessionRepository {
-        async fn create_user_session(&self, _: UserSession) -> Result<(), SessionRepositoryError> {
-            todo!()
-        }
-
-        async fn get_user_session(&self, _: &str) -> Result<UserSession, SessionRepositoryError> {
-            match self.error.lock().unwrap().take() {
-                Some(e) => Err(e),
-                None => Ok(self.return_value.clone()),
-            }
-        }
-
-        async fn delete_user_session(&self, _: &str) -> Result<(), SessionRepositoryError> {
-            todo!()
-        }
-    }
-    impl CsrfRepository for MockCsrfRepository {
-        async fn create_anonymous_csrf(&self, _: &str) -> Result<(), CsrfRepositoryError> {
-            Ok(())
-        }
-
-        async fn verify_anonymous_csrf(&self, _: &str) -> Result<bool, CsrfRepositoryError> {
-            todo!()
-        }
-
-        async fn delete_anonymous_csrf(&self, _: &str) -> Result<(), CsrfRepositoryError> {
-            todo!()
-        }
-    }
-    impl CsrfService for MockCsrfService {
-        fn generate(&self, _: u64) -> Result<(String, String), CsrfServiceError> {
-            match self.error.lock().unwrap().take() {
-                Some(e) => Err(e),
-                None => Ok(self.return_value.clone()),
-            }
-        }
-
-        fn verify(&self, _: &str, _: &str) -> bool {
-            todo!()
-        }
-    }
 
     #[tokio::test]
     async fn test_get_token_from_session() {
         // Arrange
-        let expected_session_token = "session_token".to_string();
+        let expected_session_token = String::from("session_token");
         let expected_user_id: Uuid = Uuid::now_v7();
-        let expected_username = "test".to_string();
-        let expected_csrf_token = "csrf_token".to_string();
-        let expected_csrf_cookie = "csrf_cookie".to_string();
+        let expected_username = String::from("test");
+        let expected_csrf_token = String::from("csrf_token");
+        let expected_csrf_cookie = String::from("csrf_cookie");
         let expected_csrf_token_pair = CsrfTokenPair {
             token: expected_csrf_token.clone(),
             cookie_value: expected_csrf_cookie.clone(),
@@ -167,25 +122,37 @@ mod tests {
             csrf_token: expected_csrf_token.clone(),
             csrf_cookie: expected_csrf_cookie.clone(),
         };
-        let mock_session_repository = Arc::new(MockSessionRepository {
-            error: Mutex::new(None),
-            return_value: expected_user_session,
-        });
-        let mock_csrf_repository = Arc::new(MockCsrfRepository);
-        let mock_csrf_service = Arc::new(MockCsrfService {
-            error: Mutex::new(None),
-            return_value: (expected_csrf_token.clone(), expected_csrf_cookie),
-        });
+
+        let mut mock_session_repository = MockSessionRepository::new();
+        mock_session_repository
+            .expect_get_user_session()
+            .returning(move |_| {
+                let user_session = expected_user_session.clone();
+                Box::pin(async { Ok(user_session) })
+            });
+
+        let mut mock_csrf_repository = MockCsrfRepository::new();
+        mock_csrf_repository
+            .expect_create_anonymous_csrf()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service
+            .expect_generate()
+            .return_const(Ok((expected_csrf_token, expected_csrf_cookie)));
+
         let feature = CsrfTokenFeature::new(
-            mock_session_repository,
-            mock_csrf_repository,
-            mock_csrf_service,
+            Arc::new(mock_session_repository),
+            Arc::new(mock_csrf_repository),
+            Arc::new(mock_csrf_service),
         );
+
         // Act
         let actual_csrf_token_pair = feature
-            .get_token(Some(&expected_session_token))
+            .get_token(Some(expected_session_token))
             .await
             .unwrap();
+
         // Assert
         assert_eq!(actual_csrf_token_pair, expected_csrf_token_pair);
     }
@@ -194,41 +161,40 @@ mod tests {
     async fn test_get_token_anonymous_token() {
         // Arrange
         let expected_session_token = "session_token".to_string();
-        let expected_user_id: Uuid = Uuid::now_v7();
-        let expected_username = "test".to_string();
-        let expected_csrf_token = "csrf_token".to_string();
         let expected_anonymous_csrf_token = "anonymous_csrf".to_string();
         let expected_csrf_cookie = "csrf_cookie".to_string();
         let expected_csrf_token_pair = CsrfTokenPair {
             token: expected_anonymous_csrf_token.clone(),
             cookie_value: expected_csrf_cookie.clone(),
         };
-        let expected_user_session = UserSession {
-            token: expected_session_token.clone(),
-            user_id: expected_user_id,
-            username: expected_username,
-            csrf_token: expected_csrf_token.clone(),
-            csrf_cookie: expected_csrf_cookie.clone(),
-        };
-        let mock_session_repository = Arc::new(MockSessionRepository {
-            error: Mutex::new(Some(SessionRepositoryError::NotFound)),
-            return_value: expected_user_session,
-        });
-        let mock_csrf_repository = Arc::new(MockCsrfRepository);
-        let mock_csrf_service = Arc::new(MockCsrfService {
-            error: Mutex::new(None),
-            return_value: (expected_anonymous_csrf_token.clone(), expected_csrf_cookie),
-        });
+
+        let mut mock_session_repository = MockSessionRepository::new();
+        mock_session_repository
+            .expect_get_user_session()
+            .returning(|_| Box::pin(async { Err(SessionRepositoryError::NotFound) }));
+
+        let mut mock_csrf_repository = MockCsrfRepository::new();
+        mock_csrf_repository
+            .expect_create_anonymous_csrf()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service
+            .expect_generate()
+            .return_const(Ok((expected_anonymous_csrf_token, expected_csrf_cookie)));
+
         let feature = CsrfTokenFeature::new(
-            mock_session_repository,
-            mock_csrf_repository,
-            mock_csrf_service,
+            Arc::new(mock_session_repository),
+            Arc::new(mock_csrf_repository),
+            Arc::new(mock_csrf_service),
         );
+
         // Act
         let actual_csrf_token_pair = feature
-            .get_token(Some(&expected_session_token))
+            .get_token(Some(expected_session_token))
             .await
             .unwrap();
+
         // Assert
         assert_eq!(actual_csrf_token_pair, expected_csrf_token_pair);
     }
@@ -236,39 +202,37 @@ mod tests {
     #[tokio::test]
     async fn test_get_token_no_cookie_passed() {
         // Arrange
-        let expected_session_token = "session_token".to_string();
-        let expected_user_id: Uuid = Uuid::now_v7();
-        let expected_username = "test".to_string();
-        let expected_csrf_token = "csrf_token".to_string();
         let expected_anonymous_csrf_token = "anonymous_csrf".to_string();
         let expected_csrf_cookie = "csrf_cookie".to_string();
         let expected_csrf_token_pair = CsrfTokenPair {
             token: expected_anonymous_csrf_token.clone(),
             cookie_value: expected_csrf_cookie.clone(),
         };
-        let expected_user_session = UserSession {
-            token: expected_session_token.clone(),
-            user_id: expected_user_id,
-            username: expected_username,
-            csrf_token: expected_csrf_token.clone(),
-            csrf_cookie: expected_csrf_cookie.clone(),
-        };
-        let mock_session_repository = Arc::new(MockSessionRepository {
-            error: Mutex::new(Some(SessionRepositoryError::NotFound)),
-            return_value: expected_user_session,
-        });
-        let mock_csrf_repository = Arc::new(MockCsrfRepository);
-        let mock_csrf_service = Arc::new(MockCsrfService {
-            error: Mutex::new(None),
-            return_value: (expected_anonymous_csrf_token.clone(), expected_csrf_cookie),
-        });
+
+        let mut mock_session_repository = MockSessionRepository::new();
+        mock_session_repository
+            .expect_get_user_session()
+            .returning(|_| Box::pin(async { Err(SessionRepositoryError::NotFound) }));
+
+        let mut mock_csrf_repository = MockCsrfRepository::new();
+        mock_csrf_repository
+            .expect_create_anonymous_csrf()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service
+            .expect_generate()
+            .return_const(Ok((expected_anonymous_csrf_token, expected_csrf_cookie)));
+
         let feature = CsrfTokenFeature::new(
-            mock_session_repository,
-            mock_csrf_repository,
-            mock_csrf_service,
+            Arc::new(mock_session_repository),
+            Arc::new(mock_csrf_repository),
+            Arc::new(mock_csrf_service),
         );
+
         // Act
         let actual_csrf_token_pair = feature.get_token(None).await.unwrap();
+
         // Assert
         assert_eq!(actual_csrf_token_pair, expected_csrf_token_pair);
     }

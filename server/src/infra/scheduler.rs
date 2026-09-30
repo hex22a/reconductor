@@ -1,9 +1,17 @@
 use chrono::Utc;
 use cron::Schedule;
+use thiserror::Error;
 use time::{OffsetDateTime, error::ComponentRange};
 
+#[cfg(test)]
+use mockall::automock;
+
+#[derive(Debug, Clone, Error)]
 pub enum ScheduleError {
+    #[error("no next run")]
     NoNextRun,
+
+    #[error("error conferting schedule")]
     ConvertionError,
 }
 
@@ -13,6 +21,7 @@ impl From<ComponentRange> for ScheduleError {
     }
 }
 
+#[cfg_attr(test, automock)]
 pub trait SchedulerService {
     fn calculate_next_run(&self, schedule: &Schedule) -> Result<OffsetDateTime, ScheduleError>;
 }

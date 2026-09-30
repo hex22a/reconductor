@@ -24,255 +24,27 @@ mod tests {
         constants::USER_SESSION_COOKIE_NAME,
         features::{
             csrf::{
-                error::CsrfError, model::CsrfTokenPair, token::TokenFeature,
-                verify::VerifyCsrfFeature,
+                error::CsrfError,
+                model::CsrfTokenPair,
+                token::{MockTokenFeature, TokenFeature},
+                verify::MockVerifyCsrfFeature,
             },
-            host::{dto::HostDto, error::HostError, get::GetHostFeature, list::ListHostsFeature},
-            port::{dto::PortDto, error::PortError, get::GetPortFeature, list::ListPortsFeature},
+            host::{get::MockGetHostFeature, list::MockListHostsFeature},
+            port::{get::MockGetPortFeature, list::MockListPortsFeature},
             project::{
-                create::CreateProjectFeature, dto::ProjectDto, error::ProjectError,
-                get::GetProjectFeature, list::ListProjectsFeature,
+                create::MockCreateProjectFeature, get::MockGetProjectFeature,
+                list::MockListProjectsFeature,
             },
             scan::{
-                create::CreateScanFeature, dto::ScanDto, error::ScanError, get::GetScanFeature,
-                list::ListScansFeature,
+                create::MockCreateScanFeature, get::MockGetScanFeature, list::MockListScansFeature,
             },
-            scan_run::{
-                dto::ScanRunDto, error::ScanRunError, get::GetScanRunFeature,
-                list::ListScanRunsFeature,
-            },
-            session::{auth::AuthFeature, error::SessionError, model::UserSession},
+            scan_run::{get::MockGetScanRunFeature, list::MockListScanRunsFeature},
+            session::auth::MockAuthFeature,
             user::{
-                error::UserError, login::LoginFeature, logout::LogoutFeature, model::AuthSession,
-                register::RegisterFeature,
+                login::MockLoginFeature, logout::MockLogoutFeature, register::MockRegisterFeature,
             },
         },
-        transport::pagination::Page,
     };
-
-    #[derive(Clone)]
-    struct MockRegisterFeature;
-    #[derive(Clone)]
-    struct MockTokenFeature {
-        return_value: CsrfTokenPair,
-    }
-    #[derive(Clone)]
-    struct MockLoginFeature;
-    #[derive(Clone)]
-    struct MockLogoutFeature;
-    #[derive(Clone)]
-    struct MockAuthFeature;
-    #[derive(Clone)]
-    struct MockVerifyCsrfFeature;
-    #[derive(Clone)]
-    struct MockCreateProject;
-    #[derive(Clone)]
-    struct MockGetProject;
-    #[derive(Clone)]
-    struct MockListProjects;
-    #[derive(Clone)]
-    struct MockCreateScan;
-    #[derive(Clone)]
-    struct MockGetScan;
-    #[derive(Clone)]
-    struct MockListScans;
-    #[derive(Clone)]
-    struct MockGetScanRun;
-    #[derive(Clone)]
-    struct MockListScanRuns;
-    #[derive(Clone)]
-    struct MockGetHost;
-    #[derive(Clone)]
-    struct MockListHosts;
-    #[derive(Clone)]
-    struct MockGetPort;
-    #[derive(Clone)]
-    struct MockListPorts;
-
-    impl RegisterFeature for MockRegisterFeature {
-        fn register(
-            &self,
-            _: String,
-            _: String,
-        ) -> std::pin::Pin<Box<dyn Future<Output = Result<(), UserError>> + Send + '_>> {
-            todo!()
-        }
-    }
-    impl LoginFeature for MockLoginFeature {
-        fn login(
-            &self,
-            _: String,
-            _: String,
-            _: String,
-        ) -> std::pin::Pin<Box<dyn Future<Output = Result<AuthSession, UserError>> + Send + '_>>
-        {
-            todo!()
-        }
-    }
-    impl LogoutFeature for MockLogoutFeature {
-        fn logout<'a>(
-            &'a self,
-            _: &'a str,
-        ) -> std::pin::Pin<Box<dyn Future<Output = Result<(), UserError>> + Send + 'a>> {
-            todo!()
-        }
-    }
-    impl TokenFeature for MockTokenFeature {
-        fn get_token<'a>(
-            &'a self,
-            _: Option<&'a str>,
-        ) -> std::pin::Pin<Box<dyn Future<Output = Result<CsrfTokenPair, CsrfError>> + Send + 'a>>
-        {
-            Box::pin(async { Ok(self.return_value.clone()) })
-        }
-    }
-    impl AuthFeature for MockAuthFeature {
-        fn auth<'a>(
-            &'a self,
-            _: &'a str,
-        ) -> std::pin::Pin<Box<dyn Future<Output = Result<UserSession, SessionError>> + Send + 'a>>
-        {
-            todo!()
-        }
-    }
-    impl VerifyCsrfFeature for MockVerifyCsrfFeature {
-        fn verify_anonymous(
-            &self,
-            _: String,
-            _: String,
-        ) -> std::pin::Pin<Box<dyn Future<Output = bool> + Send + '_>> {
-            todo!()
-        }
-
-        fn verify_authorized(
-            &self,
-            _: String,
-            _: String,
-            _: String,
-        ) -> std::pin::Pin<Box<dyn Future<Output = bool> + Send + '_>> {
-            todo!()
-        }
-    }
-    impl CreateProjectFeature for MockCreateProject {
-        fn create(
-            &self,
-            _: uuid::Uuid,
-            _: String,
-        ) -> std::pin::Pin<Box<dyn Future<Output = Result<ProjectDto, ProjectError>> + Send + '_>>
-        {
-            todo!()
-        }
-    }
-    impl GetProjectFeature for MockGetProject {
-        fn get(
-            &self,
-            _: uuid::Uuid,
-            _: uuid::Uuid,
-        ) -> std::pin::Pin<Box<dyn Future<Output = Result<ProjectDto, ProjectError>> + Send + '_>>
-        {
-            todo!()
-        }
-    }
-    impl ListProjectsFeature for MockListProjects {
-        fn list<'a>(
-            &'a self,
-            _: &'a uuid::Uuid,
-            _: Option<&'a str>,
-        ) -> std::pin::Pin<
-            Box<dyn Future<Output = Result<Page<ProjectDto>, ProjectError>> + Send + 'a>,
-        > {
-            todo!()
-        }
-    }
-
-    impl CreateScanFeature for MockCreateScan {
-        fn create(
-            &self,
-            _: uuid::Uuid,
-            _: sqlx::types::ipnetwork::IpNetwork,
-            _: Option<cron::Schedule>,
-        ) -> std::pin::Pin<Box<dyn Future<Output = Result<ScanDto, ScanError>> + Send + '_>>
-        {
-            todo!()
-        }
-    }
-    impl GetScanFeature for MockGetScan {
-        fn get(
-            &self,
-            _: uuid::Uuid,
-        ) -> std::pin::Pin<Box<dyn Future<Output = Result<ScanDto, ScanError>> + Send + '_>>
-        {
-            todo!()
-        }
-    }
-    impl ListScansFeature for MockListScans {
-        fn list<'a>(
-            &'a self,
-            _: &'a uuid::Uuid,
-            _: Option<&'a str>,
-        ) -> std::pin::Pin<Box<dyn Future<Output = Result<Page<ScanDto>, ScanError>> + Send + 'a>>
-        {
-            todo!()
-        }
-    }
-    impl GetScanRunFeature for MockGetScanRun {
-        fn get(
-            &self,
-            _: uuid::Uuid,
-        ) -> std::pin::Pin<Box<dyn Future<Output = Result<ScanRunDto, ScanRunError>> + Send + '_>>
-        {
-            todo!()
-        }
-    }
-    impl ListScanRunsFeature for MockListScanRuns {
-        fn list<'a>(
-            &'a self,
-            _: &'a uuid::Uuid,
-            _: Option<&'a str>,
-        ) -> std::pin::Pin<
-            Box<dyn Future<Output = Result<Page<ScanRunDto>, ScanRunError>> + Send + 'a>,
-        > {
-            todo!()
-        }
-    }
-    impl GetHostFeature for MockGetHost {
-        fn get(
-            &self,
-            _: uuid::Uuid,
-        ) -> std::pin::Pin<Box<dyn Future<Output = Result<HostDto, HostError>> + Send + '_>>
-        {
-            todo!()
-        }
-    }
-    impl ListHostsFeature for MockListHosts {
-        fn list<'a>(
-            &'a self,
-            _: &'a uuid::Uuid,
-            _: Option<&'a str>,
-        ) -> std::pin::Pin<Box<dyn Future<Output = Result<Page<HostDto>, HostError>> + Send + 'a>>
-        {
-            todo!()
-        }
-    }
-    impl GetPortFeature for MockGetPort {
-        fn get(
-            &self,
-            _: uuid::Uuid,
-        ) -> std::pin::Pin<Box<dyn Future<Output = Result<PortDto, PortError>> + Send + '_>>
-        {
-            todo!()
-        }
-    }
-    impl ListPortsFeature for MockListPorts {
-        fn list<'a>(
-            &'a self,
-            _: &'a uuid::Uuid,
-            _: Option<&'a str>,
-        ) -> std::pin::Pin<Box<dyn Future<Output = Result<Page<PortDto>, PortError>> + Send + 'a>>
-        {
-            todo!()
-        }
-    }
 
     #[tokio::test]
     async fn test_csrf_get() {
@@ -286,26 +58,31 @@ mod tests {
             token: expected_csrf_token,
             cookie_value: expected_csrf_cookie_value,
         };
-        let mock_register_feature = Arc::new(MockRegisterFeature);
-        let mock_login_feature = Arc::new(MockLoginFeature);
-        let mock_logout_feature = Arc::new(MockLogoutFeature);
-        let mock_auth_feature = Arc::new(MockAuthFeature);
-        let mock_token_feature = Arc::new(MockTokenFeature {
-            return_value: expected_csrf_token_pair,
+
+        let mut mock_token_feature = MockTokenFeature::new();
+        mock_token_feature.expect_get_token().returning(move |_| {
+            let csrf_token_pair = expected_csrf_token_pair.clone();
+            Box::pin(async { Ok(csrf_token_pair) })
         });
-        let mock_verify_csrf_feature = Arc::new(MockVerifyCsrfFeature);
-        let mock_create_project = Arc::new(MockCreateProject);
-        let mock_get_project = Arc::new(MockGetProject);
-        let mock_list_projects = Arc::new(MockListProjects);
-        let mock_create_scan = Arc::new(MockCreateScan);
-        let mock_get_scan = Arc::new(MockGetScan);
-        let mock_list_scans = Arc::new(MockListScans);
-        let mock_get_scan_run = Arc::new(MockGetScanRun);
-        let mock_list_scan_runs = Arc::new(MockListScanRuns);
-        let mock_get_host = Arc::new(MockGetHost);
-        let mock_list_hosts = Arc::new(MockListHosts);
-        let mock_list_ports = Arc::new(MockListPorts);
-        let mock_get_port = Arc::new(MockGetPort);
+        let mock_register_feature = Arc::new(MockRegisterFeature::new());
+        let mock_login_feature = Arc::new(MockLoginFeature::new());
+        let mock_logout_feature = Arc::new(MockLogoutFeature::new());
+        let mock_auth_feature = Arc::new(MockAuthFeature::new());
+        let mock_token_feature = Arc::new(mock_token_feature);
+        let mock_verify_csrf_feature = Arc::new(MockVerifyCsrfFeature::new());
+        let mock_create_project = Arc::new(MockCreateProjectFeature::new());
+        let mock_get_project = Arc::new(MockGetProjectFeature::new());
+        let mock_list_projects = Arc::new(MockListProjectsFeature::new());
+        let mock_create_scan = Arc::new(MockCreateScanFeature::new());
+        let mock_get_scan = Arc::new(MockGetScanFeature::new());
+        let mock_list_scans = Arc::new(MockListScansFeature::new());
+        let mock_get_scan_run = Arc::new(MockGetScanRunFeature::new());
+        let mock_list_scan_runs = Arc::new(MockListScanRunsFeature::new());
+        let mock_get_host = Arc::new(MockGetHostFeature::new());
+        let mock_list_hosts = Arc::new(MockListHostsFeature::new());
+        let mock_list_ports = Arc::new(MockListPortsFeature::new());
+        let mock_get_port = Arc::new(MockGetPortFeature::new());
+
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,
@@ -355,26 +132,31 @@ mod tests {
             token: expected_csrf_token,
             cookie_value: expected_csrf_cookie_value,
         };
-        let mock_register_feature = Arc::new(MockRegisterFeature);
-        let mock_login_feature = Arc::new(MockLoginFeature);
-        let mock_logout_feature = Arc::new(MockLogoutFeature);
-        let mock_auth_feature = Arc::new(MockAuthFeature);
-        let mock_token_feature = Arc::new(MockTokenFeature {
-            return_value: expected_csrf_token_pair,
+
+        let mut mock_token_feature = MockTokenFeature::new();
+        mock_token_feature.expect_get_token().returning(move |_| {
+            let csrf_token_pair = expected_csrf_token_pair.clone();
+            Box::pin(async { Ok(csrf_token_pair) })
         });
-        let mock_verify_csrf_feature = Arc::new(MockVerifyCsrfFeature);
-        let mock_create_project = Arc::new(MockCreateProject);
-        let mock_get_project = Arc::new(MockGetProject);
-        let mock_list_projects = Arc::new(MockListProjects);
-        let mock_create_scan = Arc::new(MockCreateScan);
-        let mock_get_scan = Arc::new(MockGetScan);
-        let mock_list_scans = Arc::new(MockListScans);
-        let mock_get_scan_run = Arc::new(MockGetScanRun);
-        let mock_list_scan_runs = Arc::new(MockListScanRuns);
-        let mock_get_host = Arc::new(MockGetHost);
-        let mock_list_hosts = Arc::new(MockListHosts);
-        let mock_list_ports = Arc::new(MockListPorts);
-        let mock_get_port = Arc::new(MockGetPort);
+        let mock_register_feature = Arc::new(MockRegisterFeature::new());
+        let mock_login_feature = Arc::new(MockLoginFeature::new());
+        let mock_logout_feature = Arc::new(MockLogoutFeature::new());
+        let mock_auth_feature = Arc::new(MockAuthFeature::new());
+        let mock_token_feature = Arc::new(mock_token_feature);
+        let mock_verify_csrf_feature = Arc::new(MockVerifyCsrfFeature::new());
+        let mock_create_project = Arc::new(MockCreateProjectFeature::new());
+        let mock_get_project = Arc::new(MockGetProjectFeature::new());
+        let mock_list_projects = Arc::new(MockListProjectsFeature::new());
+        let mock_create_scan = Arc::new(MockCreateScanFeature::new());
+        let mock_get_scan = Arc::new(MockGetScanFeature::new());
+        let mock_list_scans = Arc::new(MockListScansFeature::new());
+        let mock_get_scan_run = Arc::new(MockGetScanRunFeature::new());
+        let mock_list_scan_runs = Arc::new(MockListScanRunsFeature::new());
+        let mock_get_host = Arc::new(MockGetHostFeature::new());
+        let mock_list_hosts = Arc::new(MockListHostsFeature::new());
+        let mock_list_ports = Arc::new(MockListPortsFeature::new());
+        let mock_get_port = Arc::new(MockGetPortFeature::new());
+
         let expected_app_state = Arc::new(AppState {
             register_feature: mock_register_feature,
             login_feature: mock_login_feature,

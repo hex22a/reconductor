@@ -1,10 +1,14 @@
 use std::sync::Arc;
 
+#[cfg(test)]
+use mockall::automock;
+
 use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::features::port::model::PortEntity;
 
+#[cfg_attr(test, automock)]
 pub trait PortRepository {
     fn get_port(
         &self,
@@ -14,7 +18,7 @@ pub trait PortRepository {
     fn list_ports(
         &self,
         host_id: &Uuid,
-        cursor_id: Option<&Uuid>,
+        cursor_id: Option<Uuid>,
         limit: i64,
     ) -> impl Future<Output = Result<Vec<PortEntity>, sqlx::Error>> + Send;
 }
@@ -57,7 +61,7 @@ impl PortRepository for PgPortRepository {
     async fn list_ports(
         &self,
         host_id: &Uuid,
-        cursor_id: Option<&Uuid>,
+        cursor_id: Option<Uuid>,
         limit: i64,
     ) -> Result<Vec<PortEntity>, sqlx::Error> {
         match cursor_id {

@@ -1,20 +1,24 @@
 use std::{pin::Pin, sync::Arc};
 use subtle::ConstantTimeEq;
 
+#[cfg(test)]
+use mockall::automock;
+
 use crate::{features::csrf::repository::CsrfRepository, infra::csrf::CsrfService};
 
+#[cfg_attr(test, automock)]
 pub trait VerifyCsrfFeature {
-    fn verify_anonymous(
-        &self,
+    fn verify_anonymous<'a>(
+        &'a self,
         csrf_cookie: String,
         csrf_token: String,
-    ) -> Pin<Box<dyn Future<Output = bool> + Send + '_>>;
-    fn verify_authorized(
-        &self,
+    ) -> Pin<Box<dyn Future<Output = bool> + Send + 'a>>;
+    fn verify_authorized<'a>(
+        &'a self,
         csrf_cookie: String,
         header_csrf_token: String,
         session_csrf_token: String,
-    ) -> Pin<Box<dyn Future<Output = bool> + Send + '_>>;
+    ) -> Pin<Box<dyn Future<Output = bool> + Send + 'a>>;
 }
 
 #[derive(Clone)]

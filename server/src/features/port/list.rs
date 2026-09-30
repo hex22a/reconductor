@@ -1,5 +1,8 @@
 use std::{pin::Pin, sync::Arc};
 
+#[cfg(test)]
+use mockall::automock;
+
 use uuid::Uuid;
 
 use crate::{
@@ -9,11 +12,12 @@ use crate::{
     transport::pagination::{Page, PageInfo},
 };
 
+#[cfg_attr(test, automock)]
 pub trait ListPortsFeature {
     fn list<'a>(
         &'a self,
-        port_id: &'a Uuid,
-        cursor_id: Option<&'a str>,
+        port_id: Uuid,
+        cursor_id: Option<String>,
     ) -> Pin<Box<dyn Future<Output = Result<Page<PortDto>, PortError>> + Send + 'a>>;
 }
 
@@ -34,17 +38,16 @@ where
 {
     fn list<'a>(
         &'a self,
-        host_id: &'a Uuid,
-        cursor_id: Option<&'a str>,
+        host_id: Uuid,
+        cursor_id: Option<String>,
     ) -> Pin<Box<dyn Future<Output = Result<Page<PortDto>, PortError>> + Send + 'a>> {
         Box::pin(async move {
             let mut has_next_page = false;
-            let maybe_cursor_id = cursor_id.map(decode_cursor).transpose()?;
-            let maybe_cursor_ref = maybe_cursor_id.as_ref();
+            let maybe_cursor_id = cursor_id.map(|cursor| decode_cursor(&cursor)).transpose()?;
             let limit = PORTS_PAGE_SIZE_LIMIT + 1;
             let mut ports = self
                 .port_repository
-                .list_ports(host_id, maybe_cursor_ref, limit)
+                .list_ports(&host_id, maybe_cursor_id, limit)
                 .await?;
             if ports.len() == limit as usize {
                 has_next_page = true;
@@ -80,43 +83,19 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Mutex;
-
     use crate::{
-        constants::PORTS_PAGE_SIZE_LIMIT, domain::cursor::encode_cursor,
-        features::port::model::PortEntity, transport::pagination::PageInfo,
+        constants::PORTS_PAGE_SIZE_LIMIT,
+        domain::cursor::encode_cursor,
+        features::port::{model::PortEntity, repository::MockPortRepository},
+        transport::pagination::PageInfo,
     };
 
     use super::*;
 
-    struct MockPortRepository {
-        error: Mutex<Option<sqlx::Error>>,
-        port_entity: PortEntity,
-        size: usize,
-    }
-
-    impl PortRepository for MockPortRepository {
-        async fn get_port(&self, _: &Uuid) -> Result<PortEntity, sqlx::Error> {
-            todo!()
-        }
-
-        async fn list_ports(
-            &self,
-            _: &Uuid,
-            _: Option<&Uuid>,
-            _: i64,
-        ) -> Result<Vec<PortEntity>, sqlx::Error> {
-            match self.error.lock().unwrap().take() {
-                Some(e) => Err(e),
-                None => Ok(vec![self.port_entity.clone(); self.size]),
-            }
-        }
-    }
-
     #[tokio::test]
     async fn test_list_ports_no_next_page() {
         // Arrange
-        let expected_cursor_id = "AZ0GNLkMdACZ0iU9dt-z6g";
+        let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
         let expected_port_id = Uuid::now_v7();
         let expected_host_id = Uuid::now_v7();
         let expected_port_number = 22;
@@ -131,6 +110,7 @@ mod tests {
             product: None,
             version: None,
         };
+        let expected_port_entities = vec![expected_port; expected_port_entities_size];
         let expected_port_dto = PortDto {
             id: expected_port_id,
             port: expected_port_number,
@@ -149,16 +129,20 @@ mod tests {
             data: expected_ports,
             page_info: expected_page_info,
         };
-        let mock_port_repository = MockPortRepository {
-            error: Mutex::new(None),
-            port_entity: expected_port,
-            size: expected_port_entities_size,
-        };
+
+        let mut mock_port_repository = MockPortRepository::new();
+        mock_port_repository
+            .expect_list_ports()
+            .returning(move |_, _, _| {
+                let port_entities = expected_port_entities.clone();
+                Box::pin(async { Ok(port_entities) })
+            });
+
         let future = ListPorts::new(Arc::new(mock_port_repository));
 
         // Act
         let actual_page = future
-            .list(&expected_host_id, Some(expected_cursor_id))
+            .list(expected_host_id, Some(expected_cursor_id))
             .await
             .unwrap();
 
@@ -169,7 +153,7 @@ mod tests {
     #[tokio::test]
     async fn test_list_ports_with_next_page() {
         // Arrange
-        let expected_cursor_id = "AZ0GNLkMdACZ0iU9dt-z6g";
+        let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
         let expected_port_id = Uuid::now_v7();
         let expected_end_cursor = encode_cursor(&expected_port_id);
         let expected_host_id = Uuid::now_v7();
@@ -185,6 +169,7 @@ mod tests {
             product: None,
             version: None,
         };
+        let expected_port_entities = vec![expected_port; expected_port_entities_size + 1];
         let expected_port_dto = PortDto {
             id: expected_port_id,
             port: expected_port_number,
@@ -203,16 +188,20 @@ mod tests {
             data: expected_ports,
             page_info: expected_page_info,
         };
-        let mock_port_repository = MockPortRepository {
-            error: Mutex::new(None),
-            port_entity: expected_port,
-            size: expected_port_entities_size + 1,
-        };
+
+        let mut mock_port_repository = MockPortRepository::new();
+        mock_port_repository
+            .expect_list_ports()
+            .returning(move |_, _, _| {
+                let port_entities = expected_port_entities.clone();
+                Box::pin(async { Ok(port_entities) })
+            });
+
         let future = ListPorts::new(Arc::new(mock_port_repository));
 
         // Act
         let actual_page = future
-            .list(&expected_host_id, Some(expected_cursor_id))
+            .list(expected_host_id, Some(expected_cursor_id))
             .await
             .unwrap();
 
@@ -238,6 +227,7 @@ mod tests {
             product: None,
             version: None,
         };
+        let expected_port_entities = vec![expected_port; expected_port_entities_size + 1];
         let expected_port_dto = PortDto {
             id: expected_port_id,
             port: expected_port_number,
@@ -256,15 +246,19 @@ mod tests {
             data: expected_ports,
             page_info: expected_page_info,
         };
-        let mock_port_repository = MockPortRepository {
-            error: Mutex::new(None),
-            port_entity: expected_port,
-            size: expected_port_entities_size + 1,
-        };
+
+        let mut mock_port_repository = MockPortRepository::new();
+        mock_port_repository
+            .expect_list_ports()
+            .returning(move |_, _, _| {
+                let port_entities = expected_port_entities.clone();
+                Box::pin(async { Ok(port_entities) })
+            });
+
         let future = ListPorts::new(Arc::new(mock_port_repository));
 
         // Act
-        let actual_page = future.list(&expected_host_id, None).await.unwrap();
+        let actual_page = future.list(expected_host_id, None).await.unwrap();
 
         // Assert
         assert_eq!(actual_page, expected_page);
@@ -273,7 +267,7 @@ mod tests {
     #[tokio::test]
     async fn test_list_ports_not_found() {
         // Arrange
-        let expected_cursor_id = "AZ0GNLkMdACZ0iU9dt-z6g";
+        let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
         let expected_port_id = Uuid::now_v7();
         let expected_host_id = Uuid::now_v7();
         let expected_port_number = 22;
@@ -288,16 +282,17 @@ mod tests {
             product: None,
             version: None,
         };
-        let mock_port_repository = MockPortRepository {
-            error: Mutex::new(Some(sqlx::Error::RowNotFound)),
-            port_entity: expected_port,
-            size: expected_port_entities_size,
-        };
+
+        let mut mock_port_repository = MockPortRepository::new();
+        mock_port_repository
+            .expect_list_ports()
+            .returning(|_, _, _| Box::pin(async { Err(sqlx::Error::RowNotFound) }));
+
         let future = ListPorts::new(Arc::new(mock_port_repository));
 
         // Act
         let actual_result = future
-            .list(&expected_host_id, Some(expected_cursor_id))
+            .list(expected_host_id, Some(expected_cursor_id))
             .await;
 
         // Assert

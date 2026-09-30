@@ -1,5 +1,8 @@
 use std::{pin::Pin, sync::Arc};
 
+#[cfg(test)]
+use mockall::automock;
+
 use uuid::Uuid;
 
 use crate::{
@@ -9,11 +12,12 @@ use crate::{
     transport::pagination::{Page, PageInfo},
 };
 
+#[cfg_attr(test, automock)]
 pub trait ListProjectsFeature {
     fn list<'a>(
         &'a self,
-        owner_id: &'a Uuid,
-        cursor_id: Option<&'a str>,
+        owner_id: Uuid,
+        cursor_id: Option<String>,
     ) -> Pin<Box<dyn Future<Output = Result<Page<ProjectDto>, ProjectError>> + Send + 'a>>;
 }
 
@@ -34,17 +38,16 @@ where
 {
     fn list<'a>(
         &'a self,
-        owner_id: &'a Uuid,
-        cursor_id: Option<&'a str>,
+        owner_id: Uuid,
+        cursor_id: Option<String>,
     ) -> Pin<Box<dyn Future<Output = Result<Page<ProjectDto>, ProjectError>> + Send + 'a>> {
         Box::pin(async move {
             let mut has_next_page = false;
-            let maybe_cursor_id = cursor_id.map(decode_cursor).transpose()?;
-            let maybe_cursor_id_ref = maybe_cursor_id.as_ref();
+            let maybe_cursor_id = cursor_id.map(|cursor| decode_cursor(&cursor)).transpose()?;
             let limit = PROJECTS_PAGE_SIZE_LIMIT + 1;
             let mut projects = self
                 .project_repository
-                .list_projects(owner_id, maybe_cursor_id_ref, limit)
+                .list_projects(&owner_id, maybe_cursor_id, limit)
                 .await?;
             if projects.len() == limit as usize {
                 has_next_page = true;
@@ -79,55 +82,20 @@ mod tests {
     use time::macros::datetime;
 
     use super::*;
-    use std::sync::Mutex;
 
     use crate::{
         constants::PROJECTS_PAGE_SIZE_LIMIT,
         domain::cursor::encode_cursor,
         features::project::{
-            dto::ProjectDto,
-            model::{ProjectEntity, ProjectInsert},
-            repository::ProjectRepository,
+            dto::ProjectDto, model::ProjectEntity, repository::MockProjectRepository,
         },
         transport::pagination::PageInfo,
     };
 
-    struct MockProjectRepository {
-        error: Mutex<Option<sqlx::Error>>,
-        project_entity: ProjectEntity,
-        size: usize,
-    }
-
-    impl ProjectRepository for MockProjectRepository {
-        async fn create_project(&self, _: ProjectInsert) -> Result<ProjectEntity, sqlx::Error> {
-            todo!()
-        }
-
-        async fn get_project(
-            &self,
-            _: &uuid::Uuid,
-            _: &uuid::Uuid,
-        ) -> Result<ProjectEntity, sqlx::Error> {
-            todo!()
-        }
-
-        async fn list_projects(
-            &self,
-            _: &uuid::Uuid,
-            _: Option<&uuid::Uuid>,
-            _: i64,
-        ) -> Result<Vec<ProjectEntity>, sqlx::Error> {
-            match self.error.lock().unwrap().take() {
-                Some(e) => Err(e),
-                None => Ok(vec![self.project_entity.clone(); self.size]),
-            }
-        }
-    }
-
     #[tokio::test]
     async fn test_list_projects_no_next_page() {
         // Arrange
-        let expected_cursor_id = "AZ0GNLkMdACZ0iU9dt-z6g";
+        let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
         let expected_project_id = Uuid::now_v7();
         let expected_owner_id = Uuid::now_v7();
         let expected_name = "test".to_string();
@@ -139,6 +107,7 @@ mod tests {
             name: expected_name.clone(),
             created_at: expected_created_at,
         };
+        let expected_project_entities = vec![expected_project; expected_project_entities_size];
         let expected_project_dto = ProjectDto {
             id: expected_project_id,
             name: expected_name,
@@ -153,17 +122,23 @@ mod tests {
             data: expected_projects,
             page_info: expected_page_info,
         };
-        let mock_project_repository = MockProjectRepository {
-            error: Mutex::new(None),
-            project_entity: expected_project,
-            size: expected_project_entities_size,
-        };
+
+        let mut mock_project_repository = MockProjectRepository::new();
+        mock_project_repository
+            .expect_list_projects()
+            .returning(move |_, _, _| {
+                let project_entities = expected_project_entities.clone();
+                Box::pin(async { Ok(project_entities) })
+            });
+
         let feature = ListProjects::new(Arc::new(mock_project_repository));
+
         // Act
         let actual_page = feature
-            .list(&expected_owner_id, Some(expected_cursor_id))
+            .list(expected_owner_id, Some(expected_cursor_id))
             .await
             .unwrap();
+
         // Assert
         assert_eq!(actual_page, expected_page);
     }
@@ -171,7 +146,7 @@ mod tests {
     #[tokio::test]
     async fn test_list_projects_with_next_page() {
         // Arrange
-        let expected_cursor_id = "AZ0GNLkMdACZ0iU9dt-z6g";
+        let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
         let expected_project_id = Uuid::now_v7();
         let expected_end_cursor = encode_cursor(&expected_project_id);
         let expected_owner_id = Uuid::now_v7();
@@ -184,6 +159,7 @@ mod tests {
             name: expected_name.clone(),
             created_at: expected_created_at,
         };
+        let expected_project_entities = vec![expected_project; expected_project_entities_size + 1];
         let expected_project_dto = ProjectDto {
             id: expected_project_id,
             name: expected_name,
@@ -198,17 +174,23 @@ mod tests {
             data: expected_projects,
             page_info: expected_page_info,
         };
-        let mock_project_repository = MockProjectRepository {
-            error: Mutex::new(None),
-            project_entity: expected_project,
-            size: expected_project_entities_size + 1,
-        };
+
+        let mut mock_project_repository = MockProjectRepository::new();
+        mock_project_repository
+            .expect_list_projects()
+            .returning(move |_, _, _| {
+                let project_entities = expected_project_entities.clone();
+                Box::pin(async { Ok(project_entities) })
+            });
+
         let feature = ListProjects::new(Arc::new(mock_project_repository));
+
         // Act
         let actual_page = feature
-            .list(&expected_owner_id, Some(expected_cursor_id))
+            .list(expected_owner_id, Some(expected_cursor_id))
             .await
             .unwrap();
+
         // Assert
         assert_eq!(actual_page, expected_page);
     }
@@ -228,6 +210,7 @@ mod tests {
             name: expected_name.clone(),
             created_at: expected_created_at,
         };
+        let expected_project_entities = vec![expected_project; expected_project_entities_size + 1];
         let expected_project_dto = ProjectDto {
             id: expected_project_id,
             name: expected_name,
@@ -242,14 +225,20 @@ mod tests {
             data: expected_projects,
             page_info: expected_page_info,
         };
-        let mock_project_repository = MockProjectRepository {
-            error: Mutex::new(None),
-            project_entity: expected_project,
-            size: expected_project_entities_size + 1,
-        };
+
+        let mut mock_project_repository = MockProjectRepository::new();
+        mock_project_repository
+            .expect_list_projects()
+            .returning(move |_, _, _| {
+                let project_entities = expected_project_entities.clone();
+                Box::pin(async { Ok(project_entities) })
+            });
+
         let feature = ListProjects::new(Arc::new(mock_project_repository));
+
         // Act
-        let actual_page = feature.list(&expected_owner_id, None).await.unwrap();
+        let actual_page = feature.list(expected_owner_id, None).await.unwrap();
+
         // Assert
         assert_eq!(actual_page, expected_page);
     }
@@ -257,27 +246,18 @@ mod tests {
     #[tokio::test]
     async fn test_list_projects_not_found() {
         // Arrange
-        let expected_cursor_id = "AZ0GNLkMdACZ0iU9dt-z6g";
-        let expected_project_id = Uuid::now_v7();
+        let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
         let expected_owner_id = Uuid::now_v7();
-        let expected_name = "test".to_string();
-        let expected_created_at = datetime!(2019-01-01 0:00 UTC);
-        let expected_project_entities_size = PROJECTS_PAGE_SIZE_LIMIT as usize;
-        let expected_project = ProjectEntity {
-            id: expected_project_id,
-            owner_id: expected_owner_id,
-            name: expected_name.clone(),
-            created_at: expected_created_at,
-        };
-        let mock_project_repository = MockProjectRepository {
-            error: Mutex::new(Some(sqlx::Error::RowNotFound)),
-            project_entity: expected_project,
-            size: expected_project_entities_size,
-        };
+
+        let mut mock_project_repository = MockProjectRepository::new();
+        mock_project_repository
+            .expect_list_projects()
+            .returning(|_, _, _| Box::pin(async { Err(sqlx::Error::RowNotFound) }));
+
         let feature = ListProjects::new(Arc::new(mock_project_repository));
         // Act
         let actual_result = feature
-            .list(&expected_owner_id, Some(expected_cursor_id))
+            .list(expected_owner_id, Some(expected_cursor_id))
             .await;
         // Assert
         assert!(matches!(actual_result, Err(ProjectError::NotFound)));

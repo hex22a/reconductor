@@ -1,13 +1,17 @@
 use std::{pin::Pin, sync::Arc};
 
+#[cfg(test)]
+use mockall::automock;
+
 use crate::features::session::{
     error::SessionError, model::UserSession, repository::SessionRepository,
 };
 
+#[cfg_attr(test, automock)]
 pub trait AuthFeature {
     fn auth<'a>(
         &'a self,
-        session_id: &'a str,
+        session_id: String,
     ) -> Pin<Box<dyn Future<Output = Result<UserSession, SessionError>> + Send + 'a>>;
 }
 
@@ -28,9 +32,14 @@ where
 {
     fn auth<'a>(
         &'a self,
-        session_id: &'a str,
+        session_id: String,
     ) -> Pin<Box<dyn Future<Output = Result<UserSession, SessionError>> + Send + 'a>> {
-        Box::pin(async move { Ok(self.session_repository.get_user_session(session_id).await?) })
+        Box::pin(async move {
+            Ok(self
+                .session_repository
+                .get_user_session(&session_id)
+                .await?)
+        })
     }
 }
 
@@ -67,13 +76,13 @@ mod tests {
     #[tokio::test]
     async fn test_auth_session_found() {
         // Arrange
-        let expected_session_token = "session_token";
+        let expected_session_token = String::from("session_token");
         let expected_user_id: Uuid = Uuid::now_v7();
         let expected_username = "test".to_string();
         let expected_csrf_token = "csrf_token".to_string();
         let expected_csrf_cookie = "csrf_cookie".to_string();
         let expected_user_session = UserSession {
-            token: expected_session_token.to_string(),
+            token: expected_session_token.clone(),
             user_id: expected_user_id,
             username: expected_username,
             csrf_token: expected_csrf_token.clone(),
@@ -93,13 +102,13 @@ mod tests {
     #[tokio::test]
     async fn test_auth_session_not_found() {
         // Arrange
-        let expected_session_token = "session_token";
+        let expected_session_token = String::from("session_token");
         let expected_user_id: Uuid = Uuid::now_v7();
         let expected_username = "test".to_string();
         let expected_csrf_token = "csrf_token".to_string();
         let expected_csrf_cookie = "csrf_cookie".to_string();
         let expected_user_session = UserSession {
-            token: expected_session_token.to_string(),
+            token: expected_session_token.clone(),
             user_id: expected_user_id,
             username: expected_username,
             csrf_token: expected_csrf_token.clone(),

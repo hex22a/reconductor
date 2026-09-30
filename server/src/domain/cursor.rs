@@ -1,9 +1,13 @@
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
+use thiserror::Error;
 use uuid::Uuid;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum CursorError {
+    #[error("error decoding cursor")]
     DecodeError,
+
+    #[error("error parsing cursor")]
     ParsingError,
 }
 

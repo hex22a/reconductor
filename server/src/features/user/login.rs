@@ -1,5 +1,8 @@
 use std::{pin::Pin, sync::Arc};
 
+#[cfg(test)]
+use mockall::automock;
+
 use crate::{
     constants::USER_SESSION_TTL_SECONDS,
     features::{
@@ -10,13 +13,14 @@ use crate::{
     infra::{csrf::CsrfService, password::PasswordService, random::RngService},
 };
 
+#[cfg_attr(test, automock)]
 pub trait LoginFeature {
-    fn login(
-        &self,
+    fn login<'a>(
+        &'a self,
         username: String,
         password: String,
         anonymos_csrf_token: String,
-    ) -> Pin<Box<dyn Future<Output = Result<AuthSession, UserError>> + Send + '_>>;
+    ) -> Pin<Box<dyn Future<Output = Result<AuthSession, UserError>> + Send + 'a>>;
 }
 
 #[derive(Clone)]

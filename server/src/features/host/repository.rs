@@ -1,10 +1,14 @@
 use std::sync::Arc;
 
+#[cfg(test)]
+use mockall::automock;
+
 use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::features::host::model::HostEntity;
 
+#[cfg_attr(test, automock)]
 pub trait HostRepository {
     fn get_host(
         &self,
@@ -14,7 +18,7 @@ pub trait HostRepository {
     fn list_hosts(
         &self,
         scan_run_id: &Uuid,
-        cursor_id: Option<&Uuid>,
+        cursor_id: Option<Uuid>,
         limit: i64,
     ) -> impl Future<Output = Result<Vec<HostEntity>, sqlx::Error>> + Send;
 }
@@ -57,7 +61,7 @@ impl HostRepository for PgHostRepository {
     async fn list_hosts(
         &self,
         scan_run_id: &Uuid,
-        cursor_id: Option<&Uuid>,
+        cursor_id: Option<Uuid>,
         limit: i64,
     ) -> Result<Vec<HostEntity>, sqlx::Error> {
         match cursor_id {

@@ -40,6 +40,6 @@ pub async fn list(
     State(state): State<Arc<AppState>>,
     Path(project_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, ServerError> {
-    let scans = state.list_scans_feature.list(&project_id, None).await?;
+    let scans = state.list_scans_feature.list(project_id, None).await?;
     Ok((StatusCode::OK, Json(scans)))
 }

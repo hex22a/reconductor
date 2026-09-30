@@ -1,16 +1,20 @@
 use std::{pin::Pin, sync::Arc};
 
+#[cfg(test)]
+use mockall::automock;
+
 use uuid::Uuid;
 
 use crate::features::port::{
     dto::PortDto, error::PortError, model::PortEntity, repository::PortRepository,
 };
 
+#[cfg_attr(test, automock)]
 pub trait GetPortFeature {
-    fn get(
-        &self,
+    fn get<'a>(
+        &'a self,
         port_id: Uuid,
-    ) -> Pin<Box<dyn Future<Output = Result<PortDto, PortError>> + Send + '_>>;
+    ) -> Pin<Box<dyn Future<Output = Result<PortDto, PortError>> + Send + 'a>>;
 }
 
 pub struct GetPort<R: PortRepository> {
@@ -57,34 +61,9 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Mutex;
-
-    use crate::features::port::model::PortEntity;
+    use crate::features::port::{model::PortEntity, repository::MockPortRepository};
 
     use super::*;
-
-    struct MockPortRepository {
-        error: Mutex<Option<sqlx::Error>>,
-        port_entity: PortEntity,
-    }
-
-    impl PortRepository for MockPortRepository {
-        async fn get_port(&self, _: &Uuid) -> Result<PortEntity, sqlx::Error> {
-            match self.error.lock().unwrap().take() {
-                Some(e) => Err(e),
-                None => Ok(self.port_entity.clone()),
-            }
-        }
-
-        async fn list_ports(
-            &self,
-            _: &Uuid,
-            _: Option<&Uuid>,
-            _: i64,
-        ) -> Result<Vec<PortEntity>, sqlx::Error> {
-            todo!()
-        }
-    }
 
     #[tokio::test]
     async fn test_get_port() {
@@ -111,10 +90,13 @@ mod tests {
             product: None,
             version: None,
         };
-        let mock_port_repository = MockPortRepository {
-            error: Mutex::new(None),
-            port_entity: expected_port,
-        };
+
+        let mut mock_port_repository = MockPortRepository::new();
+        mock_port_repository.expect_get_port().returning(move |_| {
+            let port = expected_port.clone();
+            Box::pin(async { Ok(port) })
+        });
+
         let feature = GetPort::new(Arc::new(mock_port_repository));
 
         // Act
@@ -140,10 +122,12 @@ mod tests {
             product: None,
             version: None,
         };
-        let mock_port_repository = MockPortRepository {
-            error: Mutex::new(Some(sqlx::Error::RowNotFound)),
-            port_entity: expected_port,
-        };
+
+        let mut mock_port_repository = MockPortRepository::new();
+        mock_port_repository
+            .expect_get_port()
+            .returning(|_| Box::pin(async { Err(sqlx::Error::RowNotFound) }));
+
         let feature = GetPort::new(Arc::new(mock_port_repository));
 
         // Act

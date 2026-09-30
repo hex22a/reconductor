@@ -17,7 +17,9 @@ pub async fn handle(
     State(state): State<Arc<AppState>>,
     jar: CookieJar,
 ) -> Result<impl IntoResponse, ServerError> {
-    let session_cookie = jar.get(USER_SESSION_COOKIE_NAME).map(|c| c.value());
+    let session_cookie = jar
+        .get(USER_SESSION_COOKIE_NAME)
+        .map(|c| c.value().to_string());
     let csrf_token_pair = state.csrf_feature.get_token(session_cookie).await?;
     let jar = jar.add(
         Cookie::build((CSRF_COOKIE_NAME, csrf_token_pair.cookie_value))

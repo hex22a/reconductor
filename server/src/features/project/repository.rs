@@ -1,10 +1,14 @@
 use std::sync::Arc;
 
+#[cfg(test)]
+use mockall::automock;
+
 use sqlx::PgPool;
 use sqlx::types::Uuid;
 
 use crate::features::project::model::{ProjectEntity, ProjectInsert};
 
+#[cfg_attr(test, automock)]
 pub trait ProjectRepository {
     fn create_project(
         &self,
@@ -18,7 +22,7 @@ pub trait ProjectRepository {
     fn list_projects(
         &self,
         owner_id: &Uuid,
-        cursor_id: Option<&Uuid>,
+        cursor_id: Option<Uuid>,
         limit: i64,
     ) -> impl Future<Output = Result<Vec<ProjectEntity>, sqlx::Error>> + Send;
 }
@@ -83,7 +87,7 @@ impl ProjectRepository for PgProjectRepository {
     async fn list_projects(
         &self,
         owner_id: &Uuid,
-        cursor_id: Option<&Uuid>,
+        cursor_id: Option<Uuid>,
         limit: i64,
     ) -> Result<Vec<ProjectEntity>, sqlx::Error> {
         match cursor_id {

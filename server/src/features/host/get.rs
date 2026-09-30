@@ -1,16 +1,20 @@
 use std::{pin::Pin, sync::Arc};
 
+#[cfg(test)]
+use mockall::automock;
+
 use uuid::Uuid;
 
 use crate::features::host::{
     dto::HostDto, error::HostError, model::HostEntity, repository::HostRepository,
 };
 
+#[cfg_attr(test, automock)]
 pub trait GetHostFeature {
-    fn get(
-        &self,
+    fn get<'a>(
+        &'a self,
         host_id: Uuid,
-    ) -> Pin<Box<dyn Future<Output = Result<HostDto, HostError>> + Send + '_>>;
+    ) -> Pin<Box<dyn Future<Output = Result<HostDto, HostError>> + Send + 'a>>;
 }
 
 pub struct GetHost<R: HostRepository> {
@@ -57,36 +61,11 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Mutex;
-
     use sqlx::types::ipnetwork::IpNetwork;
 
-    use crate::features::host::model::HostEntity;
+    use crate::features::host::{model::HostEntity, repository::MockHostRepository};
 
     use super::*;
-
-    struct MockHostRepository {
-        error: Mutex<Option<sqlx::Error>>,
-        host_entity: HostEntity,
-    }
-
-    impl HostRepository for MockHostRepository {
-        async fn get_host(&self, _: &Uuid) -> Result<HostEntity, sqlx::Error> {
-            match self.error.lock().unwrap().take() {
-                Some(e) => Err(e),
-                None => Ok(self.host_entity.clone()),
-            }
-        }
-
-        async fn list_hosts(
-            &self,
-            _: &Uuid,
-            _: Option<&Uuid>,
-            _: i64,
-        ) -> Result<Vec<HostEntity>, sqlx::Error> {
-            todo!()
-        }
-    }
 
     #[tokio::test]
     async fn test_get_host() {
@@ -113,10 +92,13 @@ mod tests {
             os_match: None,
             os_accuracy: None,
         };
-        let mock_host_repository = MockHostRepository {
-            error: Mutex::new(None),
-            host_entity: expected_host,
-        };
+
+        let mut mock_host_repository = MockHostRepository::new();
+        mock_host_repository.expect_get_host().returning(move |_| {
+            let host = expected_host.clone();
+            Box::pin(async { Ok(host) })
+        });
+
         let feature = GetHost::new(Arc::new(mock_host_repository));
 
         // Act
@@ -130,22 +112,12 @@ mod tests {
     async fn test_get_host_not_found() {
         // Arrange
         let expected_host_id = Uuid::now_v7();
-        let expected_scan_run_id = Uuid::now_v7();
-        let expected_ip: IpNetwork = "192.168.0.1".parse().unwrap();
-        let expected_host = HostEntity {
-            id: expected_host_id,
-            scan_run_id: expected_scan_run_id,
-            ip: expected_ip,
-            mac: None,
-            vendor: None,
-            hostname: None,
-            os_match: None,
-            os_accuracy: None,
-        };
-        let mock_host_repository = MockHostRepository {
-            error: Mutex::new(Some(sqlx::Error::RowNotFound)),
-            host_entity: expected_host,
-        };
+
+        let mut mock_host_repository = MockHostRepository::new();
+        mock_host_repository
+            .expect_get_host()
+            .returning(|_| Box::pin(async { Err(sqlx::Error::RowNotFound) }));
+
         let feature = GetHost::new(Arc::new(mock_host_repository));
 
         // Act

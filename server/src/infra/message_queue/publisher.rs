@@ -1,3 +1,6 @@
+#[cfg(test)]
+use mockall::automock;
+
 use sqlx::types::ipnetwork::IpNetwork;
 use uuid::Uuid;
 
@@ -6,6 +9,7 @@ use crate::{
     infra::message_queue::{MqProvider, error::MqError},
 };
 
+#[cfg_attr(test, automock)]
 pub trait Publisher {
     fn publish_scan(
         &self,

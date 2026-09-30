@@ -1,10 +1,14 @@
 use std::sync::Arc;
 
+#[cfg(test)]
+use mockall::automock;
+
 use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::features::scan_run::model::ScanRunEntity;
 
+#[cfg_attr(test, automock)]
 pub trait ScanRunRepository {
     fn get_scan_run(
         &self,
@@ -13,7 +17,7 @@ pub trait ScanRunRepository {
     fn list_scan_runs(
         &self,
         scan_id: &Uuid,
-        cursor_id: Option<&Uuid>,
+        cursor_id: Option<Uuid>,
         limit: i64,
     ) -> impl Future<Output = Result<Vec<ScanRunEntity>, sqlx::Error>> + Send;
 }
@@ -51,7 +55,7 @@ impl ScanRunRepository for PgScanRunRepository {
     async fn list_scan_runs(
         &self,
         scan_id: &Uuid,
-        cursor_id: Option<&Uuid>,
+        cursor_id: Option<Uuid>,
         limit: i64,
     ) -> Result<Vec<ScanRunEntity>, sqlx::Error> {
         match cursor_id {

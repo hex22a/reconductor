@@ -1,11 +1,15 @@
 use crate::features::scan::model::ScanStatus;
 use std::sync::Arc;
 
+#[cfg(test)]
+use mockall::automock;
+
 use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::features::scan::model::{ScanEntity, ScanInsert};
 
+#[cfg_attr(test, automock)]
 pub trait ScanRepository {
     fn create_scan(
         &self,
@@ -18,7 +22,7 @@ pub trait ScanRepository {
     fn list_scans(
         &self,
         project_id: &Uuid,
-        cursor_id: Option<&Uuid>,
+        cursor_id: Option<Uuid>,
         limit: i64,
     ) -> impl Future<Output = Result<Vec<ScanEntity>, sqlx::Error>> + Send;
 }
@@ -87,7 +91,7 @@ impl ScanRepository for PgScanRespository {
     async fn list_scans(
         &self,
         project_id: &Uuid,
-        cursor_id: Option<&Uuid>,
+        cursor_id: Option<Uuid>,
         limit: i64,
     ) -> Result<Vec<ScanEntity>, sqlx::Error> {
         match cursor_id {

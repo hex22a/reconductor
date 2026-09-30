@@ -1,11 +1,15 @@
 use std::{pin::Pin, sync::Arc};
 
+#[cfg(test)]
+use mockall::automock;
+
 use crate::features::{session::repository::SessionRepository, user::error::UserError};
 
+#[cfg_attr(test, automock)]
 pub trait LogoutFeature {
     fn logout<'a>(
         &'a self,
-        session_id: &'a str,
+        session_id: String,
     ) -> Pin<Box<dyn Future<Output = Result<(), UserError>> + Send + 'a>>;
 }
 
@@ -26,11 +30,11 @@ where
 {
     fn logout<'a>(
         &'a self,
-        session_id: &'a str,
+        session_id: String,
     ) -> Pin<Box<dyn Future<Output = Result<(), UserError>> + Send + 'a>> {
         Box::pin(async move {
             self.session_repository
-                .delete_user_session(session_id)
+                .delete_user_session(&session_id)
                 .await?;
             Ok(())
         })
@@ -46,7 +50,7 @@ mod tests {
     #[tokio::test]
     async fn test_logout() {
         // Arrange
-        let expected_session_id = "session_id";
+        let expected_session_id = String::from("session_id");
         let mut mock_session_repository = MockSessionRepository::new();
         mock_session_repository
             .expect_delete_user_session()

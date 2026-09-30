@@ -22,6 +22,6 @@ pub async fn list(
     State(state): State<Arc<AppState>>,
     Path((_, _, _, host_id)): Path<(Uuid, Uuid, Uuid, Uuid)>,
 ) -> Result<impl IntoResponse, ServerError> {
-    let ports = state.list_ports_feature.list(&host_id, None).await?;
+    let ports = state.list_ports_feature.list(host_id, None).await?;
     Ok((StatusCode::OK, Json(ports)))
 }

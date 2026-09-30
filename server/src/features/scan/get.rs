@@ -1,16 +1,20 @@
 use std::{pin::Pin, sync::Arc};
 
+#[cfg(test)]
+use mockall::automock;
+
 use uuid::Uuid;
 
 use crate::features::scan::{
     dto::ScanDto, error::ScanError, model::ScanEntity, repository::ScanRepository,
 };
 
+#[cfg_attr(test, automock)]
 pub trait GetScanFeature {
-    fn get(
-        &self,
+    fn get<'a>(
+        &'a self,
         scan_id: Uuid,
-    ) -> Pin<Box<dyn Future<Output = Result<ScanDto, ScanError>> + Send + '_>>;
+    ) -> Pin<Box<dyn Future<Output = Result<ScanDto, ScanError>> + Send + 'a>>;
 }
 
 pub struct GetScan<R: ScanRepository> {
@@ -27,10 +31,10 @@ impl<R> GetScanFeature for GetScan<R>
 where
     R: ScanRepository + Send + Sync,
 {
-    fn get(
-        &self,
+    fn get<'a>(
+        &'a self,
         scan_id: Uuid,
-    ) -> Pin<Box<dyn Future<Output = Result<ScanDto, ScanError>> + Send + '_>> {
+    ) -> Pin<Box<dyn Future<Output = Result<ScanDto, ScanError>> + Send + 'a>> {
         Box::pin(async move {
             let ScanEntity {
                 id,
@@ -51,44 +55,12 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Mutex;
-
     use sqlx::types::ipnetwork::IpNetwork;
     use time::macros::datetime;
 
-    use crate::features::scan::model::ScanEntity;
+    use crate::features::scan::{model::ScanEntity, repository::MockScanRepository};
 
     use super::*;
-
-    struct MockScanRepository {
-        error: Mutex<Option<sqlx::Error>>,
-        scan_entity: ScanEntity,
-    }
-
-    impl ScanRepository for MockScanRepository {
-        async fn create_scan(
-            &self,
-            _: crate::features::scan::model::ScanInsert,
-        ) -> Result<ScanEntity, sqlx::Error> {
-            todo!()
-        }
-
-        async fn get_scan(&self, _: &Uuid) -> Result<ScanEntity, sqlx::Error> {
-            match self.error.lock().unwrap().take() {
-                Some(e) => Err(e),
-                None => Ok(self.scan_entity.clone()),
-            }
-        }
-
-        async fn list_scans(
-            &self,
-            _: &Uuid,
-            _: Option<&Uuid>,
-            _: i64,
-        ) -> Result<Vec<ScanEntity>, sqlx::Error> {
-            todo!()
-        }
-    }
 
     #[tokio::test]
     async fn test_get_scan() {
@@ -115,10 +87,13 @@ mod tests {
             schedule: expected_schedule,
             created_at: expected_created_at,
         };
-        let mock_scan_repository = MockScanRepository {
-            error: Mutex::new(None),
-            scan_entity: expected_scan,
-        };
+
+        let mut mock_scan_repository = MockScanRepository::new();
+        mock_scan_repository.expect_get_scan().returning(move |_| {
+            let scan = expected_scan.clone();
+            Box::pin(async { Ok(scan) })
+        });
+
         let feature = GetScan::new(Arc::new(mock_scan_repository));
 
         // Act
@@ -132,25 +107,12 @@ mod tests {
     async fn test_get_scan_not_found() {
         // Arrange
         let expected_scan_id = Uuid::now_v7();
-        let expected_project_id = Uuid::now_v7();
-        let expected_target: IpNetwork = "192.168.0.1".parse().unwrap();
-        let expected_schedule = Some(String::from("0 * * * * *"));
-        let expected_status = crate::features::scan::model::ScanStatus::Scheduled;
-        let expected_created_at = datetime!(2019-01-01 0:00 UTC);
-        let expected_next_run_at = Some(datetime!(2019-02-01 0:00 UTC));
-        let expected_scan = ScanEntity {
-            id: expected_scan_id,
-            project_id: expected_project_id,
-            target: expected_target,
-            status: expected_status,
-            schedule: expected_schedule.clone(),
-            created_at: expected_created_at,
-            next_run_at: expected_next_run_at,
-        };
-        let mock_scan_repository = MockScanRepository {
-            error: Mutex::new(Some(sqlx::Error::RowNotFound)),
-            scan_entity: expected_scan,
-        };
+
+        let mut mock_scan_repository = MockScanRepository::new();
+        mock_scan_repository
+            .expect_get_scan()
+            .returning(|_| Box::pin(async { Err(sqlx::Error::RowNotFound) }));
+
         let feature = GetScan::new(Arc::new(mock_scan_repository));
 
         // Act

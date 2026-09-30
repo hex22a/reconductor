@@ -87,7 +87,7 @@ pub async fn logout(
 ) -> Result<impl IntoResponse, ServerError> {
     let session_id = jar
         .get(USER_SESSION_COOKIE_NAME)
-        .map(|c| c.value())
+        .map(|c| c.value().to_string())
         .ok_or(ServerError::Unauthorized)?;
     state.logout_feature.logout(session_id).await?;
     let jar = jar.remove(
