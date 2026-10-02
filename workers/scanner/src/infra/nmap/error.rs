@@ -1,7 +1,10 @@
 use std::{io, string::FromUtf8Error};
 
-#[derive(Debug)]
+use thiserror::Error;
+
+#[derive(Debug, Error)]
 pub enum NmapError {
+    #[error("error running nmap")]
     RunError,
 }
 

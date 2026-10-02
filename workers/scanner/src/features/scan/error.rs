@@ -1,9 +1,15 @@
 use sqlx::error::DatabaseError;
+use thiserror::Error;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum ScanError {
+    #[error("scan not found")]
     NotFound,
-    UpdateError(Box<dyn DatabaseError>),
+
+    #[error("error updating scan {0}")]
+    UpdateError(#[source] Box<dyn DatabaseError>),
+
+    #[error("internal error")]
     InternalError,
 }
 

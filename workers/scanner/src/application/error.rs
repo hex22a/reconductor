@@ -1,18 +1,28 @@
-use std::{env::VarError, fmt, num::ParseIntError};
+use std::{env::VarError, num::ParseIntError};
 
 use quick_xml::DeError;
+use thiserror::Error;
 
 use crate::{
     features::{scan::error::ScanError, scan_result::error::ScanResultError},
     infra::{message_queue::error::MqError, nmap::error::NmapError},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum AppError {
+    #[error("environment error {0}")]
     EnvironmentError(String),
+
+    #[error("error initialization")]
     InitializationError,
+
+    #[error("error parsing int")]
     ParseIntError,
+
+    #[error("internal error")]
     InternalError,
+
+    #[error("deserilize error")]
     DeserialzeError,
 }
 
@@ -61,11 +71,5 @@ impl From<MqError> for AppError {
 impl From<DeError> for AppError {
     fn from(_: DeError) -> Self {
         Self::DeserialzeError
-    }
-}
-
-impl fmt::Display for AppError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Scanner error")
     }
 }

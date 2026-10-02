@@ -9,10 +9,13 @@ pub struct NmapRun {
 #[derive(Debug, Deserialize)]
 pub struct Host {
     pub status: Status,
+
     #[serde(rename = "address", default)]
     pub addresses: Vec<Address>,
+
     #[serde(rename = "hostnames")]
     pub hostnames: Option<Hostnames>,
+
     pub ports: Option<Ports>,
     pub os: Option<Os>,
 }
@@ -27,8 +30,10 @@ pub struct Status {
 pub struct Address {
     #[serde(rename = "@addr")]
     pub addr: String,
+
     #[serde(rename = "@addrtype")]
     pub addrtype: String,
+
     #[serde(rename = "@vendor")]
     pub vendor: Option<String>,
 }
@@ -55,8 +60,10 @@ pub struct Ports {
 pub struct Port {
     #[serde(rename = "@portid")]
     pub portid: String,
+
     #[serde(rename = "@protocol")]
     pub protocol: String,
+
     pub state: PortState,
     pub service: Option<Service>,
 }
@@ -71,8 +78,10 @@ pub struct PortState {
 pub struct Service {
     #[serde(rename = "@name")]
     pub name: Option<String>,
+
     #[serde(rename = "@product")]
     pub product: Option<String>,
+
     #[serde(rename = "@version")]
     pub version: Option<String>,
 }
@@ -87,6 +96,7 @@ pub struct Os {
 pub struct OsMatch {
     #[serde(rename = "@name")]
     pub name: String,
+
     #[serde(rename = "@accuracy")]
     pub accuracy: String,
 }

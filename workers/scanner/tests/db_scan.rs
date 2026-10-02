@@ -63,10 +63,12 @@ async fn test_update_scan_status_done(db: PgPool) {
     let expected_status = ScanStatus::Done;
     let expected_scan_id: Uuid = setup_scans(&db).await;
     let repo = PgScanRepository::new(Arc::new(db));
+
     // Act
     let actual_result = repo
         .update_scan_status(expected_scan_id, expected_status)
         .await;
+
     // Assert
     assert_eq!(actual_result.unwrap(), ());
 }
@@ -77,10 +79,12 @@ async fn test_update_scan_status_in_progress(db: PgPool) {
     let expected_status = ScanStatus::InProgress;
     let expected_scan_id: Uuid = setup_scans(&db).await;
     let repo = PgScanRepository::new(Arc::new(db));
+
     // Act
     let actual_result = repo
         .update_scan_status(expected_scan_id, expected_status)
         .await;
+
     // Assert
     assert_eq!(actual_result.unwrap(), ());
 }
@@ -119,10 +123,12 @@ async fn test_store_scan_results(db: PgPool) {
     }];
     let expected_scan_id: Uuid = setup_scans(&db).await;
     let repo = PgScanResultRepository::new(Arc::new(db));
+
     // Act
     let actual_result = repo
         .store_scan_results(expected_scan_id, expected_hosts)
         .await;
+
     // Assert
     assert_eq!(actual_result.unwrap(), ());
 }
