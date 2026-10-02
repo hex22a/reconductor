@@ -1,6 +1,11 @@
-#[derive(Debug)]
+use thiserror::Error;
+
+#[derive(Debug, Error)]
 pub enum MqError {
+    #[error("failed to publish message")]
     PublishError,
+
+    #[error("failed to build message queue")]
     BuildError,
 }
 
