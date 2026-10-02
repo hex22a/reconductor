@@ -1,12 +1,21 @@
 use std::{env::VarError, num::ParseIntError};
 
+use thiserror::Error;
+
 use crate::{features::scan::error::ScanError, infra::message_queue::error::MqError};
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum AppError {
+    #[error("environment error {0}")]
     EnvironmentError(String),
+
+    #[error("error initialization")]
     InitializationError,
+
+    #[error("error parsing int")]
     ParseIntError,
+
+    #[error("internal error")]
     InternalError,
 }
 

@@ -1,12 +1,18 @@
-use std::fmt;
-
 use sqlx::error::DatabaseError;
+use thiserror::Error;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum ScanError {
+    #[error("scan not found")]
     NotFound,
-    UpdateError(Box<dyn DatabaseError>),
+
+    #[error("failed to update scan {0}")]
+    UpdateError(#[source] Box<dyn DatabaseError>),
+
+    #[error("internal database error")]
     InternalError,
+
+    #[error("failed to parse schedule")]
     ScheduleParsingError,
 }
 
@@ -23,18 +29,5 @@ impl From<sqlx::Error> for ScanError {
 impl From<cron::error::Error> for ScanError {
     fn from(_: cron::error::Error) -> Self {
         Self::ScheduleParsingError
-    }
-}
-
-impl fmt::Display for ScanError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            ScanError::NotFound => write!(f, "Scan not found"),
-            ScanError::UpdateError(database_error) => {
-                write!(f, "Failed to update scan: {}", database_error)
-            }
-            ScanError::InternalError => write!(f, "Internal database error"),
-            ScanError::ScheduleParsingError => write!(f, "Failed to parse schedule"),
-        }
     }
 }
