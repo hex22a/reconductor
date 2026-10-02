@@ -1,21 +1,15 @@
-use core::fmt;
-
 use chrono::Utc;
 use cron::Schedule;
+use thiserror::Error;
 use time::{OffsetDateTime, error::ComponentRange};
 
+#[derive(Debug, Error)]
 pub enum ScheduleError {
+    #[error("no next run")]
     NoNextRun,
-    ConvertionError,
-}
 
-impl fmt::Display for ScheduleError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ScheduleError::NoNextRun => write!(f, "No next run"),
-            ScheduleError::ConvertionError => write!(f, "Failed to convert"),
-        }
-    }
+    #[error("failed to convert")]
+    ConvertionError,
 }
 
 impl From<ComponentRange> for ScheduleError {
