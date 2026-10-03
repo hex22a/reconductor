@@ -1,6 +1,11 @@
 [workspace]
 resolver = "2"
-members = ["server", "workers/scanner", "workers/scheduler"]
+members = [
+    "crates/*",
+    "server",
+    "workers/scanner",
+    "workers/scheduler"
+]
 
 [workspace.package]
 license = "MIT OR Apache-2.0"
@@ -9,3 +14,4 @@ edition = "2024"
 [workspace.dependencies]
 mockall = "0.15.0"
 thiserror = "2.0.21"
+reconductor-messaging = { path = "crates/messaging" }
