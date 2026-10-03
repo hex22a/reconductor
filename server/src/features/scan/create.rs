@@ -4,6 +4,7 @@ use std::{pin::Pin, sync::Arc};
 use mockall::automock;
 
 use cron::Schedule;
+use reconductor_messaging::publisher::Publisher;
 use sqlx::types::ipnetwork::IpNetwork;
 use time::OffsetDateTime;
 use uuid::Uuid;
@@ -15,7 +16,7 @@ use crate::{
         model::{ScanEntity, ScanInsert},
         repository::ScanRepository,
     },
-    infra::{message_queue::publisher::Publisher, scheduler::SchedulerService},
+    infra::scheduler::SchedulerService,
 };
 
 #[cfg_attr(test, automock)]
@@ -88,9 +89,10 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
+    use std::{str::FromStr, sync::Mutex};
 
     use mockall::predicate::eq;
+    use reconductor_messaging::error::MqError;
     use time::macros::datetime;
 
     use crate::{
@@ -98,10 +100,24 @@ mod tests {
             model::{ScanEntity, ScanStatus},
             repository::MockScanRepository,
         },
-        infra::{message_queue::publisher::MockPublisher, scheduler::MockSchedulerService},
+        infra::scheduler::MockSchedulerService,
     };
 
     use super::*;
+
+    struct MockMqPublisher {
+        publish_calls: Arc<Mutex<Vec<(Uuid, IpNetwork)>>>,
+    }
+
+    impl Publisher for MockMqPublisher {
+        async fn publish_scan(&self, scan_id: &Uuid, target: &IpNetwork) -> Result<(), MqError> {
+            self.publish_calls
+                .lock()
+                .unwrap()
+                .push((scan_id.to_owned(), target.to_owned()));
+            Ok(())
+        }
+    }
 
     #[tokio::test]
     async fn test_create_scan() {
@@ -129,11 +145,10 @@ mod tests {
             created_at: expected_created_at,
         };
 
-        let mut mock_mq_publisher = MockPublisher::new();
-        mock_mq_publisher
-            .expect_publish_scan()
-            .with(eq(expected_scan_id), eq(expected_target))
-            .returning(|_, _| Box::pin(async { Ok(()) }));
+        let publish_calls = Arc::new(Mutex::new(vec![]));
+        let mock_mq_publisher = MockMqPublisher {
+            publish_calls: publish_calls.clone(),
+        };
         let mut mock_scan_repository = MockScanRepository::new();
         mock_scan_repository
             .expect_create_scan()
@@ -164,5 +179,10 @@ mod tests {
 
         // Assert
         assert_eq!(actual_scan, expected_scan);
+        assert_eq!(publish_calls.lock().unwrap().len(), 1);
+        assert_eq!(
+            publish_calls.lock().unwrap()[0],
+            (expected_scan_id, expected_target)
+        )
     }
 }

@@ -2,7 +2,7 @@
 use mockall::automock;
 
 use lapin::{
-    BasicProperties, Channel, Consumer,
+    BasicProperties, Channel, Connection, Consumer,
     message::Delivery,
     options::{
         BasicAckOptions, BasicConsumeOptions, BasicNackOptions, BasicPublishOptions,
@@ -60,7 +60,12 @@ pub struct RabbitMqProvider {
 }
 
 impl RabbitMqProvider {
-    pub async fn build(channel: Channel) -> Result<Self, MqError> {
+    pub async fn build(config: RabbitMqConfig) -> Result<Self, MqError> {
+        let rabbit_mq_uri = config.uri();
+        let conn = Connection::connect(&rabbit_mq_uri, lapin::ConnectionProperties::default())
+            .await
+            .or(Err(MqError::Connect))?;
+        let channel = conn.create_channel().await.or(Err(MqError::Create))?;
         channel
             .queue_declare(
                 SCANS_QUEUE.into(),
@@ -71,7 +76,7 @@ impl RabbitMqProvider {
                 FieldTable::default(),
             )
             .await
-            .or(Err(MqError::Build))?;
+            .or(Err(MqError::Declare))?;
         Ok(Self { channel })
     }
 }

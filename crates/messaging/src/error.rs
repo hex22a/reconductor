@@ -2,6 +2,15 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum MqError {
+    #[error("failed to connect to mq server")]
+    Connect,
+
+    #[error("failed to create channel")]
+    Create,
+
+    #[error("failed to declare message queue")]
+    Declare,
+
     #[error("failed to consume message")]
     Consume,
 
@@ -13,9 +22,6 @@ pub enum MqError {
 
     #[error("failed to nack")]
     Nack,
-
-    #[error("failed to build message queue")]
-    Build,
 }
 
 impl From<serde_json::Error> for MqError {

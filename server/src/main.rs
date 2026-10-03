@@ -1,11 +1,9 @@
-use server::infra::message_queue::{RabbitMqConfig, RabbitMqProvider};
+use reconductor_messaging::{RabbitMqConfig, RabbitMqProvider};
 use server::infra::persistence::db::DbConfig;
 use server::infra::persistence::kv::KvConfig;
 use server::{AppError, Config, Reconductor};
 
 use server::infra::persistence::{db, kv};
-
-use tracing::info;
 
 #[tokio::main]
 async fn main() -> Result<(), AppError> {
@@ -30,21 +28,16 @@ async fn main() -> Result<(), AppError> {
         database: config.kv_db,
     })
     .await;
-    let rabbit_mq_uri = RabbitMqConfig {
+    let rabbit_mq_config = RabbitMqConfig {
         username: config.rabbitmq_username,
         password: config.rabbitmq_password,
         host: config.rabbitmq_host,
         port: config.rabbitmq_port,
         vhost: config.rabbitmq_vhost,
-    }
-    .uri();
-    let conn =
-        lapin::Connection::connect(&rabbit_mq_uri, lapin::ConnectionProperties::default()).await?;
-    info!("Connected to RabbitMQ");
-    let publish_channel = conn.create_channel().await?;
-    let mq_provider = RabbitMqProvider::build(publish_channel)
+    };
+    let mq_provider = RabbitMqProvider::build(rabbit_mq_config)
         .await
-        .expect("Can't declare a message queue");
+        .expect("failed to connect to MQ");
 
     let app = Reconductor::build(db, kv, mq_provider, config.csrf_key, config.dashboard_url);
 

@@ -4,6 +4,8 @@ use axum::Router;
 use axum::http::header::CONTENT_TYPE;
 use axum::http::{HeaderName, HeaderValue, Method};
 use rand::rngs::SysRng;
+use reconductor_messaging::RabbitMqProvider;
+use reconductor_messaging::publisher::MqPublisher;
 use sqlx::PgPool;
 
 pub use infra::persistence::kv::FredKvProvider;
@@ -47,8 +49,6 @@ use crate::features::scan::get::GetScan;
 use crate::features::scan_run::get::GetScanRun;
 use crate::features::scan_run::list::ListScanRuns;
 use crate::features::scan_run::repository::PgScanRunRepository;
-use crate::infra::message_queue::RabbitMqProvider;
-use crate::infra::message_queue::publisher::MqPublisher;
 
 pub use application::error::AppError;
 
