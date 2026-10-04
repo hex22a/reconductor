@@ -5,18 +5,16 @@ use mockall::automock;
 
 use cron::Schedule;
 use reconductor_messaging::publisher::Publisher;
+use reconductor_schedule::SchedulerService;
 use sqlx::types::ipnetwork::IpNetwork;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
-use crate::{
-    features::scan::{
-        dto::ScanDto,
-        error::ScanError,
-        model::{ScanEntity, ScanInsert},
-        repository::ScanRepository,
-    },
-    infra::scheduler::SchedulerService,
+use crate::features::scan::{
+    dto::ScanDto,
+    error::ScanError,
+    model::{ScanEntity, ScanInsert},
+    repository::ScanRepository,
 };
 
 #[cfg_attr(test, automock)]
@@ -91,22 +89,24 @@ where
 mod tests {
     use std::{str::FromStr, sync::Mutex};
 
-    use mockall::predicate::eq;
     use reconductor_messaging::error::MqError;
+    use reconductor_schedule::ScheduleError;
     use time::macros::datetime;
 
-    use crate::{
-        features::scan::{
-            model::{ScanEntity, ScanStatus},
-            repository::MockScanRepository,
-        },
-        infra::scheduler::MockSchedulerService,
+    use crate::features::scan::{
+        model::{ScanEntity, ScanStatus},
+        repository::MockScanRepository,
     };
 
     use super::*;
 
     struct MockMqPublisher {
         publish_calls: Arc<Mutex<Vec<(Uuid, IpNetwork)>>>,
+    }
+
+    struct MockScheduler {
+        error: Mutex<Option<ScheduleError>>,
+        return_value: OffsetDateTime,
     }
 
     impl Publisher for MockMqPublisher {
@@ -116,6 +116,15 @@ mod tests {
                 .unwrap()
                 .push((scan_id.to_owned(), target.to_owned()));
             Ok(())
+        }
+    }
+
+    impl SchedulerService for MockScheduler {
+        fn calculate_next_run(&self, _: &Schedule) -> Result<OffsetDateTime, ScheduleError> {
+            match self.error.lock().unwrap().take() {
+                Some(e) => Err(e),
+                None => Ok(self.return_value),
+            }
         }
     }
 
@@ -156,10 +165,10 @@ mod tests {
                 let scan_entity = expected_scan_entity.clone();
                 Box::pin(async { Ok(scan_entity) })
             });
-        let mut mock_scheduler_service = MockSchedulerService::new();
-        mock_scheduler_service
-            .expect_calculate_next_run()
-            .return_const(Ok(expected_next_run_at));
+        let mock_scheduler_service = MockScheduler {
+            error: Mutex::new(None),
+            return_value: expected_created_at,
+        };
 
         let feature = CreateScan::new(
             Arc::new(mock_scan_repository),

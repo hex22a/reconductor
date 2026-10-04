@@ -15,3 +15,4 @@ edition = "2024"
 mockall = "0.15.0"
 thiserror = "2.0.21"
 reconductor-messaging = { path = "crates/messaging" }
+reconductor-schedule = { path = "crates/schedule" }

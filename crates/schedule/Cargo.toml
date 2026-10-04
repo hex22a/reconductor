@@ -1,0 +1,11 @@
+[package]
+name = "reconductor-schedule"
+version = "0.1.0"
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+chrono = { version = "0.4.45", features = ["serde"] }
+cron = "0.17.0"
+time = { version = "0.3.55", features = ["serde"] }
+thiserror.workspace = true

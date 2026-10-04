@@ -2461,6 +2461,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "reconductor-schedule"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "cron",
+ "thiserror",
+ "time",
+]
+
+[[package]]
 name = "redis-protocol"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2841,6 +2851,7 @@ dependencies = [
  "mockall",
  "rand 0.10.2",
  "reconductor-messaging",
+ "reconductor-schedule",
  "serde",
  "serde_json",
  "sqlx",

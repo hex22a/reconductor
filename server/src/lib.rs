@@ -6,6 +6,7 @@ use axum::http::{HeaderName, HeaderValue, Method};
 use rand::rngs::SysRng;
 use reconductor_messaging::RabbitMqProvider;
 use reconductor_messaging::publisher::MqPublisher;
+use reconductor_schedule::Scheduler;
 use sqlx::PgPool;
 
 pub use infra::persistence::kv::FredKvProvider;
@@ -30,7 +31,6 @@ use features::user::register::UserRegisterFeature;
 use infra::csrf::AesGcmCsrfService;
 use infra::password::Argon2Service;
 use infra::random::OsRngService;
-use infra::scheduler::Scheduler;
 use routes::api::v1;
 use state::AppState;
 

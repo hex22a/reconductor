@@ -1,7 +1,8 @@
 use reconductor_messaging::error::MqError;
+use reconductor_schedule::ScheduleError;
 use thiserror::Error;
 
-use crate::{domain::cursor::CursorError, infra::scheduler::ScheduleError};
+use crate::domain::cursor::CursorError;
 
 #[derive(Debug, Error)]
 pub enum ScanError {
