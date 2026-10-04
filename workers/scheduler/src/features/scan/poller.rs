@@ -1,12 +1,13 @@
 use std::str::FromStr;
 
 use cron::Schedule;
+use reconductor_messaging::publisher::Publisher;
 use tokio::time::{Duration, interval};
 use tracing::{error, info};
 
 use crate::{
     features::scan::{error::ScanError, repository::ScanRepository},
-    infra::{message_queue::publisher::Publisher, scheduler::SchedulerService},
+    infra::scheduler::SchedulerService,
 };
 
 pub trait PollerFeature {
@@ -62,7 +63,7 @@ impl<R: ScanRepository, P: Publisher, S: SchedulerService> PollerFeature for Sca
                 continue;
             };
 
-            match self.publisher.publish_scan(scan.id, &scan.target).await {
+            match self.publisher.publish_scan(&scan.id, &scan.target).await {
                 Ok(_) => {
                     info!("Published scan {} for target {}", scan.id, scan.target);
                     let schedule = Schedule::from_str(schedule)?;
@@ -96,16 +97,14 @@ mod tests {
     };
 
     use cron::Schedule;
+    use reconductor_messaging::error::MqError;
     use sqlx::types::{
         ipnetwork::{IpNetwork, Ipv4Network},
         time::OffsetDateTime,
     };
     use uuid::Uuid;
 
-    use crate::{
-        features::scan::model::DueScan,
-        infra::{message_queue::error::MqError, scheduler::ScheduleError},
-    };
+    use crate::{features::scan::model::DueScan, infra::scheduler::ScheduleError};
 
     use super::*;
 
@@ -143,8 +142,8 @@ mod tests {
     }
 
     impl Publisher for MockScanPublisher {
-        async fn publish_scan(&self, scan_id: Uuid, target: &IpNetwork) -> Result<(), MqError> {
-            self.publish_calls.lock().unwrap().push((scan_id, *target));
+        async fn publish_scan(&self, scan_id: &Uuid, target: &IpNetwork) -> Result<(), MqError> {
+            self.publish_calls.lock().unwrap().push((*scan_id, *target));
             Ok(())
         }
     }

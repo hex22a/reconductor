@@ -1,8 +1,9 @@
 use std::{env::VarError, num::ParseIntError};
 
+use reconductor_messaging::error::MqError;
 use thiserror::Error;
 
-use crate::{features::scan::error::ScanError, infra::message_queue::error::MqError};
+use crate::features::scan::error::ScanError;
 
 #[derive(Debug, Error)]
 pub enum AppError {

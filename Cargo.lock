@@ -2696,6 +2696,7 @@ dependencies = [
  "ipnetwork",
  "lapin",
  "mockall",
+ "reconductor-messaging",
  "serde_json",
  "sqlx",
  "thiserror",

@@ -1,3 +1,4 @@
+use reconductor_messaging::{RabbitMqProvider, publisher::MqPublisher};
 use sqlx::PgPool;
 
 use crate::{
@@ -5,10 +6,7 @@ use crate::{
         poller::{PollerFeature, ScanPoller},
         repository::PgScanRepository,
     },
-    infra::{
-        message_queue::{RabbitMqProvider, publisher::MqPublisher},
-        scheduler::Scheduler,
-    },
+    infra::scheduler::Scheduler,
 };
 
 pub mod application;
@@ -22,7 +20,7 @@ impl ScanScheduler {
     pub fn build(db: PgPool, mq: RabbitMqProvider, poll_interval_secs: u64) -> impl PollerFeature {
         ScanPoller::new(
             PgScanRepository { db },
-            MqPublisher { provider: mq },
+            MqPublisher::new(mq),
             Scheduler,
             poll_interval_secs,
         )

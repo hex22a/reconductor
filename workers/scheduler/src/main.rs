@@ -1,15 +1,12 @@
 mod config;
 
+use reconductor_messaging::{RabbitMqConfig, RabbitMqProvider};
 use scheduler::{
     ScanScheduler,
     application::error::AppError,
     features::scan::poller::PollerFeature,
-    infra::{
-        db::{self, DbConfig},
-        message_queue::{RabbitMqConfig, RabbitMqProvider},
-    },
+    infra::db::{self, DbConfig},
 };
-use tracing::info;
 
 #[tokio::main]
 async fn main() -> Result<(), AppError> {
@@ -26,20 +23,16 @@ async fn main() -> Result<(), AppError> {
         db_name: config.db_name,
     })
     .await;
-    let rabbitmq_uri = RabbitMqConfig {
+    let rabbit_mq_config = RabbitMqConfig {
         username: config.rabbitmq_username,
         password: config.rabbitmq_password,
         host: config.rabbitmq_host,
         port: config.rabbitmq_port,
         vhost: config.rabbitmq_vhost,
-    }
-    .uri();
-    let conn =
-        lapin::Connection::connect(&rabbitmq_uri, lapin::ConnectionProperties::default()).await?;
-    info!("Connected to RabbitMQ");
-
-    let publish_channel = conn.create_channel().await?;
-    let mq_provider = RabbitMqProvider::build(publish_channel).await?;
+    };
+    let mq_provider = RabbitMqProvider::build(rabbit_mq_config)
+        .await
+        .expect("failed to connect to MQ");
 
     let scheduler = ScanScheduler::build(db, mq_provider, config.poll_interval_secs);
 

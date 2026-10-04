@@ -19,6 +19,7 @@ tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 urlencoding = "2.1.3"
 uuid = { version = "1.26.0", features = ["serde", "v7"] }
 thiserror.workspace = true
+reconductor-messaging.workspace = true
 
 [dev-dependencies]
 mockall.workspace = true
