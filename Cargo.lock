@@ -2684,7 +2684,6 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
- "urlencoding",
  "uuid",
 ]
 
@@ -2701,7 +2700,6 @@ dependencies = [
 name = "scheduler"
 version = "0.1.0"
 dependencies = [
- "chrono",
  "cron",
  "dotenvy",
  "ipnetwork",
@@ -2709,14 +2707,12 @@ dependencies = [
  "mockall",
  "reconductor-messaging",
  "reconductor-schedule",
- "serde_json",
  "sqlx",
  "thiserror",
  "time",
  "tokio",
  "tracing",
  "tracing-subscriber",
- "urlencoding",
  "uuid",
 ]
 
@@ -2864,7 +2860,6 @@ dependencies = [
  "tower-http",
  "tracing",
  "tracing-subscriber",
- "urlencoding",
  "uuid",
 ]
 
