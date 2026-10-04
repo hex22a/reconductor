@@ -2708,6 +2708,7 @@ dependencies = [
  "lapin",
  "mockall",
  "reconductor-messaging",
+ "reconductor-schedule",
  "serde_json",
  "sqlx",
  "thiserror",

@@ -8,7 +8,7 @@ pub enum ScheduleError {
     #[error("no next run")]
     NoNextRun,
 
-    #[error("error conferting schedule")]
+    #[error("error converting schedule")]
     ConvertionError,
 }
 

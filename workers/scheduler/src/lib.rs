@@ -1,16 +1,13 @@
 use reconductor_messaging::{RabbitMqProvider, publisher::MqPublisher};
+use reconductor_schedule::Scheduler;
 use sqlx::PgPool;
 
-use crate::{
-    features::scan::{
-        poller::{PollerFeature, ScanPoller},
-        repository::PgScanRepository,
-    },
-    infra::scheduler::Scheduler,
+use crate::features::scan::{
+    poller::{PollerFeature, ScanPoller},
+    repository::PgScanRepository,
 };
 
 pub mod application;
-mod constants;
 pub mod features;
 pub mod infra;
 

@@ -2,13 +2,11 @@ use std::str::FromStr;
 
 use cron::Schedule;
 use reconductor_messaging::publisher::Publisher;
+use reconductor_schedule::SchedulerService;
 use tokio::time::{Duration, interval};
 use tracing::{error, info};
 
-use crate::{
-    features::scan::{error::ScanError, repository::ScanRepository},
-    infra::scheduler::SchedulerService,
-};
+use crate::features::scan::{error::ScanError, repository::ScanRepository};
 
 pub trait PollerFeature {
     fn run(&self) -> impl Future<Output = Result<(), ScanError>>;
@@ -98,13 +96,14 @@ mod tests {
 
     use cron::Schedule;
     use reconductor_messaging::error::MqError;
+    use reconductor_schedule::ScheduleError;
     use sqlx::types::{
         ipnetwork::{IpNetwork, Ipv4Network},
         time::OffsetDateTime,
     };
     use uuid::Uuid;
 
-    use crate::{features::scan::model::DueScan, infra::scheduler::ScheduleError};
+    use crate::features::scan::model::DueScan;
 
     use super::*;
 
