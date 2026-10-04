@@ -1,11 +1,12 @@
 use std::{env::VarError, num::ParseIntError};
 
 use quick_xml::DeError;
+use reconductor_messaging::error::MqError;
 use thiserror::Error;
 
 use crate::{
     features::{scan::error::ScanError, scan_result::error::ScanResultError},
-    infra::{message_queue::error::MqError, nmap::error::NmapError},
+    infra::nmap::error::NmapError,
 };
 
 #[derive(Debug, Error)]

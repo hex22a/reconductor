@@ -1,7 +1,7 @@
 mod config;
 
-use scanner::{AppError, DbConfig, RabbitMqConfig, RabbitMqProvider, Runner, Scanner, db};
-use tracing::info;
+use reconductor_messaging::{RabbitMqConfig, RabbitMqProvider};
+use scanner::{AppError, DbConfig, Runner, Scanner, db};
 
 #[tokio::main]
 async fn main() -> Result<(), AppError> {
@@ -11,19 +11,7 @@ async fn main() -> Result<(), AppError> {
         .init();
 
     let config = config::Config::from_env()?;
-    let rabbitmq_uri = RabbitMqConfig {
-        username: config.rabbitmq_username,
-        password: config.rabbitmq_password,
-        host: config.rabbitmq_host,
-        port: config.rabbitmq_port,
-        vhost: config.rabbitmq_vhost,
-    }
-    .uri();
-    let conn =
-        lapin::Connection::connect(&rabbitmq_uri, lapin::ConnectionProperties::default()).await?;
-    info!("Connected to RabbitMQ");
 
-    let consume_channel = conn.create_channel().await?;
     let db = db::init_db(DbConfig {
         username: config.db_username,
         password: config.db_password,
@@ -32,9 +20,17 @@ async fn main() -> Result<(), AppError> {
         db_name: config.db_name,
     })
     .await;
-    let mq_provider = RabbitMqProvider::build(consume_channel)
+
+    let rabbit_mq_config = RabbitMqConfig {
+        username: config.rabbitmq_username,
+        password: config.rabbitmq_password,
+        host: config.rabbitmq_host,
+        port: config.rabbitmq_port,
+        vhost: config.rabbitmq_vhost,
+    };
+    let mq_provider = RabbitMqProvider::build(rabbit_mq_config)
         .await
-        .expect("Can't declare a message queue");
+        .expect("failed to connect to MQ");
 
     let app = Scanner::build(db, mq_provider);
     let _ = app.run().await;

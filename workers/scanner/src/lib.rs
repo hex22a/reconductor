@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use reconductor_messaging::{RabbitMqProvider, consumer::MqConsumer};
 use sqlx::PgPool;
 
 use crate::{
@@ -8,7 +9,7 @@ use crate::{
         scan::{repository::PgScanRepository, update::UpdateScan},
         scan_result::{add::AddScanResult, repository::PgScanResultRepository},
     },
-    infra::{message_queue::consumer::MqConsumer, nmap::NmapRunner},
+    infra::nmap::NmapRunner,
 };
 
 mod application;
@@ -21,8 +22,6 @@ pub use application::error::AppError;
 pub use application::run::Runner;
 pub use infra::db;
 pub use infra::db::DbConfig;
-pub use infra::message_queue::RabbitMqConfig;
-pub use infra::message_queue::RabbitMqProvider;
 
 pub struct Scanner;
 

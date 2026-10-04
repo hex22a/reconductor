@@ -3,10 +3,10 @@ use std::sync::Arc;
 use crate::{
     application::{error::AppError, processor::Processor},
     domain::scan_message::ScanMessage,
-    infra::message_queue::consumer::Consumer,
 };
 use futures_lite::StreamExt;
 use lapin::message::Delivery;
+use reconductor_messaging::consumer::Consumer;
 use tracing::{error, info};
 
 pub trait Runner {

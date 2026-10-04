@@ -2666,6 +2666,7 @@ dependencies = [
  "lapin",
  "mockall",
  "quick-xml",
+ "reconductor-messaging",
  "serde",
  "serde_json",
  "sqlx",
