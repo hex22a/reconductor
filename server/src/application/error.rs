@@ -58,12 +58,6 @@ impl From<ParseIntError> for AppError {
     }
 }
 
-impl From<lapin::Error> for AppError {
-    fn from(_: lapin::Error) -> Self {
-        Self::InitializationError
-    }
-}
-
 pub type FieldErrors = HashMap<String, Vec<String>>;
 
 #[derive(Debug)]

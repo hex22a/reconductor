@@ -16,7 +16,6 @@ dotenvy = "0.15.7"
 fred = "10.1.0"
 hex = "0.4.3"
 ipnetwork = { version = "0.21.1", features = ["serde"] }
-lapin = "4.10.0"
 mac_address = { version = "1.1.8", features = ["serde"] }
 rand = "0.10.2"
 serde = { version = "1.0.229", features = ["derive"] }
