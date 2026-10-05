@@ -69,7 +69,8 @@ impl<R: ScanResultRepository> AddScanResult<R> {
                 state: Some(p.state.state),
                 service: p.service.as_ref().and_then(|s| s.name.clone()),
                 product: p.service.as_ref().and_then(|s| s.product.clone()),
-                version: p.service.and_then(|s| s.version),
+                version: p.service.as_ref().and_then(|s| s.version.clone()),
+                cpes: p.service.and_then(|s| s.cpes),
             })
             .collect();
 

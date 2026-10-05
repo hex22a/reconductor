@@ -94,6 +94,10 @@ async fn test_store_scan_results(db: PgPool) {
     // Arrange
     let expected_host_ip: IpNetwork = "192.168.0.1".parse().unwrap();
     let expected_host_mac_address: MacAddress = MacAddress::from_str("08:00:2b:01:02:03").unwrap();
+    let expected_cpes = vec![
+        String::from("cpe:/a:openbsd:openssh:6.6.1p1"),
+        String::from("cpe:/o:linux:linux_kernel"),
+    ];
     let expected_ports: Vec<ScanPortInsert> = vec![
         ScanPortInsert {
             port: 22,
@@ -102,6 +106,7 @@ async fn test_store_scan_results(db: PgPool) {
             service: Some("ssh".to_string()),
             product: Some("ssh".to_string()),
             version: Some("1.0.1".to_string()),
+            cpes: Some(expected_cpes),
         },
         ScanPortInsert {
             port: 80,
@@ -110,6 +115,7 @@ async fn test_store_scan_results(db: PgPool) {
             service: Some("server".to_string()),
             product: Some("bun".to_string()),
             version: Some("1.0.1".to_string()),
+            cpes: None,
         },
     ];
     let expected_hosts: Vec<ScanHostInsert> = vec![ScanHostInsert {

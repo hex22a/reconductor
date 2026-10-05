@@ -84,6 +84,9 @@ pub struct Service {
 
     #[serde(rename = "@version")]
     pub version: Option<String>,
+
+    #[serde(rename = "cpe")]
+    pub cpes: Option<Vec<String>>,
 }
 
 #[derive(Debug, Deserialize)]

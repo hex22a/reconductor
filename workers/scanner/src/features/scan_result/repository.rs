@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use sqlx::PgPool;
+use sqlx::{PgPool, QueryBuilder};
 use uuid::Uuid;
 
 use crate::features::scan_result::{error::ScanResultError, model::ScanHostInsert};
@@ -64,42 +64,27 @@ impl ScanResultRepository for PgScanResultRepository {
             .await?;
 
             if !host.ports.is_empty() {
-                let host_ids = vec![host_id; host.ports.len()];
-                let ports: Vec<i32> = host.ports.iter().map(|p| p.port).collect();
-                let protocols: Vec<Option<String>> =
-                    host.ports.iter().map(|p| p.protocol.clone()).collect();
-                let states: Vec<Option<String>> =
-                    host.ports.iter().map(|p| p.state.clone()).collect();
-                let services: Vec<Option<String>> =
-                    host.ports.iter().map(|p| p.service.clone()).collect();
-                let products: Vec<Option<String>> =
-                    host.ports.iter().map(|p| p.product.clone()).collect();
-                let versions: Vec<Option<String>> =
-                    host.ports.iter().map(|p| p.version.clone()).collect();
-                sqlx::query!(
-                    r#"
-                    INSERT INTO recon.scan_ports
-                        (host_id, port, protocol, state, service, product, version)
-                    SELECT * FROM UNNEST(
-                        $1::uuid[],
-                        $2::int[],
-                        $3::text[],
-                        $4::text[],
-                        $5::text[],
-                        $6::text[],
-                        $7::text[]
-                    )
-                    "#,
-                    &host_ids as &[Uuid],
-                    &ports as &[i32],
-                    &protocols as &[Option<String>],
-                    &states as &[Option<String>],
-                    &services as &[Option<String>],
-                    &products as &[Option<String>],
-                    &versions as &[Option<String>],
-                )
-                .execute(&mut *tx)
-                .await?;
+                let mut query = QueryBuilder::new(
+                    "INSERT INTO recon.scan_ports \
+                        (host_id, port, protocol, state, service, product, version, cpes)",
+                );
+
+                query.push_values(&host.ports, |mut row, port| {
+                    row.push_bind(host_id)
+                        .push_bind(port.port)
+                        .push_bind(&port.protocol)
+                        .push_bind(&port.state)
+                        .push_bind(&port.service)
+                        .push_bind(&port.product)
+                        .push_bind(&port.version)
+                        .push_bind(
+                            port.cpes
+                                .as_ref()
+                                .map(|cpes| cpes.iter().map(|c| c.to_string()).collect::<Vec<_>>()),
+                        );
+                });
+
+                query.build().execute(&mut *tx).await?;
             }
         }
         tx.commit().await?;
