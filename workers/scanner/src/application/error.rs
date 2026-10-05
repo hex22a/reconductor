@@ -33,12 +33,6 @@ impl From<VarError> for AppError {
     }
 }
 
-impl From<lapin::Error> for AppError {
-    fn from(_: lapin::Error) -> Self {
-        Self::InitializationError
-    }
-}
-
 impl From<ParseIntError> for AppError {
     fn from(_: ParseIntError) -> Self {
         Self::ParseIntError

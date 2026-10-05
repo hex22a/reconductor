@@ -5,8 +5,7 @@ use crate::{
     domain::scan_message::ScanMessage,
 };
 use futures_lite::StreamExt;
-use lapin::message::Delivery;
-use reconductor_messaging::consumer::Consumer;
+use reconductor_messaging::{Delivery, consumer::Consumer};
 use tracing::{error, info};
 
 pub trait Runner {
@@ -40,7 +39,7 @@ where
     async fn run(&self) -> Result<(), AppError> {
         let mut consumer = self.consumer.consume_scan().await?;
         while let Some(delivery) = consumer.next().await {
-            let delivery = delivery?;
+            let delivery = delivery.or(Err(AppError::InitializationError))?;
 
             let msg: ScanMessage = match serde_json::from_slice(&delivery.data) {
                 Ok(m) => m,

@@ -3,7 +3,6 @@ use mockall::automock;
 
 use lapin::{
     BasicProperties, Channel, Connection, Consumer,
-    message::Delivery,
     options::{
         BasicAckOptions, BasicConsumeOptions, BasicNackOptions, BasicPublishOptions,
         QueueDeclareOptions,
@@ -13,6 +12,8 @@ use lapin::{
 use serde_json::Value;
 
 use crate::error::MqError;
+
+pub use lapin::message::Delivery;
 
 pub const SCANS_QUEUE: &str = "scans";
 pub const CONSUMER_TAG: &str = "scanner_worker";

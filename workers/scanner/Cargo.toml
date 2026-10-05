@@ -7,7 +7,6 @@ license.workspace = true
 [dependencies]
 dotenvy = "0.15.7"
 futures-lite = "2.6.1"
-lapin = "4.10.0"
 quick-xml = { version = "0.42.0", features = ["serde", "serialize"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
