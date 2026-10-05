@@ -109,6 +109,7 @@ mod tests {
             service: None,
             product: None,
             version: None,
+            cpes: None,
         };
         let expected_port_entities = vec![expected_port; expected_port_entities_size];
         let expected_port_dto = PortDto {
@@ -168,6 +169,7 @@ mod tests {
             service: None,
             product: None,
             version: None,
+            cpes: None,
         };
         let expected_port_entities = vec![expected_port; expected_port_entities_size + 1];
         let expected_port_dto = PortDto {
@@ -226,6 +228,7 @@ mod tests {
             service: None,
             product: None,
             version: None,
+            cpes: None,
         };
         let expected_port_entities = vec![expected_port; expected_port_entities_size + 1];
         let expected_port_dto = PortDto {
@@ -281,6 +284,7 @@ mod tests {
             service: None,
             product: None,
             version: None,
+            cpes: None,
         };
 
         let mut mock_port_repository = MockPortRepository::new();

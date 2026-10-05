@@ -46,7 +46,8 @@ impl HostRepository for PgHostRepository {
                 vendor,
                 hostname,
                 os_match,
-                os_accuracy
+                os_accuracy,
+                cpes
             FROM recon.scan_hosts
             WHERE id=$1
             LIMIT 1;
@@ -77,7 +78,8 @@ impl HostRepository for PgHostRepository {
                         vendor,
                         hostname,
                         os_match,
-                        os_accuracy
+                        os_accuracy,
+                        cpes
                     FROM recon.scan_hosts
                     WHERE scan_run_id=$1 and id < $2
                     ORDER BY id DESC
@@ -102,7 +104,8 @@ impl HostRepository for PgHostRepository {
                         vendor,
                         hostname,
                         os_match,
-                        os_accuracy
+                        os_accuracy,
+                        cpes
                     FROM recon.scan_hosts
                     WHERE scan_run_id=$1
                     ORDER BY id DESC

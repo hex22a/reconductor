@@ -55,7 +55,8 @@ CREATE TABLE recon.scan_hosts (
     vendor TEXT,
     hostname TEXT,
     os_match TEXT,
-    os_accuracy INT
+    os_accuracy INT,
+    cpes TEXT[]
 );
 
 CREATE INDEX idx_scan_hosts_id_desc ON recon.scan_hosts (id DESC);
@@ -68,7 +69,8 @@ CREATE TABLE recon.scan_ports (
     state VARCHAR(20),
     service TEXT,
     product TEXT,
-    version TEXT
+    version TEXT,
+    cpes TEXT[]
 );
 
 CREATE INDEX idx_scan_ports_id_desc ON recon.scan_ports (id DESC);

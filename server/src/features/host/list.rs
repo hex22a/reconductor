@@ -111,6 +111,7 @@ mod tests {
             hostname: None,
             os_match: None,
             os_accuracy: None,
+            cpes: None,
         };
         let expected_host_entities = vec![expected_host; expected_host_entities_size];
         let expected_host_dto = HostDto {
@@ -170,6 +171,7 @@ mod tests {
             hostname: None,
             os_match: None,
             os_accuracy: None,
+            cpes: None,
         };
         let expected_host_entities = vec![expected_host; expected_host_entities_size + 1];
         let expected_host_dto = HostDto {
@@ -228,6 +230,7 @@ mod tests {
             hostname: None,
             os_match: None,
             os_accuracy: None,
+            cpes: None,
         };
         let expected_host_entities = vec![expected_host; expected_host_entities_size + 1];
         let expected_host_dto = HostDto {
@@ -283,6 +286,7 @@ mod tests {
             hostname: None,
             os_match: None,
             os_accuracy: None,
+            cpes: None,
         };
 
         let mut mock_host_repository = MockHostRepository::new();

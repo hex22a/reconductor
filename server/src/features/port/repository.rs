@@ -46,7 +46,8 @@ impl PortRepository for PgPortRepository {
                 state,
                 service,
                 product,
-                version
+                version,
+                cpes
             FROM recon.scan_ports
             WHERE id=$1
             LIMIT 1;
@@ -77,7 +78,8 @@ impl PortRepository for PgPortRepository {
                         state,
                         service,
                         product,
-                        version
+                        version,
+                        cpes
                     FROM recon.scan_ports
                     WHERE host_id=$1 AND id < $2
                     ORDER BY id DESC
@@ -102,7 +104,8 @@ impl PortRepository for PgPortRepository {
                         state,
                         service,
                         product,
-                        version
+                        version,
+                        cpes
                     FROM recon.scan_ports
                     WHERE host_id=$1
                     ORDER BY id DESC

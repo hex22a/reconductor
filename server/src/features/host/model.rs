@@ -11,4 +11,5 @@ pub struct HostEntity {
     pub hostname: Option<String>,
     pub os_match: Option<String>,
     pub os_accuracy: Option<i32>,
+    pub cpes: Option<Vec<String>>,
 }

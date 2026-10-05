@@ -82,6 +82,7 @@ mod tests {
             hostname: None,
             os_match: None,
             os_accuracy: None,
+            cpes: None,
         };
         let expected_host_dto = HostDto {
             id: expected_host_id,

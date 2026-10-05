@@ -80,6 +80,7 @@ mod tests {
             service: None,
             product: None,
             version: None,
+            cpes: None,
         };
         let expected_port_dto = PortDto {
             id: expected_port_id,
@@ -121,6 +122,7 @@ mod tests {
             service: None,
             product: None,
             version: None,
+            cpes: None,
         };
 
         let mut mock_port_repository = MockPortRepository::new();

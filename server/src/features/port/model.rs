@@ -10,4 +10,5 @@ pub struct PortEntity {
     pub service: Option<String>,
     pub product: Option<String>,
     pub version: Option<String>,
+    pub cpes: Option<Vec<String>>,
 }
