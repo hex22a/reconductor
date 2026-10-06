@@ -29,10 +29,10 @@ async fn stores_csrf_under_correct_key() {
     let expected_token = "store_csrf_under_correct_key";
 
     // Act
-    let actual_result = store.create_anonymous_csrf(expected_token).await.unwrap();
+    let actual_result = store.create_anonymous_csrf(expected_token).await;
 
     //Assert
-    assert_eq!(actual_result, ());
+    assert!(actual_result.is_ok());
 }
 
 #[tokio::test]

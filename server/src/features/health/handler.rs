@@ -16,8 +16,10 @@ mod tests {
         // Arrange
         let expected_health_response = HealthResponse { healthy: true };
         let expected_health = (StatusCode::OK, Json(expected_health_response));
+
         // Act
         let actual_health = handle().await;
+
         // Assert
         assert_eq!(actual_health.0, expected_health.0);
         assert_eq!(actual_health.1.0, expected_health.1.0);

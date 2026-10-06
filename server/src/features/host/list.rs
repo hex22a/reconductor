@@ -270,20 +270,7 @@ mod tests {
     async fn test_list_hosts_not_found() {
         // Arrange
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
-        let expected_host_id = Uuid::now_v7();
         let expected_scan_run_id = Uuid::now_v7();
-        let expected_ip: IpNetwork = "192.168.0.1".parse().unwrap();
-        let expected_host_entities_size = HOSTS_PAGE_SIZE_LIMIT as usize;
-        let expected_host = HostEntity {
-            id: expected_host_id,
-            scan_run_id: expected_scan_run_id,
-            ip: expected_ip,
-            mac: None,
-            vendor: None,
-            hostname: None,
-            os_match: None,
-            os_accuracy: None,
-        };
 
         let mut mock_host_repository = MockHostRepository::new();
         mock_host_repository
