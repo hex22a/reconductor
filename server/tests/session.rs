@@ -46,11 +46,10 @@ async fn stores_session_under_correct_key() {
     // Act
     let actual_result = store
         .create_user_session(expected_user_session)
-        .await
-        .unwrap();
+        .await;
 
     //Assert
-    assert_eq!(actual_result, ());
+    assert!(actual_result.is_ok());
 }
 
 #[tokio::test]
