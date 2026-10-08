@@ -10,11 +10,11 @@ use crate::constants::{
 
 #[derive(Debug, Clone, Error)]
 pub enum PasswordServiceError {
-    #[error("error hasing password: {0}")]
-    HashError(String),
+    #[error("error hashing password: {0}")]
+    Hashing(String),
 
     #[error("error parsing hash: {0}")]
-    ParseError(String),
+    Parsing(String),
 }
 
 #[cfg_attr(test, automock)]
@@ -43,7 +43,7 @@ impl PasswordService for Argon2Service {
         argon2
             .hash_password(password.as_bytes())
             .map(|h| h.to_string())
-            .map_err(|e| PasswordServiceError::HashError(e.to_string()))
+            .map_err(|e| PasswordServiceError::Hashing(e.to_string()))
     }
 
     fn verify_password(
@@ -60,7 +60,7 @@ impl PasswordService for Argon2Service {
         .unwrap();
         let argon2 = Argon2::new(argon2::Algorithm::Argon2id, argon2::Version::V0x13, params);
         let password_hash = PasswordHash::new(password_hash)
-            .map_err(|e| PasswordServiceError::ParseError(e.to_string()))?;
+            .map_err(|e| PasswordServiceError::Parsing(e.to_string()))?;
         Ok(argon2
             .verify_password(password.as_bytes(), &password_hash)
             .is_ok())

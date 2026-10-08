@@ -118,6 +118,7 @@ where
 
 #[cfg(test)]
 mod tests {
+    use rand::rngs::SysError;
     use time::macros::datetime;
     use uuid::Uuid;
 
@@ -125,24 +126,28 @@ mod tests {
 
     use crate::{
         features::{
-            csrf::repository::MockCsrfRepository,
-            session::repository::MockSessionRepository,
+            csrf::repository::{CsrfRepositoryError, MockCsrfRepository},
+            session::repository::{MockSessionRepository, SessionRepositoryError},
             user::{model::UserEntity, repository::MockUserRepository},
         },
-        infra::{csrf::MockCsrfService, password::MockPasswordService, random::MockRngService},
+        infra::{
+            csrf::{CsrfServiceError, MockCsrfService},
+            password::{MockPasswordService, PasswordServiceError},
+            random::{MockRngService, RngServiceError},
+        },
     };
 
     #[tokio::test]
     async fn test_login_password_matches() {
         // Arrange
-        let expected_anonymous_csrf = "anonymous_csrf".to_string();
-        let expected_csrf_token = "csrf_token".to_string();
-        let expected_csrf_cookie_value = "csrf_cookie".to_string();
-        let expected_session_cookie = "session_cookie".to_string();
+        let expected_anonymous_csrf = String::from("anonymous_csrf");
+        let expected_csrf_token = String::from("csrf_token");
+        let expected_csrf_cookie_value = String::from("csrf_cookie");
+        let expected_session_cookie = String::from("session_cookie");
         let expected_user_id = Uuid::now_v7();
-        let expected_username = "test".to_string();
-        let expected_password = "password".to_string();
-        let expected_password_hash = "password_hash".to_string();
+        let expected_username = String::from("test");
+        let expected_password = String::from("password");
+        let expected_password_hash = String::from("password_hash");
         let expected_password_version: i16 = 1;
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_updated_at = datetime!(2019-01-01 0:00 UTC);
@@ -225,16 +230,369 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_login_error_generating_session_id() {
+        // Arrange
+        let expected_anonymous_csrf = String::from("anonymous_csrf");
+        let expected_csrf_token = String::from("csrf_token");
+        let expected_csrf_cookie_value = String::from("csrf_cookie");
+        let expected_user_id = Uuid::now_v7();
+        let expected_username = String::from("test");
+        let expected_password = String::from("password");
+        let expected_password_hash = String::from("password_hash");
+        let expected_password_version: i16 = 1;
+        let expected_created_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_updated_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_last_login_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_is_active = true;
+        let expected_user_entity = UserEntity {
+            id: expected_user_id,
+            username: expected_username.clone(),
+            password_hash: expected_password_hash,
+            password_version: expected_password_version,
+            created_at: expected_created_at,
+            updated_at: expected_updated_at,
+            last_login_at: expected_last_login_at,
+            is_active: expected_is_active,
+        };
+        let expected_csrf_service_generated_value =
+            (expected_csrf_token, expected_csrf_cookie_value);
+
+        let mut mock_password_service = MockPasswordService::new();
+        mock_password_service
+            .expect_verify_password()
+            .return_const(Ok(true));
+
+        let mut mock_user_repository = MockUserRepository::new();
+        mock_user_repository
+            .expect_get_user_by_username()
+            .returning(move |_| {
+                let user = expected_user_entity.clone();
+                Box::pin(async { Ok(user) })
+            });
+
+        let mut mock_session_repository = MockSessionRepository::new();
+        mock_session_repository
+            .expect_create_user_session()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
+        let mut mock_csrf_repository = MockCsrfRepository::new();
+        mock_csrf_repository
+            .expect_delete_anonymous_csrf()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service
+            .expect_generate()
+            .return_const(Ok(expected_csrf_service_generated_value));
+
+        let mut mock_rng_service = MockRngService::new();
+        mock_rng_service
+            .expect_generate_session_id()
+            .return_const(Err(RngServiceError::OsError(SysError::UNEXPECTED)));
+
+        let feature = UserLoginFeature::new(
+            Arc::new(mock_user_repository),
+            Arc::new(mock_session_repository),
+            Arc::new(mock_csrf_repository),
+            Arc::new(mock_csrf_service),
+            Arc::new(mock_password_service),
+            Arc::new(mock_rng_service),
+        );
+
+        // Act
+        let actual_login_result = feature
+            .login(
+                expected_username,
+                expected_password,
+                expected_anonymous_csrf,
+            )
+            .await;
+
+        // Assert
+        assert!(matches!(actual_login_result, Err(UserError::Interntal)));
+    }
+
+    #[tokio::test]
+    async fn test_login_error_generating_csrf_pair() {
+        // Arrange
+        let expected_anonymous_csrf = String::from("anonymous_csrf");
+        let expected_session_cookie = String::from("session_cookie");
+        let expected_user_id = Uuid::now_v7();
+        let expected_username = String::from("test");
+        let expected_password = String::from("password");
+        let expected_password_hash = String::from("password_hash");
+        let expected_password_version: i16 = 1;
+        let expected_created_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_updated_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_last_login_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_is_active = true;
+        let expected_user_entity = UserEntity {
+            id: expected_user_id,
+            username: expected_username.clone(),
+            password_hash: expected_password_hash,
+            password_version: expected_password_version,
+            created_at: expected_created_at,
+            updated_at: expected_updated_at,
+            last_login_at: expected_last_login_at,
+            is_active: expected_is_active,
+        };
+
+        let mut mock_password_service = MockPasswordService::new();
+        mock_password_service
+            .expect_verify_password()
+            .return_const(Ok(true));
+
+        let mut mock_user_repository = MockUserRepository::new();
+        mock_user_repository
+            .expect_get_user_by_username()
+            .returning(move |_| {
+                let user = expected_user_entity.clone();
+                Box::pin(async { Ok(user) })
+            });
+
+        let mut mock_session_repository = MockSessionRepository::new();
+        mock_session_repository
+            .expect_create_user_session()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
+        let mut mock_csrf_repository = MockCsrfRepository::new();
+        mock_csrf_repository
+            .expect_delete_anonymous_csrf()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service
+            .expect_generate()
+            .return_const(Err(CsrfServiceError::CsrfInternalError));
+
+        let mut mock_rng_service = MockRngService::new();
+        mock_rng_service
+            .expect_generate_session_id()
+            .return_const(Ok(expected_session_cookie));
+
+        let feature = UserLoginFeature::new(
+            Arc::new(mock_user_repository),
+            Arc::new(mock_session_repository),
+            Arc::new(mock_csrf_repository),
+            Arc::new(mock_csrf_service),
+            Arc::new(mock_password_service),
+            Arc::new(mock_rng_service),
+        );
+
+        // Act
+        let actual_login_result = feature
+            .login(
+                expected_username,
+                expected_password,
+                expected_anonymous_csrf,
+            )
+            .await;
+
+        // Assert
+        assert!(matches!(actual_login_result, Err(UserError::Interntal)));
+    }
+
+    #[tokio::test]
+    async fn test_login_error_storing_user_session() {
+        // Arrange
+        let expected_anonymous_csrf = String::from("anonymous_csrf");
+        let expected_csrf_token = String::from("csrf_token");
+        let expected_csrf_cookie_value = String::from("csrf_cookie");
+        let expected_user_id = Uuid::now_v7();
+        let expected_session_cookie = String::from("session_cookie");
+        let expected_username = String::from("test");
+        let expected_password = String::from("password");
+        let expected_password_hash = String::from("password_hash");
+        let expected_password_version: i16 = 1;
+        let expected_created_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_updated_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_last_login_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_is_active = true;
+        let expected_user_entity = UserEntity {
+            id: expected_user_id,
+            username: expected_username.clone(),
+            password_hash: expected_password_hash,
+            password_version: expected_password_version,
+            created_at: expected_created_at,
+            updated_at: expected_updated_at,
+            last_login_at: expected_last_login_at,
+            is_active: expected_is_active,
+        };
+        let expected_csrf_service_generated_value =
+            (expected_csrf_token, expected_csrf_cookie_value);
+
+        let mut mock_password_service = MockPasswordService::new();
+        mock_password_service
+            .expect_verify_password()
+            .return_const(Ok(true));
+
+        let mut mock_user_repository = MockUserRepository::new();
+        mock_user_repository
+            .expect_get_user_by_username()
+            .returning(move |_| {
+                let user = expected_user_entity.clone();
+                Box::pin(async { Ok(user) })
+            });
+
+        let mut mock_session_repository = MockSessionRepository::new();
+        mock_session_repository
+            .expect_create_user_session()
+            .returning(|_| {
+                Box::pin(async {
+                    Err(SessionRepositoryError::StorageError(
+                        fred::error::Error::new(
+                            fred::error::ErrorKind::IO,
+                            String::from("IO Error"),
+                        ),
+                    ))
+                })
+            });
+
+        let mut mock_csrf_repository = MockCsrfRepository::new();
+        mock_csrf_repository
+            .expect_delete_anonymous_csrf()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service
+            .expect_generate()
+            .return_const(Ok(expected_csrf_service_generated_value));
+
+        let mut mock_rng_service = MockRngService::new();
+        mock_rng_service
+            .expect_generate_session_id()
+            .return_const(Ok(expected_session_cookie));
+
+        let feature = UserLoginFeature::new(
+            Arc::new(mock_user_repository),
+            Arc::new(mock_session_repository),
+            Arc::new(mock_csrf_repository),
+            Arc::new(mock_csrf_service),
+            Arc::new(mock_password_service),
+            Arc::new(mock_rng_service),
+        );
+
+        // Act
+        let actual_login_result = feature
+            .login(
+                expected_username,
+                expected_password,
+                expected_anonymous_csrf,
+            )
+            .await;
+
+        // Assert
+        assert!(matches!(
+            actual_login_result,
+            Err(UserError::StorageError(_))
+        ));
+    }
+
+    #[tokio::test]
+    async fn test_login_error_deleting_anonymous_csrf() {
+        // Arrange
+        let expected_anonymous_csrf = String::from("anonymous_csrf");
+        let expected_csrf_token = String::from("csrf_token");
+        let expected_csrf_cookie_value = String::from("csrf_cookie");
+        let expected_user_id = Uuid::now_v7();
+        let expected_session_cookie = String::from("session_cookie");
+        let expected_username = String::from("test");
+        let expected_password = String::from("password");
+        let expected_password_hash = String::from("password_hash");
+        let expected_password_version: i16 = 1;
+        let expected_created_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_updated_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_last_login_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_is_active = true;
+        let expected_user_entity = UserEntity {
+            id: expected_user_id,
+            username: expected_username.clone(),
+            password_hash: expected_password_hash,
+            password_version: expected_password_version,
+            created_at: expected_created_at,
+            updated_at: expected_updated_at,
+            last_login_at: expected_last_login_at,
+            is_active: expected_is_active,
+        };
+        let expected_csrf_service_generated_value =
+            (expected_csrf_token, expected_csrf_cookie_value);
+
+        let mut mock_password_service = MockPasswordService::new();
+        mock_password_service
+            .expect_verify_password()
+            .return_const(Ok(true));
+
+        let mut mock_user_repository = MockUserRepository::new();
+        mock_user_repository
+            .expect_get_user_by_username()
+            .returning(move |_| {
+                let user = expected_user_entity.clone();
+                Box::pin(async { Ok(user) })
+            });
+
+        let mut mock_session_repository = MockSessionRepository::new();
+        mock_session_repository
+            .expect_create_user_session()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
+        let mut mock_csrf_repository = MockCsrfRepository::new();
+        mock_csrf_repository
+            .expect_delete_anonymous_csrf()
+            .returning(|_| {
+                Box::pin(async {
+                    Err(CsrfRepositoryError::StorageError(fred::error::Error::new(
+                        fred::error::ErrorKind::IO,
+                        String::from("IO Error"),
+                    )))
+                })
+            });
+
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service
+            .expect_generate()
+            .return_const(Ok(expected_csrf_service_generated_value));
+
+        let mut mock_rng_service = MockRngService::new();
+        mock_rng_service
+            .expect_generate_session_id()
+            .return_const(Ok(expected_session_cookie));
+
+        let feature = UserLoginFeature::new(
+            Arc::new(mock_user_repository),
+            Arc::new(mock_session_repository),
+            Arc::new(mock_csrf_repository),
+            Arc::new(mock_csrf_service),
+            Arc::new(mock_password_service),
+            Arc::new(mock_rng_service),
+        );
+
+        // Act
+        let actual_login_result = feature
+            .login(
+                expected_username,
+                expected_password,
+                expected_anonymous_csrf,
+            )
+            .await;
+
+        // Assert
+        assert!(matches!(
+            actual_login_result,
+            Err(UserError::StorageError(_))
+        ));
+    }
+
+    #[tokio::test]
     async fn test_login_password_does_not_match() {
         // Arrange
-        let expected_anonymous_csrf = "anonymous_csrf".to_string();
-        let expected_csrf_token = "csrf_token".to_string();
-        let expected_csrf_cookie_value = "csrf_cookie".to_string();
+        let expected_anonymous_csrf = String::from("anonymous_csrf");
+        let expected_csrf_token = String::from("csrf_token");
+        let expected_csrf_cookie_value = String::from("csrf_cookie");
         let expected_user_id = Uuid::now_v7();
-        let expected_session_cookie = "session_cookie".to_string();
-        let expected_username = "test".to_string();
-        let expected_password = "password".to_string();
-        let expected_password_hash = "password_hash".to_string();
+        let expected_session_cookie = String::from("session_cookie");
+        let expected_username = String::from("test");
+        let expected_password = String::from("password");
+        let expected_password_hash = String::from("password_hash");
         let expected_password_version: i16 = 1;
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_updated_at = datetime!(2019-01-01 0:00 UTC);
@@ -308,6 +666,159 @@ mod tests {
         assert!(matches!(
             actual_login_result,
             Err(UserError::PasswordMismatch)
+        ));
+    }
+
+    #[tokio::test]
+    async fn test_login_error_verifying_password() {
+        // Arrange
+        let expected_anonymous_csrf = String::from("anonymous_csrf");
+        let expected_csrf_token = String::from("csrf_token");
+        let expected_csrf_cookie_value = String::from("csrf_cookie");
+        let expected_user_id = Uuid::now_v7();
+        let expected_session_cookie = String::from("session_cookie");
+        let expected_username = String::from("test");
+        let expected_password = String::from("password");
+        let expected_password_hash = String::from("password_hash");
+        let expected_password_version: i16 = 1;
+        let expected_created_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_updated_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_last_login_at = datetime!(2019-01-01 0:00 UTC);
+        let expected_is_active = true;
+        let expected_user_entity = UserEntity {
+            id: expected_user_id,
+            username: expected_username.clone(),
+            password_hash: expected_password_hash,
+            password_version: expected_password_version,
+            created_at: expected_created_at,
+            updated_at: expected_updated_at,
+            last_login_at: expected_last_login_at,
+            is_active: expected_is_active,
+        };
+        let expected_csrf_service_generated_value =
+            (expected_csrf_token, expected_csrf_cookie_value);
+
+        let mut mock_password_service = MockPasswordService::new();
+        mock_password_service
+            .expect_verify_password()
+            .return_const(Err(PasswordServiceError::Hashing(String::from(
+                "error hasing",
+            ))));
+
+        let mut mock_user_repository = MockUserRepository::new();
+        mock_user_repository
+            .expect_get_user_by_username()
+            .returning(move |_| {
+                let user = expected_user_entity.clone();
+                Box::pin(async { Ok(user) })
+            });
+
+        let mut mock_session_repository = MockSessionRepository::new();
+        mock_session_repository
+            .expect_create_user_session()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
+        let mut mock_csrf_repository = MockCsrfRepository::new();
+        mock_csrf_repository
+            .expect_delete_anonymous_csrf()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service
+            .expect_generate()
+            .return_const(Ok(expected_csrf_service_generated_value));
+
+        let mut mock_rng_service = MockRngService::new();
+        mock_rng_service
+            .expect_generate_session_id()
+            .return_const(Ok(expected_session_cookie));
+
+        let feature = UserLoginFeature::new(
+            Arc::new(mock_user_repository),
+            Arc::new(mock_session_repository),
+            Arc::new(mock_csrf_repository),
+            Arc::new(mock_csrf_service),
+            Arc::new(mock_password_service),
+            Arc::new(mock_rng_service),
+        );
+
+        // Act
+        let actual_login_result = feature
+            .login(
+                expected_username,
+                expected_password,
+                expected_anonymous_csrf,
+            )
+            .await;
+
+        // Assert
+        assert!(matches!(actual_login_result, Err(UserError::PasswordError)));
+    }
+
+    #[tokio::test]
+    async fn test_login_user_not_found() {
+        // Arrange
+        let expected_anonymous_csrf = String::from("anonymous_csrf");
+        let expected_csrf_token = String::from("csrf_token");
+        let expected_csrf_cookie_value = String::from("csrf_cookie");
+        let expected_session_cookie = String::from("session_cookie");
+        let expected_username = String::from("test");
+        let expected_password = String::from("password");
+        let expected_csrf_service_generated_value =
+            (expected_csrf_token, expected_csrf_cookie_value);
+
+        let mut mock_user_repository = MockUserRepository::new();
+        mock_user_repository
+            .expect_get_user_by_username()
+            .returning(|_| Box::pin(async { Err(sqlx::Error::RowNotFound) }));
+
+        let mut mock_password_service = MockPasswordService::new();
+        mock_password_service
+            .expect_verify_password()
+            .return_const(Ok(false));
+
+        let mut mock_session_repository = MockSessionRepository::new();
+        mock_session_repository
+            .expect_create_user_session()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
+        let mut mock_csrf_repository = MockCsrfRepository::new();
+        mock_csrf_repository
+            .expect_delete_anonymous_csrf()
+            .returning(|_| Box::pin(async { Ok(()) }));
+
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service
+            .expect_generate()
+            .return_const(Ok(expected_csrf_service_generated_value));
+
+        let mut mock_rng_service = MockRngService::new();
+        mock_rng_service
+            .expect_generate_session_id()
+            .return_const(Ok(expected_session_cookie));
+
+        let feature = UserLoginFeature::new(
+            Arc::new(mock_user_repository),
+            Arc::new(mock_session_repository),
+            Arc::new(mock_csrf_repository),
+            Arc::new(mock_csrf_service),
+            Arc::new(mock_password_service),
+            Arc::new(mock_rng_service),
+        );
+
+        // Act
+        let actual_login_result = feature
+            .login(
+                expected_username,
+                expected_password,
+                expected_anonymous_csrf,
+            )
+            .await;
+
+        // Assert
+        assert!(matches!(
+            actual_login_result,
+            Err(UserError::StorageError(_))
         ));
     }
 }
