@@ -67,8 +67,10 @@ async fn test_create_project(db: PgPool) {
         name: expected_name,
     };
     let repo = PgProjectRepository::new(Arc::new(db));
+
     // Act
     let actual_project_entity = repo.create_project(expected_project_insert).await.unwrap();
+
     // Assert
     assert_eq!(
         actual_project_entity.owner_id,
@@ -82,11 +84,13 @@ async fn test_get_project_by_id(db: PgPool) {
     // Arrange
     let (expected_project_id, expected_owner_id) = setup_project(&db).await;
     let repo = PgProjectRepository::new(Arc::new(db));
+
     // Act
     let actual_project = repo
         .get_project(&expected_project_id, &expected_owner_id)
         .await
         .unwrap();
+
     // Assert
     assert_eq!(actual_project.id, expected_project_id);
 }
@@ -97,10 +101,12 @@ async fn test_get_project_by_id_wrong_owner(db: PgPool) {
     let (expected_project_id, _) = setup_project(&db).await;
     let expected_owner_id = Uuid::now_v7();
     let repo = PgProjectRepository::new(Arc::new(db));
+
     // Act
     let actual_result = repo
         .get_project(&expected_project_id, &expected_owner_id)
         .await;
+
     // Assert
     assert!(matches!(actual_result, Err(sqlx::Error::RowNotFound)));
 }
@@ -111,10 +117,12 @@ async fn test_get_project_by_id_not_found(db: PgPool) {
     let expected_project_id = Uuid::now_v7();
     let expected_owner_id = Uuid::now_v7();
     let repo = PgProjectRepository::new(Arc::new(db));
+
     // Act
     let actual_result = repo
         .get_project(&expected_project_id, &expected_owner_id)
         .await;
+
     // Assert
     assert!(matches!(actual_result, Err(sqlx::Error::RowNotFound)));
 }
@@ -131,11 +139,13 @@ async fn test_list_projects(db: PgPool) {
     };
     let repo = PgProjectRepository::new(Arc::new(db));
     repo.create_project(expected_project_insert).await.unwrap();
+
     // Act
     let actual_projects = repo
         .list_projects(&expected_owner_id, None, expected_limit)
         .await
         .unwrap();
+
     // Assert
     assert_eq!(actual_projects.len(), expected_limit as usize);
 }

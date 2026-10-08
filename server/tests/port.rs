@@ -96,8 +96,10 @@ async fn test_get_scan_by_id(db: PgPool) {
         _expected_project_id,
     ) = setup_port(&db).await;
     let repo = PgPortRepository::new(Arc::new(db));
+
     // Act
     let actual_port = repo.get_port(&expected_port_id).await.unwrap();
+
     // Assert
     assert_eq!(actual_port.id, expected_port_id);
 }
@@ -107,8 +109,10 @@ async fn test_get_scan_by_id_not_found(db: PgPool) {
     // Arrange
     let expected_port_id = Uuid::now_v7();
     let repo = PgPortRepository::new(Arc::new(db));
+
     // Act
     let actual_result = repo.get_port(&expected_port_id).await;
+
     // Assert
     assert!(matches!(actual_result, Err(sqlx::Error::RowNotFound)));
 }
@@ -125,11 +129,13 @@ async fn test_list_scans(db: PgPool) {
         _expected_project_id,
     ) = setup_port(&db).await;
     let repo = PgPortRepository::new(Arc::new(db));
+
     // Act
     let actual_projects = repo
         .list_ports(&expected_host_id, None, expected_limit)
         .await
         .unwrap();
+
     // Assert
     assert_eq!(actual_projects.len(), expected_limit as usize);
 }

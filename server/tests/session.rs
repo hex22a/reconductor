@@ -44,9 +44,7 @@ async fn stores_session_under_correct_key() {
     let expected_user_session = create_user_session_fixture(expected_token);
 
     // Act
-    let actual_result = store
-        .create_user_session(expected_user_session)
-        .await;
+    let actual_result = store.create_user_session(expected_user_session).await;
 
     //Assert
     assert!(actual_result.is_ok());

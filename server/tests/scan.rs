@@ -88,8 +88,10 @@ async fn test_create_scan(db: PgPool) {
         next_run_at: Some(expected_next_run_at),
     };
     let repo = PgScanRespository::new(Arc::new(db));
+
     // Act
     let actual_scan_entity = repo.create_scan(expected_scan_insert).await.unwrap();
+
     // Assert
     assert_eq!(actual_scan_entity.project_id, expected_project_id,);
     assert_eq!(actual_scan_entity.target, expected_target);
@@ -100,8 +102,10 @@ async fn test_get_scan_by_id(db: PgPool) {
     // Arrange
     let (expected_scan_id, _expected_project_id) = setup_scan(&db).await;
     let repo = PgScanRespository::new(Arc::new(db));
+
     // Act
     let actual_scan = repo.get_scan(&expected_scan_id).await.unwrap();
+
     // Assert
     assert_eq!(actual_scan.id, expected_scan_id);
 }
@@ -111,8 +115,10 @@ async fn test_get_scan_by_id_not_found(db: PgPool) {
     // Arrange
     let expected_scan_id = Uuid::now_v7();
     let repo = PgScanRespository::new(Arc::new(db));
+
     // Act
     let actual_result = repo.get_scan(&expected_scan_id).await;
+
     // Assert
     assert!(matches!(actual_result, Err(sqlx::Error::RowNotFound)));
 }
@@ -133,11 +139,13 @@ async fn test_list_scans(db: PgPool) {
     };
     let repo = PgScanRespository::new(Arc::new(db));
     repo.create_scan(expected_scan_insert).await.unwrap();
+
     // Act
     let actual_projects = repo
         .list_scans(&expected_project_id, None, expected_limit)
         .await
         .unwrap();
+
     // Assert
     assert_eq!(actual_projects.len(), expected_limit as usize);
 }

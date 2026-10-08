@@ -60,8 +60,10 @@ async fn test_get_scan_by_id(db: PgPool) {
     // Arrange
     let (expected_scan_run_id, _expected_scan_id, _expected_project_id) = setup_scan_run(&db).await;
     let repo = PgScanRunRepository::new(Arc::new(db));
+
     // Act
     let actual_scan_run = repo.get_scan_run(&expected_scan_run_id).await.unwrap();
+
     // Assert
     assert_eq!(actual_scan_run.id, expected_scan_run_id);
 }
@@ -71,8 +73,10 @@ async fn test_get_scan_by_id_not_found(db: PgPool) {
     // Arrange
     let expected_scan_run_id = Uuid::now_v7();
     let repo = PgScanRunRepository::new(Arc::new(db));
+
     // Act
     let actual_result = repo.get_scan_run(&expected_scan_run_id).await;
+
     // Assert
     assert!(matches!(actual_result, Err(sqlx::Error::RowNotFound)));
 }
@@ -83,11 +87,13 @@ async fn test_list_scans(db: PgPool) {
     let expected_limit: i64 = 1;
     let (_expected_scan_run_id, expected_scan_id, _expected_project_id) = setup_scan_run(&db).await;
     let repo = PgScanRunRepository::new(Arc::new(db));
+
     // Act
     let actual_projects = repo
         .list_scan_runs(&expected_scan_id, None, expected_limit)
         .await
         .unwrap();
+
     // Assert
     assert_eq!(actual_projects.len(), expected_limit as usize);
 }

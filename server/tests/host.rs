@@ -78,8 +78,10 @@ async fn test_get_scan_by_id(db: PgPool) {
     let (expected_host_id, _expected_scan_run_id, _expected_scan_id, _expected_project_id) =
         setup_host(&db).await;
     let repo = PgHostRepository::new(Arc::new(db));
+
     // Act
     let actual_host = repo.get_host(&expected_host_id).await.unwrap();
+
     // Assert
     assert_eq!(actual_host.id, expected_host_id);
 }
@@ -89,8 +91,10 @@ async fn test_get_scan_by_id_not_found(db: PgPool) {
     // Arrange
     let expected_host_id = Uuid::now_v7();
     let repo = PgHostRepository::new(Arc::new(db));
+
     // Act
     let actual_result = repo.get_host(&expected_host_id).await;
+
     // Assert
     assert!(matches!(actual_result, Err(sqlx::Error::RowNotFound)));
 }
@@ -102,11 +106,13 @@ async fn test_list_scans(db: PgPool) {
     let (_expected_host_id, expected_scan_run_id, _expected_scan_id, _expected_project_id) =
         setup_host(&db).await;
     let repo = PgHostRepository::new(Arc::new(db));
+
     // Act
     let actual_projects = repo
         .list_hosts(&expected_scan_run_id, None, expected_limit)
         .await
         .unwrap();
+
     // Assert
     assert_eq!(actual_projects.len(), expected_limit as usize);
 }
