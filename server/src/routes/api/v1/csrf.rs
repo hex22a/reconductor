@@ -24,9 +24,8 @@ mod tests {
         constants::USER_SESSION_COOKIE_NAME,
         features::{
             csrf::{
-                error::CsrfError,
-                model::CsrfTokenPair,
-                token::{MockTokenFeature, TokenFeature},
+                model::{CsrfCookie, CsrfToken, CsrfTokenPair},
+                token::MockTokenFeature,
                 verify::MockVerifyCsrfFeature,
             },
             host::{get::MockGetHostFeature, list::MockListHostsFeature},
@@ -39,7 +38,7 @@ mod tests {
                 create::MockCreateScanFeature, get::MockGetScanFeature, list::MockListScansFeature,
             },
             scan_run::{get::MockGetScanRunFeature, list::MockListScanRunsFeature},
-            session::auth::MockAuthFeature,
+            session::{auth::MockAuthFeature, model::SessionToken},
             user::{
                 login::MockLoginFeature, logout::MockLogoutFeature, register::MockRegisterFeature,
             },
@@ -49,11 +48,14 @@ mod tests {
     #[tokio::test]
     async fn test_csrf_get() {
         // Arrange
-        let expected_session_cookie = "session_cookie".to_string();
-        let expected_cookie_header =
-            format!("{}={}", USER_SESSION_COOKIE_NAME, expected_session_cookie);
-        let expected_csrf_token = "csrf_token".to_string();
-        let expected_csrf_cookie_value = "csrf_cookie".to_string();
+        let expected_session_cookie = SessionToken::new("session_cookie");
+        let expected_cookie_header = format!(
+            "{}={}",
+            USER_SESSION_COOKIE_NAME,
+            expected_session_cookie.as_ref()
+        );
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie_value = CsrfCookie::new("csrf_cookie");
         let expected_csrf_token_pair = CsrfTokenPair {
             token: expected_csrf_token,
             cookie_value: expected_csrf_cookie_value,
@@ -104,6 +106,7 @@ mod tests {
             list_ports_feature: mock_list_ports,
         });
         let app = routes(expected_app_state);
+
         // Act
         let actual_response = app
             .oneshot(
@@ -116,6 +119,7 @@ mod tests {
             )
             .await
             .unwrap();
+
         // Assert
         assert_eq!(actual_response.status(), StatusCode::OK);
     }
@@ -123,11 +127,14 @@ mod tests {
     #[tokio::test]
     async fn test_csrf_post() {
         // Arrange
-        let expected_session_cookie = "session_cookie".to_string();
-        let expected_cookie_header =
-            format!("{}={}", USER_SESSION_COOKIE_NAME, expected_session_cookie);
-        let expected_csrf_token = "csrf_token".to_string();
-        let expected_csrf_cookie_value = "csrf_cookie".to_string();
+        let expected_session_cookie = SessionToken::new("session_cookie");
+        let expected_cookie_header = format!(
+            "{}={}",
+            USER_SESSION_COOKIE_NAME,
+            expected_session_cookie.as_ref()
+        );
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie_value = CsrfCookie::new("csrf_cookie");
         let expected_csrf_token_pair = CsrfTokenPair {
             token: expected_csrf_token,
             cookie_value: expected_csrf_cookie_value,
@@ -178,6 +185,7 @@ mod tests {
             list_ports_feature: mock_list_ports,
         });
         let app = routes(expected_app_state);
+
         // Act
         let actual_response = app
             .oneshot(
@@ -190,6 +198,7 @@ mod tests {
             )
             .await
             .unwrap();
+
         // Assert
         assert_eq!(actual_response.status(), StatusCode::METHOD_NOT_ALLOWED);
     }

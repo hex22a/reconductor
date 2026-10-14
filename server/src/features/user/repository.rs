@@ -4,7 +4,7 @@ use std::sync::Arc;
 use mockall::automock;
 use sqlx::PgPool;
 
-use crate::features::user::model::{UserEntity, UserInsert};
+use crate::features::user::model::{UserEntity, UserInsert, Username};
 
 #[cfg_attr(test, automock)]
 pub trait UserRepository {
@@ -14,7 +14,7 @@ pub trait UserRepository {
     ) -> impl Future<Output = Result<(), sqlx::Error>> + Send;
     fn get_user_by_username(
         &self,
-        username: &str,
+        username: &Username,
     ) -> impl Future<Output = Result<UserEntity, sqlx::Error>> + Send;
 }
 
@@ -38,15 +38,15 @@ impl UserRepository for PgUserRepository {
             VALUES
                 ($1, $2)
             "#,
-            user_insert.username,
-            user_insert.password_hash,
+            user_insert.username.as_ref(),
+            user_insert.password_hash.as_ref(),
         )
         .execute(&*self.db)
         .await?;
         Ok(())
     }
 
-    async fn get_user_by_username(&self, username: &str) -> Result<UserEntity, sqlx::Error> {
+    async fn get_user_by_username(&self, username: &Username) -> Result<UserEntity, sqlx::Error> {
         let user = sqlx::query_as!(
             UserEntity,
             r#"
@@ -63,7 +63,7 @@ impl UserRepository for PgUserRepository {
             WHERE username=$1
             LIMIT 1;
             "#,
-            username
+            username.as_ref()
         )
         .fetch_one(&*self.db)
         .await?;

@@ -6,6 +6,7 @@ use thiserror::Error;
 
 use crate::{
     constants::{ANONYMOUS_CSRF_PREFIX, ANONYMOUS_CSRF_TTL_SECONDS},
+    features::csrf::model::CsrfToken,
     infra::persistence::kv::KvProvider,
 };
 
@@ -25,15 +26,15 @@ impl From<fred::error::Error> for CsrfRepositoryError {
 pub trait CsrfRepository {
     fn create_anonymous_csrf(
         &self,
-        token: &str,
+        token: &CsrfToken,
     ) -> impl Future<Output = Result<(), CsrfRepositoryError>> + Send;
     fn verify_anonymous_csrf(
         &self,
-        token: &str,
+        token: &CsrfToken,
     ) -> impl Future<Output = Result<bool, CsrfRepositoryError>> + Send;
     fn delete_anonymous_csrf(
         &self,
-        token: &str,
+        token: &CsrfToken,
     ) -> impl Future<Output = Result<(), CsrfRepositoryError>> + Send;
 }
 
@@ -49,21 +50,21 @@ impl<K: KvProvider> CsrfStore<K> {
 }
 
 impl<K: KvProvider + Send + Sync> CsrfRepository for CsrfStore<K> {
-    async fn create_anonymous_csrf(&self, token: &str) -> Result<(), CsrfRepositoryError> {
-        let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token);
+    async fn create_anonymous_csrf(&self, token: &CsrfToken) -> Result<(), CsrfRepositoryError> {
+        let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token.as_ref());
         let ttl = Duration::from_secs(ANONYMOUS_CSRF_TTL_SECONDS);
         self.kv.set(&key, "1", Some(&ttl)).await?;
         Ok(())
     }
 
-    async fn verify_anonymous_csrf(&self, token: &str) -> Result<bool, CsrfRepositoryError> {
-        let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token);
+    async fn verify_anonymous_csrf(&self, token: &CsrfToken) -> Result<bool, CsrfRepositoryError> {
+        let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token.as_ref());
         let csrf = self.kv.get(&key).await?;
         Ok(csrf.is_some())
     }
 
-    async fn delete_anonymous_csrf(&self, token: &str) -> Result<(), CsrfRepositoryError> {
-        let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token);
+    async fn delete_anonymous_csrf(&self, token: &CsrfToken) -> Result<(), CsrfRepositoryError> {
+        let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token.as_ref());
         self.kv.del(&key).await?;
         Ok(())
     }

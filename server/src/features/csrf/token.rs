@@ -7,7 +7,10 @@ use crate::{
     constants::ANONYMOUS_CSRF_TTL_SECONDS,
     features::{
         csrf::{error::CsrfError, model::CsrfTokenPair, repository::CsrfRepository},
-        session::repository::{SessionRepository, SessionRepositoryError},
+        session::{
+            model::SessionToken,
+            repository::{SessionRepository, SessionRepositoryError},
+        },
     },
     infra::csrf::CsrfService,
 };
@@ -16,7 +19,7 @@ use crate::{
 pub trait TokenFeature {
     fn get_token<'a>(
         &'a self,
-        session_token: Option<String>,
+        session_token: Option<SessionToken>,
     ) -> Pin<Box<dyn Future<Output = Result<CsrfTokenPair, CsrfError>> + Send + 'a>>;
 }
 
@@ -45,7 +48,7 @@ where
 {
     fn get_token<'a>(
         &'a self,
-        session_cookie: Option<String>,
+        session_cookie: Option<SessionToken>,
     ) -> Pin<Box<dyn Future<Output = Result<CsrfTokenPair, CsrfError>> + Send + 'a>> {
         Box::pin(async move {
             match session_cookie {
@@ -97,8 +100,15 @@ mod tests {
     use super::*;
     use crate::{
         features::{
-            csrf::repository::MockCsrfRepository,
-            session::{model::UserSession, repository::MockSessionRepository},
+            csrf::{
+                model::{CsrfCookie, CsrfToken},
+                repository::MockCsrfRepository,
+            },
+            session::{
+                model::{SessionToken, UserSession},
+                repository::MockSessionRepository,
+            },
+            user::model::Username,
         },
         infra::csrf::MockCsrfService,
     };
@@ -106,11 +116,11 @@ mod tests {
     #[tokio::test]
     async fn test_get_token_from_session() {
         // Arrange
-        let expected_session_token = String::from("session_token");
+        let expected_session_token = SessionToken::new("session_token");
         let expected_user_id: Uuid = Uuid::now_v7();
-        let expected_username = String::from("test");
-        let expected_csrf_token = String::from("csrf_token");
-        let expected_csrf_cookie = String::from("csrf_cookie");
+        let expected_username = Username::new("test");
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie = CsrfCookie::new("csrf_cookie");
         let expected_csrf_token_pair = CsrfTokenPair {
             token: expected_csrf_token.clone(),
             cookie_value: expected_csrf_cookie.clone(),
@@ -160,9 +170,9 @@ mod tests {
     #[tokio::test]
     async fn test_get_token_anonymous_token() {
         // Arrange
-        let expected_session_token = "session_token".to_string();
-        let expected_anonymous_csrf_token = "anonymous_csrf".to_string();
-        let expected_csrf_cookie = "csrf_cookie".to_string();
+        let expected_session_token = SessionToken::new("session_token");
+        let expected_anonymous_csrf_token = CsrfToken::new("anonymous_csrf");
+        let expected_csrf_cookie = CsrfCookie::new("csrf_cookie");
         let expected_csrf_token_pair = CsrfTokenPair {
             token: expected_anonymous_csrf_token.clone(),
             cookie_value: expected_csrf_cookie.clone(),
@@ -202,8 +212,8 @@ mod tests {
     #[tokio::test]
     async fn test_get_token_no_cookie_passed() {
         // Arrange
-        let expected_anonymous_csrf_token = "anonymous_csrf".to_string();
-        let expected_csrf_cookie = "csrf_cookie".to_string();
+        let expected_anonymous_csrf_token = CsrfToken::new("anonymous_csrf");
+        let expected_csrf_cookie = CsrfCookie::new("csrf_cookie");
         let expected_csrf_token_pair = CsrfTokenPair {
             token: expected_anonymous_csrf_token.clone(),
             cookie_value: expected_csrf_cookie.clone(),

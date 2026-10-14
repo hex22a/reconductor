@@ -6,7 +6,7 @@ use thiserror::Error;
 
 use crate::{
     constants::{USER_SESSION_PREFIX, USER_SESSION_TTL_SECONDS},
-    features::session::model::UserSession,
+    features::session::model::{SessionToken, UserSession},
     infra::persistence::kv::KvProvider,
 };
 
@@ -25,11 +25,11 @@ pub enum SessionRepositoryError {
 impl From<UserSession> for HashMap<String, String> {
     fn from(value: UserSession) -> Self {
         let mut map = HashMap::new();
-        map.insert("token".to_string(), value.token);
+        map.insert("token".to_string(), value.token.into_string());
         map.insert("user_id".to_string(), value.user_id.to_string());
-        map.insert("username".to_string(), value.username);
-        map.insert("csrf_token".to_string(), value.csrf_token);
-        map.insert("csrf_cookie".to_string(), value.csrf_cookie);
+        map.insert("username".to_string(), value.username.into_string());
+        map.insert("csrf_token".to_string(), value.csrf_token.into_string());
+        map.insert("csrf_cookie".to_string(), value.csrf_cookie.into_string());
         map
     }
 }
@@ -41,7 +41,8 @@ impl TryFrom<HashMap<String, String>> for UserSession {
         let user_session = UserSession {
             token: map
                 .remove("token")
-                .ok_or(SessionRepositoryError::NotFound)?,
+                .ok_or(SessionRepositoryError::NotFound)?
+                .into(),
             user_id: map
                 .remove("user_id")
                 .ok_or(SessionRepositoryError::NotFound)?
@@ -49,13 +50,16 @@ impl TryFrom<HashMap<String, String>> for UserSession {
                 .map_err(|_| SessionRepositoryError::ParseError)?,
             username: map
                 .remove("username")
-                .ok_or(SessionRepositoryError::NotFound)?,
+                .ok_or(SessionRepositoryError::NotFound)?
+                .into(),
             csrf_token: map
                 .remove("csrf_token")
-                .ok_or(SessionRepositoryError::NotFound)?,
+                .ok_or(SessionRepositoryError::NotFound)?
+                .into(),
             csrf_cookie: map
                 .remove("csrf_cookie")
-                .ok_or(SessionRepositoryError::NotFound)?,
+                .ok_or(SessionRepositoryError::NotFound)?
+                .into(),
         };
         Ok(user_session)
     }
@@ -75,11 +79,11 @@ pub trait SessionRepository {
     ) -> impl Future<Output = Result<(), SessionRepositoryError>> + Send;
     fn get_user_session(
         &self,
-        token: &str,
+        token: &SessionToken,
     ) -> impl Future<Output = Result<UserSession, SessionRepositoryError>> + Send;
     fn delete_user_session(
         &self,
-        token: &str,
+        token: &SessionToken,
     ) -> impl Future<Output = Result<(), SessionRepositoryError>> + Send;
 }
 
@@ -99,21 +103,27 @@ impl<K: KvProvider + Send + Sync> SessionRepository for SessionStore<K> {
         &self,
         user_session: UserSession,
     ) -> Result<(), SessionRepositoryError> {
-        let key = format!("{}:{}", USER_SESSION_PREFIX, user_session.token);
+        let key = format!("{}:{}", USER_SESSION_PREFIX, user_session.token.as_ref());
         let ttl = Duration::from_secs(USER_SESSION_TTL_SECONDS);
         self.kv.hset(&key, user_session.into()).await?;
         self.kv.expire(&key, &ttl).await?;
         Ok(())
     }
 
-    async fn get_user_session(&self, token: &str) -> Result<UserSession, SessionRepositoryError> {
-        let key = format!("{}:{}", USER_SESSION_PREFIX, token);
+    async fn get_user_session(
+        &self,
+        token: &SessionToken,
+    ) -> Result<UserSession, SessionRepositoryError> {
+        let key = format!("{}:{}", USER_SESSION_PREFIX, token.as_ref());
         let session = self.kv.hgetall(&key).await?.try_into()?;
         Ok(session)
     }
 
-    async fn delete_user_session(&self, token: &str) -> Result<(), SessionRepositoryError> {
-        let key = format!("{}:{}", USER_SESSION_PREFIX, token);
+    async fn delete_user_session(
+        &self,
+        token: &SessionToken,
+    ) -> Result<(), SessionRepositoryError> {
+        let key = format!("{}:{}", USER_SESSION_PREFIX, token.as_ref());
         self.kv.del(&key).await?;
         Ok(())
     }

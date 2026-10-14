@@ -4,14 +4,16 @@ use std::{pin::Pin, sync::Arc};
 use mockall::automock;
 
 use crate::features::session::{
-    error::SessionError, model::UserSession, repository::SessionRepository,
+    error::SessionError,
+    model::{SessionToken, UserSession},
+    repository::SessionRepository,
 };
 
 #[cfg_attr(test, automock)]
 pub trait AuthFeature {
     fn auth<'a>(
         &'a self,
-        session_id: String,
+        session_id: SessionToken,
     ) -> Pin<Box<dyn Future<Output = Result<UserSession, SessionError>> + Send + 'a>>;
 }
 
@@ -32,7 +34,7 @@ where
 {
     fn auth<'a>(
         &'a self,
-        session_id: String,
+        session_id: SessionToken,
     ) -> Pin<Box<dyn Future<Output = Result<UserSession, SessionError>> + Send + 'a>> {
         Box::pin(async move {
             Ok(self
@@ -48,39 +50,24 @@ mod tests {
     use uuid::Uuid;
 
     use super::*;
-    use std::sync::Mutex;
 
-    use crate::features::session::{model::UserSession, repository::SessionRepositoryError};
-
-    struct MockSessionRepository {
-        error: Mutex<Option<SessionRepositoryError>>,
-        return_value: UserSession,
-    }
-    impl SessionRepository for MockSessionRepository {
-        async fn create_user_session(&self, _: UserSession) -> Result<(), SessionRepositoryError> {
-            todo!()
-        }
-
-        async fn get_user_session(&self, _: &str) -> Result<UserSession, SessionRepositoryError> {
-            match self.error.lock().unwrap().take() {
-                Some(e) => Err(e),
-                None => Ok(self.return_value.clone()),
-            }
-        }
-
-        async fn delete_user_session(&self, _: &str) -> Result<(), SessionRepositoryError> {
-            todo!()
-        }
-    }
+    use crate::features::{
+        csrf::model::{CsrfCookie, CsrfToken},
+        session::{
+            model::UserSession,
+            repository::{MockSessionRepository, SessionRepositoryError},
+        },
+        user::model::Username,
+    };
 
     #[tokio::test]
     async fn test_auth_session_found() {
         // Arrange
-        let expected_session_token = String::from("session_token");
+        let expected_session_token = SessionToken::new("session_token");
         let expected_user_id: Uuid = Uuid::now_v7();
-        let expected_username = "test".to_string();
-        let expected_csrf_token = "csrf_token".to_string();
-        let expected_csrf_cookie = "csrf_cookie".to_string();
+        let expected_username = Username::new("test");
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie = CsrfCookie::new("csrf_cookie");
         let expected_user_session = UserSession {
             token: expected_session_token.clone(),
             user_id: expected_user_id,
@@ -88,13 +75,21 @@ mod tests {
             csrf_token: expected_csrf_token.clone(),
             csrf_cookie: expected_csrf_cookie.clone(),
         };
-        let mock_session_repository = Arc::new(MockSessionRepository {
-            error: Mutex::new(None),
-            return_value: expected_user_session.clone(),
-        });
-        let feature = UserAuthFeature::new(mock_session_repository);
+
+        let mut mock_session_repository = MockSessionRepository::new();
+        let user_session = expected_user_session.clone();
+        mock_session_repository
+            .expect_get_user_session()
+            .returning(move |_| {
+                let user_session = user_session.clone();
+                Box::pin(async { Ok(user_session) })
+            });
+
+        let feature = UserAuthFeature::new(Arc::new(mock_session_repository));
+
         // Act
         let actual_user_session = feature.auth(expected_session_token).await.unwrap();
+
         // Assert
         assert_eq!(actual_user_session, expected_user_session);
     }
@@ -102,23 +97,15 @@ mod tests {
     #[tokio::test]
     async fn test_auth_session_not_found() {
         // Arrange
-        let expected_session_token = String::from("session_token");
-        let expected_user_id: Uuid = Uuid::now_v7();
-        let expected_username = "test".to_string();
-        let expected_csrf_token = "csrf_token".to_string();
-        let expected_csrf_cookie = "csrf_cookie".to_string();
-        let expected_user_session = UserSession {
-            token: expected_session_token.clone(),
-            user_id: expected_user_id,
-            username: expected_username,
-            csrf_token: expected_csrf_token.clone(),
-            csrf_cookie: expected_csrf_cookie.clone(),
-        };
-        let mock_session_repository = Arc::new(MockSessionRepository {
-            error: Mutex::new(Some(SessionRepositoryError::NotFound)),
-            return_value: expected_user_session.clone(),
-        });
-        let feature = UserAuthFeature::new(mock_session_repository);
+        let expected_session_token = SessionToken::new("session_token");
+
+        let mut mock_session_repository = MockSessionRepository::new();
+        mock_session_repository
+            .expect_get_user_session()
+            .returning(|_| Box::pin(async { Err(SessionRepositoryError::NotFound) }));
+
+        let feature = UserAuthFeature::new(Arc::new(mock_session_repository));
+
         // Act
         let actual_auth_result = feature.auth(expected_session_token).await;
         // Assert

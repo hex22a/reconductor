@@ -9,7 +9,7 @@ use axum_extra::extract::{
 use crate::{
     application::error::ServerError,
     constants::{CSRF_COOKIE_NAME, USER_SESSION_COOKIE_NAME},
-    features::csrf::dto::CsrfResponse,
+    features::{csrf::dto::CsrfResponse, session::model::SessionToken},
     state::AppState,
 };
 
@@ -20,9 +20,12 @@ pub async fn handle(
     let session_cookie = jar
         .get(USER_SESSION_COOKIE_NAME)
         .map(|c| c.value().to_string());
-    let csrf_token_pair = state.csrf_feature.get_token(session_cookie).await?;
+    let csrf_token_pair = state
+        .csrf_feature
+        .get_token(session_cookie.map(SessionToken::new))
+        .await?;
     let jar = jar.add(
-        Cookie::build((CSRF_COOKIE_NAME, csrf_token_pair.cookie_value))
+        Cookie::build((CSRF_COOKIE_NAME, csrf_token_pair.cookie_value.into_string()))
             .http_only(true)
             .secure(true)
             .same_site(SameSite::Lax)
@@ -33,7 +36,7 @@ pub async fn handle(
         StatusCode::OK,
         jar,
         Json(CsrfResponse {
-            csrf_token: csrf_token_pair.token,
+            csrf_token: csrf_token_pair.token.into_string(),
         }),
     ))
 }

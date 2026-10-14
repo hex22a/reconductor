@@ -4,20 +4,26 @@ use subtle::ConstantTimeEq;
 #[cfg(test)]
 use mockall::automock;
 
-use crate::{features::csrf::repository::CsrfRepository, infra::csrf::CsrfService};
+use crate::{
+    features::csrf::{
+        model::{CsrfCookie, CsrfToken},
+        repository::CsrfRepository,
+    },
+    infra::csrf::CsrfService,
+};
 
 #[cfg_attr(test, automock)]
 pub trait VerifyCsrfFeature {
     fn verify_anonymous<'a>(
         &'a self,
-        csrf_cookie: String,
-        csrf_token: String,
+        csrf_cookie: CsrfCookie,
+        csrf_token: CsrfToken,
     ) -> Pin<Box<dyn Future<Output = bool> + Send + 'a>>;
     fn verify_authorized<'a>(
         &'a self,
-        csrf_cookie: String,
-        header_csrf_token: String,
-        session_csrf_token: String,
+        csrf_cookie: CsrfCookie,
+        header_csrf_token: CsrfToken,
+        session_csrf_token: CsrfToken,
     ) -> Pin<Box<dyn Future<Output = bool> + Send + 'a>>;
 }
 
@@ -43,8 +49,8 @@ where
 {
     fn verify_anonymous(
         &self,
-        csrf_cookie: String,
-        csrf_token: String,
+        csrf_cookie: CsrfCookie,
+        csrf_token: CsrfToken,
     ) -> Pin<Box<dyn Future<Output = bool> + Send + '_>> {
         Box::pin(async move {
             self.csrf_service.verify(&csrf_token, &csrf_cookie)
@@ -58,15 +64,16 @@ where
 
     fn verify_authorized(
         &self,
-        csrf_cookie: String,
-        header_csrf_token: String,
-        session_csrf_token: String,
+        csrf_cookie: CsrfCookie,
+        header_csrf_token: CsrfToken,
+        session_csrf_token: CsrfToken,
     ) -> Pin<Box<dyn Future<Output = bool> + Send + '_>> {
         Box::pin(async move {
             self.csrf_service.verify(&header_csrf_token, &csrf_cookie)
                 && header_csrf_token
+                    .as_ref()
                     .as_bytes()
-                    .ct_eq(session_csrf_token.as_bytes())
+                    .ct_eq(session_csrf_token.as_ref().as_bytes())
                     .into()
         })
     }
@@ -74,60 +81,34 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Mutex;
-
-    use crate::{features::csrf::repository::CsrfRepositoryError, infra::csrf::CsrfServiceError};
+    use crate::{
+        features::csrf::repository::{CsrfRepositoryError, MockCsrfRepository},
+        infra::csrf::MockCsrfService,
+    };
 
     use super::*;
-
-    struct MockCsrfRepository {
-        error: Mutex<Option<CsrfRepositoryError>>,
-        return_value: bool,
-    }
-    struct MockCsrfService {
-        return_value: bool,
-    }
-    impl CsrfRepository for MockCsrfRepository {
-        async fn create_anonymous_csrf(&self, _: &str) -> Result<(), CsrfRepositoryError> {
-            todo!()
-        }
-
-        async fn verify_anonymous_csrf(&self, _: &str) -> Result<bool, CsrfRepositoryError> {
-            match self.error.lock().unwrap().take() {
-                Some(e) => Err(e),
-                None => Ok(self.return_value),
-            }
-        }
-
-        async fn delete_anonymous_csrf(&self, _: &str) -> Result<(), CsrfRepositoryError> {
-            todo!()
-        }
-    }
-    impl CsrfService for MockCsrfService {
-        fn generate(&self, _: u64) -> Result<(String, String), CsrfServiceError> {
-            todo!()
-        }
-
-        fn verify(&self, _: &str, _: &str) -> bool {
-            self.return_value
-        }
-    }
 
     #[tokio::test]
     async fn test_verify_anonymous_valid() {
         // Arrange
-        let expected_csrf_token = "csrf_token".to_string();
-        let expected_csrf_cookie = "csrf_cookie".to_string();
-        let mock_csrf_repository = Arc::new(MockCsrfRepository {
-            error: Mutex::new(None),
-            return_value: true,
-        });
-        let mock_csrf_service = Arc::new(MockCsrfService { return_value: true });
-        let strategy = StatefulCsrfVerifier::new(mock_csrf_service, mock_csrf_repository);
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie = CsrfCookie::new("csrf_cookie");
+
+        let mut mock_csrf_repository = MockCsrfRepository::new();
+        mock_csrf_repository
+            .expect_verify_anonymous_csrf()
+            .returning(|_| Box::pin(async { Ok(true) }));
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service.expect_verify().return_const(true);
+
+        let strategy =
+            StatefulCsrfVerifier::new(Arc::new(mock_csrf_service), Arc::new(mock_csrf_repository));
+
         // Act
         let actual_is_valid = strategy
             .verify_anonymous(expected_csrf_cookie, expected_csrf_token)
             .await;
+
         // Assert
         assert!(actual_is_valid);
     }
@@ -135,18 +116,24 @@ mod tests {
     #[tokio::test]
     async fn test_verify_anonymous_invalid_state() {
         // Arrange
-        let expected_csrf_token = "csrf_token".to_string();
-        let expected_csrf_cookie = "csrf_cookie".to_string();
-        let mock_csrf_repository = Arc::new(MockCsrfRepository {
-            error: Mutex::new(None),
-            return_value: false,
-        });
-        let mock_csrf_service = Arc::new(MockCsrfService { return_value: true });
-        let strategy = StatefulCsrfVerifier::new(mock_csrf_service, mock_csrf_repository);
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie = CsrfCookie::new("csrf_cookie");
+
+        let mut mock_csrf_repository = MockCsrfRepository::new();
+        mock_csrf_repository
+            .expect_verify_anonymous_csrf()
+            .returning(|_| Box::pin(async { Ok(false) }));
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service.expect_verify().return_const(true);
+
+        let strategy =
+            StatefulCsrfVerifier::new(Arc::new(mock_csrf_service), Arc::new(mock_csrf_repository));
+
         // Act
         let actual_is_valid = strategy
             .verify_anonymous(expected_csrf_cookie, expected_csrf_token)
             .await;
+
         // Assert
         assert!(!actual_is_valid);
     }
@@ -154,20 +141,30 @@ mod tests {
     #[tokio::test]
     async fn test_verify_anonymous_storage_error() {
         // Arrange
-        let expected_csrf_token = "csrf_token".to_string();
-        let expected_csrf_cookie = "csrf_cookie".to_string();
-        let mock_csrf_repository = Arc::new(MockCsrfRepository {
-            error: Mutex::new(Some(CsrfRepositoryError::StorageError(
-                fred::error::Error::new_canceled(),
-            ))),
-            return_value: false,
-        });
-        let mock_csrf_service = Arc::new(MockCsrfService { return_value: true });
-        let strategy = StatefulCsrfVerifier::new(mock_csrf_service, mock_csrf_repository);
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie = CsrfCookie::new("csrf_cookie");
+
+        let mut mock_csrf_repository = MockCsrfRepository::new();
+        mock_csrf_repository
+            .expect_verify_anonymous_csrf()
+            .returning(|_| {
+                Box::pin(async {
+                    Err(CsrfRepositoryError::StorageError(
+                        fred::error::Error::new_canceled(),
+                    ))
+                })
+            });
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service.expect_verify().return_const(true);
+
+        let strategy =
+            StatefulCsrfVerifier::new(Arc::new(mock_csrf_service), Arc::new(mock_csrf_repository));
+
         // Act
         let actual_is_valid = strategy
             .verify_anonymous(expected_csrf_cookie, expected_csrf_token)
             .await;
+
         // Assert
         assert!(!actual_is_valid);
     }
@@ -175,20 +172,24 @@ mod tests {
     #[tokio::test]
     async fn test_verify_anonymous_invalid() {
         // Arrange
-        let expected_csrf_token = "csrf_token".to_string();
-        let expected_csrf_cookie = "csrf_cookie".to_string();
-        let mock_csrf_repository = Arc::new(MockCsrfRepository {
-            error: Mutex::new(None),
-            return_value: false,
-        });
-        let mock_csrf_service = Arc::new(MockCsrfService {
-            return_value: false,
-        });
-        let strategy = StatefulCsrfVerifier::new(mock_csrf_service, mock_csrf_repository);
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie = CsrfCookie::new("csrf_cookie");
+
+        let mut mock_csrf_repository = MockCsrfRepository::new();
+        mock_csrf_repository
+            .expect_verify_anonymous_csrf()
+            .returning(|_| Box::pin(async { Ok(false) }));
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service.expect_verify().return_const(false);
+
+        let strategy =
+            StatefulCsrfVerifier::new(Arc::new(mock_csrf_service), Arc::new(mock_csrf_repository));
+
         // Act
         let actual_is_valid = strategy
             .verify_anonymous(expected_csrf_cookie, expected_csrf_token)
             .await;
+
         // Assert
         assert!(!actual_is_valid);
     }
@@ -196,15 +197,17 @@ mod tests {
     #[tokio::test]
     async fn test_verify_authorized_valid() {
         // Arrange
-        let expected_csrf_token = "csrf_token".to_string();
-        let expected_csrf_cookie = "csrf_cookie".to_string();
-        let expected_session_csrf_token = "csrf_token".to_string();
-        let mock_csrf_repository = Arc::new(MockCsrfRepository {
-            error: Mutex::new(None),
-            return_value: true,
-        });
-        let mock_csrf_service = Arc::new(MockCsrfService { return_value: true });
-        let strategy = StatefulCsrfVerifier::new(mock_csrf_service, mock_csrf_repository);
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie = CsrfCookie::new("csrf_cookie");
+        let expected_session_csrf_token = CsrfToken::new("csrf_token");
+
+        let mock_csrf_repository = MockCsrfRepository::new();
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service.expect_verify().return_const(true);
+
+        let strategy =
+            StatefulCsrfVerifier::new(Arc::new(mock_csrf_service), Arc::new(mock_csrf_repository));
+
         // Act
         let actual_is_valid = strategy
             .verify_authorized(
@@ -218,17 +221,19 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_verify_authorized_invalid_state() {
+    async fn test_verify_authorized_not_equal() {
         // Arrange
-        let expected_csrf_token = "csrf_token".to_string();
-        let expected_csrf_cookie = "csrf_cookie".to_string();
-        let expected_session_csrf_token = "not_equal".to_string();
-        let mock_csrf_repository = Arc::new(MockCsrfRepository {
-            error: Mutex::new(None),
-            return_value: true,
-        });
-        let mock_csrf_service = Arc::new(MockCsrfService { return_value: true });
-        let strategy = StatefulCsrfVerifier::new(mock_csrf_service, mock_csrf_repository);
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie = CsrfCookie::new("csrf_cookie");
+        let expected_session_csrf_token = CsrfToken::new("not_equal");
+
+        let mock_csrf_repository = MockCsrfRepository::new();
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service.expect_verify().return_const(true);
+
+        let strategy =
+            StatefulCsrfVerifier::new(Arc::new(mock_csrf_service), Arc::new(mock_csrf_repository));
+
         // Act
         let actual_is_valid = strategy
             .verify_authorized(
@@ -244,17 +249,17 @@ mod tests {
     #[tokio::test]
     async fn test_verify_authorized_invalid() {
         // Arrange
-        let expected_csrf_token = "csrf_token".to_string();
-        let expected_csrf_cookie = "csrf_cookie".to_string();
-        let expected_session_csrf_token = "csrf_token".to_string();
-        let mock_csrf_repository = Arc::new(MockCsrfRepository {
-            error: Mutex::new(None),
-            return_value: true,
-        });
-        let mock_csrf_service = Arc::new(MockCsrfService {
-            return_value: false,
-        });
-        let strategy = StatefulCsrfVerifier::new(mock_csrf_service, mock_csrf_repository);
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie = CsrfCookie::new("csrf_cookie");
+        let expected_session_csrf_token = CsrfToken::new("csrf_token");
+
+        let mock_csrf_repository = MockCsrfRepository::new();
+        let mut mock_csrf_service = MockCsrfService::new();
+        mock_csrf_service.expect_verify().return_const(false);
+
+        let strategy =
+            StatefulCsrfVerifier::new(Arc::new(mock_csrf_service), Arc::new(mock_csrf_repository));
+
         // Act
         let actual_is_valid = strategy
             .verify_authorized(
@@ -263,6 +268,7 @@ mod tests {
                 expected_session_csrf_token,
             )
             .await;
+
         // Assert
         assert!(!actual_is_valid);
     }

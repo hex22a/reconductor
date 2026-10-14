@@ -8,7 +8,8 @@ use axum::{
 use axum_extra::extract::CookieJar;
 
 use crate::{
-    application::error::ServerError, constants::USER_SESSION_COOKIE_NAME, state::AppState,
+    application::error::ServerError, constants::USER_SESSION_COOKIE_NAME,
+    features::session::model::SessionToken, state::AppState,
 };
 
 pub async fn session_middleware(
@@ -21,7 +22,10 @@ pub async fn session_middleware(
         .get(USER_SESSION_COOKIE_NAME)
         .map(|c| c.value().to_string())
         .ok_or(ServerError::Unauthorized)?;
-    let user_session = state.auth_feature.auth(session_token).await?;
+    let user_session = state
+        .auth_feature
+        .auth(SessionToken::new(session_token))
+        .await?;
     req.extensions_mut().insert(user_session);
     Ok(next.run(req).await)
 }

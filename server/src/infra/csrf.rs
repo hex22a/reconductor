@@ -6,7 +6,10 @@ use thiserror::Error;
 #[cfg(test)]
 use mockall::automock;
 
-use crate::infra::random::{OsRngService, RngService, RngServiceError};
+use crate::{
+    features::csrf::model::{CsrfCookie, CsrfToken},
+    infra::random::{OsRngService, RngService, RngServiceError},
+};
 
 #[derive(Debug, Clone, Error)]
 pub enum CsrfServiceError {
@@ -38,8 +41,8 @@ impl From<RngServiceError> for CsrfServiceError {
 
 #[cfg_attr(test, automock)]
 pub trait CsrfService {
-    fn generate(&self, ttl: u64) -> Result<(String, String), CsrfServiceError>;
-    fn verify(&self, token: &str, cookie: &str) -> bool;
+    fn generate(&self, ttl: u64) -> Result<(CsrfToken, CsrfCookie), CsrfServiceError>;
+    fn verify(&self, token: &CsrfToken, cookie: &CsrfCookie) -> bool;
 }
 
 #[derive(Clone)]
@@ -58,18 +61,21 @@ impl AesGcmCsrfService {
 }
 
 impl CsrfService for AesGcmCsrfService {
-    fn generate(&self, ttl: u64) -> Result<(String, String), CsrfServiceError> {
+    fn generate(&self, ttl: u64) -> Result<(CsrfToken, CsrfCookie), CsrfServiceError> {
         let nonce = self.rng.generate_nonce()?;
         let (token, cookie) = self.protect.generate_token_pair(Some(&nonce), ttl as i64)?;
-        Ok((token.b64_string(), cookie.b64_string()))
+        Ok((
+            CsrfToken::new(token.b64_string()),
+            CsrfCookie::new(cookie.b64_string()),
+        ))
     }
 
-    fn verify(&self, token: &str, cookie: &str) -> bool {
-        let token_bytes = match general_purpose::STANDARD.decode(token) {
+    fn verify(&self, token: &CsrfToken, cookie: &CsrfCookie) -> bool {
+        let token_bytes = match general_purpose::STANDARD.decode(token.as_ref()) {
             Ok(b) => b,
             Err(_) => return false,
         };
-        let cookie_bytes = match general_purpose::STANDARD.decode(cookie) {
+        let cookie_bytes = match general_purpose::STANDARD.decode(cookie.as_ref()) {
             Ok(b) => b,
             Err(_) => return false,
         };

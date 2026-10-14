@@ -3,7 +3,8 @@ use std::sync::Arc;
 use crate::{
     constants::{CSRF_COOKIE_NAME, USER_SESSION_COOKIE_NAME},
     features::{
-        session::model::UserSession,
+        csrf::model::CsrfToken,
+        session::model::{SessionToken, UserSession},
         user::{
             dto::{LoginResponse, MeResponse},
             model::UserInput,
@@ -44,19 +45,26 @@ pub async fn login(
         .ok_or(ServerError::Forbidden)?;
     let auth_session = state
         .login_feature
-        .login(user.username, user.password, anonymous_csrf_token)
+        .login(
+            user.username,
+            user.password,
+            CsrfToken::new(anonymous_csrf_token),
+        )
         .await?;
     let jar = jar
         .add(
-            Cookie::build((USER_SESSION_COOKIE_NAME, auth_session.session_id))
-                .http_only(true)
-                .secure(true)
-                .same_site(SameSite::Lax)
-                .path("/")
-                .build(),
+            Cookie::build((
+                USER_SESSION_COOKIE_NAME,
+                auth_session.session_id.into_string(),
+            ))
+            .http_only(true)
+            .secure(true)
+            .same_site(SameSite::Lax)
+            .path("/")
+            .build(),
         )
         .add(
-            Cookie::build((CSRF_COOKIE_NAME, auth_session.csrf_cookie))
+            Cookie::build((CSRF_COOKIE_NAME, auth_session.csrf_cookie.into_string()))
                 .http_only(true)
                 .secure(true)
                 .same_site(SameSite::Lax)
@@ -67,7 +75,7 @@ pub async fn login(
         StatusCode::OK,
         jar,
         Json(LoginResponse {
-            csrf_token: auth_session.csrf_token,
+            csrf_token: auth_session.csrf_token.into_string(),
         }),
     ))
 }
@@ -76,7 +84,7 @@ pub async fn me(Extension(user_session): Extension<UserSession>) -> impl IntoRes
     (
         StatusCode::OK,
         Json(MeResponse {
-            username: user_session.username,
+            username: user_session.username.into_string(),
         }),
     )
 }
@@ -89,7 +97,10 @@ pub async fn logout(
         .get(USER_SESSION_COOKIE_NAME)
         .map(|c| c.value().to_string())
         .ok_or(ServerError::Unauthorized)?;
-    state.logout_feature.logout(session_id).await?;
+    state
+        .logout_feature
+        .logout(SessionToken::new(session_id))
+        .await?;
     let jar = jar.remove(
         Cookie::build(USER_SESSION_COOKIE_NAME)
             .http_only(true)

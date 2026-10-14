@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use server::features::user::{
-    model::UserInsert,
+    model::{PasswordHash, UserInsert, Username},
     repository::{PgUserRepository, UserRepository},
 };
 use sqlx::PgPool;
@@ -9,8 +9,8 @@ use sqlx::PgPool;
 #[sqlx::test(migrations = "../migrations")]
 async fn test_add_user(db: PgPool) {
     // Arrange
-    let expected_username: String = "test".to_string();
-    let expected_password_hash: String = "password_hash".to_string();
+    let expected_username = Username::new("test");
+    let expected_password_hash = PasswordHash::new("password_hash");
     let expected_user_insert = UserInsert {
         username: expected_username,
         password_hash: expected_password_hash,
@@ -27,7 +27,7 @@ async fn test_add_user(db: PgPool) {
 #[sqlx::test(migrations = "../migrations")]
 async fn test_get_user_by_username_not_found(db: PgPool) {
     // Arrange
-    let expected_username: String = "test".to_string();
+    let expected_username = Username::new("test");
     let repo = PgUserRepository::new(Arc::new(db));
 
     // Act
@@ -40,8 +40,8 @@ async fn test_get_user_by_username_not_found(db: PgPool) {
 #[sqlx::test(migrations = "../migrations")]
 async fn test_get_user_by_username_existing_username(db: PgPool) {
     // Arrange
-    let expected_username: String = "test".to_string();
-    let expected_password_hash: String = "password_hash".to_string();
+    let expected_username = Username::new("test");
+    let expected_password_hash = PasswordHash::new("password_hash");
     let expected_user_insert = UserInsert {
         username: expected_username.clone(),
         password_hash: expected_password_hash.clone(),

@@ -5,7 +5,7 @@ use std::sync::Arc;
 use mockall::automock;
 
 use crate::features::user::error::UserError;
-use crate::features::user::model::UserInsert;
+use crate::features::user::model::{Password, UserInsert, Username};
 use crate::features::user::repository::UserRepository;
 use crate::infra::password::PasswordService;
 
@@ -13,8 +13,8 @@ use crate::infra::password::PasswordService;
 pub trait RegisterFeature {
     fn register<'a>(
         &'a self,
-        username: String,
-        password: String,
+        username: Username,
+        password: Password,
     ) -> Pin<Box<dyn Future<Output = Result<(), UserError>> + Send + 'a>>;
 }
 
@@ -40,8 +40,8 @@ where
 {
     fn register(
         &self,
-        username: String,
-        password: String,
+        username: Username,
+        password: Password,
     ) -> Pin<Box<dyn Future<Output = Result<(), UserError>> + Send + '_>> {
         Box::pin(async move {
             let password_hash = self.password_service.hash_password(&password)?;
@@ -60,6 +60,9 @@ where
 mod tests {
     use std::sync::Arc;
 
+    use crate::features::user::model::Password;
+    use crate::features::user::model::PasswordHash;
+    use crate::features::user::model::Username;
     use crate::features::user::register::RegisterFeature;
     use crate::features::user::register::UserRegisterFeature;
     use crate::features::user::repository::MockUserRepository;
@@ -68,16 +71,18 @@ mod tests {
     #[tokio::test]
     async fn test_register_feature() {
         // Arrange
-        let expected_username = "test".to_string();
-        let expected_password = "password".to_string();
+        let expected_username = Username::new("test");
+        let expected_password = Password::new("password");
+
         let mut mock_password_service = MockPasswordService::new();
         mock_password_service
             .expect_hash_password()
-            .return_const(Ok(String::from("hashed_password")));
+            .return_const(Ok(PasswordHash::new("hashed_password")));
         let mut mock_user_repository = MockUserRepository::new();
         mock_user_repository
             .expect_add_user()
             .returning(|_| Box::pin(async { Ok(()) }));
+
         let feature = UserRegisterFeature::new(
             Arc::new(mock_password_service),
             Arc::new(mock_user_repository),

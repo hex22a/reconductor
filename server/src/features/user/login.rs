@@ -6,9 +6,13 @@ use mockall::automock;
 use crate::{
     constants::USER_SESSION_TTL_SECONDS,
     features::{
-        csrf::repository::CsrfRepository,
+        csrf::{model::CsrfToken, repository::CsrfRepository},
         session::{model::UserSession, repository::SessionRepository},
-        user::{error::UserError, model::AuthSession, repository::UserRepository},
+        user::{
+            error::UserError,
+            model::{AuthSession, Password, Username},
+            repository::UserRepository,
+        },
     },
     infra::{csrf::CsrfService, password::PasswordService, random::RngService},
 };
@@ -17,9 +21,9 @@ use crate::{
 pub trait LoginFeature {
     fn login<'a>(
         &'a self,
-        username: String,
-        password: String,
-        anonymos_csrf_token: String,
+        username: Username,
+        password: Password,
+        anonymos_csrf_token: CsrfToken,
     ) -> Pin<Box<dyn Future<Output = Result<AuthSession, UserError>> + Send + 'a>>;
 }
 
@@ -79,9 +83,9 @@ where
 {
     fn login(
         &self,
-        username: String,
-        password: String,
-        anonymous_csrf_token: String,
+        username: Username,
+        password: Password,
+        anonymous_csrf_token: CsrfToken,
     ) -> Pin<Box<dyn Future<Output = Result<AuthSession, UserError>> + Send + '_>> {
         Box::pin(async move {
             let user = self.user_repository.get_user_by_username(&username).await?;
@@ -126,9 +130,18 @@ mod tests {
 
     use crate::{
         features::{
-            csrf::repository::{CsrfRepositoryError, MockCsrfRepository},
-            session::repository::{MockSessionRepository, SessionRepositoryError},
-            user::{model::UserEntity, repository::MockUserRepository},
+            csrf::{
+                model::CsrfCookie,
+                repository::{CsrfRepositoryError, MockCsrfRepository},
+            },
+            session::{
+                model::SessionToken,
+                repository::{MockSessionRepository, SessionRepositoryError},
+            },
+            user::{
+                model::{PasswordHash, UserEntity},
+                repository::MockUserRepository,
+            },
         },
         infra::{
             csrf::{CsrfServiceError, MockCsrfService},
@@ -140,14 +153,14 @@ mod tests {
     #[tokio::test]
     async fn test_login_password_matches() {
         // Arrange
-        let expected_anonymous_csrf = String::from("anonymous_csrf");
-        let expected_csrf_token = String::from("csrf_token");
-        let expected_csrf_cookie_value = String::from("csrf_cookie");
-        let expected_session_cookie = String::from("session_cookie");
+        let expected_anonymous_csrf = CsrfToken::new("anonymous_csrf");
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie_value = CsrfCookie::new("csrf_cookie");
+        let expected_session_cookie = SessionToken::new("session_cookie");
         let expected_user_id = Uuid::now_v7();
-        let expected_username = String::from("test");
-        let expected_password = String::from("password");
-        let expected_password_hash = String::from("password_hash");
+        let expected_username = Username::new("test");
+        let expected_password = Password::new("password");
+        let expected_password_hash = PasswordHash::new("password_hash");
         let expected_password_version: i16 = 1;
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_updated_at = datetime!(2019-01-01 0:00 UTC);
@@ -232,13 +245,13 @@ mod tests {
     #[tokio::test]
     async fn test_login_error_generating_session_id() {
         // Arrange
-        let expected_anonymous_csrf = String::from("anonymous_csrf");
-        let expected_csrf_token = String::from("csrf_token");
-        let expected_csrf_cookie_value = String::from("csrf_cookie");
+        let expected_anonymous_csrf = CsrfToken::new("anonymous_csrf");
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie_value = CsrfCookie::new("csrf_cookie");
         let expected_user_id = Uuid::now_v7();
-        let expected_username = String::from("test");
-        let expected_password = String::from("password");
-        let expected_password_hash = String::from("password_hash");
+        let expected_username = Username::new("test");
+        let expected_password = Password::new("password");
+        let expected_password_hash = PasswordHash::new("password_hash");
         let expected_password_version: i16 = 1;
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_updated_at = datetime!(2019-01-01 0:00 UTC);
@@ -315,12 +328,12 @@ mod tests {
     #[tokio::test]
     async fn test_login_error_generating_csrf_pair() {
         // Arrange
-        let expected_anonymous_csrf = String::from("anonymous_csrf");
-        let expected_session_cookie = String::from("session_cookie");
+        let expected_anonymous_csrf = CsrfToken::new("anonymous_csrf");
+        let expected_session_cookie = SessionToken::new("session_cookie");
         let expected_user_id = Uuid::now_v7();
-        let expected_username = String::from("test");
-        let expected_password = String::from("password");
-        let expected_password_hash = String::from("password_hash");
+        let expected_username = Username::new("test");
+        let expected_password = Password::new("password");
+        let expected_password_hash = PasswordHash::new("password_hash");
         let expected_password_version: i16 = 1;
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_updated_at = datetime!(2019-01-01 0:00 UTC);
@@ -395,14 +408,14 @@ mod tests {
     #[tokio::test]
     async fn test_login_error_storing_user_session() {
         // Arrange
-        let expected_anonymous_csrf = String::from("anonymous_csrf");
-        let expected_csrf_token = String::from("csrf_token");
-        let expected_csrf_cookie_value = String::from("csrf_cookie");
+        let expected_anonymous_csrf = CsrfToken::new("anonymous_csrf");
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie_value = CsrfCookie::new("csrf_cookie");
         let expected_user_id = Uuid::now_v7();
-        let expected_session_cookie = String::from("session_cookie");
-        let expected_username = String::from("test");
-        let expected_password = String::from("password");
-        let expected_password_hash = String::from("password_hash");
+        let expected_session_cookie = SessionToken::new("session_cookie");
+        let expected_username = Username::new("test");
+        let expected_password = Password::new("password");
+        let expected_password_hash = PasswordHash::new("password_hash");
         let expected_password_version: i16 = 1;
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_updated_at = datetime!(2019-01-01 0:00 UTC);
@@ -491,14 +504,14 @@ mod tests {
     #[tokio::test]
     async fn test_login_error_deleting_anonymous_csrf() {
         // Arrange
-        let expected_anonymous_csrf = String::from("anonymous_csrf");
-        let expected_csrf_token = String::from("csrf_token");
-        let expected_csrf_cookie_value = String::from("csrf_cookie");
+        let expected_anonymous_csrf = CsrfToken::new("anonymous_csrf");
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie_value = CsrfCookie::new("csrf_cookie");
         let expected_user_id = Uuid::now_v7();
-        let expected_session_cookie = String::from("session_cookie");
-        let expected_username = String::from("test");
-        let expected_password = String::from("password");
-        let expected_password_hash = String::from("password_hash");
+        let expected_session_cookie = SessionToken::new("session_cookie");
+        let expected_username = Username::new("test");
+        let expected_password = Password::new("password");
+        let expected_password_hash = PasswordHash::new("password_hash");
         let expected_password_version: i16 = 1;
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_updated_at = datetime!(2019-01-01 0:00 UTC);
@@ -585,14 +598,14 @@ mod tests {
     #[tokio::test]
     async fn test_login_password_does_not_match() {
         // Arrange
-        let expected_anonymous_csrf = String::from("anonymous_csrf");
-        let expected_csrf_token = String::from("csrf_token");
-        let expected_csrf_cookie_value = String::from("csrf_cookie");
+        let expected_anonymous_csrf = CsrfToken::new("anonymous_csrf");
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie_value = CsrfCookie::new("csrf_cookie");
         let expected_user_id = Uuid::now_v7();
-        let expected_session_cookie = String::from("session_cookie");
-        let expected_username = String::from("test");
-        let expected_password = String::from("password");
-        let expected_password_hash = String::from("password_hash");
+        let expected_session_cookie = SessionToken::new("session_cookie");
+        let expected_username = Username::new("test");
+        let expected_password = Password::new("password");
+        let expected_password_hash = PasswordHash::new("password_hash");
         let expected_password_version: i16 = 1;
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_updated_at = datetime!(2019-01-01 0:00 UTC);
@@ -672,14 +685,14 @@ mod tests {
     #[tokio::test]
     async fn test_login_error_verifying_password() {
         // Arrange
-        let expected_anonymous_csrf = String::from("anonymous_csrf");
-        let expected_csrf_token = String::from("csrf_token");
-        let expected_csrf_cookie_value = String::from("csrf_cookie");
+        let expected_anonymous_csrf = CsrfToken::new("anonymous_csrf");
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie_value = CsrfCookie::new("csrf_cookie");
         let expected_user_id = Uuid::now_v7();
-        let expected_session_cookie = String::from("session_cookie");
-        let expected_username = String::from("test");
-        let expected_password = String::from("password");
-        let expected_password_hash = String::from("password_hash");
+        let expected_session_cookie = SessionToken::new("session_cookie");
+        let expected_username = Username::new("test");
+        let expected_password = Password::new("password");
+        let expected_password_hash = PasswordHash::new("password_hash");
         let expected_password_version: i16 = 1;
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_updated_at = datetime!(2019-01-01 0:00 UTC);
@@ -758,12 +771,12 @@ mod tests {
     #[tokio::test]
     async fn test_login_user_not_found() {
         // Arrange
-        let expected_anonymous_csrf = String::from("anonymous_csrf");
-        let expected_csrf_token = String::from("csrf_token");
-        let expected_csrf_cookie_value = String::from("csrf_cookie");
-        let expected_session_cookie = String::from("session_cookie");
-        let expected_username = String::from("test");
-        let expected_password = String::from("password");
+        let expected_anonymous_csrf = CsrfToken::new("anonymous_csrf");
+        let expected_csrf_token = CsrfToken::new("csrf_token");
+        let expected_csrf_cookie_value = CsrfCookie::new("csrf_cookie");
+        let expected_session_cookie = SessionToken::new("session_cookie");
+        let expected_username = Username::new("test");
+        let expected_password = Password::new("password");
         let expected_csrf_service_generated_value =
             (expected_csrf_token, expected_csrf_cookie_value);
 

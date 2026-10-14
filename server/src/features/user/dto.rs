@@ -7,7 +7,7 @@ use crate::{
     constants::{
         MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH, MIN_PASSWORD_LENGTH, MIN_USERNAME_LENGTH,
     },
-    features::user::model::UserInput,
+    features::user::model::{Password, UserInput, Username},
 };
 
 #[derive(Deserialize, Serialize)]
@@ -59,8 +59,8 @@ impl TryFrom<UserInputRequest> for UserInput {
         match error {
             true => Err(ServerError::ValidationError(field_errors)),
             false => Ok(UserInput {
-                username: value.username,
-                password: value.password,
+                username: Username::new(value.username),
+                password: Password::new(value.password),
             }),
         }
     }
@@ -68,20 +68,23 @@ impl TryFrom<UserInputRequest> for UserInput {
 
 #[cfg(test)]
 mod tests {
-    use crate::features::user::{dto::UserInputRequest, model::UserInput};
+    use crate::features::user::{
+        dto::UserInputRequest,
+        model::{Password, UserInput, Username},
+    };
 
     #[test]
     fn test_valid_username_and_password() {
         // Arrange
-        let expected_username = "test".to_string();
-        let expected_password = "password".to_string();
+        let expected_username = Username::new("test");
+        let expected_password = Password::new("password");
         let expected_register_user = UserInput {
             username: expected_username.clone(),
             password: expected_password.clone(),
         };
         let expected_register_user_request = UserInputRequest {
-            username: expected_username.clone(),
-            password: expected_password.clone(),
+            username: expected_username.into_string(),
+            password: expected_password.into_string(),
         };
 
         // Act

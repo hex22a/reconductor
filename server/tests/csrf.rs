@@ -2,7 +2,10 @@ use std::sync::Arc;
 
 use server::{
     Config,
-    features::csrf::repository::{CsrfRepository, CsrfStore},
+    features::csrf::{
+        model::CsrfToken,
+        repository::{CsrfRepository, CsrfStore},
+    },
     infra::persistence::kv::{self, FredKvProvider, KvConfig},
 };
 
@@ -26,10 +29,10 @@ async fn create_store() -> CsrfStore<FredKvProvider> {
 async fn stores_csrf_under_correct_key() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "store_csrf_under_correct_key";
+    let expected_token = CsrfToken::new("store_csrf_under_correct_key");
 
     // Act
-    let actual_result = store.create_anonymous_csrf(expected_token).await;
+    let actual_result = store.create_anonymous_csrf(&expected_token).await;
 
     //Assert
     assert!(actual_result.is_ok());
@@ -39,10 +42,10 @@ async fn stores_csrf_under_correct_key() {
 async fn returns_false_for_missing_csrf() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "csrf_does_not_exist";
+    let expected_token = CsrfToken::new("csrf_does_not_exist");
 
     // Act
-    let actual_valid = store.verify_anonymous_csrf(expected_token).await.unwrap();
+    let actual_valid = store.verify_anonymous_csrf(&expected_token).await.unwrap();
 
     // Assert
     assert!(!actual_valid);
@@ -52,11 +55,11 @@ async fn returns_false_for_missing_csrf() {
 async fn gets_session_from_storage() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "get_csrf_from_storage";
-    store.create_anonymous_csrf(expected_token).await.unwrap();
+    let expected_token = CsrfToken::new("get_csrf_from_storage");
+    store.create_anonymous_csrf(&expected_token).await.unwrap();
 
     // Act
-    let actual_valid = store.verify_anonymous_csrf(expected_token).await.unwrap();
+    let actual_valid = store.verify_anonymous_csrf(&expected_token).await.unwrap();
 
     // Assert
     assert!(actual_valid);
@@ -66,13 +69,13 @@ async fn gets_session_from_storage() {
 async fn deletes_session_from_storage() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "csrf_token_to_delete";
-    store.create_anonymous_csrf(expected_token).await.unwrap();
+    let expected_token = CsrfToken::new("csrf_token_to_delete");
+    store.create_anonymous_csrf(&expected_token).await.unwrap();
 
     // Act
-    store.delete_anonymous_csrf(expected_token).await.unwrap();
+    store.delete_anonymous_csrf(&expected_token).await.unwrap();
 
     // Assert
-    let actual_valid = store.verify_anonymous_csrf(expected_token).await.unwrap();
+    let actual_valid = store.verify_anonymous_csrf(&expected_token).await.unwrap();
     assert!(!actual_valid);
 }

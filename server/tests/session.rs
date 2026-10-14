@@ -2,9 +2,13 @@ use std::sync::Arc;
 
 use server::{
     Config,
-    features::session::{
-        model::UserSession,
-        repository::{SessionRepository, SessionRepositoryError, SessionStore},
+    features::{
+        csrf::model::{CsrfCookie, CsrfToken},
+        session::{
+            model::{SessionToken, UserSession},
+            repository::{SessionRepository, SessionRepositoryError, SessionStore},
+        },
+        user::model::Username,
     },
     infra::persistence::kv::{self, FredKvProvider, KvConfig},
 };
@@ -26,13 +30,13 @@ async fn create_store() -> SessionStore<FredKvProvider> {
     SessionStore::new(kv)
 }
 
-fn create_user_session_fixture(token: String) -> UserSession {
+fn create_user_session_fixture(token: &SessionToken) -> UserSession {
     UserSession {
-        token,
+        token: token.to_owned(),
         user_id: Uuid::now_v7(),
-        username: "testuser".to_string(),
-        csrf_token: "csrf_token".to_string(),
-        csrf_cookie: "csrf_cookei".to_string(),
+        username: Username::new("testuser"),
+        csrf_token: CsrfToken::new("csrf_token"),
+        csrf_cookie: CsrfCookie::new("csrf_cookei"),
     }
 }
 
@@ -40,8 +44,8 @@ fn create_user_session_fixture(token: String) -> UserSession {
 async fn stores_session_under_correct_key() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "store_under_correct_key".to_string();
-    let expected_user_session = create_user_session_fixture(expected_token);
+    let expected_token = SessionToken::new("store_under_correct_key");
+    let expected_user_session = create_user_session_fixture(&expected_token);
 
     // Act
     let actual_result = store.create_user_session(expected_user_session).await;
@@ -54,10 +58,10 @@ async fn stores_session_under_correct_key() {
 async fn returns_not_found_error_for_missing_session() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "does_not_exist";
+    let expected_token = SessionToken::new("does_not_exist");
 
     // Act
-    let actual_result = store.get_user_session(expected_token).await;
+    let actual_result = store.get_user_session(&expected_token).await;
 
     // Assert
     assert!(matches!(
@@ -70,15 +74,15 @@ async fn returns_not_found_error_for_missing_session() {
 async fn gets_session_from_storage() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "get_session_from_storage";
-    let expected_user_session = create_user_session_fixture(expected_token.to_string());
+    let expected_token = SessionToken::new("get_session_from_storage");
+    let expected_user_session = create_user_session_fixture(&expected_token);
     store
         .create_user_session(expected_user_session.clone())
         .await
         .unwrap();
 
     // Act
-    let actual_user_session = store.get_user_session(expected_token).await.unwrap();
+    let actual_user_session = store.get_user_session(&expected_token).await.unwrap();
 
     // Assert
     assert_eq!(actual_user_session, expected_user_session);
@@ -88,17 +92,17 @@ async fn gets_session_from_storage() {
 async fn deletes_session_from_storage() {
     // Arrange
     let store = create_store().await;
-    let expected_token = "token_to_delete";
-    let expected_user_session = create_user_session_fixture(expected_token.to_string());
+    let expected_token = SessionToken::new("token_to_delete");
+    let expected_user_session = create_user_session_fixture(&expected_token);
     store
         .create_user_session(expected_user_session)
         .await
         .unwrap();
 
     // Act
-    store.delete_user_session(expected_token).await.unwrap();
+    store.delete_user_session(&expected_token).await.unwrap();
 
     // Assert
-    let result = store.get_user_session(expected_token).await;
+    let result = store.get_user_session(&expected_token).await;
     assert!(matches!(result, Err(SessionRepositoryError::NotFound)));
 }

@@ -4,8 +4,9 @@ use argon2::{Argon2, Params, PasswordHash, PasswordHasher, PasswordVerifier};
 use mockall::automock;
 use thiserror::Error;
 
-use crate::constants::{
-    PASSWORD_MEMORY_COST_BYTES, PASSWORD_PARALLELISM, PASSWORD_TIME_COST_PASSES,
+use crate::{
+    constants::{PASSWORD_MEMORY_COST_BYTES, PASSWORD_PARALLELISM, PASSWORD_TIME_COST_PASSES},
+    features::user::{self, model::Password},
 };
 
 #[derive(Debug, Clone, Error)]
@@ -19,11 +20,14 @@ pub enum PasswordServiceError {
 
 #[cfg_attr(test, automock)]
 pub trait PasswordService {
-    fn hash_password(&self, password: &str) -> Result<String, PasswordServiceError>;
+    fn hash_password(
+        &self,
+        password: &Password,
+    ) -> Result<user::model::PasswordHash, PasswordServiceError>;
     fn verify_password(
         &self,
-        password: &str,
-        password_hash: &str,
+        password: &Password,
+        password_hash: &user::model::PasswordHash,
     ) -> Result<bool, PasswordServiceError>;
 }
 
@@ -31,7 +35,10 @@ pub trait PasswordService {
 pub struct Argon2Service;
 
 impl PasswordService for Argon2Service {
-    fn hash_password(&self, password: &str) -> Result<String, PasswordServiceError> {
+    fn hash_password(
+        &self,
+        password: &Password,
+    ) -> Result<user::model::PasswordHash, PasswordServiceError> {
         let params = Params::new(
             PASSWORD_MEMORY_COST_BYTES,
             PASSWORD_TIME_COST_PASSES,
@@ -41,15 +48,15 @@ impl PasswordService for Argon2Service {
         .unwrap();
         let argon2 = Argon2::new(argon2::Algorithm::Argon2id, argon2::Version::V0x13, params);
         argon2
-            .hash_password(password.as_bytes())
-            .map(|h| h.to_string())
+            .hash_password(password.as_ref().as_bytes())
+            .map(|h| user::model::PasswordHash::new(h.to_string()))
             .map_err(|e| PasswordServiceError::Hashing(e.to_string()))
     }
 
     fn verify_password(
         &self,
-        password: &str,
-        password_hash: &str,
+        password: &Password,
+        password_hash: &user::model::PasswordHash,
     ) -> Result<bool, PasswordServiceError> {
         let params = Params::new(
             PASSWORD_MEMORY_COST_BYTES,
@@ -59,10 +66,10 @@ impl PasswordService for Argon2Service {
         )
         .unwrap();
         let argon2 = Argon2::new(argon2::Algorithm::Argon2id, argon2::Version::V0x13, params);
-        let password_hash = PasswordHash::new(password_hash)
+        let password_hash = PasswordHash::new(password_hash.as_ref())
             .map_err(|e| PasswordServiceError::Parsing(e.to_string()))?;
         Ok(argon2
-            .verify_password(password.as_bytes(), &password_hash)
+            .verify_password(password.as_ref().as_bytes(), &password_hash)
             .is_ok())
     }
 }

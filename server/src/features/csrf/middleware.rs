@@ -12,7 +12,10 @@ use axum_extra::extract::CookieJar;
 use crate::{
     application::error::ServerError,
     constants::{CSRF_COOKIE_NAME, CSRF_HEADER},
-    features::session::model::UserSession,
+    features::{
+        csrf::model::{CsrfCookie, CsrfToken},
+        session::model::UserSession,
+    },
     state::AppState,
 };
 
@@ -34,7 +37,10 @@ pub async fn double_submit(
         .ok_or(ServerError::Forbidden)?;
     match state
         .verify_csrf_feature
-        .verify_anonymous(cookie_csrf_token, header_csrf_token)
+        .verify_anonymous(
+            CsrfCookie::new(cookie_csrf_token),
+            CsrfToken::new(header_csrf_token),
+        )
         .await
     {
         true => Ok(next.run(req).await),
@@ -62,7 +68,11 @@ pub async fn session_based(
     let session_csrf_token = session.csrf_token;
     match state
         .verify_csrf_feature
-        .verify_authorized(cookie_csrf_token, header_csrf_token, session_csrf_token)
+        .verify_authorized(
+            CsrfCookie::new(cookie_csrf_token),
+            CsrfToken::new(header_csrf_token),
+            session_csrf_token,
+        )
         .await
     {
         true => Ok(next.run(req).await),
