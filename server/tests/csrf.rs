@@ -1,11 +1,8 @@
 use std::sync::Arc;
 
 use server::{
-    Config,
-    features::csrf::{
-        model::CsrfToken,
-        repository::{CsrfRepository, CsrfStore},
-    },
+    Config, CsrfToken,
+    features::csrf::repository::{CsrfRepository, CsrfStore},
     infra::persistence::kv::{self, FredKvProvider, KvConfig},
 };
 

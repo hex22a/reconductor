@@ -4,8 +4,10 @@ use std::sync::Arc;
 #[cfg(test)]
 use mockall::automock;
 
+use crate::domain::password::Password;
+use crate::domain::username::Username;
 use crate::features::user::error::UserError;
-use crate::features::user::model::{Password, UserInsert, Username};
+use crate::features::user::model::UserInsert;
 use crate::features::user::repository::UserRepository;
 use crate::infra::password::PasswordService;
 
@@ -60,11 +62,9 @@ where
 mod tests {
     use std::sync::Arc;
 
-    use crate::features::user::model::Password;
-    use crate::features::user::model::PasswordHash;
-    use crate::features::user::model::Username;
-    use crate::features::user::register::RegisterFeature;
-    use crate::features::user::register::UserRegisterFeature;
+    use super::*;
+
+    use crate::domain::password_hash::PasswordHash;
     use crate::features::user::repository::MockUserRepository;
     use crate::infra::password::MockPasswordService;
 

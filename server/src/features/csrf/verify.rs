@@ -5,10 +5,8 @@ use subtle::ConstantTimeEq;
 use mockall::automock;
 
 use crate::{
-    features::csrf::{
-        model::{CsrfCookie, CsrfToken},
-        repository::CsrfRepository,
-    },
+    domain::{csrf_cookie::CsrfCookie, csrf_token::CsrfToken},
+    features::csrf::repository::CsrfRepository,
     infra::csrf::CsrfService,
 };
 
@@ -242,6 +240,7 @@ mod tests {
                 expected_session_csrf_token,
             )
             .await;
+
         // Assert
         assert!(!actual_is_valid);
     }

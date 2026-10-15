@@ -12,7 +12,7 @@ use mockall::automock;
 
 use crate::{
     constants::{NONCE_SIZE_BYTES, SESSION_ID_SIZE_BYTES},
-    features::session::model::SessionToken,
+    domain::session_token::SessionToken,
 };
 
 #[derive(Debug, Clone, Error)]

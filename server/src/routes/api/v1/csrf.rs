@@ -22,12 +22,9 @@ mod tests {
 
     use crate::{
         constants::USER_SESSION_COOKIE_NAME,
+        domain::{csrf_cookie::CsrfCookie, csrf_token::CsrfToken, session_token::SessionToken},
         features::{
-            csrf::{
-                model::{CsrfCookie, CsrfToken, CsrfTokenPair},
-                token::MockTokenFeature,
-                verify::MockVerifyCsrfFeature,
-            },
+            csrf::{model::CsrfTokenPair, token::MockTokenFeature, verify::MockVerifyCsrfFeature},
             host::{get::MockGetHostFeature, list::MockListHostsFeature},
             port::{get::MockGetPortFeature, list::MockListPortsFeature},
             project::{
@@ -38,7 +35,7 @@ mod tests {
                 create::MockCreateScanFeature, get::MockGetScanFeature, list::MockListScansFeature,
             },
             scan_run::{get::MockGetScanRunFeature, list::MockListScanRunsFeature},
-            session::{auth::MockAuthFeature, model::SessionToken},
+            session::auth::MockAuthFeature,
             user::{
                 login::MockLoginFeature, logout::MockLogoutFeature, register::MockRegisterFeature,
             },

@@ -9,7 +9,7 @@ use axum_extra::extract::CookieJar;
 
 use crate::{
     application::error::ServerError, constants::USER_SESSION_COOKIE_NAME,
-    features::session::model::SessionToken, state::AppState,
+    domain::session_token::SessionToken, state::AppState,
 };
 
 pub async fn session_middleware(

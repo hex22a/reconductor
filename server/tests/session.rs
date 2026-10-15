@@ -1,14 +1,10 @@
 use std::sync::Arc;
 
 use server::{
-    Config,
-    features::{
-        csrf::model::{CsrfCookie, CsrfToken},
-        session::{
-            model::{SessionToken, UserSession},
-            repository::{SessionRepository, SessionRepositoryError, SessionStore},
-        },
-        user::model::Username,
+    Config, CsrfCookie, CsrfToken, SessionToken, Username,
+    features::session::{
+        model::UserSession,
+        repository::{SessionRepository, SessionRepositoryError, SessionStore},
     },
     infra::persistence::kv::{self, FredKvProvider, KvConfig},
 };

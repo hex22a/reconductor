@@ -4,7 +4,10 @@ use std::sync::Arc;
 use mockall::automock;
 use sqlx::PgPool;
 
-use crate::features::user::model::{UserEntity, UserInsert, Username};
+use crate::{
+    domain::username::Username,
+    features::user::model::{UserEntity, UserInsert},
+};
 
 #[cfg_attr(test, automock)]
 pub trait UserRepository {

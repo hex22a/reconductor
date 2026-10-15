@@ -3,10 +3,9 @@ use std::{pin::Pin, sync::Arc};
 #[cfg(test)]
 use mockall::automock;
 
-use crate::features::session::{
-    error::SessionError,
-    model::{SessionToken, UserSession},
-    repository::SessionRepository,
+use crate::{
+    domain::session_token::SessionToken,
+    features::session::{error::SessionError, model::UserSession, repository::SessionRepository},
 };
 
 #[cfg_attr(test, automock)]
@@ -51,13 +50,12 @@ mod tests {
 
     use super::*;
 
-    use crate::features::{
-        csrf::model::{CsrfCookie, CsrfToken},
-        session::{
+    use crate::{
+        domain::{csrf_cookie::CsrfCookie, csrf_token::CsrfToken, username::Username},
+        features::session::{
             model::UserSession,
             repository::{MockSessionRepository, SessionRepositoryError},
         },
-        user::model::Username,
     };
 
     #[tokio::test]

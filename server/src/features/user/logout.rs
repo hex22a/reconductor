@@ -3,9 +3,9 @@ use std::{pin::Pin, sync::Arc};
 #[cfg(test)]
 use mockall::automock;
 
-use crate::features::{
-    session::{model::SessionToken, repository::SessionRepository},
-    user::error::UserError,
+use crate::{
+    domain::session_token::SessionToken,
+    features::{session::repository::SessionRepository, user::error::UserError},
 };
 
 #[cfg_attr(test, automock)]

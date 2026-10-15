@@ -2,9 +2,9 @@ use std::sync::Arc;
 
 use crate::{
     constants::{CSRF_COOKIE_NAME, USER_SESSION_COOKIE_NAME},
+    domain::{csrf_token::CsrfToken, session_token::SessionToken},
     features::{
-        csrf::model::CsrfToken,
-        session::model::{SessionToken, UserSession},
+        session::model::UserSession,
         user::{
             dto::{LoginResponse, MeResponse},
             model::UserInput,

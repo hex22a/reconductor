@@ -1,99 +1,10 @@
-use std::fmt::Debug;
-
 use sqlx::types::Uuid;
 use time::OffsetDateTime;
 
-use crate::features::{
-    csrf::model::{CsrfCookie, CsrfToken},
-    session::model::SessionToken,
+use crate::domain::{
+    csrf_cookie::CsrfCookie, csrf_token::CsrfToken, password::Password,
+    password_hash::PasswordHash, session_token::SessionToken, username::Username,
 };
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct Username(String);
-
-impl Username {
-    pub fn new(value: impl Into<String>) -> Self {
-        Self(value.into())
-    }
-
-    pub fn into_string(self) -> String {
-        self.0
-    }
-}
-
-impl From<String> for Username {
-    fn from(value: String) -> Self {
-        Self(value)
-    }
-}
-
-impl AsRef<str> for Username {
-    fn as_ref(&self) -> &str {
-        &self.0
-    }
-}
-
-#[derive(Clone, PartialEq)]
-pub struct Password(String);
-
-impl Password {
-    pub fn new(value: impl Into<String>) -> Self {
-        Self(value.into())
-    }
-
-    pub fn into_string(self) -> String {
-        self.0
-    }
-}
-
-impl From<String> for Password {
-    fn from(value: String) -> Self {
-        Self(value)
-    }
-}
-
-impl AsRef<str> for Password {
-    fn as_ref(&self) -> &str {
-        &self.0
-    }
-}
-
-impl Debug for Password {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("Password").field(&"***").finish()
-    }
-}
-
-#[derive(Clone, PartialEq)]
-pub struct PasswordHash(String);
-
-impl PasswordHash {
-    pub fn new(value: impl Into<String>) -> Self {
-        Self(value.into())
-    }
-
-    pub fn into_string(self) -> String {
-        self.0
-    }
-}
-
-impl From<String> for PasswordHash {
-    fn from(value: String) -> Self {
-        Self(value)
-    }
-}
-
-impl AsRef<str> for PasswordHash {
-    fn as_ref(&self) -> &str {
-        &self.0
-    }
-}
-
-impl Debug for PasswordHash {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("PasswordHash").field(&"***").finish()
-    }
-}
 
 #[derive(Debug, PartialEq)]
 pub struct UserInput {

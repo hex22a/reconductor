@@ -1,8 +1,11 @@
 use std::sync::Arc;
 
-use server::features::user::{
-    model::{PasswordHash, UserInsert, Username},
-    repository::{PgUserRepository, UserRepository},
+use server::{
+    PasswordHash, Username,
+    features::user::{
+        model::UserInsert,
+        repository::{PgUserRepository, UserRepository},
+    },
 };
 use sqlx::PgPool;
 

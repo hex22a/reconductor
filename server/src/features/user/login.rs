@@ -5,14 +5,11 @@ use mockall::automock;
 
 use crate::{
     constants::USER_SESSION_TTL_SECONDS,
+    domain::{csrf_token::CsrfToken, password::Password, username::Username},
     features::{
-        csrf::{model::CsrfToken, repository::CsrfRepository},
+        csrf::repository::CsrfRepository,
         session::{model::UserSession, repository::SessionRepository},
-        user::{
-            error::UserError,
-            model::{AuthSession, Password, Username},
-            repository::UserRepository,
-        },
+        user::{error::UserError, model::AuthSession, repository::UserRepository},
     },
     infra::{csrf::CsrfService, password::PasswordService, random::RngService},
 };
@@ -129,19 +126,13 @@ mod tests {
     use super::*;
 
     use crate::{
+        domain::{
+            csrf_cookie::CsrfCookie, password_hash::PasswordHash, session_token::SessionToken,
+        },
         features::{
-            csrf::{
-                model::CsrfCookie,
-                repository::{CsrfRepositoryError, MockCsrfRepository},
-            },
-            session::{
-                model::SessionToken,
-                repository::{MockSessionRepository, SessionRepositoryError},
-            },
-            user::{
-                model::{PasswordHash, UserEntity},
-                repository::MockUserRepository,
-            },
+            csrf::repository::{CsrfRepositoryError, MockCsrfRepository},
+            session::repository::{MockSessionRepository, SessionRepositoryError},
+            user::{model::UserEntity, repository::MockUserRepository},
         },
         infra::{
             csrf::{CsrfServiceError, MockCsrfService},

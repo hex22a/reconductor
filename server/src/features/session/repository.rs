@@ -6,7 +6,8 @@ use thiserror::Error;
 
 use crate::{
     constants::{USER_SESSION_PREFIX, USER_SESSION_TTL_SECONDS},
-    features::session::model::{SessionToken, UserSession},
+    domain::session_token::SessionToken,
+    features::session::model::UserSession,
     infra::persistence::kv::KvProvider,
 };
 
