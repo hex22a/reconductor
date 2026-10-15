@@ -1,0 +1,12 @@
+[package]
+name = "newtype-derive"
+version = "0.1.0"
+license.workspace = true
+edition.workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = "2.0"
+quote = "1.0"
