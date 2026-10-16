@@ -1,8 +1,6 @@
 use uuid::Uuid;
 
-use crate::domain::{
-    csrf_cookie::CsrfCookie, csrf_token::CsrfToken, session_token::SessionToken, username::Username,
-};
+use crate::domain::types::{CsrfCookie, CsrfToken, SessionToken, Username};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct UserSession {

@@ -22,7 +22,7 @@ mod tests {
 
     use crate::{
         constants::USER_SESSION_COOKIE_NAME,
-        domain::{csrf_cookie::CsrfCookie, csrf_token::CsrfToken, session_token::SessionToken},
+        domain::types::{CsrfCookie, CsrfToken, SessionToken},
         features::{
             csrf::{model::CsrfTokenPair, token::MockTokenFeature, verify::MockVerifyCsrfFeature},
             host::{get::MockGetHostFeature, list::MockListHostsFeature},

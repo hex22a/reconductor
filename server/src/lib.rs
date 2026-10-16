@@ -52,10 +52,7 @@ use crate::features::scan_run::repository::PgScanRunRepository;
 
 pub use application::error::AppError;
 
-pub use domain::{
-    csrf_cookie::CsrfCookie, csrf_token::CsrfToken, password_hash::PasswordHash,
-    session_token::SessionToken, username::Username,
-};
+pub use domain::types::{CsrfCookie, CsrfToken, PasswordHash, SessionToken, Username};
 
 mod application;
 mod config;

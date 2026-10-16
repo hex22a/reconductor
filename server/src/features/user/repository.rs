@@ -5,7 +5,7 @@ use mockall::automock;
 use sqlx::PgPool;
 
 use crate::{
-    domain::username::Username,
+    domain::types::Username,
     features::user::model::{UserEntity, UserInsert},
 };
 

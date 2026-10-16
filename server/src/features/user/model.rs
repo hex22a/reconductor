@@ -1,10 +1,7 @@
 use sqlx::types::Uuid;
 use time::OffsetDateTime;
 
-use crate::domain::{
-    csrf_cookie::CsrfCookie, csrf_token::CsrfToken, password::Password,
-    password_hash::PasswordHash, session_token::SessionToken, username::Username,
-};
+use crate::domain::types::{CsrfCookie, CsrfToken, Password, PasswordHash, SessionToken, Username};
 
 #[derive(Debug, PartialEq)]
 pub struct UserInput {

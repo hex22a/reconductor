@@ -4,7 +4,7 @@ use std::{pin::Pin, sync::Arc};
 use mockall::automock;
 
 use crate::{
-    domain::session_token::SessionToken,
+    domain::types::SessionToken,
     features::session::{error::SessionError, model::UserSession, repository::SessionRepository},
 };
 
@@ -51,7 +51,7 @@ mod tests {
     use super::*;
 
     use crate::{
-        domain::{csrf_cookie::CsrfCookie, csrf_token::CsrfToken, username::Username},
+        domain::types::{CsrfCookie, CsrfToken, Username},
         features::session::{
             model::UserSession,
             repository::{MockSessionRepository, SessionRepositoryError},

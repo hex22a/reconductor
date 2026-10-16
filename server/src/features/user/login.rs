@@ -5,7 +5,7 @@ use mockall::automock;
 
 use crate::{
     constants::USER_SESSION_TTL_SECONDS,
-    domain::{csrf_token::CsrfToken, password::Password, username::Username},
+    domain::types::{CsrfToken, Password, Username},
     features::{
         csrf::repository::CsrfRepository,
         session::{model::UserSession, repository::SessionRepository},
@@ -126,9 +126,7 @@ mod tests {
     use super::*;
 
     use crate::{
-        domain::{
-            csrf_cookie::CsrfCookie, password_hash::PasswordHash, session_token::SessionToken,
-        },
+        domain::types::{CsrfCookie, PasswordHash, SessionToken},
         features::{
             csrf::repository::{CsrfRepositoryError, MockCsrfRepository},
             session::repository::{MockSessionRepository, SessionRepositoryError},

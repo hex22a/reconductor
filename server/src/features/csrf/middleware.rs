@@ -12,7 +12,7 @@ use axum_extra::extract::CookieJar;
 use crate::{
     application::error::ServerError,
     constants::{CSRF_COOKIE_NAME, CSRF_HEADER},
-    domain::{csrf_cookie::CsrfCookie, csrf_token::CsrfToken},
+    domain::types::{CsrfCookie, CsrfToken},
     features::session::model::UserSession,
     state::AppState,
 };

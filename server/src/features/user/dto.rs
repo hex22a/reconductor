@@ -7,7 +7,7 @@ use crate::{
     constants::{
         MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH, MIN_PASSWORD_LENGTH, MIN_USERNAME_LENGTH,
     },
-    domain::{password::Password, username::Username},
+    domain::types::{Password, Username},
     features::user::model::UserInput,
 };
 
@@ -70,7 +70,7 @@ impl TryFrom<UserInputRequest> for UserInput {
 #[cfg(test)]
 mod tests {
     use crate::{
-        domain::{password::Password, username::Username},
+        domain::types::{Password, Username},
         features::user::{dto::UserInputRequest, model::UserInput},
     };
 

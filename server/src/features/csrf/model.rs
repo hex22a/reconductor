@@ -1,4 +1,4 @@
-use crate::domain::{csrf_cookie::CsrfCookie, csrf_token::CsrfToken};
+use crate::domain::types::{CsrfCookie, CsrfToken};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct CsrfTokenPair {

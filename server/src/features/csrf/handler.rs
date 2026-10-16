@@ -9,7 +9,7 @@ use axum_extra::extract::{
 use crate::{
     application::error::ServerError,
     constants::{CSRF_COOKIE_NAME, USER_SESSION_COOKIE_NAME},
-    domain::session_token::SessionToken,
+    domain::types::SessionToken,
     features::csrf::dto::CsrfResponse,
     state::AppState,
 };

@@ -4,7 +4,7 @@ use std::{pin::Pin, sync::Arc};
 use mockall::automock;
 
 use crate::{
-    domain::session_token::SessionToken,
+    domain::types::SessionToken,
     features::{session::repository::SessionRepository, user::error::UserError},
 };
 
