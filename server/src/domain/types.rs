@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 
 use newtype_derive::Newtype;
+use uuid::Uuid;
 
 #[derive(Clone, PartialEq, Newtype)]
 pub struct CsrfCookie(String);
@@ -55,3 +56,27 @@ pub struct Username(String);
 
 #[derive(Clone, Debug, PartialEq, Newtype)]
 pub struct Vendor(String);
+
+pub struct UserId(Uuid);
+
+impl UserId {
+    pub fn new(value: impl Into<Uuid>) -> Self {
+        Self(value.into())
+    }
+
+    pub fn into_inner(self) -> Uuid {
+        self.0
+    }
+}
+
+impl From<Uuid> for UserId {
+    fn from(value: Uuid) -> Self {
+        Self(value)
+    }
+}
+
+impl AsRef<Uuid> for UserId {
+    fn as_ref(&self) -> &Uuid {
+        &self.0
+    }
+}

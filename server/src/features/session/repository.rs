@@ -26,11 +26,11 @@ pub enum SessionRepositoryError {
 impl From<UserSession> for HashMap<String, String> {
     fn from(value: UserSession) -> Self {
         let mut map = HashMap::new();
-        map.insert("token".to_string(), value.token.into_string());
+        map.insert("token".to_string(), value.token.into_inner());
         map.insert("user_id".to_string(), value.user_id.to_string());
-        map.insert("username".to_string(), value.username.into_string());
-        map.insert("csrf_token".to_string(), value.csrf_token.into_string());
-        map.insert("csrf_cookie".to_string(), value.csrf_cookie.into_string());
+        map.insert("username".to_string(), value.username.into_inner());
+        map.insert("csrf_token".to_string(), value.csrf_token.into_inner());
+        map.insert("csrf_cookie".to_string(), value.csrf_cookie.into_inner());
         map
     }
 }

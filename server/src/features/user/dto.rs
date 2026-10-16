@@ -84,8 +84,8 @@ mod tests {
             password: expected_password.clone(),
         };
         let expected_register_user_request = UserInputRequest {
-            username: expected_username.into_string(),
-            password: expected_password.into_string(),
+            username: expected_username.into_inner(),
+            password: expected_password.into_inner(),
         };
 
         // Act

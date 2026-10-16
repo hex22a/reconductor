@@ -55,7 +55,7 @@ pub async fn login(
         .add(
             Cookie::build((
                 USER_SESSION_COOKIE_NAME,
-                auth_session.session_id.into_string(),
+                auth_session.session_id.into_inner(),
             ))
             .http_only(true)
             .secure(true)
@@ -64,7 +64,7 @@ pub async fn login(
             .build(),
         )
         .add(
-            Cookie::build((CSRF_COOKIE_NAME, auth_session.csrf_cookie.into_string()))
+            Cookie::build((CSRF_COOKIE_NAME, auth_session.csrf_cookie.into_inner()))
                 .http_only(true)
                 .secure(true)
                 .same_site(SameSite::Lax)
@@ -75,7 +75,7 @@ pub async fn login(
         StatusCode::OK,
         jar,
         Json(LoginResponse {
-            csrf_token: auth_session.csrf_token.into_string(),
+            csrf_token: auth_session.csrf_token.into_inner(),
         }),
     ))
 }
@@ -84,7 +84,7 @@ pub async fn me(Extension(user_session): Extension<UserSession>) -> impl IntoRes
     (
         StatusCode::OK,
         Json(MeResponse {
-            username: user_session.username.into_string(),
+            username: user_session.username.into_inner(),
         }),
     )
 }

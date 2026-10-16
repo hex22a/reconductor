@@ -26,7 +26,7 @@ pub async fn handle(
         .get_token(session_cookie.map(SessionToken::new))
         .await?;
     let jar = jar.add(
-        Cookie::build((CSRF_COOKIE_NAME, csrf_token_pair.cookie_value.into_string()))
+        Cookie::build((CSRF_COOKIE_NAME, csrf_token_pair.cookie_value.into_inner()))
             .http_only(true)
             .secure(true)
             .same_site(SameSite::Lax)
@@ -37,7 +37,7 @@ pub async fn handle(
         StatusCode::OK,
         jar,
         Json(CsrfResponse {
-            csrf_token: csrf_token_pair.token.into_string(),
+            csrf_token: csrf_token_pair.token.into_inner(),
         }),
     ))
 }
