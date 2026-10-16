@@ -1,3 +1,4 @@
+use secrecy::ExposeSecret;
 use std::{pin::Pin, sync::Arc};
 use subtle::ConstantTimeEq;
 
@@ -69,9 +70,10 @@ where
         Box::pin(async move {
             self.csrf_service.verify(&header_csrf_token, &csrf_cookie)
                 && header_csrf_token
-                    .as_ref()
+                    .into_inner()
+                    .expose_secret()
                     .as_bytes()
-                    .ct_eq(session_csrf_token.as_ref().as_bytes())
+                    .ct_eq(session_csrf_token.into_inner().expose_secret().as_bytes())
                     .into()
         })
     }

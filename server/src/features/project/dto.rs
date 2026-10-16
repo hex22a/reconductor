@@ -1,15 +1,15 @@
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
-use uuid::Uuid;
 
 use crate::{
     application::error::{FieldErrors, ServerError},
+    domain::types::ProjectId,
     features::project::model::CreateProjectInput,
 };
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct ProjectDto {
-    pub id: Uuid,
+    pub id: ProjectId,
     pub name: String,
     #[serde(with = "time::serde::rfc3339")]
     pub created_at: OffsetDateTime,

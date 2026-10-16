@@ -6,7 +6,10 @@ use mockall::automock;
 use sqlx::PgPool;
 use sqlx::types::Uuid;
 
-use crate::features::project::model::{ProjectEntity, ProjectInsert};
+use crate::{
+    domain::types::{ProjectId, UserId},
+    features::project::model::{ProjectEntity, ProjectInsert},
+};
 
 #[cfg_attr(test, automock)]
 pub trait ProjectRepository {
@@ -16,12 +19,12 @@ pub trait ProjectRepository {
     ) -> impl Future<Output = Result<ProjectEntity, sqlx::Error>> + Send;
     fn get_project(
         &self,
-        project_id: &Uuid,
-        owner_id: &Uuid,
+        project_id: &ProjectId,
+        owner_id: &UserId,
     ) -> impl Future<Output = Result<ProjectEntity, sqlx::Error>> + Send;
     fn list_projects(
         &self,
-        owner_id: &Uuid,
+        owner_id: &UserId,
         cursor_id: Option<Uuid>,
         limit: i64,
     ) -> impl Future<Output = Result<Vec<ProjectEntity>, sqlx::Error>> + Send;
@@ -52,7 +55,7 @@ impl ProjectRepository for PgProjectRepository {
             RETURNING *;
             "#,
             project_insert.name,
-            project_insert.owner_id,
+            project_insert.owner_id.into_inner(),
         )
         .fetch_one(&*self.db)
         .await?;
@@ -61,8 +64,8 @@ impl ProjectRepository for PgProjectRepository {
 
     async fn get_project(
         &self,
-        project_id: &Uuid,
-        owner_id: &Uuid,
+        project_id: &ProjectId,
+        owner_id: &UserId,
     ) -> Result<ProjectEntity, sqlx::Error> {
         let project = sqlx::query_as!(
             ProjectEntity,
@@ -76,8 +79,8 @@ impl ProjectRepository for PgProjectRepository {
             WHERE id=$1 and owner_id=$2
             LIMIT 1;
             "#,
-            project_id,
-            owner_id,
+            project_id.as_ref(),
+            owner_id.as_ref(),
         )
         .fetch_one(&*self.db)
         .await?;
@@ -86,7 +89,7 @@ impl ProjectRepository for PgProjectRepository {
 
     async fn list_projects(
         &self,
-        owner_id: &Uuid,
+        owner_id: &UserId,
         cursor_id: Option<Uuid>,
         limit: i64,
     ) -> Result<Vec<ProjectEntity>, sqlx::Error> {
@@ -105,7 +108,7 @@ impl ProjectRepository for PgProjectRepository {
                     ORDER BY id DESC
                     LIMIT $3;
                     "#,
-                    owner_id,
+                    owner_id.as_ref(),
                     cursor,
                     limit
                 )
@@ -126,7 +129,7 @@ impl ProjectRepository for PgProjectRepository {
                     ORDER BY id DESC
                     LIMIT $2;
                     "#,
-                    owner_id,
+                    owner_id.as_ref(),
                     limit
                 )
                 .fetch_all(&*self.db)

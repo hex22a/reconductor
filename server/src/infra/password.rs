@@ -2,6 +2,7 @@ use argon2::{Argon2, Params, PasswordHash, PasswordHasher, PasswordVerifier};
 
 #[cfg(test)]
 use mockall::automock;
+use secrecy::ExposeSecret;
 use thiserror::Error;
 
 use crate::{
@@ -48,7 +49,7 @@ impl PasswordService for Argon2Service {
         .unwrap();
         let argon2 = Argon2::new(argon2::Algorithm::Argon2id, argon2::Version::V0x13, params);
         argon2
-            .hash_password(password.as_ref().as_bytes())
+            .hash_password(password.as_ref().expose_secret().as_bytes())
             .map(|h| crate::domain::types::PasswordHash::new(h.to_string()))
             .map_err(|e| PasswordServiceError::Hashing(e.to_string()))
     }
@@ -66,10 +67,10 @@ impl PasswordService for Argon2Service {
         )
         .unwrap();
         let argon2 = Argon2::new(argon2::Algorithm::Argon2id, argon2::Version::V0x13, params);
-        let password_hash = PasswordHash::new(password_hash.as_ref())
+        let password_hash = PasswordHash::new(password_hash.as_ref().expose_secret())
             .map_err(|e| PasswordServiceError::Parsing(e.to_string()))?;
         Ok(argon2
-            .verify_password(password.as_ref().as_bytes(), &password_hash)
+            .verify_password(password.as_ref().expose_secret().as_bytes(), &password_hash)
             .is_ok())
     }
 }

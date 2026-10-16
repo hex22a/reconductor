@@ -10,6 +10,7 @@ use uuid::Uuid;
 
 use crate::{
     application::error::ServerError,
+    domain::types::ProjectId,
     features::{
         project::{dto::CreateProjctRequest, model::CreateProjectInput},
         session::model::UserSession,
@@ -37,7 +38,10 @@ pub async fn get_project(
     Path(project_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, ServerError> {
     let owner_id = user_session.user_id;
-    let project = state.get_project_feature.get(project_id, owner_id).await?;
+    let project = state
+        .get_project_feature
+        .get(ProjectId::new(project_id), owner_id)
+        .await?;
     Ok((StatusCode::OK, Json(project)))
 }
 

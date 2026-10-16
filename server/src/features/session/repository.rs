@@ -2,13 +2,15 @@ use std::{collections::HashMap, sync::Arc, time::Duration};
 
 #[cfg(test)]
 use mockall::automock;
+use secrecy::{ExposeSecret, SecretString};
 use thiserror::Error;
+use uuid::Uuid;
 
 use crate::{
     constants::{USER_SESSION_PREFIX, USER_SESSION_TTL_SECONDS},
     domain::types::SessionToken,
     features::session::model::UserSession,
-    infra::persistence::kv::KvProvider,
+    infra::persistence::kv::{KvProvider, StorageId},
 };
 
 #[derive(Debug, Error)]
@@ -26,11 +28,23 @@ pub enum SessionRepositoryError {
 impl From<UserSession> for HashMap<String, String> {
     fn from(value: UserSession) -> Self {
         let mut map = HashMap::new();
-        map.insert("token".to_string(), value.token.into_inner());
-        map.insert("user_id".to_string(), value.user_id.to_string());
-        map.insert("username".to_string(), value.username.into_inner());
-        map.insert("csrf_token".to_string(), value.csrf_token.into_inner());
-        map.insert("csrf_cookie".to_string(), value.csrf_cookie.into_inner());
+        map.insert(
+            String::from("token"),
+            value.token.into_inner().expose_secret().to_owned(),
+        );
+        map.insert(
+            String::from("user_id"),
+            value.user_id.into_inner().to_string(),
+        );
+        map.insert(String::from("username"), value.username.into_inner());
+        map.insert(
+            String::from("csrf_token"),
+            value.csrf_token.into_inner().expose_secret().to_owned(),
+        );
+        map.insert(
+            String::from("csrf_cookie"),
+            value.csrf_cookie.into_inner().expose_secret().to_owned(),
+        );
         map
     }
 }
@@ -42,23 +56,27 @@ impl TryFrom<HashMap<String, String>> for UserSession {
         let user_session = UserSession {
             token: map
                 .remove("token")
+                .map(|s| SecretString::from(s))
                 .ok_or(SessionRepositoryError::NotFound)?
                 .into(),
             user_id: map
                 .remove("user_id")
                 .ok_or(SessionRepositoryError::NotFound)?
-                .parse()
-                .map_err(|_| SessionRepositoryError::ParseError)?,
+                .parse::<Uuid>()
+                .map_err(|_| SessionRepositoryError::ParseError)?
+                .into(),
             username: map
                 .remove("username")
                 .ok_or(SessionRepositoryError::NotFound)?
                 .into(),
             csrf_token: map
                 .remove("csrf_token")
+                .map(|s| SecretString::from(s))
                 .ok_or(SessionRepositoryError::NotFound)?
                 .into(),
             csrf_cookie: map
                 .remove("csrf_cookie")
+                .map(|s| SecretString::from(s))
                 .ok_or(SessionRepositoryError::NotFound)?
                 .into(),
         };
@@ -104,7 +122,11 @@ impl<K: KvProvider + Send + Sync> SessionRepository for SessionStore<K> {
         &self,
         user_session: UserSession,
     ) -> Result<(), SessionRepositoryError> {
-        let key = format!("{}:{}", USER_SESSION_PREFIX, user_session.token.as_ref());
+        let key = format!(
+            "{}:{}",
+            USER_SESSION_PREFIX,
+            user_session.token.storage_id()
+        );
         let ttl = Duration::from_secs(USER_SESSION_TTL_SECONDS);
         self.kv.hset(&key, user_session.into()).await?;
         self.kv.expire(&key, &ttl).await?;
@@ -115,7 +137,7 @@ impl<K: KvProvider + Send + Sync> SessionRepository for SessionStore<K> {
         &self,
         token: &SessionToken,
     ) -> Result<UserSession, SessionRepositoryError> {
-        let key = format!("{}:{}", USER_SESSION_PREFIX, token.as_ref());
+        let key = format!("{}:{}", USER_SESSION_PREFIX, token.storage_id());
         let session = self.kv.hgetall(&key).await?.try_into()?;
         Ok(session)
     }
@@ -124,7 +146,7 @@ impl<K: KvProvider + Send + Sync> SessionRepository for SessionStore<K> {
         &self,
         token: &SessionToken,
     ) -> Result<(), SessionRepositoryError> {
-        let key = format!("{}:{}", USER_SESSION_PREFIX, token.as_ref());
+        let key = format!("{}:{}", USER_SESSION_PREFIX, token.storage_id());
         self.kv.del(&key).await?;
         Ok(())
     }

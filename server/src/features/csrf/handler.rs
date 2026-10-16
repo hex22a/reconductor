@@ -5,6 +5,7 @@ use axum_extra::extract::{
     CookieJar,
     cookie::{Cookie, SameSite},
 };
+use secrecy::ExposeSecret;
 
 use crate::{
     application::error::ServerError,
@@ -26,18 +27,29 @@ pub async fn handle(
         .get_token(session_cookie.map(SessionToken::new))
         .await?;
     let jar = jar.add(
-        Cookie::build((CSRF_COOKIE_NAME, csrf_token_pair.cookie_value.into_inner()))
-            .http_only(true)
-            .secure(true)
-            .same_site(SameSite::Lax)
-            .path("/")
-            .build(),
+        Cookie::build((
+            CSRF_COOKIE_NAME,
+            csrf_token_pair
+                .cookie_value
+                .into_inner()
+                .expose_secret()
+                .to_owned(),
+        ))
+        .http_only(true)
+        .secure(true)
+        .same_site(SameSite::Lax)
+        .path("/")
+        .build(),
     );
     Ok((
         StatusCode::OK,
         jar,
         Json(CsrfResponse {
-            csrf_token: csrf_token_pair.token.into_inner(),
+            csrf_token: csrf_token_pair
+                .token
+                .into_inner()
+                .expose_secret()
+                .to_owned(),
         }),
     ))
 }

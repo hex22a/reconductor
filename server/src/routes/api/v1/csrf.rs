@@ -16,6 +16,7 @@ mod tests {
         body::Body,
         http::{Request, StatusCode},
     };
+    use secrecy::ExposeSecret;
     use tower::ServiceExt;
 
     use super::*;
@@ -49,7 +50,7 @@ mod tests {
         let expected_cookie_header = format!(
             "{}={}",
             USER_SESSION_COOKIE_NAME,
-            expected_session_cookie.as_ref()
+            expected_session_cookie.as_ref().expose_secret().to_owned()
         );
         let expected_csrf_token = CsrfToken::new("csrf_token");
         let expected_csrf_cookie_value = CsrfCookie::new("csrf_cookie");
@@ -128,7 +129,7 @@ mod tests {
         let expected_cookie_header = format!(
             "{}={}",
             USER_SESSION_COOKIE_NAME,
-            expected_session_cookie.as_ref()
+            expected_session_cookie.as_ref().expose_secret().to_owned()
         );
         let expected_csrf_token = CsrfToken::new("csrf_token");
         let expected_csrf_cookie_value = CsrfCookie::new("csrf_cookie");

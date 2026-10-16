@@ -16,6 +16,7 @@ use axum_extra::extract::{
     CookieJar,
     cookie::{Cookie, SameSite},
 };
+use secrecy::ExposeSecret;
 
 use crate::{
     application::error::ServerError, features::user::dto::UserInputRequest, state::AppState,
@@ -55,7 +56,11 @@ pub async fn login(
         .add(
             Cookie::build((
                 USER_SESSION_COOKIE_NAME,
-                auth_session.session_id.into_inner(),
+                auth_session
+                    .session_id
+                    .into_inner()
+                    .expose_secret()
+                    .to_owned(),
             ))
             .http_only(true)
             .secure(true)
@@ -64,18 +69,29 @@ pub async fn login(
             .build(),
         )
         .add(
-            Cookie::build((CSRF_COOKIE_NAME, auth_session.csrf_cookie.into_inner()))
-                .http_only(true)
-                .secure(true)
-                .same_site(SameSite::Lax)
-                .path("/")
-                .build(),
+            Cookie::build((
+                CSRF_COOKIE_NAME,
+                auth_session
+                    .csrf_cookie
+                    .into_inner()
+                    .expose_secret()
+                    .to_owned(),
+            ))
+            .http_only(true)
+            .secure(true)
+            .same_site(SameSite::Lax)
+            .path("/")
+            .build(),
         );
     Ok((
         StatusCode::OK,
         jar,
         Json(LoginResponse {
-            csrf_token: auth_session.csrf_token.into_inner(),
+            csrf_token: auth_session
+                .csrf_token
+                .into_inner()
+                .expose_secret()
+                .to_owned(),
         }),
     ))
 }

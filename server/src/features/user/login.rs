@@ -120,13 +120,14 @@ where
 #[cfg(test)]
 mod tests {
     use rand::rngs::SysError;
+    use secrecy::ExposeSecret;
     use time::macros::datetime;
     use uuid::Uuid;
 
     use super::*;
 
     use crate::{
-        domain::types::{CsrfCookie, PasswordHash, SessionToken},
+        domain::types::{CsrfCookie, PasswordHash, SessionToken, UserId},
         features::{
             csrf::repository::{CsrfRepositoryError, MockCsrfRepository},
             session::repository::{MockSessionRepository, SessionRepositoryError},
@@ -146,7 +147,7 @@ mod tests {
         let expected_csrf_token = CsrfToken::new("csrf_token");
         let expected_csrf_cookie_value = CsrfCookie::new("csrf_cookie");
         let expected_session_cookie = SessionToken::new("session_cookie");
-        let expected_user_id = Uuid::now_v7();
+        let expected_user_id = UserId::new(Uuid::now_v7());
         let expected_username = Username::new("test");
         let expected_password = Password::new("password");
         let expected_password_hash = PasswordHash::new("password_hash");
@@ -228,7 +229,27 @@ mod tests {
             .unwrap();
 
         // Assert
-        assert_eq!(actual_auth_session, expected_auth_session);
+        assert_eq!(
+            actual_auth_session.csrf_cookie.into_inner().expose_secret(),
+            expected_auth_session
+                .csrf_cookie
+                .into_inner()
+                .expose_secret()
+        );
+        assert_eq!(
+            actual_auth_session.csrf_token.into_inner().expose_secret(),
+            expected_auth_session
+                .csrf_token
+                .into_inner()
+                .expose_secret()
+        );
+        assert_eq!(
+            actual_auth_session.session_id.into_inner().expose_secret(),
+            expected_auth_session
+                .session_id
+                .into_inner()
+                .expose_secret()
+        );
     }
 
     #[tokio::test]
@@ -237,7 +258,7 @@ mod tests {
         let expected_anonymous_csrf = CsrfToken::new("anonymous_csrf");
         let expected_csrf_token = CsrfToken::new("csrf_token");
         let expected_csrf_cookie_value = CsrfCookie::new("csrf_cookie");
-        let expected_user_id = Uuid::now_v7();
+        let expected_user_id = UserId::new(Uuid::now_v7());
         let expected_username = Username::new("test");
         let expected_password = Password::new("password");
         let expected_password_hash = PasswordHash::new("password_hash");
@@ -319,7 +340,7 @@ mod tests {
         // Arrange
         let expected_anonymous_csrf = CsrfToken::new("anonymous_csrf");
         let expected_session_cookie = SessionToken::new("session_cookie");
-        let expected_user_id = Uuid::now_v7();
+        let expected_user_id = UserId::new(Uuid::now_v7());
         let expected_username = Username::new("test");
         let expected_password = Password::new("password");
         let expected_password_hash = PasswordHash::new("password_hash");
@@ -400,7 +421,7 @@ mod tests {
         let expected_anonymous_csrf = CsrfToken::new("anonymous_csrf");
         let expected_csrf_token = CsrfToken::new("csrf_token");
         let expected_csrf_cookie_value = CsrfCookie::new("csrf_cookie");
-        let expected_user_id = Uuid::now_v7();
+        let expected_user_id = UserId::new(Uuid::now_v7());
         let expected_session_cookie = SessionToken::new("session_cookie");
         let expected_username = Username::new("test");
         let expected_password = Password::new("password");
@@ -496,7 +517,7 @@ mod tests {
         let expected_anonymous_csrf = CsrfToken::new("anonymous_csrf");
         let expected_csrf_token = CsrfToken::new("csrf_token");
         let expected_csrf_cookie_value = CsrfCookie::new("csrf_cookie");
-        let expected_user_id = Uuid::now_v7();
+        let expected_user_id = UserId::new(Uuid::now_v7());
         let expected_session_cookie = SessionToken::new("session_cookie");
         let expected_username = Username::new("test");
         let expected_password = Password::new("password");
@@ -590,7 +611,7 @@ mod tests {
         let expected_anonymous_csrf = CsrfToken::new("anonymous_csrf");
         let expected_csrf_token = CsrfToken::new("csrf_token");
         let expected_csrf_cookie_value = CsrfCookie::new("csrf_cookie");
-        let expected_user_id = Uuid::now_v7();
+        let expected_user_id = UserId::new(Uuid::now_v7());
         let expected_session_cookie = SessionToken::new("session_cookie");
         let expected_username = Username::new("test");
         let expected_password = Password::new("password");
@@ -677,7 +698,7 @@ mod tests {
         let expected_anonymous_csrf = CsrfToken::new("anonymous_csrf");
         let expected_csrf_token = CsrfToken::new("csrf_token");
         let expected_csrf_cookie_value = CsrfCookie::new("csrf_cookie");
-        let expected_user_id = Uuid::now_v7();
+        let expected_user_id = UserId::new(Uuid::now_v7());
         let expected_session_cookie = SessionToken::new("session_cookie");
         let expected_username = Username::new("test");
         let expected_password = Password::new("password");

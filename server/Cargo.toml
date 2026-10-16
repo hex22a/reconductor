@@ -33,6 +33,8 @@ newtype-derive = { path = "../crates/newtype-derive" }
 thiserror.workspace = true
 reconductor-messaging.workspace = true
 reconductor-schedule.workspace = true
+secrecy = "0.10.3"
+sha2 = "0.11.1"
 
 [dev-dependencies]
 mockall.workspace = true

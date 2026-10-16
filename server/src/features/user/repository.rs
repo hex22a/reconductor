@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
+use crate::domain::types::PasswordHash;
+
 #[cfg(test)]
 use mockall::automock;
+use secrecy::ExposeSecret;
 use sqlx::PgPool;
 
 use crate::{
@@ -42,7 +45,7 @@ impl UserRepository for PgUserRepository {
                 ($1, $2)
             "#,
             user_insert.username.as_ref(),
-            user_insert.password_hash.as_ref(),
+            user_insert.password_hash.as_ref().expose_secret(),
         )
         .execute(&*self.db)
         .await?;
@@ -56,7 +59,7 @@ impl UserRepository for PgUserRepository {
             SELECT
                 id,
                 username,
-                password_hash,
+                password_hash as "password_hash: PasswordHash",
                 password_version,
                 created_at,
                 updated_at,

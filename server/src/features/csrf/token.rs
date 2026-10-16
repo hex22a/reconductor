@@ -93,11 +93,12 @@ where
 
 #[cfg(test)]
 mod tests {
+    use secrecy::ExposeSecret;
     use uuid::Uuid;
 
     use super::*;
     use crate::{
-        domain::types::{CsrfCookie, CsrfToken, Username},
+        domain::types::{CsrfCookie, CsrfToken, UserId, Username},
         features::{
             csrf::repository::MockCsrfRepository,
             session::{model::UserSession, repository::MockSessionRepository},
@@ -109,7 +110,7 @@ mod tests {
     async fn test_get_token_from_session() {
         // Arrange
         let expected_session_token = SessionToken::new("session_token");
-        let expected_user_id: Uuid = Uuid::now_v7();
+        let expected_user_id = UserId::new(Uuid::now_v7());
         let expected_username = Username::new("test");
         let expected_csrf_token = CsrfToken::new("csrf_token");
         let expected_csrf_cookie = CsrfCookie::new("csrf_cookie");
@@ -156,7 +157,20 @@ mod tests {
             .unwrap();
 
         // Assert
-        assert_eq!(actual_csrf_token_pair, expected_csrf_token_pair);
+        assert_eq!(
+            actual_csrf_token_pair
+                .cookie_value
+                .into_inner()
+                .expose_secret(),
+            expected_csrf_token_pair
+                .cookie_value
+                .into_inner()
+                .expose_secret()
+        );
+        assert_eq!(
+            actual_csrf_token_pair.token.into_inner().expose_secret(),
+            expected_csrf_token_pair.token.into_inner().expose_secret()
+        );
     }
 
     #[tokio::test]
@@ -198,7 +212,20 @@ mod tests {
             .unwrap();
 
         // Assert
-        assert_eq!(actual_csrf_token_pair, expected_csrf_token_pair);
+        assert_eq!(
+            actual_csrf_token_pair
+                .cookie_value
+                .into_inner()
+                .expose_secret(),
+            expected_csrf_token_pair
+                .cookie_value
+                .into_inner()
+                .expose_secret()
+        );
+        assert_eq!(
+            actual_csrf_token_pair.token.into_inner().expose_secret(),
+            expected_csrf_token_pair.token.into_inner().expose_secret()
+        );
     }
 
     #[tokio::test]
@@ -236,6 +263,19 @@ mod tests {
         let actual_csrf_token_pair = feature.get_token(None).await.unwrap();
 
         // Assert
-        assert_eq!(actual_csrf_token_pair, expected_csrf_token_pair);
+        assert_eq!(
+            actual_csrf_token_pair
+                .cookie_value
+                .into_inner()
+                .expose_secret(),
+            expected_csrf_token_pair
+                .cookie_value
+                .into_inner()
+                .expose_secret()
+        );
+        assert_eq!(
+            actual_csrf_token_pair.token.into_inner().expose_secret(),
+            expected_csrf_token_pair.token.into_inner().expose_secret()
+        );
     }
 }

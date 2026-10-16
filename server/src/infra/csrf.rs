@@ -1,5 +1,6 @@
 use base64::{Engine, engine::general_purpose};
 use csrf::{AesGcmCsrfProtection, CsrfError, CsrfProtection};
+use secrecy::ExposeSecret;
 use std::sync::Arc;
 use thiserror::Error;
 
@@ -71,11 +72,11 @@ impl CsrfService for AesGcmCsrfService {
     }
 
     fn verify(&self, token: &CsrfToken, cookie: &CsrfCookie) -> bool {
-        let token_bytes = match general_purpose::STANDARD.decode(token.as_ref()) {
+        let token_bytes = match general_purpose::STANDARD.decode(token.as_ref().expose_secret()) {
             Ok(b) => b,
             Err(_) => return false,
         };
-        let cookie_bytes = match general_purpose::STANDARD.decode(cookie.as_ref()) {
+        let cookie_bytes = match general_purpose::STANDARD.decode(cookie.as_ref().expose_secret()) {
             Ok(b) => b,
             Err(_) => return false,
         };

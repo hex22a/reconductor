@@ -1,14 +1,17 @@
 use std::sync::Arc;
 
-use server::features::project::{
-    model::{ProjectEntity, ProjectInsert},
-    repository::{PgProjectRepository, ProjectRepository},
+use server::{
+    ProjectId, UserId,
+    features::project::{
+        model::{ProjectEntity, ProjectInsert},
+        repository::{PgProjectRepository, ProjectRepository},
+    },
 };
 use sqlx::PgPool;
 use time::macros::datetime;
 use uuid::Uuid;
 
-async fn setup_user(db: &PgPool) -> Uuid {
+async fn setup_user(db: &PgPool) -> UserId {
     sqlx::query_scalar(
         r#"
         INSERT INTO recon.users
@@ -22,8 +25,8 @@ async fn setup_user(db: &PgPool) -> Uuid {
     .unwrap()
 }
 
-async fn setup_project(db: &PgPool) -> (Uuid, Uuid) {
-    let expected_user_id: Uuid = sqlx::query_scalar(
+async fn setup_project(db: &PgPool) -> (ProjectId, UserId) {
+    let expected_user_id = sqlx::query_scalar(
         r#"
         INSERT INTO recon.users
             (username, password_hash)
@@ -34,7 +37,7 @@ async fn setup_project(db: &PgPool) -> (Uuid, Uuid) {
     .fetch_one(db)
     .await
     .unwrap();
-    let expected_project_id: Uuid = sqlx::query_scalar(
+    let expected_project_id = sqlx::query_scalar(
         r#"
         INSERT INTO recon.projects
             (name, owner_id)
@@ -42,7 +45,7 @@ async fn setup_project(db: &PgPool) -> (Uuid, Uuid) {
         RETURNING id
         "#,
     )
-    .bind(expected_user_id)
+    .bind(&expected_user_id)
     .fetch_one(db)
     .await
     .unwrap();
@@ -52,13 +55,13 @@ async fn setup_project(db: &PgPool) -> (Uuid, Uuid) {
 #[sqlx::test(migrations = "../migrations")]
 async fn test_create_project(db: PgPool) {
     // Arrange
-    let expected_project_id = Uuid::now_v7();
+    let expected_project_id = ProjectId::new(Uuid::now_v7());
     let expected_owner_id = setup_user(&db).await;
     let expected_name = "test".to_string();
     let expected_created_at = datetime!(2019-01-01 0:00 UTC);
     let expected_project_entity = ProjectEntity {
         id: expected_project_id,
-        owner_id: expected_owner_id,
+        owner_id: expected_owner_id.clone(),
         name: expected_name.clone(),
         created_at: expected_created_at,
     };
@@ -99,7 +102,7 @@ async fn test_get_project_by_id(db: PgPool) {
 async fn test_get_project_by_id_wrong_owner(db: PgPool) {
     // Arrange
     let (expected_project_id, _) = setup_project(&db).await;
-    let expected_owner_id = Uuid::now_v7();
+    let expected_owner_id = UserId::new(Uuid::now_v7());
     let repo = PgProjectRepository::new(Arc::new(db));
 
     // Act
@@ -114,8 +117,8 @@ async fn test_get_project_by_id_wrong_owner(db: PgPool) {
 #[sqlx::test(migrations = "../migrations")]
 async fn test_get_project_by_id_not_found(db: PgPool) {
     // Arrange
-    let expected_project_id = Uuid::now_v7();
-    let expected_owner_id = Uuid::now_v7();
+    let expected_project_id = ProjectId::new(Uuid::now_v7());
+    let expected_owner_id = UserId::new(Uuid::now_v7());
     let repo = PgProjectRepository::new(Arc::new(db));
 
     // Act
@@ -134,7 +137,7 @@ async fn test_list_projects(db: PgPool) {
     let expected_owner_id = setup_user(&db).await;
     let expected_name = "test".to_string();
     let expected_project_insert = ProjectInsert {
-        owner_id: expected_owner_id,
+        owner_id: expected_owner_id.clone(),
         name: expected_name,
     };
     let repo = PgProjectRepository::new(Arc::new(db));

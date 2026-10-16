@@ -1,15 +1,16 @@
-use sqlx::types::Uuid;
 use time::OffsetDateTime;
 
-use crate::domain::types::{CsrfCookie, CsrfToken, Password, PasswordHash, SessionToken, Username};
+use crate::domain::types::{
+    CsrfCookie, CsrfToken, Password, PasswordHash, SessionToken, UserId, Username,
+};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct UserInput {
     pub username: Username,
     pub password: Password,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct AuthSession {
     pub session_id: SessionToken,
     pub csrf_token: CsrfToken,
@@ -18,7 +19,7 @@ pub struct AuthSession {
 
 #[derive(Clone)]
 pub struct UserEntity {
-    pub id: Uuid,
+    pub id: UserId,
     pub username: Username,
     pub password_hash: PasswordHash,
     pub password_version: i16,

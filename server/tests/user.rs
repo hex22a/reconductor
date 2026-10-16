@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use secrecy::ExposeSecret;
 use server::{
     PasswordHash, Username,
     features::user::{
@@ -57,5 +58,8 @@ async fn test_get_user_by_username_existing_username(db: PgPool) {
 
     // Assert
     assert_eq!(actual_user.username, expected_username);
-    assert_eq!(actual_user.password_hash, expected_password_hash);
+    assert_eq!(
+        actual_user.password_hash.into_inner().expose_secret(),
+        expected_password_hash.into_inner().expose_secret()
+    );
 }

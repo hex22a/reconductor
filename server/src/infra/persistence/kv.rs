@@ -19,6 +19,10 @@ pub struct KvConfig {
     pub database: u8,
 }
 
+pub trait StorageId {
+    fn storage_id(&self) -> String;
+}
+
 pub trait KvProvider {
     fn get(
         &self,

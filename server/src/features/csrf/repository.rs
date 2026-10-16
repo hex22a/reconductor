@@ -7,7 +7,7 @@ use thiserror::Error;
 use crate::{
     constants::{ANONYMOUS_CSRF_PREFIX, ANONYMOUS_CSRF_TTL_SECONDS},
     domain::types::CsrfToken,
-    infra::persistence::kv::KvProvider,
+    infra::persistence::kv::{KvProvider, StorageId},
 };
 
 #[derive(Debug, Error)]
@@ -51,20 +51,20 @@ impl<K: KvProvider> CsrfStore<K> {
 
 impl<K: KvProvider + Send + Sync> CsrfRepository for CsrfStore<K> {
     async fn create_anonymous_csrf(&self, token: &CsrfToken) -> Result<(), CsrfRepositoryError> {
-        let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token.as_ref());
+        let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token.storage_id());
         let ttl = Duration::from_secs(ANONYMOUS_CSRF_TTL_SECONDS);
         self.kv.set(&key, "1", Some(&ttl)).await?;
         Ok(())
     }
 
     async fn verify_anonymous_csrf(&self, token: &CsrfToken) -> Result<bool, CsrfRepositoryError> {
-        let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token.as_ref());
+        let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token.storage_id());
         let csrf = self.kv.get(&key).await?;
         Ok(csrf.is_some())
     }
 
     async fn delete_anonymous_csrf(&self, token: &CsrfToken) -> Result<(), CsrfRepositoryError> {
-        let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token.as_ref());
+        let key = format!("{}:{}", ANONYMOUS_CSRF_PREFIX, token.storage_id());
         self.kv.del(&key).await?;
         Ok(())
     }

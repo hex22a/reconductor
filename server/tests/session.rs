@@ -1,7 +1,8 @@
 use std::sync::Arc;
 
+use secrecy::ExposeSecret;
 use server::{
-    Config, CsrfCookie, CsrfToken, SessionToken, Username,
+    Config, CsrfCookie, CsrfToken, SessionToken, UserId, Username,
     features::session::{
         model::UserSession,
         repository::{SessionRepository, SessionRepositoryError, SessionStore},
@@ -29,7 +30,7 @@ async fn create_store() -> SessionStore<FredKvProvider> {
 fn create_user_session_fixture(token: &SessionToken) -> UserSession {
     UserSession {
         token: token.to_owned(),
-        user_id: Uuid::now_v7(),
+        user_id: UserId::new(Uuid::now_v7()),
         username: Username::new("testuser"),
         csrf_token: CsrfToken::new("csrf_token"),
         csrf_cookie: CsrfCookie::new("csrf_cookei"),
@@ -81,7 +82,26 @@ async fn gets_session_from_storage() {
     let actual_user_session = store.get_user_session(&expected_token).await.unwrap();
 
     // Assert
-    assert_eq!(actual_user_session, expected_user_session);
+    assert_eq!(actual_user_session.user_id, expected_user_session.user_id);
+    assert_eq!(actual_user_session.username, expected_user_session.username);
+    assert_eq!(
+        actual_user_session.csrf_cookie.into_inner().expose_secret(),
+        expected_user_session
+            .csrf_cookie
+            .into_inner()
+            .expose_secret()
+    );
+    assert_eq!(
+        actual_user_session.token.into_inner().expose_secret(),
+        expected_user_session.token.into_inner().expose_secret()
+    );
+    assert_eq!(
+        actual_user_session.csrf_token.into_inner().expose_secret(),
+        expected_user_session
+            .csrf_token
+            .into_inner()
+            .expose_secret()
+    );
 }
 
 #[tokio::test]

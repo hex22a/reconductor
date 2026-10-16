@@ -3,18 +3,17 @@ use std::{pin::Pin, sync::Arc};
 #[cfg(test)]
 use mockall::automock;
 
-use uuid::Uuid;
-
-use crate::features::project::{
-    dto::ProjectDto, error::ProjectError, repository::ProjectRepository,
+use crate::{
+    domain::types::{ProjectId, UserId},
+    features::project::{dto::ProjectDto, error::ProjectError, repository::ProjectRepository},
 };
 
 #[cfg_attr(test, automock)]
 pub trait GetProjectFeature {
     fn get<'a>(
         &'a self,
-        project_id: Uuid,
-        owner_id: Uuid,
+        project_id: ProjectId,
+        owner_id: UserId,
     ) -> Pin<Box<dyn Future<Output = Result<ProjectDto, ProjectError>> + Send + 'a>>;
 }
 
@@ -34,8 +33,8 @@ where
 {
     fn get(
         &self,
-        project_id: Uuid,
-        owner_id: Uuid,
+        project_id: ProjectId,
+        owner_id: UserId,
     ) -> Pin<Box<dyn Future<Output = Result<ProjectDto, ProjectError>> + Send + '_>> {
         Box::pin(async move {
             let project = self
@@ -54,26 +53,30 @@ where
 #[cfg(test)]
 mod tests {
     use time::macros::datetime;
+    use uuid::Uuid;
 
-    use crate::features::project::{model::ProjectEntity, repository::MockProjectRepository};
+    use crate::{
+        domain::types::{ProjectId, UserId},
+        features::project::{model::ProjectEntity, repository::MockProjectRepository},
+    };
 
     use super::*;
 
     #[tokio::test]
     async fn test_get_project() {
         // Arrange
-        let expected_project_id = Uuid::now_v7();
-        let expected_owner_id = Uuid::now_v7();
-        let expected_name = "test".to_string();
+        let expected_project_id = ProjectId::new(Uuid::now_v7());
+        let expected_owner_id = UserId::new(Uuid::now_v7());
+        let expected_name = String::from("test");
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_project = ProjectEntity {
-            id: expected_project_id,
-            owner_id: expected_owner_id,
+            id: expected_project_id.clone(),
+            owner_id: expected_owner_id.clone(),
             name: expected_name.clone(),
             created_at: expected_created_at,
         };
         let expected_project_dto = ProjectDto {
-            id: expected_project_id,
+            id: expected_project_id.clone(),
             name: expected_name,
             created_at: expected_created_at,
         };
@@ -101,8 +104,8 @@ mod tests {
     #[tokio::test]
     async fn test_get_project_not_found() {
         // Arrange
-        let expected_project_id = Uuid::now_v7();
-        let expected_owner_id = Uuid::now_v7();
+        let expected_project_id = ProjectId::new(Uuid::now_v7());
+        let expected_owner_id = UserId::new(Uuid::now_v7());
 
         let mut mock_project_repository = MockProjectRepository::new();
         mock_project_repository

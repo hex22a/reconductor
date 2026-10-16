@@ -3,11 +3,12 @@ use std::{pin::Pin, sync::Arc};
 #[cfg(test)]
 use mockall::automock;
 
-use uuid::Uuid;
-
 use crate::{
     constants::PROJECTS_PAGE_SIZE_LIMIT,
-    domain::cursor::{decode_cursor, encode_cursor},
+    domain::{
+        cursor::{decode_cursor, encode_cursor},
+        types::UserId,
+    },
     features::project::{dto::ProjectDto, error::ProjectError, repository::ProjectRepository},
     transport::pagination::{Page, PageInfo},
 };
@@ -16,7 +17,7 @@ use crate::{
 pub trait ListProjectsFeature {
     fn list<'a>(
         &'a self,
-        owner_id: Uuid,
+        owner_id: UserId,
         cursor_id: Option<String>,
     ) -> Pin<Box<dyn Future<Output = Result<Page<ProjectDto>, ProjectError>> + Send + 'a>>;
 }
@@ -38,7 +39,7 @@ where
 {
     fn list<'a>(
         &'a self,
-        owner_id: Uuid,
+        owner_id: UserId,
         cursor_id: Option<String>,
     ) -> Pin<Box<dyn Future<Output = Result<Page<ProjectDto>, ProjectError>> + Send + 'a>> {
         Box::pin(async move {
@@ -56,7 +57,7 @@ where
             let project_dtos = projects
                 .iter()
                 .map(|p| ProjectDto {
-                    id: p.id,
+                    id: p.id.clone(),
                     name: p.name.clone(),
                     created_at: p.created_at,
                 })
@@ -67,7 +68,11 @@ where
                     has_next_page,
                     end_cursor: match has_next_page {
                         true => Some(encode_cursor(
-                            &projects.last().ok_or(ProjectError::NoLastCursor)?.id,
+                            &projects
+                                .last()
+                                .ok_or(ProjectError::NoLastCursor)?
+                                .id
+                                .as_ref(),
                         )),
                         false => None,
                     },
@@ -80,12 +85,13 @@ where
 #[cfg(test)]
 mod tests {
     use time::macros::datetime;
+    use uuid::Uuid;
 
     use super::*;
 
     use crate::{
         constants::PROJECTS_PAGE_SIZE_LIMIT,
-        domain::cursor::encode_cursor,
+        domain::{cursor::encode_cursor, types::ProjectId},
         features::project::{
             dto::ProjectDto, model::ProjectEntity, repository::MockProjectRepository,
         },
@@ -96,14 +102,14 @@ mod tests {
     async fn test_list_projects_no_next_page() {
         // Arrange
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
-        let expected_project_id = Uuid::now_v7();
-        let expected_owner_id = Uuid::now_v7();
-        let expected_name = "test".to_string();
+        let expected_project_id = ProjectId::new(Uuid::now_v7());
+        let expected_owner_id = UserId::new(Uuid::now_v7());
+        let expected_name = String::from("test");
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_project_entities_size = PROJECTS_PAGE_SIZE_LIMIT as usize;
         let expected_project = ProjectEntity {
-            id: expected_project_id,
-            owner_id: expected_owner_id,
+            id: expected_project_id.clone(),
+            owner_id: expected_owner_id.clone(),
             name: expected_name.clone(),
             created_at: expected_created_at,
         };
@@ -147,15 +153,15 @@ mod tests {
     async fn test_list_projects_with_next_page() {
         // Arrange
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
-        let expected_project_id = Uuid::now_v7();
-        let expected_end_cursor = encode_cursor(&expected_project_id);
-        let expected_owner_id = Uuid::now_v7();
-        let expected_name = "test".to_string();
+        let expected_project_id = ProjectId::new(Uuid::now_v7());
+        let expected_end_cursor = encode_cursor(&expected_project_id.as_ref());
+        let expected_owner_id = UserId::new(Uuid::now_v7());
+        let expected_name = String::from("test");
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_project_entities_size = PROJECTS_PAGE_SIZE_LIMIT as usize;
         let expected_project = ProjectEntity {
-            id: expected_project_id,
-            owner_id: expected_owner_id,
+            id: expected_project_id.clone(),
+            owner_id: expected_owner_id.clone(),
             name: expected_name.clone(),
             created_at: expected_created_at,
         };
@@ -198,15 +204,15 @@ mod tests {
     #[tokio::test]
     async fn test_list_projects_no_cursor() {
         // Arrange
-        let expected_project_id = Uuid::now_v7();
-        let expected_end_cursor = encode_cursor(&expected_project_id);
-        let expected_owner_id = Uuid::now_v7();
-        let expected_name = "test".to_string();
+        let expected_project_id = ProjectId::new(Uuid::now_v7());
+        let expected_end_cursor = encode_cursor(&expected_project_id.as_ref());
+        let expected_owner_id = UserId::new(Uuid::now_v7());
+        let expected_name = String::from("test");
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_project_entities_size = PROJECTS_PAGE_SIZE_LIMIT as usize;
         let expected_project = ProjectEntity {
-            id: expected_project_id,
-            owner_id: expected_owner_id,
+            id: expected_project_id.clone(),
+            owner_id: expected_owner_id.clone(),
             name: expected_name.clone(),
             created_at: expected_created_at,
         };
@@ -247,7 +253,7 @@ mod tests {
     async fn test_list_projects_not_found() {
         // Arrange
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
-        let expected_owner_id = Uuid::now_v7();
+        let expected_owner_id = UserId::new(Uuid::now_v7());
 
         let mut mock_project_repository = MockProjectRepository::new();
         mock_project_repository
@@ -255,10 +261,12 @@ mod tests {
             .returning(|_, _, _| Box::pin(async { Err(sqlx::Error::RowNotFound) }));
 
         let feature = ListProjects::new(Arc::new(mock_project_repository));
+
         // Act
         let actual_result = feature
             .list(expected_owner_id, Some(expected_cursor_id))
             .await;
+
         // Assert
         assert!(matches!(actual_result, Err(ProjectError::NotFound)));
     }

@@ -3,17 +3,18 @@ use std::{pin::Pin, sync::Arc};
 #[cfg(test)]
 use mockall::automock;
 
-use uuid::Uuid;
-
-use crate::features::project::{
-    dto::ProjectDto, error::ProjectError, model::ProjectInsert, repository::ProjectRepository,
+use crate::{
+    domain::types::UserId,
+    features::project::{
+        dto::ProjectDto, error::ProjectError, model::ProjectInsert, repository::ProjectRepository,
+    },
 };
 
 #[cfg_attr(test, automock)]
 pub trait CreateProjectFeature {
     fn create<'a>(
         &'a self,
-        owner_id: Uuid,
+        owner_id: UserId,
         name: String,
     ) -> Pin<Box<dyn Future<Output = Result<ProjectDto, ProjectError>> + Send + 'a>>;
 }
@@ -34,7 +35,7 @@ where
 {
     fn create(
         &self,
-        owner_id: Uuid,
+        owner_id: UserId,
         name: String,
     ) -> Pin<Box<dyn Future<Output = Result<ProjectDto, ProjectError>> + Send + '_>> {
         Box::pin(async move {
@@ -57,25 +58,28 @@ mod tests {
     use time::macros::datetime;
     use uuid::Uuid;
 
-    use crate::features::project::{model::ProjectEntity, repository::MockProjectRepository};
+    use crate::{
+        domain::types::ProjectId,
+        features::project::{model::ProjectEntity, repository::MockProjectRepository},
+    };
 
     use super::*;
 
     #[tokio::test]
     async fn test_create_project() {
         // Arrange
-        let expected_project_id = Uuid::now_v7();
-        let expected_owner_id = Uuid::now_v7();
+        let expected_project_id = ProjectId::new(Uuid::now_v7());
+        let expected_owner_id = UserId::new(Uuid::now_v7());
         let expected_project_name = "test".to_string();
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_project_entity = ProjectEntity {
-            id: expected_project_id,
-            owner_id: expected_owner_id,
+            id: expected_project_id.clone(),
+            owner_id: expected_owner_id.clone(),
             name: expected_project_name.clone(),
             created_at: expected_created_at,
         };
         let expected_project = ProjectDto {
-            id: expected_project_id,
+            id: expected_project_id.clone(),
             name: expected_project_name.clone(),
             created_at: expected_created_at,
         };

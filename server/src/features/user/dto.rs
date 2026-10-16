@@ -69,6 +69,8 @@ impl TryFrom<UserInputRequest> for UserInput {
 
 #[cfg(test)]
 mod tests {
+    use secrecy::ExposeSecret;
+
     use crate::{
         domain::types::{Password, Username},
         features::user::{dto::UserInputRequest, model::UserInput},
@@ -85,7 +87,7 @@ mod tests {
         };
         let expected_register_user_request = UserInputRequest {
             username: expected_username.into_inner(),
-            password: expected_password.into_inner(),
+            password: expected_password.into_inner().expose_secret().to_owned(),
         };
 
         // Act
@@ -93,6 +95,13 @@ mod tests {
             UserInput::try_from(expected_register_user_request).unwrap();
 
         // Assert
-        assert_eq!(actual_register_user, expected_register_user);
+        assert_eq!(
+            actual_register_user.username,
+            expected_register_user.username
+        );
+        assert_eq!(
+            actual_register_user.password.into_inner().expose_secret(),
+            expected_register_user.password.into_inner().expose_secret(),
+        );
     }
 }

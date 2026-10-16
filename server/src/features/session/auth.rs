@@ -46,12 +46,13 @@ where
 
 #[cfg(test)]
 mod tests {
+    use secrecy::ExposeSecret;
     use uuid::Uuid;
 
     use super::*;
 
     use crate::{
-        domain::types::{CsrfCookie, CsrfToken, Username},
+        domain::types::{CsrfCookie, CsrfToken, UserId, Username},
         features::session::{
             model::UserSession,
             repository::{MockSessionRepository, SessionRepositoryError},
@@ -62,14 +63,14 @@ mod tests {
     async fn test_auth_session_found() {
         // Arrange
         let expected_session_token = SessionToken::new("session_token");
-        let expected_user_id: Uuid = Uuid::now_v7();
+        let expected_user_id = UserId::new(Uuid::now_v7());
         let expected_username = Username::new("test");
         let expected_csrf_token = CsrfToken::new("csrf_token");
         let expected_csrf_cookie = CsrfCookie::new("csrf_cookie");
         let expected_user_session = UserSession {
             token: expected_session_token.clone(),
-            user_id: expected_user_id,
-            username: expected_username,
+            user_id: expected_user_id.clone(),
+            username: expected_username.clone(),
             csrf_token: expected_csrf_token.clone(),
             csrf_cookie: expected_csrf_cookie.clone(),
         };
@@ -89,7 +90,26 @@ mod tests {
         let actual_user_session = feature.auth(expected_session_token).await.unwrap();
 
         // Assert
-        assert_eq!(actual_user_session, expected_user_session);
+        assert_eq!(actual_user_session.user_id, expected_user_id);
+        assert_eq!(actual_user_session.username, expected_username);
+        assert_eq!(
+            actual_user_session.csrf_cookie.into_inner().expose_secret(),
+            expected_user_session
+                .csrf_cookie
+                .into_inner()
+                .expose_secret()
+        );
+        assert_eq!(
+            actual_user_session.token.into_inner().expose_secret(),
+            expected_user_session.token.into_inner().expose_secret()
+        );
+        assert_eq!(
+            actual_user_session.csrf_token.into_inner().expose_secret(),
+            expected_user_session
+                .csrf_token
+                .into_inner()
+                .expose_secret()
+        );
     }
 
     #[tokio::test]
@@ -106,6 +126,7 @@ mod tests {
 
         // Act
         let actual_auth_result = feature.auth(expected_session_token).await;
+
         // Assert
         assert!(matches!(actual_auth_result, Err(SessionError::NotFound)));
     }

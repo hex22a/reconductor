@@ -1,82 +1,89 @@
 use std::fmt::Debug;
 
 use newtype_derive::Newtype;
+use secrecy::{ExposeSecret, SecretString};
+use serde::Serialize;
+use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
-#[derive(Clone, PartialEq, Newtype)]
-pub struct CsrfCookie(String);
+use crate::infra::persistence::kv::StorageId;
 
-impl Debug for CsrfCookie {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("CsrfCookie").field(&"***").finish()
-    }
-}
+#[derive(Clone, Debug, Newtype)]
+pub struct CsrfCookie(SecretString);
 
-#[derive(Clone, PartialEq, Newtype)]
-pub struct CsrfToken(String);
+#[derive(Clone, Debug, Newtype)]
+pub struct CsrfToken(SecretString);
 
-impl Debug for CsrfToken {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("CsrfToken").field(&"***").finish()
+impl StorageId for CsrfToken {
+    fn storage_id(&self) -> String {
+        let digest = Sha256::digest(self.as_ref().expose_secret().as_bytes());
+        hex::encode(digest)
     }
 }
 
 #[derive(Clone, Debug, PartialEq, Newtype)]
 pub struct Hostname(String);
 
-#[derive(Clone, PartialEq, Newtype)]
-pub struct Password(String);
+#[derive(Clone, Debug, Newtype)]
+pub struct Password(SecretString);
 
-impl Debug for Password {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("Password").field(&"***").finish()
+#[derive(Clone, Debug, Newtype)]
+pub struct PasswordHash(SecretString);
+
+impl<T: sqlx::Database> sqlx::Type<T> for PasswordHash
+where
+    str: sqlx::Type<T>,
+{
+    fn type_info() -> T::TypeInfo {
+        <str as sqlx::Type<T>>::type_info()
+    }
+    fn compatible(ty: &T::TypeInfo) -> bool {
+        <str as sqlx::Type<T>>::compatible(ty)
     }
 }
 
-#[derive(Clone, PartialEq, Newtype)]
-pub struct PasswordHash(String);
-
-impl Debug for PasswordHash {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("PasswordHash").field(&"***").finish()
+impl<'r, T: sqlx::Database> sqlx::Decode<'r, T> for PasswordHash
+where
+    &'r str: sqlx::Decode<'r, T>,
+{
+    fn decode(value: T::ValueRef<'r>) -> Result<Self, sqlx::error::BoxDynError> {
+        let s = <&str as sqlx::Decode<T>>::decode(value)?;
+        Ok(Self(SecretString::from(s.to_owned())))
     }
 }
 
-#[derive(Clone, PartialEq, Newtype)]
-pub struct SessionToken(String);
+impl<'q, T: sqlx::Database> sqlx::Encode<'_, T> for PasswordHash
+where
+    for<'a> &'a str: sqlx::Encode<'q, T>,
+{
+    fn encode_by_ref(
+        &self,
+        buf: &mut T::ArgumentBuffer,
+    ) -> Result<sqlx::encode::IsNull, sqlx::error::BoxDynError> {
+        <&str as sqlx::Encode<T>>::encode_by_ref(&self.0.expose_secret(), buf)
+    }
+}
+#[derive(Clone, Debug, Newtype)]
+pub struct SessionToken(SecretString);
 
-impl Debug for SessionToken {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("SessionToken").field(&"***").finish()
+impl StorageId for SessionToken {
+    fn storage_id(&self) -> String {
+        let digest = Sha256::digest(self.as_ref().expose_secret().as_bytes());
+        hex::encode(digest)
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Newtype)]
+#[derive(Clone, Debug, PartialEq, Newtype, sqlx::Type)]
+#[sqlx(transparent)]
 pub struct Username(String);
 
 #[derive(Clone, Debug, PartialEq, Newtype)]
 pub struct Vendor(String);
 
+#[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
+#[sqlx(transparent)]
 pub struct UserId(Uuid);
 
-impl UserId {
-    pub fn new(value: impl Into<Uuid>) -> Self {
-        Self(value.into())
-    }
-
-    pub fn into_inner(self) -> Uuid {
-        self.0
-    }
-}
-
-impl From<Uuid> for UserId {
-    fn from(value: Uuid) -> Self {
-        Self(value)
-    }
-}
-
-impl AsRef<Uuid> for UserId {
-    fn as_ref(&self) -> &Uuid {
-        &self.0
-    }
-}
+#[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
+#[sqlx(transparent)]
+pub struct ProjectId(Uuid);
