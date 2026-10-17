@@ -56,7 +56,7 @@ impl TryFrom<HashMap<String, String>> for UserSession {
         let user_session = UserSession {
             token: map
                 .remove("token")
-                .map(|s| SecretString::from(s))
+                .map(SecretString::from)
                 .ok_or(SessionRepositoryError::NotFound)?
                 .into(),
             user_id: map
@@ -71,12 +71,12 @@ impl TryFrom<HashMap<String, String>> for UserSession {
                 .into(),
             csrf_token: map
                 .remove("csrf_token")
-                .map(|s| SecretString::from(s))
+                .map(SecretString::from)
                 .ok_or(SessionRepositoryError::NotFound)?
                 .into(),
             csrf_cookie: map
                 .remove("csrf_cookie")
-                .map(|s| SecretString::from(s))
+                .map(SecretString::from)
                 .ok_or(SessionRepositoryError::NotFound)?
                 .into(),
         };

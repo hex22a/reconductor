@@ -68,7 +68,7 @@ where
                     has_next_page,
                     end_cursor: match has_next_page {
                         true => Some(encode_cursor(
-                            &projects
+                            projects
                                 .last()
                                 .ok_or(ProjectError::NoLastCursor)?
                                 .id
@@ -154,7 +154,7 @@ mod tests {
         // Arrange
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
         let expected_project_id = ProjectId::new(Uuid::now_v7());
-        let expected_end_cursor = encode_cursor(&expected_project_id.as_ref());
+        let expected_end_cursor = encode_cursor(expected_project_id.as_ref());
         let expected_owner_id = UserId::new(Uuid::now_v7());
         let expected_name = String::from("test");
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
@@ -205,7 +205,7 @@ mod tests {
     async fn test_list_projects_no_cursor() {
         // Arrange
         let expected_project_id = ProjectId::new(Uuid::now_v7());
-        let expected_end_cursor = encode_cursor(&expected_project_id.as_ref());
+        let expected_end_cursor = encode_cursor(expected_project_id.as_ref());
         let expected_owner_id = UserId::new(Uuid::now_v7());
         let expected_name = String::from("test");
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
