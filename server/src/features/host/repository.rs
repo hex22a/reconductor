@@ -6,18 +6,21 @@ use mockall::automock;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::features::host::model::HostEntity;
+use crate::{
+    domain::types::{HostId, Hostname, OsAccuracy, OsMatch, ScanRunId, Vendor},
+    features::host::model::HostEntity,
+};
 
 #[cfg_attr(test, automock)]
 pub trait HostRepository {
     fn get_host(
         &self,
-        host_id: &Uuid,
+        host_id: &HostId,
     ) -> impl Future<Output = Result<HostEntity, sqlx::Error>> + Send;
 
     fn list_hosts(
         &self,
-        scan_run_id: &Uuid,
+        scan_run_id: &ScanRunId,
         cursor_id: Option<Uuid>,
         limit: i64,
     ) -> impl Future<Output = Result<Vec<HostEntity>, sqlx::Error>> + Send;
@@ -34,7 +37,7 @@ impl PgHostRepository {
 }
 
 impl HostRepository for PgHostRepository {
-    async fn get_host(&self, host_id: &Uuid) -> Result<HostEntity, sqlx::Error> {
+    async fn get_host(&self, host_id: &HostId) -> Result<HostEntity, sqlx::Error> {
         let host = sqlx::query_as!(
             HostEntity,
             r#"
@@ -43,15 +46,15 @@ impl HostRepository for PgHostRepository {
                 scan_run_id,
                 ip,
                 mac,
-                vendor,
-                hostname,
-                os_match,
-                os_accuracy
+                vendor as "vendor: Vendor",
+                hostname as "hostname: Hostname",
+                os_match as "os_match: OsMatch",
+                os_accuracy as "os_accuracy: OsAccuracy"
             FROM recon.scan_hosts
             WHERE id=$1
             LIMIT 1;
             "#,
-            host_id,
+            host_id.as_ref(),
         )
         .fetch_one(&*self.db)
         .await?;
@@ -60,7 +63,7 @@ impl HostRepository for PgHostRepository {
 
     async fn list_hosts(
         &self,
-        scan_run_id: &Uuid,
+        scan_run_id: &ScanRunId,
         cursor_id: Option<Uuid>,
         limit: i64,
     ) -> Result<Vec<HostEntity>, sqlx::Error> {
@@ -74,16 +77,16 @@ impl HostRepository for PgHostRepository {
                         scan_run_id,
                         ip,
                         mac,
-                        vendor,
-                        hostname,
-                        os_match,
-                        os_accuracy
+                        vendor as "vendor: Vendor",
+                        hostname as "hostname: Hostname",
+                        os_match as "os_match: OsMatch",
+                        os_accuracy as "os_accuracy: OsAccuracy"
                     FROM recon.scan_hosts
                     WHERE scan_run_id=$1 and id < $2
                     ORDER BY id DESC
                     LIMIT $3;
                     "#,
-                    scan_run_id,
+                    scan_run_id.as_ref(),
                     cursor,
                     limit,
                 )
@@ -99,16 +102,16 @@ impl HostRepository for PgHostRepository {
                         scan_run_id,
                         ip,
                         mac,
-                        vendor,
-                        hostname,
-                        os_match,
-                        os_accuracy
+                        vendor as "vendor: Vendor",
+                        hostname as "hostname: Hostname",
+                        os_match as "os_match: OsMatch",
+                        os_accuracy as "os_accuracy: OsAccuracy"
                     FROM recon.scan_hosts
                     WHERE scan_run_id=$1
                     ORDER BY id DESC
                     LIMIT $2;
                     "#,
-                    scan_run_id,
+                    scan_run_id.as_ref(),
                     limit,
                 )
                 .fetch_all(&*self.db)

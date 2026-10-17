@@ -3,17 +3,18 @@ use std::{pin::Pin, sync::Arc};
 #[cfg(test)]
 use mockall::automock;
 
-use uuid::Uuid;
-
-use crate::features::host::{
-    dto::HostDto, error::HostError, model::HostEntity, repository::HostRepository,
+use crate::{
+    domain::types::HostId,
+    features::host::{
+        dto::HostDto, error::HostError, model::HostEntity, repository::HostRepository,
+    },
 };
 
 #[cfg_attr(test, automock)]
 pub trait GetHostFeature {
     fn get<'a>(
         &'a self,
-        host_id: Uuid,
+        host_id: HostId,
     ) -> Pin<Box<dyn Future<Output = Result<HostDto, HostError>> + Send + 'a>>;
 }
 
@@ -33,7 +34,7 @@ where
 {
     fn get(
         &self,
-        host_id: Uuid,
+        host_id: HostId,
     ) -> Pin<Box<dyn Future<Output = Result<HostDto, HostError>> + Send + '_>> {
         Box::pin(async move {
             let HostEntity {
@@ -53,7 +54,7 @@ where
                 vendor,
                 hostname,
                 os_match,
-                os_accuracy: os_accuracy.map(|a| format!("{}", a)),
+                os_accuracy,
             })
         })
     }
@@ -62,20 +63,24 @@ where
 #[cfg(test)]
 mod tests {
     use sqlx::types::ipnetwork::IpNetwork;
+    use uuid::Uuid;
 
-    use crate::features::host::{model::HostEntity, repository::MockHostRepository};
+    use crate::{
+        domain::types::ScanRunId,
+        features::host::{model::HostEntity, repository::MockHostRepository},
+    };
 
     use super::*;
 
     #[tokio::test]
     async fn test_get_host() {
         // Arrange
-        let expected_host_id = Uuid::now_v7();
-        let expected_scan_run_id = Uuid::now_v7();
+        let expected_host_id = HostId::new(Uuid::now_v7());
+        let expected_scan_run_id = ScanRunId::new(Uuid::now_v7());
         let expected_ip: IpNetwork = "192.168.0.1".parse().unwrap();
         let expected_host = HostEntity {
-            id: expected_host_id,
-            scan_run_id: expected_scan_run_id,
+            id: expected_host_id.clone(),
+            scan_run_id: expected_scan_run_id.clone(),
             ip: expected_ip,
             mac: None,
             vendor: None,
@@ -84,7 +89,7 @@ mod tests {
             os_accuracy: None,
         };
         let expected_host_dto = HostDto {
-            id: expected_host_id,
+            id: expected_host_id.clone(),
             ip: expected_ip.ip(),
             mac: None,
             vendor: None,
@@ -111,7 +116,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_host_not_found() {
         // Arrange
-        let expected_host_id = Uuid::now_v7();
+        let expected_host_id = HostId::new(Uuid::now_v7());
 
         let mut mock_host_repository = MockHostRepository::new();
         mock_host_repository

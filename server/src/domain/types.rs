@@ -21,8 +21,14 @@ impl StorageId for CsrfToken {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Newtype)]
+#[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
 pub struct Hostname(String);
+
+#[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
+pub struct OsMatch(String);
+
+#[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
+pub struct OsAccuracy(i32);
 
 #[derive(Clone, Debug, Newtype)]
 pub struct Password(SecretString);
@@ -77,7 +83,8 @@ impl StorageId for SessionToken {
 #[sqlx(transparent)]
 pub struct Username(String);
 
-#[derive(Clone, Debug, PartialEq, Newtype)]
+#[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
+#[sqlx(transparent)]
 pub struct Vendor(String);
 
 #[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
@@ -87,3 +94,11 @@ pub struct UserId(Uuid);
 #[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
 #[sqlx(transparent)]
 pub struct ProjectId(Uuid);
+
+#[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
+#[sqlx(transparent)]
+pub struct HostId(Uuid);
+
+#[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
+#[sqlx(transparent)]
+pub struct ScanRunId(Uuid);

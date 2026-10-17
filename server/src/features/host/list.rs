@@ -3,11 +3,12 @@ use std::{pin::Pin, sync::Arc};
 #[cfg(test)]
 use mockall::automock;
 
-use uuid::Uuid;
-
 use crate::{
     constants::HOSTS_PAGE_SIZE_LIMIT,
-    domain::cursor::{decode_cursor, encode_cursor},
+    domain::{
+        cursor::{decode_cursor, encode_cursor},
+        types::ScanRunId,
+    },
     features::host::{dto::HostDto, error::HostError, repository::HostRepository},
     transport::pagination::{Page, PageInfo},
 };
@@ -16,7 +17,7 @@ use crate::{
 pub trait ListHostsFeature {
     fn list<'a>(
         &'a self,
-        scan_run_id: Uuid,
+        scan_run_id: ScanRunId,
         cursor_id: Option<String>,
     ) -> Pin<Box<dyn Future<Output = Result<Page<HostDto>, HostError>> + Send + 'a>>;
 }
@@ -38,7 +39,7 @@ where
 {
     fn list<'a>(
         &'a self,
-        scan_run_id: Uuid,
+        scan_run_id: ScanRunId,
         cursor_id: Option<String>,
     ) -> Pin<Box<dyn Future<Output = Result<Page<HostDto>, HostError>> + Send + 'a>> {
         Box::pin(async move {
@@ -56,13 +57,13 @@ where
             let host_dtos = hosts
                 .iter()
                 .map(|h| HostDto {
-                    id: h.id,
+                    id: h.id.clone(),
                     ip: h.ip.ip(),
                     mac: h.mac,
                     vendor: h.vendor.clone(),
                     hostname: h.hostname.clone(),
                     os_match: h.os_match.clone(),
-                    os_accuracy: h.os_accuracy.map(|n| format!("{}", n)),
+                    os_accuracy: h.os_accuracy.clone(),
                 })
                 .collect();
             Ok(Page {
@@ -71,7 +72,7 @@ where
                     has_next_page,
                     end_cursor: match has_next_page {
                         true => Some(encode_cursor(
-                            &hosts.last().ok_or(HostError::NoLastCursor)?.id,
+                            hosts.last().ok_or(HostError::NoLastCursor)?.id.as_ref(),
                         )),
                         false => None,
                     },
@@ -84,10 +85,11 @@ where
 #[cfg(test)]
 mod tests {
     use sqlx::types::ipnetwork::IpNetwork;
+    use uuid::Uuid;
 
     use crate::{
         constants::HOSTS_PAGE_SIZE_LIMIT,
-        domain::cursor::encode_cursor,
+        domain::{cursor::encode_cursor, types::HostId},
         features::host::{model::HostEntity, repository::MockHostRepository},
         transport::pagination::PageInfo,
     };
@@ -98,13 +100,13 @@ mod tests {
     async fn test_list_hosts_no_next_page() {
         // Arrange
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
-        let expected_host_id = Uuid::now_v7();
-        let expected_scan_run_id = Uuid::now_v7();
+        let expected_host_id = HostId::new(Uuid::now_v7());
+        let expected_scan_run_id = ScanRunId::new(Uuid::now_v7());
         let expected_ip: IpNetwork = "192.168.0.1".parse().unwrap();
         let expected_host_entities_size = HOSTS_PAGE_SIZE_LIMIT as usize;
         let expected_host = HostEntity {
-            id: expected_host_id,
-            scan_run_id: expected_scan_run_id,
+            id: expected_host_id.clone(),
+            scan_run_id: expected_scan_run_id.clone(),
             ip: expected_ip,
             mac: None,
             vendor: None,
@@ -156,14 +158,14 @@ mod tests {
     async fn test_list_hosts_with_next_page() {
         // Arrange
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
-        let expected_host_id = Uuid::now_v7();
-        let expected_end_cursor = encode_cursor(&expected_host_id);
-        let expected_scan_run_id = Uuid::now_v7();
+        let expected_host_id = HostId::new(Uuid::now_v7());
+        let expected_end_cursor = encode_cursor(expected_host_id.as_ref());
+        let expected_scan_run_id = ScanRunId::new(Uuid::now_v7());
         let expected_ip: IpNetwork = "192.168.0.1".parse().unwrap();
         let expected_host_entities_size = HOSTS_PAGE_SIZE_LIMIT as usize;
         let expected_host = HostEntity {
-            id: expected_host_id,
-            scan_run_id: expected_scan_run_id,
+            id: expected_host_id.clone(),
+            scan_run_id: expected_scan_run_id.clone(),
             ip: expected_ip,
             mac: None,
             vendor: None,
@@ -214,14 +216,14 @@ mod tests {
     #[tokio::test]
     async fn test_list_hosts_no_cursor() {
         // Arrange
-        let expected_host_id = Uuid::now_v7();
-        let expected_end_cursor = encode_cursor(&expected_host_id);
-        let expected_scan_run_id = Uuid::now_v7();
+        let expected_host_id = HostId::new(Uuid::now_v7());
+        let expected_end_cursor = encode_cursor(expected_host_id.as_ref());
+        let expected_scan_run_id = ScanRunId::new(Uuid::now_v7());
         let expected_ip: IpNetwork = "192.168.0.1".parse().unwrap();
         let expected_host_entities_size = HOSTS_PAGE_SIZE_LIMIT as usize;
         let expected_host = HostEntity {
-            id: expected_host_id,
-            scan_run_id: expected_scan_run_id,
+            id: expected_host_id.clone(),
+            scan_run_id: expected_scan_run_id.clone(),
             ip: expected_ip,
             mac: None,
             vendor: None,
@@ -270,7 +272,7 @@ mod tests {
     async fn test_list_hosts_not_found() {
         // Arrange
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
-        let expected_scan_run_id = Uuid::now_v7();
+        let expected_scan_run_id = ScanRunId::new(Uuid::now_v7());
 
         let mut mock_host_repository = MockHostRepository::new();
         mock_host_repository
