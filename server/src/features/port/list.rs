@@ -3,11 +3,10 @@ use std::{pin::Pin, sync::Arc};
 #[cfg(test)]
 use mockall::automock;
 
-use uuid::Uuid;
-
 use crate::{
     constants::PORTS_PAGE_SIZE_LIMIT,
     domain::cursor::{decode_cursor, encode_cursor},
+    domain::types::HostId,
     features::port::{dto::PortDto, error::PortError, repository::PortRepository},
     transport::pagination::{Page, PageInfo},
 };
@@ -16,7 +15,7 @@ use crate::{
 pub trait ListPortsFeature {
     fn list<'a>(
         &'a self,
-        port_id: Uuid,
+        host_id: HostId,
         cursor_id: Option<String>,
     ) -> Pin<Box<dyn Future<Output = Result<Page<PortDto>, PortError>> + Send + 'a>>;
 }
@@ -38,7 +37,7 @@ where
 {
     fn list<'a>(
         &'a self,
-        host_id: Uuid,
+        host_id: HostId,
         cursor_id: Option<String>,
     ) -> Pin<Box<dyn Future<Output = Result<Page<PortDto>, PortError>> + Send + 'a>> {
         Box::pin(async move {
@@ -56,8 +55,8 @@ where
             let port_dtos = ports
                 .iter()
                 .map(|p| PortDto {
-                    id: p.id,
-                    port: p.port,
+                    id: p.id.clone(),
+                    port: p.port.clone(),
                     protocol: p.protocol.clone(),
                     state: p.state.clone(),
                     service: p.service.clone(),
@@ -71,7 +70,7 @@ where
                     has_next_page,
                     end_cursor: match has_next_page {
                         true => Some(encode_cursor(
-                            &ports.last().ok_or(PortError::NoLastCursor)?.id,
+                            ports.last().ok_or(PortError::NoLastCursor)?.id.as_ref(),
                         )),
                         false => None,
                     },
@@ -83,9 +82,14 @@ where
 
 #[cfg(test)]
 mod tests {
+    use uuid::Uuid;
+
     use crate::{
         constants::PORTS_PAGE_SIZE_LIMIT,
-        domain::cursor::encode_cursor,
+        domain::{
+            cursor::encode_cursor,
+            types::{PortId, PortNumber},
+        },
         features::port::{model::PortEntity, repository::MockPortRepository},
         transport::pagination::PageInfo,
     };
@@ -96,14 +100,14 @@ mod tests {
     async fn test_list_ports_no_next_page() {
         // Arrange
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
-        let expected_port_id = Uuid::now_v7();
-        let expected_host_id = Uuid::now_v7();
-        let expected_port_number = 22;
+        let expected_port_id = PortId::new(Uuid::now_v7());
+        let expected_host_id = HostId::new(Uuid::now_v7());
+        let expected_port_number = PortNumber::new(22);
         let expected_port_entities_size = PORTS_PAGE_SIZE_LIMIT as usize;
         let expected_port = PortEntity {
-            id: expected_port_id,
-            host_id: expected_host_id,
-            port: expected_port_number,
+            id: expected_port_id.clone(),
+            host_id: expected_host_id.clone(),
+            port: expected_port_number.clone(),
             protocol: None,
             state: None,
             service: None,
@@ -155,15 +159,15 @@ mod tests {
     async fn test_list_ports_with_next_page() {
         // Arrange
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
-        let expected_port_id = Uuid::now_v7();
-        let expected_end_cursor = encode_cursor(&expected_port_id);
-        let expected_host_id = Uuid::now_v7();
-        let expected_port_number = 22;
+        let expected_port_id = PortId::new(Uuid::now_v7());
+        let expected_end_cursor = encode_cursor(expected_port_id.as_ref());
+        let expected_host_id = HostId::new(Uuid::now_v7());
+        let expected_port_number = PortNumber::new(22);
         let expected_port_entities_size = PORTS_PAGE_SIZE_LIMIT as usize;
         let expected_port = PortEntity {
-            id: expected_port_id,
-            host_id: expected_host_id,
-            port: expected_port_number,
+            id: expected_port_id.clone(),
+            host_id: expected_host_id.clone(),
+            port: expected_port_number.clone(),
             protocol: None,
             state: None,
             service: None,
@@ -214,15 +218,15 @@ mod tests {
     #[tokio::test]
     async fn test_list_ports_no_cursor() {
         // Arrange
-        let expected_port_id = Uuid::now_v7();
-        let expected_end_cursor = encode_cursor(&expected_port_id);
-        let expected_host_id = Uuid::now_v7();
-        let expected_port_number = 22;
+        let expected_port_id = PortId::new(Uuid::now_v7());
+        let expected_end_cursor = encode_cursor(expected_port_id.as_ref());
+        let expected_host_id = HostId::new(Uuid::now_v7());
+        let expected_port_number = PortNumber::new(22);
         let expected_port_entities_size = PORTS_PAGE_SIZE_LIMIT as usize;
         let expected_port = PortEntity {
-            id: expected_port_id,
-            host_id: expected_host_id,
-            port: expected_port_number,
+            id: expected_port_id.clone(),
+            host_id: expected_host_id.clone(),
+            port: expected_port_number.clone(),
             protocol: None,
             state: None,
             service: None,
@@ -232,8 +236,8 @@ mod tests {
         };
         let expected_port_entities = vec![expected_port; expected_port_entities_size + 1];
         let expected_port_dto = PortDto {
-            id: expected_port_id,
-            port: expected_port_number,
+            id: expected_port_id.clone(),
+            port: expected_port_number.clone(),
             protocol: None,
             state: None,
             service: None,
@@ -271,21 +275,7 @@ mod tests {
     async fn test_list_ports_not_found() {
         // Arrange
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
-        let expected_port_id = Uuid::now_v7();
-        let expected_host_id = Uuid::now_v7();
-        let expected_port_number = 22;
-        let expected_port_entities_size = PORTS_PAGE_SIZE_LIMIT as usize;
-        let expected_port = PortEntity {
-            id: expected_port_id,
-            host_id: expected_host_id,
-            port: expected_port_number,
-            protocol: None,
-            state: None,
-            service: None,
-            product: None,
-            version: None,
-            cpes: None,
-        };
+        let expected_host_id = HostId::new(Uuid::now_v7());
 
         let mut mock_port_repository = MockPortRepository::new();
         mock_port_repository

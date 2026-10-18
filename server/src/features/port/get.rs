@@ -3,17 +3,18 @@ use std::{pin::Pin, sync::Arc};
 #[cfg(test)]
 use mockall::automock;
 
-use uuid::Uuid;
-
-use crate::features::port::{
-    dto::PortDto, error::PortError, model::PortEntity, repository::PortRepository,
+use crate::{
+    domain::types::PortId,
+    features::port::{
+        dto::PortDto, error::PortError, model::PortEntity, repository::PortRepository,
+    },
 };
 
 #[cfg_attr(test, automock)]
 pub trait GetPortFeature {
     fn get<'a>(
         &'a self,
-        port_id: Uuid,
+        port_id: PortId,
     ) -> Pin<Box<dyn Future<Output = Result<PortDto, PortError>> + Send + 'a>>;
 }
 
@@ -33,7 +34,7 @@ where
 {
     fn get(
         &self,
-        port_id: Uuid,
+        port_id: PortId,
     ) -> Pin<Box<dyn Future<Output = Result<PortDto, PortError>> + Send + '_>> {
         Box::pin(async move {
             let PortEntity {
@@ -61,6 +62,9 @@ where
 
 #[cfg(test)]
 mod tests {
+    use uuid::Uuid;
+
+    use crate::domain::types::{HostId, PortNumber};
     use crate::features::port::{model::PortEntity, repository::MockPortRepository};
 
     use super::*;
@@ -68,13 +72,13 @@ mod tests {
     #[tokio::test]
     async fn test_get_port() {
         // Arrange
-        let expected_port_id = Uuid::now_v7();
-        let expected_host_id = Uuid::now_v7();
-        let expected_port_number = 22;
+        let expected_port_id = PortId::new(Uuid::now_v7());
+        let expected_host_id = HostId::new(Uuid::now_v7());
+        let expected_port_number = PortNumber::new(22);
         let expected_port = PortEntity {
-            id: expected_port_id,
+            id: expected_port_id.clone(),
             host_id: expected_host_id,
-            port: expected_port_number,
+            port: expected_port_number.clone(),
             protocol: None,
             state: None,
             service: None,
@@ -83,7 +87,7 @@ mod tests {
             cpes: None,
         };
         let expected_port_dto = PortDto {
-            id: expected_port_id,
+            id: expected_port_id.clone(),
             port: expected_port_number,
             protocol: None,
             state: None,
@@ -110,20 +114,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_port_not_found() {
         // Arrange
-        let expected_port_id = Uuid::now_v7();
-        let expected_host_id = Uuid::now_v7();
-        let expected_port_number = 22;
-        let expected_port = PortEntity {
-            id: expected_port_id,
-            host_id: expected_host_id,
-            port: expected_port_number,
-            protocol: None,
-            state: None,
-            service: None,
-            product: None,
-            version: None,
-            cpes: None,
-        };
+        let expected_port_id = PortId::new(Uuid::now_v7());
 
         let mut mock_port_repository = MockPortRepository::new();
         mock_port_repository

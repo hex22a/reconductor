@@ -1,10 +1,13 @@
 use std::sync::Arc;
 
-use server::features::port::repository::{PgPortRepository, PortRepository};
+use server::{
+    HostId, PortId, ScanRunId,
+    features::port::repository::{PgPortRepository, PortRepository},
+};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-async fn setup_port(db: &PgPool) -> (Uuid, Uuid, Uuid, Uuid, Uuid) {
+async fn setup_port(db: &PgPool) -> (PortId, HostId, ScanRunId, Uuid, Uuid) {
     let expected_user_id: Uuid = sqlx::query_scalar(
         r#"
         INSERT INTO recon.users
@@ -40,7 +43,7 @@ async fn setup_port(db: &PgPool) -> (Uuid, Uuid, Uuid, Uuid, Uuid) {
     .fetch_one(db)
     .await
     .unwrap();
-    let expected_scan_run_id: Uuid = sqlx::query_scalar(
+    let expected_scan_run_id = sqlx::query_scalar(
         r#"
         INSERT INTO recon.scan_runs
             (scan_id)
@@ -52,7 +55,7 @@ async fn setup_port(db: &PgPool) -> (Uuid, Uuid, Uuid, Uuid, Uuid) {
     .fetch_one(db)
     .await
     .unwrap();
-    let expected_host_id: Uuid = sqlx::query_scalar(
+    let expected_host_id = sqlx::query_scalar(
         r#"
         INSERT INTO recon.scan_hosts
             (scan_run_id, ip)
@@ -60,11 +63,11 @@ async fn setup_port(db: &PgPool) -> (Uuid, Uuid, Uuid, Uuid, Uuid) {
         RETURNING id
         "#,
     )
-    .bind(expected_scan_run_id)
+    .bind(&expected_scan_run_id)
     .fetch_one(db)
     .await
     .unwrap();
-    let expected_port_id: Uuid = sqlx::query_scalar(
+    let expected_port_id = sqlx::query_scalar(
         r#"
         INSERT INTO recon.scan_ports
             (host_id, port)
@@ -72,7 +75,7 @@ async fn setup_port(db: &PgPool) -> (Uuid, Uuid, Uuid, Uuid, Uuid) {
         RETURNING id
         "#,
     )
-    .bind(expected_host_id)
+    .bind(&expected_host_id)
     .fetch_one(db)
     .await
     .unwrap();
@@ -107,7 +110,7 @@ async fn test_get_scan_by_id(db: PgPool) {
 #[sqlx::test(migrations = "../migrations")]
 async fn test_get_scan_by_id_not_found(db: PgPool) {
     // Arrange
-    let expected_port_id = Uuid::now_v7();
+    let expected_port_id = PortId::new(Uuid::now_v7());
     let repo = PgPortRepository::new(Arc::new(db));
 
     // Act
