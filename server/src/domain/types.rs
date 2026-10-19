@@ -68,3 +68,7 @@ pub struct Version(String);
 #[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
 #[sqlx(transparent)]
 pub struct CpeString(String);
+
+#[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
+#[sqlx(transparent)]
+pub struct ProjectName(String);

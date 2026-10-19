@@ -56,7 +56,7 @@ mod tests {
     use uuid::Uuid;
 
     use crate::{
-        domain::types::{ProjectId, UserId},
+        domain::types::{ProjectId, ProjectName, UserId},
         features::project::{model::ProjectEntity, repository::MockProjectRepository},
     };
 
@@ -67,7 +67,7 @@ mod tests {
         // Arrange
         let expected_project_id = ProjectId::new(Uuid::now_v7());
         let expected_owner_id = UserId::new(Uuid::now_v7());
-        let expected_name = String::from("test");
+        let expected_name = ProjectName::new("test");
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_project = ProjectEntity {
             id: expected_project_id.clone(),

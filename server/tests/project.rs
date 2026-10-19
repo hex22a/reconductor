@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use server::{
-    ProjectId, UserId,
+    ProjectId, ProjectName, UserId,
     features::project::{
         model::{ProjectEntity, ProjectInsert},
         repository::{PgProjectRepository, ProjectRepository},
@@ -57,7 +57,7 @@ async fn test_create_project(db: PgPool) {
     // Arrange
     let expected_project_id = ProjectId::new(Uuid::now_v7());
     let expected_owner_id = setup_user(&db).await;
-    let expected_name = "test".to_string();
+    let expected_name = ProjectName::new("test");
     let expected_created_at = datetime!(2019-01-01 0:00 UTC);
     let expected_project_entity = ProjectEntity {
         id: expected_project_id,
@@ -135,7 +135,7 @@ async fn test_list_projects(db: PgPool) {
     // Arrange
     let expected_limit: i64 = 1;
     let expected_owner_id = setup_user(&db).await;
-    let expected_name = "test".to_string();
+    let expected_name = ProjectName::new("test");
     let expected_project_insert = ProjectInsert {
         owner_id: expected_owner_id.clone(),
         name: expected_name,

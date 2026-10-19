@@ -54,7 +54,7 @@ pub use application::error::AppError;
 
 pub use domain::{
     secret_types::{CsrfCookie, CsrfToken, PasswordHash, SessionToken},
-    types::{HostId, PortId, ProjectId, ScanRunId, UserId, Username},
+    types::{HostId, PortId, ProjectId, ProjectName, ScanRunId, UserId, Username},
 };
 
 mod application;

@@ -3,14 +3,14 @@ use time::OffsetDateTime;
 
 use crate::{
     application::error::{FieldErrors, ServerError},
-    domain::types::ProjectId,
+    domain::types::{ProjectId, ProjectName},
     features::project::model::CreateProjectInput,
 };
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct ProjectDto {
     pub id: ProjectId,
-    pub name: String,
+    pub name: ProjectName,
     #[serde(with = "time::serde::rfc3339")]
     pub created_at: OffsetDateTime,
 }
@@ -30,21 +30,23 @@ impl TryFrom<CreateProjctRequest> for CreateProjectInput {
                 vec!["project name cannot be empty".to_string()],
             )])))
         } else {
-            Ok(CreateProjectInput { name: value.name })
+            Ok(CreateProjectInput {
+                name: ProjectName::new(value.name),
+            })
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::features::project::{dto::CreateProjctRequest, model::CreateProjectInput};
+    use super::*;
 
     #[test]
     fn test_valid_project_name() {
         // Arrange
-        let expected_project_name = "test".to_string();
+        let expected_project_name = String::from("test");
         let expected_create_project_input = CreateProjectInput {
-            name: expected_project_name.clone(),
+            name: ProjectName::new(expected_project_name.clone()),
         };
         let expected_crate_project_request = CreateProjctRequest {
             name: expected_project_name,

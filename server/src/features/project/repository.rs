@@ -54,8 +54,8 @@ impl ProjectRepository for PgProjectRepository {
                 ($1, $2)
             RETURNING *;
             "#,
-            project_insert.name,
-            project_insert.owner_id.into_inner(),
+            project_insert.name.as_ref(),
+            project_insert.owner_id.as_ref(),
         )
         .fetch_one(&*self.db)
         .await?;

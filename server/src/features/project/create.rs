@@ -4,7 +4,7 @@ use std::{pin::Pin, sync::Arc};
 use mockall::automock;
 
 use crate::{
-    domain::types::UserId,
+    domain::types::{ProjectName, UserId},
     features::project::{
         dto::ProjectDto, error::ProjectError, model::ProjectInsert, repository::ProjectRepository,
     },
@@ -15,7 +15,7 @@ pub trait CreateProjectFeature {
     fn create<'a>(
         &'a self,
         owner_id: UserId,
-        name: String,
+        name: ProjectName,
     ) -> Pin<Box<dyn Future<Output = Result<ProjectDto, ProjectError>> + Send + 'a>>;
 }
 
@@ -36,7 +36,7 @@ where
     fn create(
         &self,
         owner_id: UserId,
-        name: String,
+        name: ProjectName,
     ) -> Pin<Box<dyn Future<Output = Result<ProjectDto, ProjectError>> + Send + '_>> {
         Box::pin(async move {
             let project_insert = ProjectInsert { owner_id, name };
@@ -70,7 +70,7 @@ mod tests {
         // Arrange
         let expected_project_id = ProjectId::new(Uuid::now_v7());
         let expected_owner_id = UserId::new(Uuid::now_v7());
-        let expected_project_name = "test".to_string();
+        let expected_project_name = ProjectName::new("test");
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_project_entity = ProjectEntity {
             id: expected_project_id.clone(),
