@@ -8,7 +8,7 @@ use thiserror::Error;
 use mockall::automock;
 
 use crate::{
-    domain::types::{CsrfCookie, CsrfToken},
+    domain::secret_types::{CsrfCookie, CsrfToken},
     infra::random::{OsRngService, RngService, RngServiceError},
 };
 

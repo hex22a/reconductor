@@ -7,7 +7,7 @@ use crate::{
     constants::{
         MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH, MIN_PASSWORD_LENGTH, MIN_USERNAME_LENGTH,
     },
-    domain::types::{Password, Username},
+    domain::{secret_types::Password, types::Username},
     features::user::model::UserInput,
 };
 
@@ -71,10 +71,9 @@ impl TryFrom<UserInputRequest> for UserInput {
 mod tests {
     use secrecy::ExposeSecret;
 
-    use crate::{
-        domain::types::{Password, Username},
-        features::user::{dto::UserInputRequest, model::UserInput},
-    };
+    use crate::features::user::{dto::UserInputRequest, model::UserInput};
+
+    use super::*;
 
     #[test]
     fn test_valid_username_and_password() {

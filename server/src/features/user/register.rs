@@ -4,7 +4,7 @@ use std::sync::Arc;
 #[cfg(test)]
 use mockall::automock;
 
-use crate::domain::types::{Password, Username};
+use crate::domain::{secret_types::Password, types::Username};
 use crate::features::user::error::UserError;
 use crate::features::user::model::UserInsert;
 use crate::features::user::repository::UserRepository;
@@ -63,7 +63,7 @@ mod tests {
 
     use super::*;
 
-    use crate::domain::types::PasswordHash;
+    use crate::domain::secret_types::PasswordHash;
     use crate::features::user::repository::MockUserRepository;
     use crate::infra::password::MockPasswordService;
 

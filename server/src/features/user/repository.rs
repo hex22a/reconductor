@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::domain::types::PasswordHash;
+use crate::domain::secret_types::PasswordHash;
 
 #[cfg(test)]
 use mockall::automock;

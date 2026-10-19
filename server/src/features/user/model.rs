@@ -1,7 +1,8 @@
 use time::OffsetDateTime;
 
-use crate::domain::types::{
-    CsrfCookie, CsrfToken, Password, PasswordHash, SessionToken, UserId, Username,
+use crate::domain::{
+    secret_types::{CsrfCookie, CsrfToken, Password, PasswordHash, SessionToken},
+    types::{UserId, Username},
 };
 
 #[derive(Debug)]

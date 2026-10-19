@@ -6,7 +6,7 @@ use subtle::ConstantTimeEq;
 use mockall::automock;
 
 use crate::{
-    domain::types::{CsrfCookie, CsrfToken},
+    domain::secret_types::{CsrfCookie, CsrfToken},
     features::csrf::repository::CsrfRepository,
     infra::csrf::CsrfService,
 };

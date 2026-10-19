@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::{
     constants::{CSRF_COOKIE_NAME, USER_SESSION_COOKIE_NAME},
-    domain::types::{CsrfToken, SessionToken},
+    domain::secret_types::{CsrfToken, SessionToken},
     features::{
         session::model::UserSession,
         user::{

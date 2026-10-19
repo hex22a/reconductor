@@ -10,7 +10,7 @@ use secrecy::ExposeSecret;
 use crate::{
     application::error::ServerError,
     constants::{CSRF_COOKIE_NAME, USER_SESSION_COOKIE_NAME},
-    domain::types::SessionToken,
+    domain::secret_types::SessionToken,
     features::csrf::dto::CsrfResponse,
     state::AppState,
 };

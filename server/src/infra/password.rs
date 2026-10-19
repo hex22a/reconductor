@@ -7,7 +7,7 @@ use thiserror::Error;
 
 use crate::{
     constants::{PASSWORD_MEMORY_COST_BYTES, PASSWORD_PARALLELISM, PASSWORD_TIME_COST_PASSES},
-    domain::types::Password,
+    domain::secret_types::Password,
 };
 
 #[derive(Debug, Clone, Error)]
@@ -24,11 +24,11 @@ pub trait PasswordService {
     fn hash_password(
         &self,
         password: &Password,
-    ) -> Result<crate::domain::types::PasswordHash, PasswordServiceError>;
+    ) -> Result<crate::domain::secret_types::PasswordHash, PasswordServiceError>;
     fn verify_password(
         &self,
         password: &Password,
-        password_hash: &crate::domain::types::PasswordHash,
+        password_hash: &crate::domain::secret_types::PasswordHash,
     ) -> Result<bool, PasswordServiceError>;
 }
 
@@ -39,7 +39,7 @@ impl PasswordService for Argon2Service {
     fn hash_password(
         &self,
         password: &Password,
-    ) -> Result<crate::domain::types::PasswordHash, PasswordServiceError> {
+    ) -> Result<crate::domain::secret_types::PasswordHash, PasswordServiceError> {
         let params = Params::new(
             PASSWORD_MEMORY_COST_BYTES,
             PASSWORD_TIME_COST_PASSES,
@@ -50,14 +50,14 @@ impl PasswordService for Argon2Service {
         let argon2 = Argon2::new(argon2::Algorithm::Argon2id, argon2::Version::V0x13, params);
         argon2
             .hash_password(password.as_ref().expose_secret().as_bytes())
-            .map(|h| crate::domain::types::PasswordHash::new(h.to_string()))
+            .map(|h| crate::domain::secret_types::PasswordHash::new(h.to_string()))
             .map_err(|e| PasswordServiceError::Hashing(e.to_string()))
     }
 
     fn verify_password(
         &self,
         password: &Password,
-        password_hash: &crate::domain::types::PasswordHash,
+        password_hash: &crate::domain::secret_types::PasswordHash,
     ) -> Result<bool, PasswordServiceError> {
         let params = Params::new(
             PASSWORD_MEMORY_COST_BYTES,

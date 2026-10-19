@@ -1,4 +1,7 @@
-use crate::domain::types::{CsrfCookie, CsrfToken, SessionToken, UserId, Username};
+use crate::domain::{
+    secret_types::{CsrfCookie, CsrfToken, SessionToken},
+    types::{UserId, Username},
+};
 
 #[derive(Debug, Clone)]
 pub struct UserSession {

@@ -6,7 +6,7 @@ use thiserror::Error;
 
 use crate::{
     constants::{ANONYMOUS_CSRF_PREFIX, ANONYMOUS_CSRF_TTL_SECONDS},
-    domain::types::CsrfToken,
+    domain::secret_types::CsrfToken,
     infra::persistence::kv::{KvProvider, StorageId},
 };
 

@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 use crate::{
     constants::{USER_SESSION_PREFIX, USER_SESSION_TTL_SECONDS},
-    domain::types::SessionToken,
+    domain::secret_types::SessionToken,
     features::session::model::UserSession,
     infra::persistence::kv::{KvProvider, StorageId},
 };
