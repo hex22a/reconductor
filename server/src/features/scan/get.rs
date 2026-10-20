@@ -54,6 +54,10 @@ where
 
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
+
+    use ipnetwork::Ipv4Network;
+    use reconductor_core::ScanTarget;
     use sqlx::types::ipnetwork::IpNetwork;
     use time::macros::datetime;
     use uuid::Uuid;
@@ -69,7 +73,8 @@ mod tests {
         // Arrange
         let expected_scan_id = ScanId::new(Uuid::now_v7());
         let expected_project_id = ProjectId::new(Uuid::now_v7());
-        let expected_target: IpNetwork = "192.168.0.1".parse().unwrap();
+        let expected_target =
+            ScanTarget::new(IpNetwork::V4(Ipv4Network::from_str("192.168.0.1").unwrap()));
         let expected_schedule = Some(String::from("0 * * * * *"));
         let expected_status = crate::features::scan::model::ScanStatus::Scheduled;
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
@@ -77,7 +82,7 @@ mod tests {
         let expected_scan = ScanEntity {
             id: expected_scan_id.clone(),
             project_id: expected_project_id,
-            target: expected_target,
+            target: expected_target.clone(),
             status: expected_status,
             schedule: expected_schedule.clone(),
             created_at: expected_created_at,

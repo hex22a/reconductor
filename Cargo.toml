@@ -21,3 +21,4 @@ reconductor-core = { path = "crates/reconductor-core" }
 newtype-derive = { path = "crates/newtype-derive" }
 sqlx = { version = "0.9.0", features = ["ipnetwork", "mac_address", "migrate", "postgres", "runtime-tokio", "time", "uuid"] }
 uuid = { version = "1.26.0", features = ["serde", "v7"] }
+ipnetwork = { version = "0.21.1", features = ["serde"] }

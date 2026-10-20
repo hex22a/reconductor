@@ -1,8 +1,7 @@
 #[cfg(test)]
 use mockall::automock;
 
-use ipnetwork::IpNetwork;
-use reconductor_core::ScanId;
+use reconductor_core::{ScanId, ScanTarget};
 
 use crate::{MqProvider, SCANS_QUEUE, error::MqError};
 
@@ -11,7 +10,7 @@ pub trait Publisher {
     fn publish_scan(
         &self,
         scan_id: &ScanId,
-        target: &IpNetwork,
+        target: &ScanTarget,
     ) -> impl Future<Output = Result<(), MqError>> + Send;
 }
 
@@ -29,7 +28,7 @@ impl<T> Publisher for MqPublisher<T>
 where
     T: MqProvider + Send + Sync,
 {
-    async fn publish_scan(&self, scan_id: &ScanId, target: &IpNetwork) -> Result<(), MqError> {
+    async fn publish_scan(&self, scan_id: &ScanId, target: &ScanTarget) -> Result<(), MqError> {
         let message = serde_json::json!({ "id": scan_id, "target": target });
         self.provider.publish(SCANS_QUEUE.into(), message).await?;
         Ok(())
@@ -44,7 +43,7 @@ mod tests {
 
     use std::str::FromStr;
 
-    use ipnetwork::Ipv4Network;
+    use ipnetwork::{IpNetwork, Ipv4Network};
     use lapin::types::ShortString;
     use mockall::predicate::eq;
     use serde_json::Value;
@@ -54,8 +53,9 @@ mod tests {
     async fn test_publish_scan() {
         // Arrange
         let expected_scan_id = ScanId::new(Uuid::now_v7());
-        let expected_target: IpNetwork =
-            IpNetwork::V4(Ipv4Network::from_str("192.168.0.0/16").unwrap());
+        let expected_target = ScanTarget::new(IpNetwork::V4(
+            Ipv4Network::from_str("192.168.0.0/16").unwrap(),
+        ));
         let expected_channel: ShortString = "scans".into();
         let expected_message: Value =
             serde_json::json!({ "id": expected_scan_id, "target": expected_target });

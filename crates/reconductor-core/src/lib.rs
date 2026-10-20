@@ -1,3 +1,3 @@
 mod types;
 
-pub use crate::types::ScanId;
+pub use crate::types::{ScanId, ScanTarget};

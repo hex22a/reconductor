@@ -1,6 +1,6 @@
 use chrono::Utc;
 use cron::Schedule;
-use reconductor_core::ScanId;
+use reconductor_core::{ScanId, ScanTarget};
 use sqlx::types::ipnetwork::IpNetwork;
 use time::OffsetDateTime;
 
@@ -21,7 +21,7 @@ pub enum ScanStatus {
 pub struct ScanEntity {
     pub id: ScanId,
     pub project_id: ProjectId,
-    pub target: IpNetwork,
+    pub target: ScanTarget,
     pub status: ScanStatus,
     pub schedule: Option<String>,
     pub created_at: OffsetDateTime,
@@ -30,13 +30,13 @@ pub struct ScanEntity {
 
 pub struct ScanInsert {
     pub project_id: ProjectId,
-    pub target: IpNetwork,
+    pub target: ScanTarget,
     pub schedule: Option<String>,
     pub next_run_at: Option<OffsetDateTime>,
 }
 
 impl ScanInsert {
-    pub fn new(project_id: ProjectId, target: IpNetwork, schedule: Option<Schedule>) -> Self {
+    pub fn new(project_id: ProjectId, target: ScanTarget, schedule: Option<Schedule>) -> Self {
         let next_run_at = schedule.as_ref().and_then(Self::calculate_next_run);
         Self {
             project_id,
@@ -63,6 +63,7 @@ pub struct CreateScanInput {
 mod tests {
     use std::str::FromStr;
 
+    use ipnetwork::Ipv4Network;
     use uuid::Uuid;
 
     use super::*;
@@ -71,15 +72,18 @@ mod tests {
     fn construct_scan_insert() {
         // Arrange
         let expected_project_id = ProjectId::new(Uuid::now_v7());
-        let expected_target: IpNetwork = "192.168.0.1".parse().unwrap();
+        let expected_target =
+            ScanTarget::new(IpNetwork::V4(Ipv4Network::from_str("192.168.0.1").unwrap()));
         let expected_schedule_with_seconds = "0 * * * * *";
         let expected_schedule = Schedule::from_str(expected_schedule_with_seconds).unwrap();
+
         // Act
         let actual_scan_insert = ScanInsert::new(
             expected_project_id,
             expected_target,
             Some(expected_schedule),
         );
+
         // Assert
         assert!(actual_scan_insert.next_run_at.is_some());
     }
@@ -88,9 +92,12 @@ mod tests {
     fn construct_scan_insert_no_schedule() {
         // Arrange
         let expected_project_id = ProjectId::new(Uuid::now_v7());
-        let expected_target: IpNetwork = "192.168.0.1".parse().unwrap();
+        let expected_target =
+            ScanTarget::new(IpNetwork::V4(Ipv4Network::from_str("192.168.0.1").unwrap()));
+
         // Act
         let actual_scan_insert = ScanInsert::new(expected_project_id, expected_target, None);
+
         // Assert
         assert!(actual_scan_insert.next_run_at.is_none());
     }

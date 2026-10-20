@@ -9,3 +9,4 @@ uuid.workspace = true
 newtype-derive.workspace = true
 serde.workspace = true
 sqlx.workspace = true
+ipnetwork.workspace = true

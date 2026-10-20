@@ -63,7 +63,7 @@ impl<R: ScanRepository, P: Publisher, S: SchedulerService> PollerFeature for Sca
 
             match self.publisher.publish_scan(&scan.id, &scan.target).await {
                 Ok(_) => {
-                    info!("Published scan {:?} for target {}", scan.id, scan.target);
+                    info!("Published scan {:?} for target {:?}", scan.id, scan.target);
                     let schedule = Schedule::from_str(schedule)?;
                     match self.scheduler.calculate_next_run(&schedule) {
                         Ok(next_run) => {
@@ -94,7 +94,7 @@ mod tests {
 
     use cron::Schedule;
     use mockall::{mock, predicate::eq};
-    use reconductor_core::ScanId;
+    use reconductor_core::{ScanId, ScanTarget};
     use reconductor_messaging::error::MqError;
     use reconductor_schedule::ScheduleError;
     use sqlx::types::{
@@ -114,7 +114,7 @@ mod tests {
             fn publish_scan(
                 &self,
                 scan_id: &ScanId,
-                target: &IpNetwork,
+                target: &ScanTarget,
             ) -> impl Future<Output = Result<(), MqError>> + Send;
         }
     }
@@ -162,15 +162,16 @@ mod tests {
     async fn test_poll_happy_path() {
         // Arrange
         let expected_scan_id = ScanId::new(Uuid::now_v7());
-        let expected_target: IpNetwork =
-            IpNetwork::V4(Ipv4Network::from_str("192.168.0.0/16").unwrap());
+        let expected_target = ScanTarget::new(IpNetwork::V4(
+            Ipv4Network::from_str("192.168.0.0/16").unwrap(),
+        ));
         let expected_schedule_string: String = String::from_str("0 5 * * * *").unwrap();
         let expected_schedule = Schedule::from_str(&expected_schedule_string).unwrap();
         let expected_poll_interval_secs: u64 = 30;
         let expected_next_run: OffsetDateTime = OffsetDateTime::now_utc();
         let expected_due_scans: Vec<DueScan> = vec![DueScan {
             id: expected_scan_id.clone(),
-            target: expected_target,
+            target: expected_target.clone(),
             schedule: Some(expected_schedule_string),
         }];
 

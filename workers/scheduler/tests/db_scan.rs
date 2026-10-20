@@ -1,3 +1,7 @@
+use std::str::FromStr;
+
+use ipnetwork::Ipv4Network;
+use reconductor_core::ScanTarget;
 use scheduler::features::scan::repository::{PgScanRepository, ScanRepository};
 use sqlx::{PgPool, types::ipnetwork::IpNetwork};
 use uuid::Uuid;
@@ -33,7 +37,8 @@ async fn setup_project(db: &PgPool) -> Uuid {
 async fn test_fetch_due_scans_return_due_scans(db: PgPool) {
     // Arrange
     let repo = PgScanRepository { db: db.clone() };
-    let expected_target: IpNetwork = "192.168.50.1/16".parse().unwrap();
+    let expected_target =
+        ScanTarget::new(IpNetwork::V4(Ipv4Network::from_str("192.168.0.1").unwrap()));
     let expected_project_id: Uuid = setup_project(&db).await;
     sqlx::query(
         r#"
@@ -43,12 +48,14 @@ async fn test_fetch_due_scans_return_due_scans(db: PgPool) {
         "#,
     )
     .bind(expected_project_id)
-    .bind(expected_target)
+    .bind(&expected_target)
     .execute(&db)
     .await
     .unwrap();
+
     // Act
     let scans = repo.fetch_due_scans().await.unwrap();
+
     // Assert
     assert_eq!(scans.len(), 1);
     assert_eq!(scans[0].target, expected_target)
@@ -72,8 +79,10 @@ async fn test_fetch_due_scans_no_schedule(db: PgPool) {
     .execute(&db)
     .await
     .unwrap();
+
     // Act
     let scans = repo.fetch_due_scans().await.unwrap();
+
     // Assert
     assert_eq!(scans.len(), 0);
 }
@@ -96,8 +105,10 @@ async fn test_fetch_due_scans_next_run_in_future(db: PgPool) {
     .execute(&db)
     .await
     .unwrap();
+
     // Act
     let scans = repo.fetch_due_scans().await.unwrap();
+
     // Assert
     assert_eq!(scans.len(), 0);
 }

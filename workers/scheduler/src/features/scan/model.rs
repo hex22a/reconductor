@@ -1,9 +1,8 @@
-use ipnetwork::IpNetwork;
-use reconductor_core::ScanId;
+use reconductor_core::{ScanId, ScanTarget};
 
 #[derive(Debug, Clone, sqlx::FromRow)]
 pub struct DueScan {
     pub id: ScanId,
-    pub target: IpNetwork,
+    pub target: ScanTarget,
     pub schedule: Option<String>,
 }

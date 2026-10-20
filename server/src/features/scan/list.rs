@@ -56,7 +56,7 @@ where
                 .iter()
                 .map(|s| ScanDto {
                     id: s.id.clone(),
-                    target: s.target,
+                    target: s.target.clone(),
                     schedule: s.schedule.clone(),
                     created_at: s.created_at,
                 })
@@ -79,7 +79,10 @@ where
 
 #[cfg(test)]
 mod tests {
-    use reconductor_core::ScanId;
+    use std::str::FromStr;
+
+    use ipnetwork::Ipv4Network;
+    use reconductor_core::{ScanId, ScanTarget};
     use sqlx::types::ipnetwork::IpNetwork;
     use time::macros::datetime;
     use uuid::Uuid;
@@ -99,7 +102,8 @@ mod tests {
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
         let expected_scan_id = ScanId::new(Uuid::now_v7());
         let expected_project_id = ProjectId::new(Uuid::now_v7());
-        let expected_target: IpNetwork = "192.168.0.1".parse().unwrap();
+        let expected_target =
+            ScanTarget::new(IpNetwork::V4(Ipv4Network::from_str("192.168.0.1").unwrap()));
         let expected_schedule = Some(String::from("0 * * * * *"));
         let expected_status = crate::features::scan::model::ScanStatus::Scheduled;
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
@@ -108,7 +112,7 @@ mod tests {
         let expected_scan = ScanEntity {
             id: expected_scan_id.clone(),
             project_id: expected_project_id.clone(),
-            target: expected_target,
+            target: expected_target.clone(),
             status: expected_status,
             schedule: expected_schedule.clone(),
             created_at: expected_created_at,
@@ -158,7 +162,8 @@ mod tests {
         let expected_scan_id = ScanId::new(Uuid::now_v7());
         let expected_end_cursor = encode_cursor(expected_scan_id.as_ref());
         let expected_project_id = ProjectId::new(Uuid::now_v7());
-        let expected_target: IpNetwork = "192.168.0.1".parse().unwrap();
+        let expected_target =
+            ScanTarget::new(IpNetwork::V4(Ipv4Network::from_str("192.168.0.1").unwrap()));
         let expected_schedule = Some(String::from("0 * * * * *"));
         let expected_status = crate::features::scan::model::ScanStatus::Scheduled;
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
@@ -167,7 +172,7 @@ mod tests {
         let expected_scan = ScanEntity {
             id: expected_scan_id.clone(),
             project_id: expected_project_id.clone(),
-            target: expected_target,
+            target: expected_target.clone(),
             status: expected_status,
             schedule: expected_schedule.clone(),
             created_at: expected_created_at,
@@ -216,7 +221,8 @@ mod tests {
         let expected_scan_id = ScanId::new(Uuid::now_v7());
         let expected_end_cursor = encode_cursor(expected_scan_id.as_ref());
         let expected_project_id = ProjectId::new(Uuid::now_v7());
-        let expected_target: IpNetwork = "192.168.0.1".parse().unwrap();
+        let expected_target =
+            ScanTarget::new(IpNetwork::V4(Ipv4Network::from_str("192.168.0.1").unwrap()));
         let expected_schedule = Some(String::from("0 * * * * *"));
         let expected_status = crate::features::scan::model::ScanStatus::Scheduled;
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
@@ -225,7 +231,7 @@ mod tests {
         let expected_scan = ScanEntity {
             id: expected_scan_id.clone(),
             project_id: expected_project_id.clone(),
-            target: expected_target,
+            target: expected_target.clone(),
             status: expected_status,
             schedule: expected_schedule.clone(),
             created_at: expected_created_at,

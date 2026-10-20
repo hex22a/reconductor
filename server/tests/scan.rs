@@ -1,8 +1,9 @@
-use std::sync::Arc;
+use std::{str::FromStr, sync::Arc};
 
-use reconductor_core::ScanId;
+use ipnetwork::{IpNetwork, Ipv4Network};
+use reconductor_core::{ScanId, ScanTarget};
 use server::{
-    ProjectId,
+    ProjectId, UserId,
     features::scan::{
         model::ScanInsert,
         repository::{PgScanRespository, ScanRepository},
@@ -12,8 +13,8 @@ use sqlx::PgPool;
 use time::macros::datetime;
 use uuid::Uuid;
 
-async fn setup_project(db: &PgPool) -> (ProjectId, Uuid) {
-    let expected_user_id: Uuid = sqlx::query_scalar(
+async fn setup_project(db: &PgPool) -> (ProjectId, UserId) {
+    let expected_user_id = sqlx::query_scalar(
         r#"
         INSERT INTO recon.users
             (username, password_hash)
@@ -32,7 +33,7 @@ async fn setup_project(db: &PgPool) -> (ProjectId, Uuid) {
         RETURNING id
         "#,
     )
-    .bind(expected_user_id)
+    .bind(&expected_user_id)
     .fetch_one(db)
     .await
     .unwrap();
@@ -83,11 +84,12 @@ async fn test_create_scan(db: PgPool) {
     // Arrange
     let (expected_project_id, _expected_owner_id) = setup_project(&db).await;
     let expected_next_run_at = datetime!(2019-01-01 0:00 UTC);
-    let expected_target = "192.168.0.1".try_into().unwrap();
+    let expected_target =
+        ScanTarget::new(IpNetwork::V4(Ipv4Network::from_str("192.168.0.1").unwrap()));
     let expected_schedule = "* * * * *".to_string();
     let expected_scan_insert = ScanInsert {
         project_id: expected_project_id.clone(),
-        target: expected_target,
+        target: expected_target.clone(),
         schedule: Some(expected_schedule),
         next_run_at: Some(expected_next_run_at),
     };
@@ -133,7 +135,8 @@ async fn test_list_scans(db: PgPool) {
     let expected_limit: i64 = 1;
     let (expected_project_id, _expected_owner_id) = setup_project(&db).await;
     let expected_next_run_at = datetime!(2019-01-01 0:00 UTC);
-    let expected_target = "192.168.0.1".try_into().unwrap();
+    let expected_target =
+        ScanTarget::new(IpNetwork::V4(Ipv4Network::from_str("192.168.0.1").unwrap()));
     let expected_schedule = "* * * * *".to_string();
     let expected_scan_insert = ScanInsert {
         project_id: expected_project_id.clone(),

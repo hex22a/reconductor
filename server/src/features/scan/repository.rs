@@ -57,7 +57,7 @@ impl ScanRepository for PgScanRespository {
                 next_run_at
             "#,
             scan_insert.project_id.as_ref(),
-            scan_insert.target,
+            scan_insert.target.as_ref(),
             scan_insert.schedule,
             scan_insert.next_run_at,
         )

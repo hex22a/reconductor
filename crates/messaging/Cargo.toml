@@ -11,7 +11,7 @@ urlencoding = "2.1.3"
 reconductor-core.workspace = true
 uuid.workspace = true
 thiserror.workspace = true
-ipnetwork = { version = "0.21.1", features = ["serde"] }
+ipnetwork.workspace = true
 
 [dev-dependencies]
 mockall.workspace = true

@@ -6,7 +6,7 @@ use axum::{
     http::StatusCode,
     response::IntoResponse,
 };
-use reconductor_core::ScanId;
+use reconductor_core::{ScanId, ScanTarget};
 use uuid::Uuid;
 
 use crate::{
@@ -25,7 +25,11 @@ pub async fn create(
     let CreateScanInput { target, schedule } = scan;
     let scan = state
         .create_scan_feature
-        .create(ProjectId::new(project_id), target, schedule)
+        .create(
+            ProjectId::new(project_id),
+            ScanTarget::new(target),
+            schedule,
+        )
         .await?;
     Ok((StatusCode::CREATED, Json(scan)))
 }

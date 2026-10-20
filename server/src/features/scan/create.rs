@@ -2,12 +2,12 @@ use std::{pin::Pin, sync::Arc};
 
 #[cfg(test)]
 use mockall::automock;
+use reconductor_core::ScanTarget;
 
 use crate::domain::types::ProjectId;
 use cron::Schedule;
 use reconductor_messaging::publisher::Publisher;
 use reconductor_schedule::SchedulerService;
-use sqlx::types::ipnetwork::IpNetwork;
 use time::OffsetDateTime;
 
 use crate::features::scan::{
@@ -22,7 +22,7 @@ pub trait CreateScanFeature {
     fn create<'a>(
         &'a self,
         project_id: ProjectId,
-        target: IpNetwork,
+        target: ScanTarget,
         schedule: Option<Schedule>,
     ) -> Pin<Box<dyn Future<Output = Result<ScanDto, ScanError>> + Send + 'a>>;
 }
@@ -52,7 +52,7 @@ where
     fn create(
         &self,
         project_id: ProjectId,
-        target: IpNetwork,
+        target: ScanTarget,
         schedule: Option<Schedule>,
     ) -> Pin<Box<dyn Future<Output = Result<ScanDto, ScanError>> + Send + '_>> {
         Box::pin(async move {
@@ -89,6 +89,7 @@ where
 mod tests {
     use std::str::FromStr;
 
+    use ipnetwork::{IpNetwork, Ipv4Network};
     use mockall::{mock, predicate::eq};
     use reconductor_core::ScanId;
     use reconductor_messaging::error::MqError;
@@ -110,7 +111,7 @@ mod tests {
             fn publish_scan(
                 &self,
                 scan_id: &ScanId,
-                target: &IpNetwork,
+                target: &ScanTarget,
             ) -> impl Future<Output = Result<(), MqError>> + Send;
         }
     }
@@ -128,7 +129,8 @@ mod tests {
         // Arrange
         let expected_scan_id = ScanId::new(Uuid::now_v7());
         let expected_project_id = ProjectId::new(Uuid::now_v7());
-        let expected_target = "192.168.0.1".parse().unwrap();
+        let expected_target =
+            ScanTarget::new(IpNetwork::V4(Ipv4Network::from_str("192.168.0.1").unwrap()));
         let expected_scan_status = ScanStatus::Scheduled;
         let expected_schedule = Schedule::from_str("* * * * * *").unwrap();
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
@@ -136,7 +138,7 @@ mod tests {
         let expected_scan_entity = ScanEntity {
             id: expected_scan_id.clone(),
             project_id: expected_project_id.clone(),
-            target: expected_target,
+            target: expected_target.clone(),
             status: expected_scan_status,
             schedule: Some(expected_schedule.to_string()),
             created_at: expected_created_at,
@@ -144,7 +146,7 @@ mod tests {
         };
         let expected_scan = ScanDto {
             id: expected_scan_id.clone(),
-            target: expected_target,
+            target: expected_target.clone(),
             schedule: Some(expected_schedule.to_string()),
             created_at: expected_created_at,
         };
@@ -152,7 +154,7 @@ mod tests {
         let mut mock_scan_publisher = MockScanPublisher::new();
         mock_scan_publisher
             .expect_publish_scan()
-            .with(eq(expected_scan_id), eq(expected_target))
+            .with(eq(expected_scan_id), eq(expected_target.clone()))
             .returning(|_, _| Box::pin(async { Ok(()) }));
 
         let mut mock_scan_repository = MockScanRepository::new();
