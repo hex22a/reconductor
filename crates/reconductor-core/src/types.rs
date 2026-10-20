@@ -10,7 +10,3 @@ pub struct ScanId(Uuid);
 #[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
 #[sqlx(transparent)]
 pub struct ScanTarget(IpNetwork);
-
-#[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
-#[sqlx(transparent)]
-pub struct ScanSchedule(String);
