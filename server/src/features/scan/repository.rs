@@ -1,9 +1,10 @@
-use crate::features::scan::model::ScanStatus;
+use crate::{domain::types::ProjectId, features::scan::model::ScanStatus};
 use std::sync::Arc;
 
 #[cfg(test)]
 use mockall::automock;
 
+use reconductor_core::ScanId;
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -17,11 +18,11 @@ pub trait ScanRepository {
     ) -> impl Future<Output = Result<ScanEntity, sqlx::Error>> + Send;
     fn get_scan(
         &self,
-        scan_id: &Uuid,
+        scan_id: &ScanId,
     ) -> impl Future<Output = Result<ScanEntity, sqlx::Error>> + Send;
     fn list_scans(
         &self,
-        project_id: &Uuid,
+        project_id: &ProjectId,
         cursor_id: Option<Uuid>,
         limit: i64,
     ) -> impl Future<Output = Result<Vec<ScanEntity>, sqlx::Error>> + Send;
@@ -55,7 +56,7 @@ impl ScanRepository for PgScanRespository {
                 schedule,
                 next_run_at
             "#,
-            scan_insert.project_id,
+            scan_insert.project_id.as_ref(),
             scan_insert.target,
             scan_insert.schedule,
             scan_insert.next_run_at,
@@ -65,7 +66,7 @@ impl ScanRepository for PgScanRespository {
         Ok(scan)
     }
 
-    async fn get_scan(&self, scan_id: &Uuid) -> Result<ScanEntity, sqlx::Error> {
+    async fn get_scan(&self, scan_id: &ScanId) -> Result<ScanEntity, sqlx::Error> {
         let scan = sqlx::query_as!(
             ScanEntity,
             r#"
@@ -81,7 +82,7 @@ impl ScanRepository for PgScanRespository {
             WHERE id=$1
             LIMIT 1;
             "#,
-            scan_id,
+            scan_id.as_ref(),
         )
         .fetch_one(&*self.db)
         .await?;
@@ -90,7 +91,7 @@ impl ScanRepository for PgScanRespository {
 
     async fn list_scans(
         &self,
-        project_id: &Uuid,
+        project_id: &ProjectId,
         cursor_id: Option<Uuid>,
         limit: i64,
     ) -> Result<Vec<ScanEntity>, sqlx::Error> {
@@ -112,7 +113,7 @@ impl ScanRepository for PgScanRespository {
                     ORDER BY id DESC
                     LIMIT $3;
                     "#,
-                    project_id,
+                    project_id.as_ref(),
                     cursor,
                     limit,
                 )
@@ -136,7 +137,7 @@ impl ScanRepository for PgScanRespository {
                     ORDER BY id DESC
                     LIMIT $2;
                     "#,
-                    project_id,
+                    project_id.as_ref(),
                     limit,
                 )
                 .fetch_all(&*self.db)

@@ -1,14 +1,18 @@
 use std::sync::Arc;
 
-use server::features::scan::{
-    model::ScanInsert,
-    repository::{PgScanRespository, ScanRepository},
+use reconductor_core::ScanId;
+use server::{
+    ProjectId,
+    features::scan::{
+        model::ScanInsert,
+        repository::{PgScanRespository, ScanRepository},
+    },
 };
 use sqlx::PgPool;
 use time::macros::datetime;
 use uuid::Uuid;
 
-async fn setup_project(db: &PgPool) -> (Uuid, Uuid) {
+async fn setup_project(db: &PgPool) -> (ProjectId, Uuid) {
     let expected_user_id: Uuid = sqlx::query_scalar(
         r#"
         INSERT INTO recon.users
@@ -20,7 +24,7 @@ async fn setup_project(db: &PgPool) -> (Uuid, Uuid) {
     .fetch_one(db)
     .await
     .unwrap();
-    let expected_project_id: Uuid = sqlx::query_scalar(
+    let expected_project_id = sqlx::query_scalar(
         r#"
         INSERT INTO recon.projects
             (name, owner_id)
@@ -35,7 +39,7 @@ async fn setup_project(db: &PgPool) -> (Uuid, Uuid) {
     (expected_project_id, expected_user_id)
 }
 
-async fn setup_scan(db: &PgPool) -> (Uuid, Uuid) {
+async fn setup_scan(db: &PgPool) -> (ScanId, ProjectId) {
     let expected_user_id: Uuid = sqlx::query_scalar(
         r#"
         INSERT INTO recon.users
@@ -47,7 +51,7 @@ async fn setup_scan(db: &PgPool) -> (Uuid, Uuid) {
     .fetch_one(db)
     .await
     .unwrap();
-    let expected_project_id: Uuid = sqlx::query_scalar(
+    let expected_project_id = sqlx::query_scalar(
         r#"
         INSERT INTO recon.projects
             (name, owner_id)
@@ -59,7 +63,7 @@ async fn setup_scan(db: &PgPool) -> (Uuid, Uuid) {
     .fetch_one(db)
     .await
     .unwrap();
-    let expected_scan_id: Uuid = sqlx::query_scalar(
+    let expected_scan_id = sqlx::query_scalar(
         r#"
         INSERT INTO recon.scans
             (project_id, target, schedule)
@@ -67,7 +71,7 @@ async fn setup_scan(db: &PgPool) -> (Uuid, Uuid) {
         RETURNING id
         "#,
     )
-    .bind(expected_project_id)
+    .bind(&expected_project_id)
     .fetch_one(db)
     .await
     .unwrap();
@@ -82,7 +86,7 @@ async fn test_create_scan(db: PgPool) {
     let expected_target = "192.168.0.1".try_into().unwrap();
     let expected_schedule = "* * * * *".to_string();
     let expected_scan_insert = ScanInsert {
-        project_id: expected_project_id,
+        project_id: expected_project_id.clone(),
         target: expected_target,
         schedule: Some(expected_schedule),
         next_run_at: Some(expected_next_run_at),
@@ -113,7 +117,7 @@ async fn test_get_scan_by_id(db: PgPool) {
 #[sqlx::test(migrations = "../migrations")]
 async fn test_get_scan_by_id_not_found(db: PgPool) {
     // Arrange
-    let expected_scan_id = Uuid::now_v7();
+    let expected_scan_id = ScanId::new(Uuid::now_v7());
     let repo = PgScanRespository::new(Arc::new(db));
 
     // Act
@@ -132,7 +136,7 @@ async fn test_list_scans(db: PgPool) {
     let expected_target = "192.168.0.1".try_into().unwrap();
     let expected_schedule = "* * * * *".to_string();
     let expected_scan_insert = ScanInsert {
-        project_id: expected_project_id,
+        project_id: expected_project_id.clone(),
         target: expected_target,
         schedule: Some(expected_schedule),
         next_run_at: Some(expected_next_run_at),

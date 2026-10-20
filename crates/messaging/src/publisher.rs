@@ -2,7 +2,7 @@
 use mockall::automock;
 
 use ipnetwork::IpNetwork;
-use uuid::Uuid;
+use reconductor_core::ScanId;
 
 use crate::{MqProvider, SCANS_QUEUE, error::MqError};
 
@@ -10,7 +10,7 @@ use crate::{MqProvider, SCANS_QUEUE, error::MqError};
 pub trait Publisher {
     fn publish_scan(
         &self,
-        scan_id: &Uuid,
+        scan_id: &ScanId,
         target: &IpNetwork,
     ) -> impl Future<Output = Result<(), MqError>> + Send;
 }
@@ -29,7 +29,7 @@ impl<T> Publisher for MqPublisher<T>
 where
     T: MqProvider + Send + Sync,
 {
-    async fn publish_scan(&self, scan_id: &Uuid, target: &IpNetwork) -> Result<(), MqError> {
+    async fn publish_scan(&self, scan_id: &ScanId, target: &IpNetwork) -> Result<(), MqError> {
         let message = serde_json::json!({ "id": scan_id, "target": target });
         self.provider.publish(SCANS_QUEUE.into(), message).await?;
         Ok(())
@@ -53,7 +53,7 @@ mod tests {
     #[tokio::test]
     async fn test_publish_scan() {
         // Arrange
-        let expected_scan_id: Uuid = Uuid::now_v7();
+        let expected_scan_id = ScanId::new(Uuid::now_v7());
         let expected_target: IpNetwork =
             IpNetwork::V4(Ipv4Network::from_str("192.168.0.0/16").unwrap());
         let expected_channel: ShortString = "scans".into();

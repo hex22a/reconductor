@@ -1,8 +1,10 @@
 use chrono::Utc;
 use cron::Schedule;
+use reconductor_core::ScanId;
 use sqlx::types::ipnetwork::IpNetwork;
 use time::OffsetDateTime;
-use uuid::Uuid;
+
+use crate::domain::types::ProjectId;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, sqlx::Type)]
 #[sqlx(type_name = "scan_status")]
@@ -17,8 +19,8 @@ pub enum ScanStatus {
 
 #[derive(Clone)]
 pub struct ScanEntity {
-    pub id: Uuid,
-    pub project_id: Uuid,
+    pub id: ScanId,
+    pub project_id: ProjectId,
     pub target: IpNetwork,
     pub status: ScanStatus,
     pub schedule: Option<String>,
@@ -27,14 +29,14 @@ pub struct ScanEntity {
 }
 
 pub struct ScanInsert {
-    pub project_id: Uuid,
+    pub project_id: ProjectId,
     pub target: IpNetwork,
     pub schedule: Option<String>,
     pub next_run_at: Option<OffsetDateTime>,
 }
 
 impl ScanInsert {
-    pub fn new(project_id: Uuid, target: IpNetwork, schedule: Option<Schedule>) -> Self {
+    pub fn new(project_id: ProjectId, target: IpNetwork, schedule: Option<Schedule>) -> Self {
         let next_run_at = schedule.as_ref().and_then(Self::calculate_next_run);
         Self {
             project_id,
@@ -61,12 +63,14 @@ pub struct CreateScanInput {
 mod tests {
     use std::str::FromStr;
 
+    use uuid::Uuid;
+
     use super::*;
 
     #[test]
     fn construct_scan_insert() {
         // Arrange
-        let expected_project_id = Uuid::now_v7();
+        let expected_project_id = ProjectId::new(Uuid::now_v7());
         let expected_target: IpNetwork = "192.168.0.1".parse().unwrap();
         let expected_schedule_with_seconds = "0 * * * * *";
         let expected_schedule = Schedule::from_str(expected_schedule_with_seconds).unwrap();
@@ -83,7 +87,7 @@ mod tests {
     #[test]
     fn construct_scan_insert_no_schedule() {
         // Arrange
-        let expected_project_id = Uuid::now_v7();
+        let expected_project_id = ProjectId::new(Uuid::now_v7());
         let expected_target: IpNetwork = "192.168.0.1".parse().unwrap();
         // Act
         let actual_scan_insert = ScanInsert::new(expected_project_id, expected_target, None);

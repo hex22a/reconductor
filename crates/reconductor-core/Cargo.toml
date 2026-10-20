@@ -1,0 +1,11 @@
+[package]
+name = "reconductor-core"
+version = "0.1.0"
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+uuid.workspace = true
+newtype-derive.workspace = true
+serde.workspace = true
+sqlx.workspace = true

@@ -3,8 +3,7 @@ use std::{pin::Pin, sync::Arc};
 #[cfg(test)]
 use mockall::automock;
 
-use uuid::Uuid;
-
+use crate::domain::types::ProjectId;
 use crate::{
     constants::SCANS_PAGE_SIZE_LIMIT,
     domain::cursor::{decode_cursor, encode_cursor},
@@ -16,7 +15,7 @@ use crate::{
 pub trait ListScansFeature {
     fn list<'a>(
         &'a self,
-        project_id: Uuid,
+        project_id: ProjectId,
         cursor_id: Option<String>,
     ) -> Pin<Box<dyn Future<Output = Result<Page<ScanDto>, ScanError>> + Send + 'a>>;
 }
@@ -38,7 +37,7 @@ where
 {
     fn list<'a>(
         &'a self,
-        project_id: Uuid,
+        project_id: ProjectId,
         cursor_id: Option<String>,
     ) -> Pin<Box<dyn Future<Output = Result<Page<ScanDto>, ScanError>> + Send + 'a>> {
         Box::pin(async move {
@@ -56,7 +55,7 @@ where
             let scan_dtos = scans
                 .iter()
                 .map(|s| ScanDto {
-                    id: s.id,
+                    id: s.id.clone(),
                     target: s.target,
                     schedule: s.schedule.clone(),
                     created_at: s.created_at,
@@ -68,7 +67,7 @@ where
                     has_next_page,
                     end_cursor: match has_next_page {
                         true => Some(encode_cursor(
-                            &scans.last().ok_or(ScanError::NoLastCursor)?.id,
+                            scans.last().ok_or(ScanError::NoLastCursor)?.id.as_ref(),
                         )),
                         false => None,
                     },
@@ -80,8 +79,10 @@ where
 
 #[cfg(test)]
 mod tests {
+    use reconductor_core::ScanId;
     use sqlx::types::ipnetwork::IpNetwork;
     use time::macros::datetime;
+    use uuid::Uuid;
 
     use crate::{
         constants::SCANS_PAGE_SIZE_LIMIT,
@@ -96,8 +97,8 @@ mod tests {
     async fn test_list_scans_no_next_page() {
         // Arrange
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
-        let expected_scan_id = Uuid::now_v7();
-        let expected_project_id = Uuid::now_v7();
+        let expected_scan_id = ScanId::new(Uuid::now_v7());
+        let expected_project_id = ProjectId::new(Uuid::now_v7());
         let expected_target: IpNetwork = "192.168.0.1".parse().unwrap();
         let expected_schedule = Some(String::from("0 * * * * *"));
         let expected_status = crate::features::scan::model::ScanStatus::Scheduled;
@@ -105,8 +106,8 @@ mod tests {
         let expected_next_run_at = Some(datetime!(2019-02-01 0:00 UTC));
         let expected_scan_entities_size = SCANS_PAGE_SIZE_LIMIT as usize;
         let expected_scan = ScanEntity {
-            id: expected_scan_id,
-            project_id: expected_project_id,
+            id: expected_scan_id.clone(),
+            project_id: expected_project_id.clone(),
             target: expected_target,
             status: expected_status,
             schedule: expected_schedule.clone(),
@@ -154,9 +155,9 @@ mod tests {
     async fn test_list_scans_with_next_page() {
         // Arrange
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
-        let expected_scan_id = Uuid::now_v7();
-        let expected_end_cursor = encode_cursor(&expected_scan_id);
-        let expected_project_id = Uuid::now_v7();
+        let expected_scan_id = ScanId::new(Uuid::now_v7());
+        let expected_end_cursor = encode_cursor(expected_scan_id.as_ref());
+        let expected_project_id = ProjectId::new(Uuid::now_v7());
         let expected_target: IpNetwork = "192.168.0.1".parse().unwrap();
         let expected_schedule = Some(String::from("0 * * * * *"));
         let expected_status = crate::features::scan::model::ScanStatus::Scheduled;
@@ -164,8 +165,8 @@ mod tests {
         let expected_next_run_at = Some(datetime!(2019-02-01 0:00 UTC));
         let expected_scan_entities_size = SCANS_PAGE_SIZE_LIMIT as usize;
         let expected_scan = ScanEntity {
-            id: expected_scan_id,
-            project_id: expected_project_id,
+            id: expected_scan_id.clone(),
+            project_id: expected_project_id.clone(),
             target: expected_target,
             status: expected_status,
             schedule: expected_schedule.clone(),
@@ -212,9 +213,9 @@ mod tests {
     #[tokio::test]
     async fn test_list_scans_no_cursor() {
         // Arrange
-        let expected_scan_id = Uuid::now_v7();
-        let expected_end_cursor = encode_cursor(&expected_scan_id);
-        let expected_project_id = Uuid::now_v7();
+        let expected_scan_id = ScanId::new(Uuid::now_v7());
+        let expected_end_cursor = encode_cursor(expected_scan_id.as_ref());
+        let expected_project_id = ProjectId::new(Uuid::now_v7());
         let expected_target: IpNetwork = "192.168.0.1".parse().unwrap();
         let expected_schedule = Some(String::from("0 * * * * *"));
         let expected_status = crate::features::scan::model::ScanStatus::Scheduled;
@@ -222,8 +223,8 @@ mod tests {
         let expected_next_run_at = Some(datetime!(2019-02-01 0:00 UTC));
         let expected_scan_entities_size = SCANS_PAGE_SIZE_LIMIT as usize;
         let expected_scan = ScanEntity {
-            id: expected_scan_id,
-            project_id: expected_project_id,
+            id: expected_scan_id.clone(),
+            project_id: expected_project_id.clone(),
             target: expected_target,
             status: expected_status,
             schedule: expected_schedule.clone(),
@@ -268,7 +269,7 @@ mod tests {
     async fn test_list_scans_not_found() {
         // Arrange
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
-        let expected_project_id = Uuid::now_v7();
+        let expected_project_id = ProjectId::new(Uuid::now_v7());
 
         let mut mock_scan_repository = MockScanRepository::new();
         mock_scan_repository

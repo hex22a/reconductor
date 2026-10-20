@@ -1,13 +1,17 @@
+use reconductor_core::ScanId;
 use sqlx::{PgPool, types::time::OffsetDateTime};
-use uuid::Uuid;
+
+#[cfg(test)]
+use mockall::automock;
 
 use crate::features::scan::{error::ScanError, model::DueScan};
 
+#[cfg_attr(test, automock)]
 pub trait ScanRepository {
     fn fetch_due_scans(&self) -> impl Future<Output = Result<Vec<DueScan>, ScanError>> + Send;
     fn update_next_run(
         &self,
-        scan_id: Uuid,
+        scan_id: &ScanId,
         next_run_at: OffsetDateTime,
     ) -> impl Future<Output = Result<(), ScanError>> + Send;
 }
@@ -36,7 +40,7 @@ impl ScanRepository for PgScanRepository {
     }
     async fn update_next_run(
         &self,
-        scan_id: Uuid,
+        scan_id: &ScanId,
         next_run_at: OffsetDateTime,
     ) -> Result<(), ScanError> {
         sqlx::query!(
@@ -46,7 +50,7 @@ impl ScanRepository for PgScanRepository {
             WHERE id = $2
             "#,
             next_run_at,
-            scan_id,
+            scan_id.as_ref(),
         )
         .execute(&self.db)
         .await?;

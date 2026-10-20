@@ -18,9 +18,9 @@ hex = "0.4.3"
 ipnetwork = { version = "0.21.1", features = ["serde"] }
 mac_address = { version = "1.1.8", features = ["serde"] }
 rand = "0.10.2"
-serde = { version = "1.0.229", features = ["derive"] }
+serde.workspace = true
 serde_json = "1.0.151"
-sqlx = { version = "0.9.0", features = ["ipnetwork", "mac_address", "migrate", "postgres", "runtime-tokio", "time", "uuid"] }
+sqlx.workspace = true
 subtle = "2.6.1"
 time = { version = "0.3.55", features = ["serde"] }
 tokio = { version = "1.53.1", features = ["full"] }
@@ -28,9 +28,10 @@ tower = { version = "0.5.3", features = ["util"] }
 tower-http = { version = "0.7.0", features = ["cors"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
-uuid = { version = "1.26.0", features = ["serde", "v7"] }
-newtype-derive = { path = "../crates/newtype-derive" }
+uuid.workspace = true
+newtype-derive.workspace = true
 thiserror.workspace = true
+reconductor-core.workspace = true
 reconductor-messaging.workspace = true
 reconductor-schedule.workspace = true
 secrecy = "0.10.3"

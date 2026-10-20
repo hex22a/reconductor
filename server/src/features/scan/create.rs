@@ -3,12 +3,12 @@ use std::{pin::Pin, sync::Arc};
 #[cfg(test)]
 use mockall::automock;
 
+use crate::domain::types::ProjectId;
 use cron::Schedule;
 use reconductor_messaging::publisher::Publisher;
 use reconductor_schedule::SchedulerService;
 use sqlx::types::ipnetwork::IpNetwork;
 use time::OffsetDateTime;
-use uuid::Uuid;
 
 use crate::features::scan::{
     dto::ScanDto,
@@ -21,7 +21,7 @@ use crate::features::scan::{
 pub trait CreateScanFeature {
     fn create<'a>(
         &'a self,
-        project_id: Uuid,
+        project_id: ProjectId,
         target: IpNetwork,
         schedule: Option<Schedule>,
     ) -> Pin<Box<dyn Future<Output = Result<ScanDto, ScanError>> + Send + 'a>>;
@@ -51,7 +51,7 @@ where
 {
     fn create(
         &self,
-        project_id: Uuid,
+        project_id: ProjectId,
         target: IpNetwork,
         schedule: Option<Schedule>,
     ) -> Pin<Box<dyn Future<Output = Result<ScanDto, ScanError>> + Send + '_>> {
@@ -87,11 +87,14 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::{str::FromStr, sync::Mutex};
+    use std::str::FromStr;
 
+    use mockall::{mock, predicate::eq};
+    use reconductor_core::ScanId;
     use reconductor_messaging::error::MqError;
     use reconductor_schedule::ScheduleError;
     use time::macros::datetime;
+    use uuid::Uuid;
 
     use crate::features::scan::{
         model::{ScanEntity, ScanStatus},
@@ -100,47 +103,39 @@ mod tests {
 
     use super::*;
 
-    struct MockMqPublisher {
-        publish_calls: Arc<Mutex<Vec<(Uuid, IpNetwork)>>>,
-    }
+    mock! {
+        ScanPublisher {}
 
-    struct MockScheduler {
-        error: Mutex<Option<ScheduleError>>,
-        return_value: OffsetDateTime,
-    }
-
-    impl Publisher for MockMqPublisher {
-        async fn publish_scan(&self, scan_id: &Uuid, target: &IpNetwork) -> Result<(), MqError> {
-            self.publish_calls
-                .lock()
-                .unwrap()
-                .push((scan_id.to_owned(), target.to_owned()));
-            Ok(())
+        impl Publisher for ScanPublisher {
+            fn publish_scan(
+                &self,
+                scan_id: &ScanId,
+                target: &IpNetwork,
+            ) -> impl Future<Output = Result<(), MqError>> + Send;
         }
     }
 
-    impl SchedulerService for MockScheduler {
-        fn calculate_next_run(&self, _: &Schedule) -> Result<OffsetDateTime, ScheduleError> {
-            match self.error.lock().unwrap().take() {
-                Some(e) => Err(e),
-                None => Ok(self.return_value),
-            }
+    mock! {
+        Scheduler {}
+
+        impl SchedulerService for Scheduler {
+            fn calculate_next_run(&self, schedule: &Schedule) -> Result<OffsetDateTime, ScheduleError>;
         }
     }
 
     #[tokio::test]
     async fn test_create_scan() {
         // Arrange
-        let expected_scan_id = Uuid::now_v7();
-        let expected_project_id = Uuid::now_v7();
+        let expected_scan_id = ScanId::new(Uuid::now_v7());
+        let expected_project_id = ProjectId::new(Uuid::now_v7());
         let expected_target = "192.168.0.1".parse().unwrap();
         let expected_scan_status = ScanStatus::Scheduled;
         let expected_schedule = Schedule::from_str("* * * * * *").unwrap();
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_next_run_at = datetime!(2019-01-02 0:00 UTC);
         let expected_scan_entity = ScanEntity {
-            id: expected_scan_id,
-            project_id: expected_project_id,
+            id: expected_scan_id.clone(),
+            project_id: expected_project_id.clone(),
             target: expected_target,
             status: expected_scan_status,
             schedule: Some(expected_schedule.to_string()),
@@ -148,16 +143,18 @@ mod tests {
             next_run_at: Some(expected_next_run_at),
         };
         let expected_scan = ScanDto {
-            id: expected_scan_id,
+            id: expected_scan_id.clone(),
             target: expected_target,
             schedule: Some(expected_schedule.to_string()),
             created_at: expected_created_at,
         };
 
-        let publish_calls = Arc::new(Mutex::new(vec![]));
-        let mock_mq_publisher = MockMqPublisher {
-            publish_calls: publish_calls.clone(),
-        };
+        let mut mock_scan_publisher = MockScanPublisher::new();
+        mock_scan_publisher
+            .expect_publish_scan()
+            .with(eq(expected_scan_id), eq(expected_target))
+            .returning(|_, _| Box::pin(async { Ok(()) }));
+
         let mut mock_scan_repository = MockScanRepository::new();
         mock_scan_repository
             .expect_create_scan()
@@ -165,14 +162,16 @@ mod tests {
                 let scan_entity = expected_scan_entity.clone();
                 Box::pin(async { Ok(scan_entity) })
             });
-        let mock_scheduler_service = MockScheduler {
-            error: Mutex::new(None),
-            return_value: expected_created_at,
-        };
+
+        let mut mock_scheduler_service = MockScheduler::new();
+        mock_scheduler_service
+            .expect_calculate_next_run()
+            .with(eq(expected_schedule.clone()))
+            .return_const(Ok(expected_next_run_at));
 
         let feature = CreateScan::new(
             Arc::new(mock_scan_repository),
-            Arc::new(mock_mq_publisher),
+            Arc::new(mock_scan_publisher),
             Arc::new(mock_scheduler_service),
         );
 
@@ -188,10 +187,5 @@ mod tests {
 
         // Assert
         assert_eq!(actual_scan, expected_scan);
-        assert_eq!(publish_calls.lock().unwrap().len(), 1);
-        assert_eq!(
-            publish_calls.lock().unwrap()[0],
-            (expected_scan_id, expected_target)
-        )
     }
 }

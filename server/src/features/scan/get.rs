@@ -2,8 +2,7 @@ use std::{pin::Pin, sync::Arc};
 
 #[cfg(test)]
 use mockall::automock;
-
-use uuid::Uuid;
+use reconductor_core::ScanId;
 
 use crate::features::scan::{
     dto::ScanDto, error::ScanError, model::ScanEntity, repository::ScanRepository,
@@ -13,7 +12,7 @@ use crate::features::scan::{
 pub trait GetScanFeature {
     fn get<'a>(
         &'a self,
-        scan_id: Uuid,
+        scan_id: ScanId,
     ) -> Pin<Box<dyn Future<Output = Result<ScanDto, ScanError>> + Send + 'a>>;
 }
 
@@ -33,7 +32,7 @@ where
 {
     fn get<'a>(
         &'a self,
-        scan_id: Uuid,
+        scan_id: ScanId,
     ) -> Pin<Box<dyn Future<Output = Result<ScanDto, ScanError>> + Send + 'a>> {
         Box::pin(async move {
             let ScanEntity {
@@ -57,6 +56,9 @@ where
 mod tests {
     use sqlx::types::ipnetwork::IpNetwork;
     use time::macros::datetime;
+    use uuid::Uuid;
+
+    use crate::domain::types::ProjectId;
 
     use crate::features::scan::{model::ScanEntity, repository::MockScanRepository};
 
@@ -65,15 +67,15 @@ mod tests {
     #[tokio::test]
     async fn test_get_scan() {
         // Arrange
-        let expected_scan_id = Uuid::now_v7();
-        let expected_project_id = Uuid::now_v7();
+        let expected_scan_id = ScanId::new(Uuid::now_v7());
+        let expected_project_id = ProjectId::new(Uuid::now_v7());
         let expected_target: IpNetwork = "192.168.0.1".parse().unwrap();
         let expected_schedule = Some(String::from("0 * * * * *"));
         let expected_status = crate::features::scan::model::ScanStatus::Scheduled;
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_next_run_at = Some(datetime!(2019-02-01 0:00 UTC));
         let expected_scan = ScanEntity {
-            id: expected_scan_id,
+            id: expected_scan_id.clone(),
             project_id: expected_project_id,
             target: expected_target,
             status: expected_status,
@@ -82,7 +84,7 @@ mod tests {
             next_run_at: expected_next_run_at,
         };
         let expected_scan_dto = ScanDto {
-            id: expected_scan_id,
+            id: expected_scan_id.clone(),
             target: expected_target,
             schedule: expected_schedule,
             created_at: expected_created_at,
@@ -106,7 +108,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_scan_not_found() {
         // Arrange
-        let expected_scan_id = Uuid::now_v7();
+        let expected_scan_id = ScanId::new(Uuid::now_v7());
 
         let mut mock_scan_repository = MockScanRepository::new();
         mock_scan_repository

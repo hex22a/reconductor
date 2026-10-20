@@ -15,6 +15,7 @@ tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 uuid = { version = "1.26.0", features = ["serde", "v7"] }
 thiserror.workspace = true
+reconductor-core.workspace = true
 reconductor-messaging.workspace = true
 reconductor-schedule.workspace = true
 

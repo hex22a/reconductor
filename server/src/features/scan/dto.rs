@@ -1,16 +1,16 @@
 use std::{collections::HashMap, str::FromStr};
 
 use cron::Schedule;
+use reconductor_core::ScanId;
 use serde::{Deserialize, Serialize};
 use sqlx::types::ipnetwork::IpNetwork;
 use time::OffsetDateTime;
-use uuid::Uuid;
 
 use crate::{application::error::ServerError, features::scan::model::CreateScanInput};
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct ScanDto {
-    pub id: Uuid,
+    pub id: ScanId,
     pub target: IpNetwork,
     pub schedule: Option<String>,
     #[serde(with = "time::serde::rfc3339")]
