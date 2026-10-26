@@ -3,20 +3,21 @@ use std::sync::Arc;
 #[cfg(test)]
 use mockall::automock;
 
+use reconductor_core::ScanId;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::features::scan_run::model::ScanRunEntity;
+use crate::{domain::types::ScanRunId, features::scan_run::model::ScanRunEntity};
 
 #[cfg_attr(test, automock)]
 pub trait ScanRunRepository {
     fn get_scan_run(
         &self,
-        scan_run_id: &Uuid,
+        scan_run_id: &ScanRunId,
     ) -> impl Future<Output = Result<ScanRunEntity, sqlx::Error>> + Send;
     fn list_scan_runs(
         &self,
-        scan_id: &Uuid,
+        scan_id: &ScanId,
         cursor_id: Option<Uuid>,
         limit: i64,
     ) -> impl Future<Output = Result<Vec<ScanRunEntity>, sqlx::Error>> + Send;
@@ -33,7 +34,7 @@ impl PgScanRunRepository {
 }
 
 impl ScanRunRepository for PgScanRunRepository {
-    async fn get_scan_run(&self, scan_run_id: &Uuid) -> Result<ScanRunEntity, sqlx::Error> {
+    async fn get_scan_run(&self, scan_run_id: &ScanRunId) -> Result<ScanRunEntity, sqlx::Error> {
         let scan_run = sqlx::query_as!(
             ScanRunEntity,
             r#"
@@ -45,7 +46,7 @@ impl ScanRunRepository for PgScanRunRepository {
             WHERE id=$1
             LIMIT 1;
             "#,
-            scan_run_id,
+            scan_run_id.as_ref(),
         )
         .fetch_one(&*self.db)
         .await?;
@@ -54,7 +55,7 @@ impl ScanRunRepository for PgScanRunRepository {
 
     async fn list_scan_runs(
         &self,
-        scan_id: &Uuid,
+        scan_id: &ScanId,
         cursor_id: Option<Uuid>,
         limit: i64,
     ) -> Result<Vec<ScanRunEntity>, sqlx::Error> {
@@ -72,7 +73,7 @@ impl ScanRunRepository for PgScanRunRepository {
                     ORDER BY id DESC
                     LIMIT $3;
                     "#,
-                    scan_id,
+                    scan_id.as_ref(),
                     cursor,
                     limit,
                 )
@@ -92,7 +93,7 @@ impl ScanRunRepository for PgScanRunRepository {
                     ORDER BY id DESC
                     LIMIT $2;
                     "#,
-                    scan_id,
+                    scan_id.as_ref(),
                     limit,
                 )
                 .fetch_all(&*self.db)

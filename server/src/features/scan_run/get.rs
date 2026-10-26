@@ -3,17 +3,18 @@ use std::{pin::Pin, sync::Arc};
 #[cfg(test)]
 use mockall::automock;
 
-use uuid::Uuid;
-
-use crate::features::scan_run::{
-    dto::ScanRunDto, error::ScanRunError, model::ScanRunEntity, repository::ScanRunRepository,
+use crate::{
+    domain::types::ScanRunId,
+    features::scan_run::{
+        dto::ScanRunDto, error::ScanRunError, model::ScanRunEntity, repository::ScanRunRepository,
+    },
 };
 
 #[cfg_attr(test, automock)]
 pub trait GetScanRunFeature {
     fn get<'a>(
         &'a self,
-        scan_run_id: Uuid,
+        scan_run_id: ScanRunId,
     ) -> Pin<Box<dyn Future<Output = Result<ScanRunDto, ScanRunError>> + Send + 'a>>;
 }
 
@@ -35,7 +36,7 @@ where
 {
     fn get(
         &self,
-        scan_run_id: Uuid,
+        scan_run_id: ScanRunId,
     ) -> Pin<Box<dyn Future<Output = Result<ScanRunDto, ScanRunError>> + Send + '_>> {
         Box::pin(async move {
             let ScanRunEntity {
@@ -54,7 +55,9 @@ where
 
 #[cfg(test)]
 mod tests {
+    use reconductor_core::ScanId;
     use time::macros::datetime;
+    use uuid::Uuid;
 
     use crate::features::scan_run::{model::ScanRunEntity, repository::MockScanRunRepository};
 
@@ -63,16 +66,16 @@ mod tests {
     #[tokio::test]
     async fn test_get_scan_run() {
         // Arrange
-        let expected_scan_run_id = Uuid::now_v7();
-        let expected_scan_id = Uuid::now_v7();
+        let expected_scan_run_id = ScanRunId::new(Uuid::now_v7());
+        let expected_scan_id = ScanId::new(Uuid::now_v7());
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_scan_run = ScanRunEntity {
-            id: expected_scan_run_id,
-            scan_id: expected_scan_id,
+            id: expected_scan_run_id.clone(),
+            scan_id: expected_scan_id.clone(),
             created_at: expected_created_at,
         };
         let expected_scan_run_dto = ScanRunDto {
-            id: expected_scan_run_id,
+            id: expected_scan_run_id.clone(),
             scan_id: expected_scan_id,
             created_at: expected_created_at,
         };
@@ -97,7 +100,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_scan_run_not_found() {
         // Arrange
-        let expected_scan_run_id = Uuid::now_v7();
+        let expected_scan_run_id = ScanRunId::new(Uuid::now_v7());
 
         let mut mock_scan_run_repository = MockScanRunRepository::new();
         mock_scan_run_repository

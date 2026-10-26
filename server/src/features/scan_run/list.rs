@@ -3,7 +3,7 @@ use std::{pin::Pin, sync::Arc};
 #[cfg(test)]
 use mockall::automock;
 
-use uuid::Uuid;
+use reconductor_core::ScanId;
 
 use crate::{
     constants::SCAN_RUNS_PAGE_SIZE_LIMIT,
@@ -16,7 +16,7 @@ use crate::{
 pub trait ListScanRunsFeature {
     fn list<'a>(
         &'a self,
-        scan_id: Uuid,
+        scan_id: ScanId,
         cursor_id: Option<String>,
     ) -> Pin<Box<dyn Future<Output = Result<Page<ScanRunDto>, ScanRunError>> + Send + 'a>>;
 }
@@ -40,7 +40,7 @@ where
 {
     fn list<'a>(
         &'a self,
-        scan_id: Uuid,
+        scan_id: ScanId,
         cursor_id: Option<String>,
     ) -> Pin<Box<dyn Future<Output = Result<Page<ScanRunDto>, ScanRunError>> + Send + 'a>> {
         Box::pin(async move {
@@ -58,8 +58,8 @@ where
             let scan_run_dtos = scan_runs
                 .iter()
                 .map(|r| ScanRunDto {
-                    id: r.id,
-                    scan_id: r.scan_id,
+                    id: r.id.to_owned(),
+                    scan_id: r.scan_id.to_owned(),
                     created_at: r.created_at,
                 })
                 .collect();
@@ -69,7 +69,11 @@ where
                     has_next_page,
                     end_cursor: match has_next_page {
                         true => Some(encode_cursor(
-                            &scan_runs.last().ok_or(ScanRunError::NoLastCursor)?.id,
+                            scan_runs
+                                .last()
+                                .ok_or(ScanRunError::NoLastCursor)?
+                                .id
+                                .as_ref(),
                         )),
                         false => None,
                     },
@@ -82,10 +86,11 @@ where
 #[cfg(test)]
 mod tests {
     use time::macros::datetime;
+    use uuid::Uuid;
 
     use crate::{
         constants::SCAN_RUNS_PAGE_SIZE_LIMIT,
-        domain::cursor::encode_cursor,
+        domain::{cursor::encode_cursor, types::ScanRunId},
         features::scan_run::{model::ScanRunEntity, repository::MockScanRunRepository},
         transport::pagination::PageInfo,
     };
@@ -96,19 +101,19 @@ mod tests {
     async fn test_list_scan_runs_no_next_page() {
         // Arrange
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
-        let expected_scan_run_id = Uuid::now_v7();
-        let expected_scan_id = Uuid::now_v7();
+        let expected_scan_run_id = ScanRunId::new(Uuid::now_v7());
+        let expected_scan_id = ScanId::new(Uuid::now_v7());
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_scan_run_entities_size = SCAN_RUNS_PAGE_SIZE_LIMIT as usize;
         let expected_scan_run = ScanRunEntity {
-            id: expected_scan_run_id,
-            scan_id: expected_scan_id,
+            id: expected_scan_run_id.clone(),
+            scan_id: expected_scan_id.clone(),
             created_at: expected_created_at,
         };
         let expected_scan_run_entities = vec![expected_scan_run; expected_scan_run_entities_size];
         let expected_scan_run_dto = ScanRunDto {
             id: expected_scan_run_id,
-            scan_id: expected_scan_id,
+            scan_id: expected_scan_id.clone(),
             created_at: expected_created_at,
         };
         let expected_scan_runs = vec![expected_scan_run_dto; expected_scan_run_entities_size];
@@ -145,21 +150,21 @@ mod tests {
     async fn test_list_scan_runs_with_next_page() {
         // Arrange
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
-        let expected_scan_run_id = Uuid::now_v7();
-        let expected_end_cursor = encode_cursor(&expected_scan_run_id);
-        let expected_scan_id = Uuid::now_v7();
+        let expected_scan_run_id = ScanRunId::new(Uuid::now_v7());
+        let expected_end_cursor = encode_cursor(expected_scan_run_id.as_ref());
+        let expected_scan_id = ScanId::new(Uuid::now_v7());
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_scan_run_entities_size = SCAN_RUNS_PAGE_SIZE_LIMIT as usize;
         let expected_scan_run = ScanRunEntity {
-            id: expected_scan_run_id,
-            scan_id: expected_scan_id,
+            id: expected_scan_run_id.clone(),
+            scan_id: expected_scan_id.clone(),
             created_at: expected_created_at,
         };
         let expected_scan_run_entities =
             vec![expected_scan_run; expected_scan_run_entities_size + 1];
         let expected_scan_run_dto = ScanRunDto {
             id: expected_scan_run_id,
-            scan_id: expected_scan_id,
+            scan_id: expected_scan_id.clone(),
             created_at: expected_created_at,
         };
         let expected_scan_runs = vec![expected_scan_run_dto; expected_scan_run_entities_size];
@@ -195,21 +200,21 @@ mod tests {
     #[tokio::test]
     async fn test_list_scan_runs_no_cursor() {
         // Arrange
-        let expected_scan_run_id = Uuid::now_v7();
-        let expected_end_cursor = encode_cursor(&expected_scan_run_id);
-        let expected_scan_id = Uuid::now_v7();
+        let expected_scan_run_id = ScanRunId::new(Uuid::now_v7());
+        let expected_end_cursor = encode_cursor(expected_scan_run_id.as_ref());
+        let expected_scan_id = ScanId::new(Uuid::now_v7());
         let expected_created_at = datetime!(2019-01-01 0:00 UTC);
         let expected_scan_run_entities_size = SCAN_RUNS_PAGE_SIZE_LIMIT as usize;
         let expected_scan_run = ScanRunEntity {
-            id: expected_scan_run_id,
-            scan_id: expected_scan_id,
+            id: expected_scan_run_id.clone(),
+            scan_id: expected_scan_id.clone(),
             created_at: expected_created_at,
         };
         let expected_scan_run_entities =
             vec![expected_scan_run; expected_scan_run_entities_size + 1];
         let expected_scan_run_dto = ScanRunDto {
             id: expected_scan_run_id,
-            scan_id: expected_scan_id,
+            scan_id: expected_scan_id.clone(),
             created_at: expected_created_at,
         };
         let expected_scan_runs = vec![expected_scan_run_dto; expected_scan_run_entities_size];
@@ -243,7 +248,7 @@ mod tests {
     async fn test_list_scan_runs_not_found() {
         // Arrange
         let expected_cursor_id = String::from("AZ0GNLkMdACZ0iU9dt-z6g");
-        let expected_scan_id = Uuid::now_v7();
+        let expected_scan_id = ScanId::new(Uuid::now_v7());
 
         let mut mock_scan_run_repository = MockScanRunRepository::new();
         mock_scan_run_repository

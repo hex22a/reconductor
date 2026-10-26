@@ -1,11 +1,15 @@
 use std::sync::Arc;
 
-use server::features::scan_run::repository::{PgScanRunRepository, ScanRunRepository};
+use reconductor_core::ScanId;
+use server::{
+    ProjectId, ScanRunId, UserId,
+    features::scan_run::repository::{PgScanRunRepository, ScanRunRepository},
+};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-async fn setup_scan_run(db: &PgPool) -> (Uuid, Uuid, Uuid) {
-    let expected_user_id: Uuid = sqlx::query_scalar(
+async fn setup_scan_run(db: &PgPool) -> (ScanRunId, ScanId, ProjectId) {
+    let expected_user_id: UserId = sqlx::query_scalar(
         r#"
         INSERT INTO recon.users
             (username, password_hash)
@@ -16,7 +20,7 @@ async fn setup_scan_run(db: &PgPool) -> (Uuid, Uuid, Uuid) {
     .fetch_one(db)
     .await
     .unwrap();
-    let expected_project_id: Uuid = sqlx::query_scalar(
+    let expected_project_id = sqlx::query_scalar(
         r#"
         INSERT INTO recon.projects
             (name, owner_id)
@@ -24,11 +28,11 @@ async fn setup_scan_run(db: &PgPool) -> (Uuid, Uuid, Uuid) {
         RETURNING id
         "#,
     )
-    .bind(expected_user_id)
+    .bind(&expected_user_id)
     .fetch_one(db)
     .await
     .unwrap();
-    let expected_scan_id: Uuid = sqlx::query_scalar(
+    let expected_scan_id = sqlx::query_scalar(
         r#"
         INSERT INTO recon.scans
             (project_id, target, schedule)
@@ -36,11 +40,11 @@ async fn setup_scan_run(db: &PgPool) -> (Uuid, Uuid, Uuid) {
         RETURNING id
         "#,
     )
-    .bind(expected_project_id)
+    .bind(&expected_project_id)
     .fetch_one(db)
     .await
     .unwrap();
-    let expected_scan_run_id: Uuid = sqlx::query_scalar(
+    let expected_scan_run_id = sqlx::query_scalar(
         r#"
         INSERT INTO recon.scan_runs
             (scan_id)
@@ -48,7 +52,7 @@ async fn setup_scan_run(db: &PgPool) -> (Uuid, Uuid, Uuid) {
         RETURNING id
         "#,
     )
-    .bind(expected_scan_id)
+    .bind(&expected_scan_id)
     .fetch_one(db)
     .await
     .unwrap();
@@ -71,7 +75,7 @@ async fn test_get_scan_by_id(db: PgPool) {
 #[sqlx::test(migrations = "../migrations")]
 async fn test_get_scan_by_id_not_found(db: PgPool) {
     // Arrange
-    let expected_scan_run_id = Uuid::now_v7();
+    let expected_scan_run_id = ScanRunId::new(Uuid::now_v7());
     let repo = PgScanRunRepository::new(Arc::new(db));
 
     // Act

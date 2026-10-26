@@ -1,11 +1,13 @@
+use reconductor_core::ScanId;
 use serde::Serialize;
 use time::OffsetDateTime;
-use uuid::Uuid;
+
+use crate::domain::types::ScanRunId;
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct ScanRunDto {
-    pub id: Uuid,
-    pub scan_id: Uuid,
+    pub id: ScanRunId,
+    pub scan_id: ScanId,
     #[serde(with = "time::serde::rfc3339")]
     pub created_at: OffsetDateTime,
 }
