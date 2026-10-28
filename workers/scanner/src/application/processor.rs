@@ -57,7 +57,7 @@ where
             .update_scan_status(scan_id, ScanStatus::InProgress)
             .await?;
 
-        let xml = S::run(target).await?;
+        let xml = self.scan_runner.run(target).await?;
         let result = parser::parse(&xml)?;
 
         let hosts: Vec<Host> = result
