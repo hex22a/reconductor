@@ -2,8 +2,6 @@
 
 set -e
 
-export NODE_ENV=test
-
 ENGINE="${ENGINE:-}"
 if [[ -z "${ENGINE}" ]]; then
   if command -v docker >/dev/null 2>&1; then
@@ -16,8 +14,8 @@ if [[ -z "${ENGINE}" ]]; then
   fi
 fi
 
-trap "${ENGINE} compose -f ../../docker-compose.test.yml down -v;" EXIT;
+trap "${ENGINE} compose -f docker-compose.test.yml down -v;" EXIT;
 
-${ENGINE} compose -f ../../docker-compose.test.yml up -d;
-cargo sqlx migrate run --source ../../migrations
-cargo test --tests
+${ENGINE} compose -f docker-compose.test.yml up -d;
+cargo sqlx migrate run --source migrations
+cargo test
