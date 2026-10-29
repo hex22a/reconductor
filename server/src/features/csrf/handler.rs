@@ -176,18 +176,6 @@ mod tests {
     #[tokio::test]
     async fn test_get_csrf_error_getting_token() {
         // Arrange
-        let expected_csrf_token = CsrfToken::new("token");
-        let expected_token_pair = CsrfTokenPair {
-            token: expected_csrf_token.clone(),
-            cookie_value: CsrfCookie::new("cookie"),
-        };
-        let expected_cookie_value = expected_token_pair
-            .clone()
-            .cookie_value
-            .into_inner()
-            .expose_secret()
-            .to_owned();
-
         let mut mock_token_feature = MockTokenFeature::new();
         mock_token_feature
             .expect_get_token()
