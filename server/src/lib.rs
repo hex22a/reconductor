@@ -57,6 +57,9 @@ pub use domain::{
     types::{HostId, PortId, ProjectId, ProjectName, ScanRunId, UserId, Username},
 };
 
+#[cfg(test)]
+pub mod test_helpers;
+
 mod application;
 mod config;
 pub mod constants;
