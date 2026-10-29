@@ -34,9 +34,5 @@ jobs:
       - uses: actions/checkout@v6
       - name: Install sqlx-cli
         run: cargo install sqlx-cli
-      - name: Prepare test environment
-        run: ./pre-test.sh
-      - name: Run migrations
-        run: cargo sqlx migrate run --source migrations
       - name: Run tests
-        run: cargo test
+        run: ./tests.sh
