@@ -83,6 +83,7 @@ mod tests {
     };
 
     use super::*;
+
     #[tokio::test]
     async fn test_get_csrf_happy_path() {
         // Arrange
