@@ -103,4 +103,26 @@ mod tests {
         // Assert
         assert_eq!(actual_project, expected_project);
     }
+
+    #[tokio::test]
+    async fn test_create_project_storage_error() {
+        // Arrange
+        let expected_owner_id = UserId::new(Uuid::now_v7());
+        let expected_project_name = ProjectName::new("test");
+
+        let mut mock_project_repository = MockProjectRepository::new();
+        mock_project_repository
+            .expect_create_project()
+            .returning(|_| Box::pin(async { Err(sqlx::Error::WorkerCrashed) }));
+
+        let feature = CreateProject::new(Arc::new(mock_project_repository));
+
+        // Act
+        let actual_result = feature
+            .create(expected_owner_id, expected_project_name)
+            .await;
+
+        // Assert
+        assert!(matches!(actual_result, Err(ProjectError::NotFound)));
+    }
 }
