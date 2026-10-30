@@ -68,11 +68,9 @@ where
                                     cookie_value,
                                 })
                             }
-                            SessionRepositoryError::ParseError => Err(CsrfError::StorageError(
-                                "error parsing user session".to_string(),
-                            )),
-                            SessionRepositoryError::StorageError(e) => {
-                                Err(CsrfError::StorageError(e.to_string()))
+                            SessionRepositoryError::ParseError
+                            | SessionRepositoryError::StorageError(_) => {
+                                Err(CsrfError::InvalidSession(error))
                             }
                         },
                     }
