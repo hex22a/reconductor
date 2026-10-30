@@ -151,7 +151,6 @@ mod tests {
             .same_site(SameSite::Lax)
             .path("/")
             .build();
-        let expected_status = StatusCode::OK;
         let expected_response = CsrfResponse {
             csrf_token: expected_csrf_token.into_inner().expose_secret().to_owned(),
         };
@@ -163,7 +162,7 @@ mod tests {
             .into_response();
 
         // Assert
-        assert_eq!(actual_response.status(), expected_status);
+        assert_eq!(actual_response.status(), StatusCode::OK);
         assert_eq!(
             set_cookie(&actual_response, CSRF_COOKIE_NAME),
             expected_cookie

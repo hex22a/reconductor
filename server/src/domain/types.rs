@@ -4,6 +4,9 @@ use newtype_derive::Newtype;
 use serde::Serialize;
 use uuid::Uuid;
 
+#[cfg(test)]
+use serde::Deserialize;
+
 #[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
 pub struct Hostname(String);
 
@@ -27,6 +30,7 @@ pub struct UserId(Uuid);
 
 #[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
 #[sqlx(transparent)]
+#[cfg_attr(test, derive(Deserialize))]
 pub struct ProjectId(Uuid);
 
 #[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
@@ -71,4 +75,5 @@ pub struct CpeString(String);
 
 #[derive(Clone, Debug, PartialEq, Newtype, Serialize, sqlx::Type)]
 #[sqlx(transparent)]
+#[cfg_attr(test, derive(Deserialize))]
 pub struct ProjectName(String);

@@ -8,9 +8,12 @@ use crate::{
 };
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
+#[cfg_attr(test, derive(Deserialize))]
 pub struct ProjectDto {
     pub id: ProjectId,
+
     pub name: ProjectName,
+
     #[serde(with = "time::serde::rfc3339")]
     pub created_at: OffsetDateTime,
 }
@@ -26,8 +29,8 @@ impl TryFrom<CreateProjctRequest> for CreateProjectInput {
     fn try_from(value: CreateProjctRequest) -> Result<Self, Self::Error> {
         if value.name.is_empty() {
             Err(ServerError::ValidationError(FieldErrors::from([(
-                "name".to_string(),
-                vec!["project name cannot be empty".to_string()],
+                String::from("name"),
+                vec![String::from("project name cannot be empty")],
             )])))
         } else {
             Ok(CreateProjectInput {
