@@ -11,7 +11,7 @@ pub struct UserInput {
     pub password: Password,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AuthSession {
     pub session_id: SessionToken,
     pub csrf_token: CsrfToken,

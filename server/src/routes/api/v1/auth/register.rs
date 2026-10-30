@@ -119,8 +119,8 @@ mod tests {
     #[tokio::test]
     async fn test_register_get() {
         // Arrange
-        let expected_username = "test".to_string();
-        let expected_password = "password".to_string();
+        let expected_username = String::from("test");
+        let expected_password = String::from("password");
 
         let mut mock_register_feature = MockRegisterFeature::new();
         mock_register_feature
