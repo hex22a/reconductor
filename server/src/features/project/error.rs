@@ -7,6 +7,9 @@ pub enum ProjectError {
     #[error("project not found")]
     NotFound,
 
+    #[error("error storing project: {0}")]
+    Storage(sqlx::Error),
+
     #[error("last cursor not provided")]
     NoLastCursor,
 
@@ -21,7 +24,10 @@ impl From<CursorError> for ProjectError {
 }
 
 impl From<sqlx::Error> for ProjectError {
-    fn from(_: sqlx::Error) -> Self {
-        ProjectError::NotFound
+    fn from(value: sqlx::Error) -> Self {
+        match value {
+            sqlx::Error::RowNotFound => Self::NotFound,
+            _ => Self::Storage(value),
+        }
     }
 }

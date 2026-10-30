@@ -123,6 +123,6 @@ mod tests {
             .await;
 
         // Assert
-        assert!(matches!(actual_result, Err(ProjectError::NotFound)));
+        assert!(matches!(actual_result, Err(ProjectError::Storage(_))));
     }
 }

@@ -51,9 +51,11 @@ mod tests {
         let expected_crate_project_request = CreateProjctRequest {
             name: expected_project_name,
         };
+
         // Act
         let actual_create_project_input: CreateProjectInput =
             CreateProjectInput::try_from(expected_crate_project_request).unwrap();
+
         // Assert
         assert_eq!(actual_create_project_input, expected_create_project_input);
     }
