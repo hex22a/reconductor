@@ -60,11 +60,18 @@ impl From<ParseIntError> for AppError {
 
 pub type FieldErrors = HashMap<String, Vec<String>>;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum ServerError {
+    #[error("Internal server errror")]
     Internal,
+
+    #[error("Unauthorized request")]
     Unauthorized,
+
+    #[error("Forbidden")]
     Forbidden,
+
+    #[error("Input validation error")]
     ValidationError(FieldErrors),
 }
 
