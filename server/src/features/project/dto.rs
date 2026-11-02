@@ -18,7 +18,7 @@ pub struct ProjectDto {
     pub created_at: OffsetDateTime,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct CreateProjctRequest {
     pub name: String,
 }
