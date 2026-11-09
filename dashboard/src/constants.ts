@@ -1,4 +1,4 @@
-import { PUBLIC_API_URL } from '$env/static/public';
+import { PUBLIC_API_URL } from '$app/env/public';
 
 const DEFAULT_API_URL = 'http://localhost:3000';
 const API_URL = PUBLIC_API_URL || DEFAULT_API_URL;

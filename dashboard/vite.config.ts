@@ -2,9 +2,20 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vitest/config';
 import { playwright } from '@vitest/browser-playwright';
 import { sveltekit } from '@sveltejs/kit/vite';
+import adapter from '@sveltejs/adapter-static';
 
 export default defineConfig({
-    plugins: [tailwindcss(), sveltekit()],
+    plugins: [
+        tailwindcss(),
+        sveltekit({
+            adapter: adapter({
+                fallback: 'index.html',
+            }),
+            alias: {
+                '@': './src',
+            },
+        }),
+    ],
     resolve: {
         tsconfigPaths: true,
     },

@@ -44,5 +44,9 @@
     "vitest": "^4.1.11",
     "vitest-browser-svelte": "^3.1.0"
   },
-  "packageManager": "pnpm@12.3.4"
+  "imports": {
+    "#lib": "./src/lib/index.js",
+    "#lib/*": "./src/lib/*"
+  },
+  "packageManager": "pnpm@12.18.0"
 }
