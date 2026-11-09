@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
-  import { auth } from '@/lib/stores/auth';
+  import { auth } from '#src/lib/stores/auth';
   console.log('authis', $auth, $auth != null);
   $effect(() => {
     if ($auth.ready && !$auth.user) {

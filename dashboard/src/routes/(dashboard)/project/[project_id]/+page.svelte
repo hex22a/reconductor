@@ -1,11 +1,11 @@
 <script lang="ts">
-  import CreateScanForm from '@/lib/components/scans/CreateScanForm.svelte';
+  import CreateScanForm from '#src/lib/components/scans/CreateScanForm.svelte';
   import type { PageProps } from './$types';
-  import Table from '@/lib/components/Table.svelte';
-  import { create } from '@/lib/services/scans';
-  import { csrf } from '@/lib/stores/csrf';
+  import Table from '#src/lib/components/Table.svelte';
+  import { create } from '#src/lib/services/scans';
+  import { csrf } from '#src/lib/stores/csrf';
   import { get } from 'svelte/store';
-  import { isError } from '@/lib/transport/ErrorResponse';
+  import { isError } from '#src/lib/transport/ErrorResponse';
   import { resolve } from '$app/paths';
 
   let { data }: PageProps = $props();

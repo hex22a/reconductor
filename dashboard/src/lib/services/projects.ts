@@ -1,4 +1,4 @@
-import { API_PROJECTS_URL, NETWORK_ERROR_CODE, NETWORK_ERROR_MESSAGE } from '@/constants';
+import { API_PROJECTS_URL, NETWORK_ERROR_CODE, NETWORK_ERROR_MESSAGE } from '#src/constants';
 import type { ErrorResponse } from '../transport/ErrorResponse';
 import type { Page } from '../transport/Pagination';
 import type { Project } from '../transport/Project';

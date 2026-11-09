@@ -45,8 +45,11 @@
     "vitest-browser-svelte": "^3.1.0"
   },
   "imports": {
-    "#lib": "./src/lib/index.js",
-    "#lib/*": "./src/lib/*"
+    "#lib": "./src/lib/index.ts",
+    "#lib/*.svelte": "./src/lib/*.svelte",
+    "#lib/*": "./src/lib/*.ts",
+    "#src/*.svelte": "./src/*.svelte",
+    "#src/*": "./src/*.ts"
   },
   "packageManager": "pnpm@12.18.0"
 }

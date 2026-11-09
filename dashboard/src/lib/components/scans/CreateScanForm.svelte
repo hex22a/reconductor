@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import type { ErrorResponse } from '@/lib/transport/ErrorResponse';
+  import type { ErrorResponse } from '#src/lib/transport/ErrorResponse';
   let {
     onCreate,
   }: {

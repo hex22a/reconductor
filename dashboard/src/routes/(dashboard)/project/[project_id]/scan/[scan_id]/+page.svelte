@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Table from '@/lib/components/Table.svelte';
+  import Table from '#src/lib/components/Table.svelte';
   import type { PageProps } from './$types';
   import { page } from '$app/state';
   import { resolve } from '$app/paths';

@@ -4,7 +4,7 @@ import {
     SYNTAX_ERROR_CODE,
     DATABASE_ERROR_CODE,
     NETWORK_ERROR_CODE,
-} from '@/constants';
+} from '#src/constants';
 
 type ErrorCode =
     | typeof DATABASE_ERROR_CODE

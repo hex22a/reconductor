@@ -1,6 +1,6 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
-  import { auth } from '@/lib/stores/auth';
+  import { auth } from '#src/lib/stores/auth';
 </script>
 
 <header class="sticky top-0 py-2">

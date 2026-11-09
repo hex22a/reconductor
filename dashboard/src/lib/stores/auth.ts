@@ -1,5 +1,5 @@
 import { writable, get } from 'svelte/store';
-import { logout, fetchMe, login, register } from '@/lib/services/auth';
+import { logout, fetchMe, login, register } from '#src/lib/services/auth';
 import { csrf } from './csrf';
 import { isError, type ErrorResponse } from '../transport/ErrorResponse';
 

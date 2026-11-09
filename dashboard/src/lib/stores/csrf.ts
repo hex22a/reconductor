@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { fetchCsrf } from '@/lib/services/csrf';
+import { fetchCsrf } from '#src/lib/services/csrf';
 import { isError, type ErrorResponse } from '../transport/ErrorResponse';
 
 function createCsrfStore() {

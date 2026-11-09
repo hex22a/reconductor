@@ -1,5 +1,5 @@
-import { auth } from '@/lib/stores/auth';
-import { csrf } from '@/lib/stores/csrf';
+import { auth } from '#src/lib/stores/auth';
+import { csrf } from '#src/lib/stores/csrf';
 
 export const ssr = false;
 

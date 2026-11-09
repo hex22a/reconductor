@@ -1,5 +1,5 @@
 <script lang="ts">
-  import CrossIcon from '@/lib/icons/CrossIcon.svelte';
+  import CrossIcon from '#src/lib/icons/CrossIcon.svelte';
   let { errors, onClose } = $props();
 </script>
 

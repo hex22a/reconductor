@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { auth } from '@/lib/stores/auth';
+  import { auth } from '#src/lib/stores/auth';
   import FormError from './FormError.svelte';
-  import { isError, type ValidationError } from '@/lib/transport/ErrorResponse';
-  import { VALIDATION_ERROR_CODE } from '@/constants';
+  import { isError, type ValidationError } from '#src/lib/transport/ErrorResponse';
+  import { VALIDATION_ERROR_CODE } from '#src/constants';
   import FieldErrors from './FieldErrors.svelte';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';

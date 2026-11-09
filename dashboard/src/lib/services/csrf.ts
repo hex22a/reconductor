@@ -1,4 +1,4 @@
-import { API_CSRF_URL, NETWORK_ERROR_CODE, NETWORK_ERROR_MESSAGE } from '@/constants';
+import { API_CSRF_URL, NETWORK_ERROR_CODE, NETWORK_ERROR_MESSAGE } from '#src/constants';
 import type { CsrfResponse } from '../transport/CsrfResponse';
 import type { ErrorResponse } from '../transport/ErrorResponse';
 

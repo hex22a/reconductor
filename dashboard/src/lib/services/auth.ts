@@ -5,7 +5,7 @@ import {
     API_REGISTER_URL,
     NETWORK_ERROR_CODE,
     NETWORK_ERROR_MESSAGE,
-} from '@/constants';
+} from '#src/constants';
 import type { ErrorResponse } from '../transport/ErrorResponse';
 import type { LoginResponse, MeResponse } from '../transport/Auth';
 

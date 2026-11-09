@@ -11,9 +11,6 @@ export default defineConfig({
             adapter: adapter({
                 fallback: 'index.html',
             }),
-            alias: {
-                '@': './src',
-            },
         }),
     ],
     resolve: {

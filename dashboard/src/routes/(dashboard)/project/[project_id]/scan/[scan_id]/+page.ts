@@ -1,10 +1,10 @@
-import { get_scan_details } from '@/lib/services/scans';
+import { get_scan_details } from '#src/lib/services/scans';
 import { get } from 'svelte/store';
 import type { PageLoad } from './$types';
-import { csrf } from '@/lib/stores/csrf';
-import { isError } from '@/lib/transport/ErrorResponse';
+import { csrf } from '#src/lib/stores/csrf';
+import { isError } from '#src/lib/transport/ErrorResponse';
 import { error } from '@sveltejs/kit';
-import { list } from '@/lib/services/runs';
+import { list } from '#src/lib/services/runs';
 
 export const load: PageLoad = async ({ parent, params, fetch }) => {
     await parent();

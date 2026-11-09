@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { csrf } from '@/lib/stores/csrf';
+  import { csrf } from '#src/lib/stores/csrf';
   import { get } from 'svelte/store';
-  import CrateProjectForm from '@/lib/components/projects/CrateProjectForm.svelte';
-  import Table from '@/lib/components/Table.svelte';
-  import { create } from '@/lib/services/projects';
-  import { isError } from '@/lib/transport/ErrorResponse.js';
+  import CrateProjectForm from '#src/lib/components/projects/CrateProjectForm.svelte';
+  import Table from '#src/lib/components/Table.svelte';
+  import { create } from '#src/lib/services/projects';
+  import { isError } from '#src/lib/transport/ErrorResponse.js';
   import { resolve } from '$app/paths';
 
   let { data } = $props();
