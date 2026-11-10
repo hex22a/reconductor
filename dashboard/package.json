@@ -47,8 +47,12 @@
   "imports": {
     "#lib": "./src/lib/index.ts",
     "#lib/*.svelte": "./src/lib/*.svelte",
+    "#lib/*.svg": "./src/lib/*.svg",
+    "#lib/*.js": "./src/lib/*.ts",
     "#lib/*": "./src/lib/*.ts",
     "#src/*.svelte": "./src/*.svelte",
+    "#src/*.svg": "./src/*.svg",
+    "#src/*.js": "./src/*.ts",
     "#src/*": "./src/*.ts"
   },
   "packageManager": "pnpm@12.18.0"
