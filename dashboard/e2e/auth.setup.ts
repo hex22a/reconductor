@@ -3,7 +3,7 @@ import { test as setup } from '@playwright/test';
 setup('create user and authenticate', async ({ page, request }) => {
     await request.get('/api/v1/csrf');
     const state = await request.storageState();
-    const csrf = state.cookies.find((c) => c.name === 'csrf_token')?.value;
+    const csrf = state.cookies.find((c) => c.name === 'recon_csrf')?.value;
 
     await request.post('/api/v1/register', {
         headers: { 'x-csrf-token': csrf! },
