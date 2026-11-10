@@ -1,4 +1,4 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
     testDir: './e2e',
@@ -9,6 +9,17 @@ export default defineConfig({
         baseURL: 'http://localhost:4173',
         trace: 'on-first-retry',
     },
+    projects: [
+        { name: 'setup', testMatch: /auth\.setup\.ts/ },
+        {
+            name: 'chromium',
+            use: {
+                ...devices['Desktop Chrome'],
+                storageState: 'e2e/.auth/user.json',
+            },
+            dependencies: ['setup'],
+        },
+    ],
     webServer: [
         {
             command: 'cargo run',
