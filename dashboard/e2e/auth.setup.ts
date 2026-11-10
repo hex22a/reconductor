@@ -5,7 +5,7 @@ setup('create user and authenticate', async ({ page, request }) => {
     const state = await request.storageState();
     const csrf = state.cookies.find((c) => c.name === 'csrf_token')?.value;
 
-    await request.post('/api/auth/register', {
+    await request.post('/api/v1/register', {
         headers: { 'x-csrf-token': csrf! },
         data: { username: 'test', password: 'password' },
     });
