@@ -35,4 +35,4 @@ jobs:
       - name: Install sqlx-cli
         run: cargo install sqlx-cli
       - name: Run tests
-        run: ./tests.sh
+        run: ./tests.sh cargo test

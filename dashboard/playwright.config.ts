@@ -6,7 +6,7 @@ export default defineConfig({
     retries: process.env.CI ? 2 : 0,
     reporter: 'list',
     use: {
-        baseURL: 'http://localhost:4173',
+        baseURL: 'http://localhost:5173',
         trace: 'on-first-retry',
     },
     projects: [
@@ -29,8 +29,8 @@ export default defineConfig({
             timeout: 120_000,
         },
         {
-            command: 'pnpm build && pnpm preview -- --port 4173',
-            url: 'http://localhost:4173',
+            command: 'pnpm build && pnpm preview --port 5173 --strictPort',
+            url: 'http://localhost:5173',
             reuseExistingServer: !process.env.CI,
         },
     ],
