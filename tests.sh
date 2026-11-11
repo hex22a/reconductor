@@ -17,6 +17,5 @@ fi
 trap "${ENGINE} compose -f docker-compose.test.yml down -v;" EXIT;
 
 ${ENGINE} compose -f docker-compose.yml --profile=infra up -d;
-cargo sqlx migrate run --source migrations
 
 "$@"
