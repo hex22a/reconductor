@@ -19,6 +19,7 @@ jobs:
       KV_HOST: ${{ vars.KV_HOST }}
       KV_PORT: ${{ vars.KV_PORT }}
       KV_DB: ${{ vars.KV_DB }}
+      PUBLIC_API_URL: ${{ vars.PUBLIC_API_URL }}
       KV_USERNAME: ${{ secrets.KV_USERNAME }}
       KV_PASSWORD: ${{ secrets.KV_PASSWORD }}
       DASHBOARD_URL: ${{ secrets.DASHBOARD_URL }}
