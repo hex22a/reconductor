@@ -44,6 +44,5 @@ jobs:
         working-directory: ./server
         run: cargo install sqlx-cli
       - name: Run tests
-        working-directory: ./dashboard
-        run: ./tests.sh pnpm test:e2e
+        run: ./tests.sh pnpm --dir=dashboard test:e2e
 
